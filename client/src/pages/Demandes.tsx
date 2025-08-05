@@ -12,8 +12,6 @@ interface DemandesStats {
   demandesToday: number
   demandesVictimes: number
   demandesMisEnCause: number
-  demandesAvecPartieCivile: number
-  demandesSans2Mois: number
 }
 
 const Demandes: React.FC = () => {
@@ -235,7 +233,7 @@ const Demandes: React.FC = () => {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg shadow p-4">
               <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
               <div className="text-sm text-gray-600">Total de l'année {new Date().getFullYear()}</div>
@@ -251,14 +249,6 @@ const Demandes: React.FC = () => {
             <div className="bg-white rounded-lg shadow p-4">
               <div className="text-2xl font-bold text-orange-600">{stats.demandesMisEnCause}</div>
               <div className="text-sm text-gray-600">Mis en cause</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-yellow-600">{stats.demandesAvecPartieCivile}</div>
-              <div className="text-sm text-gray-600">Partie civile</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-purple-600">{stats.demandesSans2Mois}</div>
-              <div className="text-sm text-gray-600">Sans décision</div>
             </div>
           </div>
         )}

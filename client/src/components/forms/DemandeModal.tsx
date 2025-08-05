@@ -247,7 +247,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                     {!demande && (
                       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
                         <p className="text-sm text-blue-700">
-                          💡 La demande sera créée sans dossier. Vous pourrez l'associer à un dossier ultérieurement depuis la liste des demandes.
+                          La demande sera créée sans dossier. Vous pourrez l'associer à un dossier ultérieurement depuis la liste des demandes.
                         </p>
                       </div>
                     )}
@@ -318,7 +318,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('unite')}
                           className="input w-full"
-                          placeholder="Ex: 1er RCP"
+                          placeholder="Ex: COB MURET"
                           disabled={isSubmitting}
                         />
                       </div>

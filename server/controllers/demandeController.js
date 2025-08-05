@@ -4,6 +4,21 @@ const { logAction } = require('../utils/logger');
 
 const prisma = new PrismaClient();
 
+// Utility function to clean empty strings from data
+const cleanEmptyStrings = (data) => {
+  const cleaned = { ...data };
+  Object.keys(cleaned).forEach(key => {
+    if (cleaned[key] === '') {
+      if (key === 'dateFaits' || key === 'dateAudience') {
+        delete cleaned[key];
+      } else {
+        cleaned[key] = null;
+      }
+    }
+  });
+  return cleaned;
+};
+
 const demandeSchema = z.object({
   numeroDS: z.string().min(1, 'Numéro DS requis'),
   type: z.enum(['VICTIME', 'MIS_EN_CAUSE'], { message: 'Type invalide' }),
@@ -200,15 +215,19 @@ const createDemande = async (req, res) => {
       return res.status(400).json({ error: 'Ce numéro DS existe déjà' });
     }
 
-    // Convert date strings to Date objects and clean empty strings
-    const dataToCreate = { ...validatedData };
+    // Clean empty strings and convert dates
+    const dataToCreate = cleanEmptyStrings(validatedData);
+    
+    // Convert date strings to Date objects
     if (dataToCreate.dateFaits) {
       dataToCreate.dateFaits = new Date(dataToCreate.dateFaits);
     }
     if (dataToCreate.dateAudience) {
       dataToCreate.dateAudience = new Date(dataToCreate.dateAudience);
     }
-    if (!dataToCreate.dossierId || dataToCreate.dossierId === '') {
+    
+    // Handle dossier association
+    if (!dataToCreate.dossierId) {
       delete dataToCreate.dossierId;
     } else {
       // Vérifier que le dossier existe
@@ -269,16 +288,20 @@ const updateDemande = async (req, res) => {
       }
     }
 
-    // Convert date strings to Date objects and clean empty strings
-    const dataToUpdate = { ...validatedData };
+    // Clean empty strings and convert dates
+    const dataToUpdate = cleanEmptyStrings(validatedData);
+    
+    // Convert date strings to Date objects
     if (dataToUpdate.dateFaits) {
       dataToUpdate.dateFaits = new Date(dataToUpdate.dateFaits);
     }
     if (dataToUpdate.dateAudience) {
       dataToUpdate.dateAudience = new Date(dataToUpdate.dateAudience);
     }
-    if (!dataToUpdate.dossierId || dataToUpdate.dossierId === '') {
-      delete dataToUpdate.dossierId;
+    
+    // Handle dossier association
+    if (!dataToUpdate.dossierId) {
+      dataToUpdate.dossierId = null; // For updates, we use null to disconnect
     } else {
       // Vérifier que le dossier existe
       const dossierExists = await prisma.dossier.findUnique({

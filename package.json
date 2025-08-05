@@ -1,0 +1,34 @@
+{
+  "name": "pf360",
+  "version": "1.0.0",
+  "description": "Application de gestion des demandes d'aide juridique pour les militaires",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "setup": "npm run install:all && cd server && npx prisma generate && npx prisma db push && npm run prisma:seed",
+    "prisma:generate": "cd server && npx prisma generate",
+    "prisma:push": "cd server && npx prisma db push",
+    "prisma:seed": "cd server && npm run prisma:seed",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "lint": "cd client && npm run lint",
+    "type-check": "cd client && npm run type-check"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "juridique",
+    "militaire",
+    "gestion",
+    "demandes"
+  ],
+  "author": "",
+  "license": "ISC"
+}

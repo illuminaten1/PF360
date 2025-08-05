@@ -1,0 +1,300 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  identifiant String   @unique
+  password    String
+  grade       String?
+  nom         String
+  prenom      String
+  mail        String   @unique
+  telephone   String?
+  role        Role     @default(UTILISATEUR)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  logs             Log[]
+  dossiersAssignes Dossier[]
+  decisions        Decision[]
+  conventions      Convention[]
+  paiements        Paiement[]
+
+  @@map("users")
+}
+
+model Demande {
+  id                     String    @id @default(cuid())
+  numeroDS               String    @unique // Numéro Démarches Simplifiées
+  type                   TypeDemande
+  
+  // Infos militaires
+  nigend                 String?
+  grade                  String?
+  nom                    String
+  prenom                 String
+  adresse1               String?
+  adresse2               String?
+  telephone1             String?
+  telephone2             String?
+  unite                  String?
+  
+  // Infos faits
+  dateFaits              DateTime?
+  commune                String?
+  codePostal             String?
+  position               Position?
+  resume                 String?
+  blessures              String?
+  partieCivile           Boolean   @default(false)
+  montantPartieCivile    Float?
+  qualificationsPenales  String?
+  dateAudience           DateTime?
+  
+  // Soutiens
+  soutienPsychologique   Boolean   @default(false)
+  soutienSocial          Boolean   @default(false)
+  soutienMedical         Boolean   @default(false)
+  
+  dateReception          DateTime  @default(now())
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  
+  // Relations
+  dossier                Dossier?  @relation(fields: [dossierId], references: [id])
+  dossierId              String?
+  decisions              DecisionDemande[]
+  conventions            ConventionDemande[]
+  
+  @@map("demandes")
+}
+
+model Dossier {
+  id                  String    @id @default(cuid())
+  numero              String    @unique @default(cuid()) // Auto-généré
+  dateReceptionGlobale DateTime  @default(now())
+  notes               String?
+  
+  // Relations
+  demandes            Demande[]
+  sgami               Sgami?    @relation(fields: [sgamiId], references: [id])
+  sgamiId             String?
+  badges              DossierBadge[]
+  attendus            DossierAttendu[]
+  assigneA            User?     @relation(fields: [assigneAId], references: [id])
+  assigneAId          String?
+  decisions           Decision[]
+  conventions         Convention[]
+  paiements           Paiement[]
+  
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@map("dossiers")
+}
+
+model Decision {
+  id              String       @id @default(cuid())
+  type            TypeDecision
+  date            DateTime     @default(now())
+  documentGenere  String?      // Path vers le document généré
+  
+  // Relations
+  dossier         Dossier      @relation(fields: [dossierId], references: [id])
+  dossierId       String
+  creePar         User         @relation(fields: [creeParId], references: [id])
+  creeParId       String
+  demandes        DecisionDemande[]
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@map("decisions")
+}
+
+model Convention {
+  id              String    @id @default(cuid())
+  date            DateTime  @default(now())
+  montantHT       Float
+  documentGenere  String?   // Path vers le document généré
+  
+  // Relations
+  dossier         Dossier   @relation(fields: [dossierId], references: [id])
+  dossierId       String
+  avocat          Avocat    @relation(fields: [avocatId], references: [id])
+  avocatId        String
+  creePar         User      @relation(fields: [creeParId], references: [id])
+  creeParId       String
+  demandes        ConventionDemande[]
+  paiements       Paiement[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("conventions")
+}
+
+model Paiement {
+  id              String      @id @default(cuid())
+  facture         String?     // Numéro de facture
+  montantHT       Float
+  montantTTC      Float
+  nature          NaturePaiement
+  ficheReglement  String?     // Path vers la fiche générée
+  
+  // Relations
+  dossier         Dossier     @relation(fields: [dossierId], references: [id])
+  dossierId       String
+  convention      Convention? @relation(fields: [conventionId], references: [id])
+  conventionId    String?
+  creePar         User        @relation(fields: [creeParId], references: [id])
+  creeParId       String
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@map("paiements")
+}
+
+model Avocat {
+  id          String   @id @default(cuid())
+  nom         String
+  prenom      String?
+  cabinet     String?
+  adresse     String?
+  telephone   String?
+  mail        String?
+  
+  // Relations
+  conventions Convention[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("avocats")
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  action    String
+  detail    String?
+  entite    String?  // Type d'entité concernée
+  entiteId  String?  // ID de l'entité concernée
+  timestamp DateTime @default(now())
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  
+  @@map("logs")
+}
+
+model Sgami {
+  id       String    @id @default(cuid())
+  nom      String    @unique
+  
+  // Relations
+  dossiers Dossier[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("sgami")
+}
+
+model Badge {
+  id       String         @id @default(cuid())
+  nom      String         @unique
+  couleur  String?        // Code couleur hex
+  
+  // Relations
+  dossiers DossierBadge[]
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  @@map("badges")
+}
+
+model DossierAttendu {
+  id          String  @id @default(cuid())
+  nomOuNigend String
+  commentaire String?
+  
+  // Relations
+  dossier     Dossier @relation(fields: [dossierId], references: [id])
+  dossierId   String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("dossiers_attendus")
+}
+
+// Tables de liaison
+model DossierBadge {
+  dossier   Dossier @relation(fields: [dossierId], references: [id])
+  dossierId String
+  badge     Badge   @relation(fields: [badgeId], references: [id])
+  badgeId   String
+  
+  @@id([dossierId, badgeId])
+  @@map("dossiers_badges")
+}
+
+model DecisionDemande {
+  decision   Decision @relation(fields: [decisionId], references: [id])
+  decisionId String
+  demande    Demande  @relation(fields: [demandeId], references: [id])
+  demandeId  String
+  
+  @@id([decisionId, demandeId])
+  @@map("decisions_demandes")
+}
+
+model ConventionDemande {
+  convention   Convention @relation(fields: [conventionId], references: [id])
+  conventionId String
+  demande      Demande    @relation(fields: [demandeId], references: [id])
+  demandeId    String
+  
+  @@id([conventionId, demandeId])
+  @@map("conventions_demandes")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  UTILISATEUR
+}
+
+enum TypeDemande {
+  VICTIME
+  MIS_EN_CAUSE
+}
+
+enum Position {
+  EN_SERVICE
+  HORS_SERVICE
+}
+
+enum TypeDecision {
+  OCTROI
+  OCTROI_PARTIEL
+  REJET
+}
+
+enum NaturePaiement {
+  AVOCAT
+  AUTRES_INTERVENANTS
+}

@@ -154,7 +154,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
                     >
                       <FolderIcon className="h-4 w-4 mr-1" />
-                      Assigner
+                      Lier au dossier
                     </button>
                   )}
                 </td>

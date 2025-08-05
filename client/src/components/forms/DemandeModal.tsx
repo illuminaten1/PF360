@@ -43,7 +43,7 @@ const demandeSchema = z.object({
   soutienSocial: z.boolean().default(false),
   soutienMedical: z.boolean().default(false),
   
-  // Association dossier
+  // Association dossier (uniquement pour modification)
   dossierId: z.string().optional()
 })
 
@@ -77,13 +77,14 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
   const partieCivile = watch('partieCivile')
 
-  // Fetch dossiers for assignment
+  // Fetch dossiers for assignment (only when editing existing demande)
   const { data: dossiers = [] } = useQuery<Dossier[]>({
     queryKey: ['dossiers'],
     queryFn: async () => {
       const response = await api.get('/dossiers')
       return response.data
-    }
+    },
+    enabled: !!demande // Only fetch when editing an existing demande
   })
 
   useEffect(() => {
@@ -125,6 +126,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         soutienPsychologique: false,
         soutienSocial: false,
         soutienMedical: false
+        // Pas de dossierId pour les nouvelles demandes
       })
     }
   }, [demande, reset])
@@ -186,7 +188,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                   {/* Informations générales */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Informations générales</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className={`grid grid-cols-1 gap-4 ${demande ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                       <div>
                         <label className="label block text-gray-700 mb-2">
                           Numéro DS *
@@ -219,24 +221,36 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         )}
                       </div>
 
-                      <div>
-                        <label className="label block text-gray-700 mb-2">
-                          Dossier associé
-                        </label>
-                        <select
-                          {...register('dossierId')}
-                          className="input w-full"
-                          disabled={isSubmitting}
-                        >
-                          <option value="">Créer un nouveau dossier</option>
-                          {dossiers.map((dossier) => (
-                            <option key={dossier.id} value={dossier.id}>
-                              {dossier.numero} {dossier.sgami?.nom && `(${dossier.sgami.nom})`}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* Afficher le champ dossier uniquement en mode modification */}
+                      {demande && (
+                        <div>
+                          <label className="label block text-gray-700 mb-2">
+                            Dossier associé
+                          </label>
+                          <select
+                            {...register('dossierId')}
+                            className="input w-full"
+                            disabled={isSubmitting}
+                          >
+                            <option value="">Aucun dossier</option>
+                            {dossiers.map((dossier) => (
+                              <option key={dossier.id} value={dossier.id}>
+                                {dossier.numero} {dossier.sgami?.nom && `(${dossier.sgami.nom})`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
+                    
+                    {/* Message informatif pour les nouvelles demandes */}
+                    {!demande && (
+                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <p className="text-sm text-blue-700">
+                          💡 La demande sera créée sans dossier. Vous pourrez l'associer à un dossier ultérieurement depuis la liste des demandes.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Informations militaires */}

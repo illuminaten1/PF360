@@ -231,18 +231,8 @@ const createDemande = async (req, res) => {
       dataToCreate.dateAudience = new Date(dataToCreate.dateAudience);
     }
     
-    // Handle dossier association
-    if (!dataToCreate.dossierId) {
-      delete dataToCreate.dossierId;
-    } else {
-      // Vérifier que le dossier existe
-      const dossierExists = await prisma.dossier.findUnique({
-        where: { id: dataToCreate.dossierId }
-      });
-      if (!dossierExists) {
-        return res.status(400).json({ error: 'Le dossier sélectionné n\'existe pas' });
-      }
-    }
+    // Pour la création, on ignore complètement le dossierId - les demandes sont créées sans dossier
+    delete dataToCreate.dossierId;
 
     const demande = await prisma.demande.create({
       data: dataToCreate,

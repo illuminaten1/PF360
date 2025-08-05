@@ -97,11 +97,15 @@ async function main() {
   ]
 
   for (const avocat of avocatsData) {
-    await prisma.avocat.upsert({
-      where: { mail: avocat.mail },
-      update: {},
-      create: avocat
+    const existing = await prisma.avocat.findFirst({
+      where: { mail: avocat.mail }
     })
+    
+    if (!existing) {
+      await prisma.avocat.create({
+        data: avocat
+      })
+    }
   }
 
   console.log('✅ Sample lawyers created')

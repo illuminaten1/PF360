@@ -21,7 +21,7 @@
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
     "winston": "^3.11.0",
-    "@carboneio/carbone": "^4.1.0",
+    "carbone": "^3.5.5",
     "exceljs": "^4.4.0",
     "dayjs": "^1.11.10",
     "zod": "^3.22.4",

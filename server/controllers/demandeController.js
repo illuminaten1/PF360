@@ -20,7 +20,7 @@ const demandeSchema = z.object({
   unite: z.string().optional(),
   
   // Infos faits
-  dateFaits: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  dateFaits: z.string().optional(),
   commune: z.string().optional(),
   codePostal: z.string().optional(),
   position: z.enum(['EN_SERVICE', 'HORS_SERVICE']).optional(),
@@ -29,7 +29,7 @@ const demandeSchema = z.object({
   partieCivile: z.boolean().default(false),
   montantPartieCivile: z.number().optional(),
   qualificationsPenales: z.string().optional(),
-  dateAudience: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  dateAudience: z.string().optional(),
   
   // Soutiens
   soutienPsychologique: z.boolean().default(false),
@@ -49,12 +49,12 @@ const getAllDemandes = async (req, res) => {
     
     if (search) {
       where.OR = [
-        { numeroDS: { contains: search, mode: 'insensitive' } },
-        { nom: { contains: search, mode: 'insensitive' } },
-        { prenom: { contains: search, mode: 'insensitive' } },
-        { nigend: { contains: search, mode: 'insensitive' } },
-        { commune: { contains: search, mode: 'insensitive' } },
-        { unite: { contains: search, mode: 'insensitive' } }
+        { numeroDS: { contains: search } },
+        { nom: { contains: search } },
+        { prenom: { contains: search } },
+        { nigend: { contains: search } },
+        { commune: { contains: search } },
+        { unite: { contains: search } }
       ];
     }
     
@@ -200,8 +200,28 @@ const createDemande = async (req, res) => {
       return res.status(400).json({ error: 'Ce numéro DS existe déjà' });
     }
 
+    // Convert date strings to Date objects and clean empty strings
+    const dataToCreate = { ...validatedData };
+    if (dataToCreate.dateFaits) {
+      dataToCreate.dateFaits = new Date(dataToCreate.dateFaits);
+    }
+    if (dataToCreate.dateAudience) {
+      dataToCreate.dateAudience = new Date(dataToCreate.dateAudience);
+    }
+    if (!dataToCreate.dossierId || dataToCreate.dossierId === '') {
+      delete dataToCreate.dossierId;
+    } else {
+      // Vérifier que le dossier existe
+      const dossierExists = await prisma.dossier.findUnique({
+        where: { id: dataToCreate.dossierId }
+      });
+      if (!dossierExists) {
+        return res.status(400).json({ error: 'Le dossier sélectionné n\'existe pas' });
+      }
+    }
+
     const demande = await prisma.demande.create({
-      data: validatedData,
+      data: dataToCreate,
       include: {
         dossier: {
           select: {
@@ -249,9 +269,29 @@ const updateDemande = async (req, res) => {
       }
     }
 
+    // Convert date strings to Date objects and clean empty strings
+    const dataToUpdate = { ...validatedData };
+    if (dataToUpdate.dateFaits) {
+      dataToUpdate.dateFaits = new Date(dataToUpdate.dateFaits);
+    }
+    if (dataToUpdate.dateAudience) {
+      dataToUpdate.dateAudience = new Date(dataToUpdate.dateAudience);
+    }
+    if (!dataToUpdate.dossierId || dataToUpdate.dossierId === '') {
+      delete dataToUpdate.dossierId;
+    } else {
+      // Vérifier que le dossier existe
+      const dossierExists = await prisma.dossier.findUnique({
+        where: { id: dataToUpdate.dossierId }
+      });
+      if (!dossierExists) {
+        return res.status(400).json({ error: 'Le dossier sélectionné n\'existe pas' });
+      }
+    }
+
     const demande = await prisma.demande.update({
       where: { id: req.params.id },
-      data: validatedData,
+      data: dataToUpdate,
       include: {
         dossier: {
           select: {

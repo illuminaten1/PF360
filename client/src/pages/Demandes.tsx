@@ -238,7 +238,7 @@ const Demandes: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
             <div className="bg-white rounded-lg shadow p-4">
               <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
-              <div className="text-sm text-gray-600">Total</div>
+              <div className="text-sm text-gray-600">Total de l'année {new Date().getFullYear()}</div>
             </div>
             <div className="bg-white rounded-lg shadow p-4">
               <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>

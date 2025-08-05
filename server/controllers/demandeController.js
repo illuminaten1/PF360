@@ -51,6 +51,9 @@ const demandeSchema = z.object({
   soutienSocial: z.boolean().default(false),
   soutienMedical: z.boolean().default(false),
   
+  // Date de réception
+  dateReception: z.string().optional(),
+  
   // Association au dossier
   dossierId: z.string().optional()
 });
@@ -230,6 +233,9 @@ const createDemande = async (req, res) => {
     if (dataToCreate.dateAudience) {
       dataToCreate.dateAudience = new Date(dataToCreate.dateAudience);
     }
+    if (dataToCreate.dateReception) {
+      dataToCreate.dateReception = new Date(dataToCreate.dateReception);
+    }
     
     // Pour la création, on ignore complètement le dossierId - les demandes sont créées sans dossier
     delete dataToCreate.dossierId;
@@ -298,6 +304,9 @@ const updateDemande = async (req, res) => {
     if (dataToUpdate.dateAudience) {
       dataToUpdate.dateAudience = new Date(dataToUpdate.dateAudience);
     }
+    if (dataToUpdate.dateReception) {
+      dataToUpdate.dateReception = new Date(dataToUpdate.dateReception);
+    }
     
     // Handle dossier association
     if (!dataToUpdate.dossierId) {
@@ -364,6 +373,10 @@ const deleteDemande = async (req, res) => {
 
 const getStats = async (req, res) => {
   try {
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear + 1, 0, 1);
+    
     const [
       totalDemandes,
       demandesToday,
@@ -372,7 +385,14 @@ const getStats = async (req, res) => {
       demandesAvecPartieCivile,
       demandesSans2Mois
     ] = await Promise.all([
-      prisma.demande.count(),
+      prisma.demande.count({
+        where: {
+          dateReception: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        }
+      }),
       prisma.demande.count({
         where: {
           dateReception: {
@@ -380,13 +400,39 @@ const getStats = async (req, res) => {
           }
         }
       }),
-      prisma.demande.count({ where: { type: 'VICTIME' } }),
-      prisma.demande.count({ where: { type: 'MIS_EN_CAUSE' } }),
-      prisma.demande.count({ where: { partieCivile: true } }),
+      prisma.demande.count({ 
+        where: { 
+          type: 'VICTIME',
+          dateReception: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        } 
+      }),
+      prisma.demande.count({ 
+        where: { 
+          type: 'MIS_EN_CAUSE',
+          dateReception: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        } 
+      }),
+      prisma.demande.count({ 
+        where: { 
+          partieCivile: true,
+          dateReception: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        } 
+      }),
       prisma.demande.count({
         where: {
           dateReception: {
-            lte: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) // 60 jours
+            lte: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 jours
+            gte: startOfYear,
+            lt: endOfYear
           },
           decisions: {
             none: {}

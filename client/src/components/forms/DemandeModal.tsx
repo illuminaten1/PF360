@@ -43,6 +43,9 @@ const demandeSchema = z.object({
   soutienSocial: z.boolean().default(false),
   soutienMedical: z.boolean().default(false),
   
+  // Date de réception
+  dateReception: z.string().optional(),
+  
   // Association dossier (uniquement pour modification)
   dossierId: z.string().optional()
 })
@@ -114,6 +117,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         soutienPsychologique: demande.soutienPsychologique,
         soutienSocial: demande.soutienSocial,
         soutienMedical: demande.soutienMedical,
+        dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : '',
         dossierId: demande.dossier?.id || ''
       })
     } else {
@@ -125,7 +129,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         partieCivile: false,
         soutienPsychologique: false,
         soutienSocial: false,
-        soutienMedical: false
+        soutienMedical: false,
+        dateReception: new Date().toISOString().split('T')[0] // Date actuelle par défaut
         // Pas de dossierId pour les nouvelles demandes
       })
     }
@@ -219,6 +224,18 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         {errors.type && (
                           <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
                         )}
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Date de réception *
+                        </label>
+                        <input
+                          {...register('dateReception')}
+                          type="date"
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        />
                       </div>
 
                       {/* Afficher le champ dossier uniquement en mode modification */}

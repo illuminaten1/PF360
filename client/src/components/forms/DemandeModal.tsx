@@ -27,7 +27,10 @@ const demandeSchema = z.object({
   dateFaits: z.string().optional(),
   commune: z.string().optional(),
   codePostal: z.string().optional(),
-  position: z.enum(['EN_SERVICE', 'HORS_SERVICE']).optional(),
+  position: z.string().optional().refine(
+    (val) => !val || ['EN_SERVICE', 'HORS_SERVICE'].includes(val),
+    { message: 'Position invalide' }
+  ),
   resume: z.string().optional(),
   blessures: z.string().optional(),
   partieCivile: z.boolean().default(false),
@@ -100,7 +103,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         dateFaits: demande.dateFaits ? new Date(demande.dateFaits).toISOString().split('T')[0] : '',
         commune: demande.commune || '',
         codePostal: demande.codePostal || '',
-        position: demande.position as 'EN_SERVICE' | 'HORS_SERVICE' | undefined,
+        position: demande.position || '',
         resume: demande.resume || '',
         blessures: demande.blessures || '',
         partieCivile: demande.partieCivile,
@@ -383,6 +386,9 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           <option value="EN_SERVICE">En service</option>
                           <option value="HORS_SERVICE">Hors service</option>
                         </select>
+                        {errors.position && (
+                          <p className="mt-1 text-sm text-red-600">{errors.position.message}</p>
+                        )}
                       </div>
 
                       <div>

@@ -9,7 +9,7 @@ const cleanEmptyStrings = (data) => {
   const cleaned = { ...data };
   Object.keys(cleaned).forEach(key => {
     if (cleaned[key] === '') {
-      if (key === 'dateFaits' || key === 'dateAudience') {
+      if (key === 'dateFaits' || key === 'dateAudience' || key === 'position') {
         delete cleaned[key];
       } else {
         cleaned[key] = null;
@@ -38,7 +38,7 @@ const demandeSchema = z.object({
   dateFaits: z.string().optional(),
   commune: z.string().optional(),
   codePostal: z.string().optional(),
-  position: z.enum(['EN_SERVICE', 'HORS_SERVICE']).optional(),
+  position: z.string().optional(),
   resume: z.string().optional(),
   blessures: z.string().optional(),
   partieCivile: z.boolean().default(false),
@@ -218,6 +218,11 @@ const createDemande = async (req, res) => {
     // Clean empty strings and convert dates
     const dataToCreate = cleanEmptyStrings(validatedData);
     
+    // Validate position if provided
+    if (dataToCreate.position && !['EN_SERVICE', 'HORS_SERVICE'].includes(dataToCreate.position)) {
+      return res.status(400).json({ error: 'Position invalide' });
+    }
+    
     // Convert date strings to Date objects
     if (dataToCreate.dateFaits) {
       dataToCreate.dateFaits = new Date(dataToCreate.dateFaits);
@@ -290,6 +295,11 @@ const updateDemande = async (req, res) => {
 
     // Clean empty strings and convert dates
     const dataToUpdate = cleanEmptyStrings(validatedData);
+    
+    // Validate position if provided
+    if (dataToUpdate.position && !['EN_SERVICE', 'HORS_SERVICE'].includes(dataToUpdate.position)) {
+      return res.status(400).json({ error: 'Position invalide' });
+    }
     
     // Convert date strings to Date objects
     if (dataToUpdate.dateFaits) {

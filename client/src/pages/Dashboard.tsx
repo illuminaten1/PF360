@@ -5,10 +5,10 @@ import api from '@/utils/api'
 import {
   FolderIcon,
   DocumentTextIcon,
-  GavelIcon,
+  ScaleIcon,
   CreditCardIcon,
   ClockIcon,
-  TrendingUpIcon
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline'
 
 interface DashboardStats {
@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
     {
       name: 'Décisions',
       value: stats?.totalDecisions || 0,
-      icon: GavelIcon,
+      icon: ScaleIcon,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       href: '/decisions'
@@ -82,7 +82,7 @@ const Dashboard: React.FC = () => {
     {
       name: 'Montant conventions',
       value: `${(stats?.montantTotalConventions || 0).toLocaleString('fr-FR')} €`,
-      icon: TrendingUpIcon,
+      icon: ArrowTrendingUpIcon,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
       href: '/conventions'

@@ -6,6 +6,7 @@ import MainLayout from '@/layouts/MainLayout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Dossiers from '@/pages/Dossiers'
+import Demandes from '@/pages/Demandes'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -34,7 +35,7 @@ function App() {
           }
         >
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="demandes" element={<PlaceholderPage title="Demandes" />} />
+          <Route path="demandes" element={<Demandes />} />
           <Route path="dossiers" element={<Dossiers />} />
           <Route path="dossiers/:id" element={<PlaceholderPage title="Détail du dossier" />} />
           <Route path="decisions" element={<PlaceholderPage title="Décisions" />} />

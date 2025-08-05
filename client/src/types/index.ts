@@ -49,6 +49,31 @@ export interface Demande {
   dateReception: string
   createdAt: string
   updatedAt: string
+  dossier?: {
+    id: string
+    numero: string
+    sgami?: {
+      nom: string
+    }
+  }
+  decisions?: Array<{
+    decision: {
+      id: string
+      type: string
+      date: string
+    }
+  }>
+  conventions?: Array<{
+    convention: {
+      id: string
+      montantHT: number
+      date: string
+      avocat: {
+        nom: string
+        prenom?: string
+      }
+    }
+  }>
 }
 
 export interface Dossier {

@@ -114,8 +114,9 @@ const Demandes: React.FC = () => {
   }
 
   const handleViewDemande = (demande: Demande) => {
-    // Navigate to demande detail page (to be implemented)
-    console.log('View demande:', demande.id)
+    // Pour l'instant, ouvre la demande en mode édition
+    setSelectedDemande(demande)
+    setIsModalOpen(true)
   }
 
   const handleDeleteDemande = (demande: Demande) => {
@@ -243,7 +244,7 @@ const Demandes: React.FC = () => {
               <div className="text-sm text-gray-600">Aujourd'hui</div>
             </div>
             <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-red-600">{stats.demandesVictimes}</div>
+              <div className="text-2xl font-bold text-sky-600">{stats.demandesVictimes}</div>
               <div className="text-sm text-gray-600">Victimes</div>
             </div>
             <div className="bg-white rounded-lg shadow p-4">

@@ -56,7 +56,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   }
 
   const getTypeColor = (type: string) => {
-    return type === 'VICTIME' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'
+    return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
   }
 
   const getPositionColor = (position?: string) => {
@@ -86,7 +86,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             {demandes.map((demande) => (
               <tr key={demande.id}>
                 <td>
-                  <div className="font-medium text-gray-900">
+                  <div 
+                    className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+                    onClick={() => onView(demande)}
+                  >
                     {demande.numeroDS}
                   </div>
                   {demande.nigend && (

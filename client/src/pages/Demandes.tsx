@@ -319,9 +319,9 @@ const Demandes: React.FC = () => {
                       assigneAId: ''
                     })
                   }}
-                  className="btn-secondary h-10 text-sm"
+                  className="btn-secondary h-10 text-sm whitespace-nowrap"
                 >
-                  Effacer
+                  Effacer les filtres
                 </button>
               </div>
             </div>

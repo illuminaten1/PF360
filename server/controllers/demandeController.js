@@ -459,6 +459,7 @@ const getStats = async (req, res) => {
       demandesToday,
       demandesVictimes,
       demandesMisEnCause,
+      demandesSansDecision,
       demandesNonAffectees
     ] = await Promise.all([
       prisma.demande.count({
@@ -494,6 +495,17 @@ const getStats = async (req, res) => {
           }
         } 
       }),
+      prisma.demande.count({
+        where: {
+          dateReception: {
+            gte: startOfYear,
+            lt: endOfYear
+          },
+          decisions: {
+            none: {}
+          }
+        }
+      }),
       prisma.demande.count({ 
         where: { 
           assigneAId: null // Demandes non affectées à un utilisateur
@@ -506,6 +518,7 @@ const getStats = async (req, res) => {
       demandesToday,
       demandesVictimes,
       demandesMisEnCause,
+      demandesSansDecision,
       demandesNonAffectees
     });
   } catch (error) {

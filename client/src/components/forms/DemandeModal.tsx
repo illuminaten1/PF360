@@ -96,7 +96,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
   // Fetch users for assignment
   const { data: users = [] } = useQuery({
-    queryKey: ['users'],
+    queryKey: ['demande-modal-users'],
     queryFn: async () => {
       const response = await api.get('/demandes/users')
       return response.data
@@ -296,7 +296,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         disabled={isSubmitting}
                       >
                         <option value="">Aucun utilisateur</option>
-                        {users.map((user: any) => (
+                        {users?.map((user: any) => (
                           <option key={user.id} value={user.id}>
                             {user.grade && `${user.grade} `}{user.prenom} {user.nom}
                           </option>

@@ -62,15 +62,13 @@ const DossierModal: React.FC<DossierModalProps> = ({
     }
   })
 
-  const { data: usersData } = useQuery<{ users: User[] }>({
-    queryKey: ['users'],
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ['dossier-modal-users'],
     queryFn: async () => {
-      const response = await api.get('/users')
+      const response = await api.get('/demandes/users')
       return response.data
     }
   })
-  
-  const users = usersData?.users || []
 
   useEffect(() => {
     if (dossier) {

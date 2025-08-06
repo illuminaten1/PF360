@@ -33,7 +33,7 @@ const Demandes: React.FC = () => {
 
   // Fetch users for assignment filter
   const { data: users = [] } = useQuery({
-    queryKey: ['users'],
+    queryKey: ['demandes-users'],
     queryFn: async () => {
       const response = await api.get('/demandes/users')
       return response.data
@@ -307,7 +307,7 @@ const Demandes: React.FC = () => {
                 >
                   <option value="">Tous les utilisateurs</option>
                   <option value="null">Non assigné</option>
-                  {users.map((user: any) => (
+                  {users?.map((user: any) => (
                     <option key={user.id} value={user.id}>
                       {user.grade && `${user.grade} `}{user.prenom} {user.nom}
                     </option>

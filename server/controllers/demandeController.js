@@ -64,7 +64,7 @@ const demandeSchema = z.object({
 
 const getAllDemandes = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, position, partieCivile } = req.query;
+    const { page = 1, limit = 20, search, type, dateDebut, dateFin } = req.query;
     const skip = (page - 1) * limit;
 
     const where = {};
@@ -81,8 +81,17 @@ const getAllDemandes = async (req, res) => {
     }
     
     if (type) where.type = type;
-    if (position) where.position = position;
-    if (partieCivile !== undefined) where.partieCivile = partieCivile === 'true';
+    
+    // Filtrage par date de réception
+    if (dateDebut || dateFin) {
+      where.dateReception = {};
+      if (dateDebut) {
+        where.dateReception.gte = new Date(dateDebut + 'T00:00:00.000Z');
+      }
+      if (dateFin) {
+        where.dateReception.lte = new Date(dateFin + 'T23:59:59.999Z');
+      }
+    }
 
     const [demandes, total] = await Promise.all([
       prisma.demande.findMany({

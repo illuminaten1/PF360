@@ -22,7 +22,9 @@ const Demandes: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(true)
   const [filters, setFilters] = useState({
-    type: ''
+    type: '',
+    dateDebut: '',
+    dateFin: ''
   })
 
   const queryClient = useQueryClient()
@@ -34,6 +36,8 @@ const Demandes: React.FC = () => {
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (filters.type) params.append('type', filters.type)
+      if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
+      if (filters.dateFin) params.append('dateFin', filters.dateFin)
       
       const response = await api.get(`/demandes?${params.toString()}`)
       return response.data
@@ -232,7 +236,7 @@ const Demandes: React.FC = () => {
         {/* Advanced filters */}
         {showFilters && (
           <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="label block text-gray-700 mb-2">Type</label>
                 <select
@@ -244,6 +248,39 @@ const Demandes: React.FC = () => {
                   <option value="VICTIME">Victime</option>
                   <option value="MIS_EN_CAUSE">Mis en cause</option>
                 </select>
+              </div>
+              <div>
+                <label className="label block text-gray-700 mb-2">Date de début</label>
+                <input
+                  type="date"
+                  value={filters.dateDebut}
+                  onChange={(e) => handleFilterChange('dateDebut', e.target.value)}
+                  className="input w-full"
+                />
+              </div>
+              <div>
+                <label className="label block text-gray-700 mb-2">Date de fin</label>
+                <input
+                  type="date"
+                  value={filters.dateFin}
+                  onChange={(e) => handleFilterChange('dateFin', e.target.value)}
+                  className="input w-full"
+                />
+              </div>
+              <div className="flex flex-col justify-end">
+                <button
+                  onClick={() => {
+                    const today = new Date().toISOString().split('T')[0]
+                    setFilters(prev => ({
+                      ...prev,
+                      dateDebut: today,
+                      dateFin: today
+                    }))
+                  }}
+                  className="btn-secondary h-10"
+                >
+                  Aujourd'hui
+                </button>
               </div>
             </div>
           </div>

@@ -189,9 +189,9 @@ const Demandes: React.FC = () => {
             </div>
             
             {/* Statistiques actuelles */}
-            <div className="w-full md:w-auto">
+            <div className="flex-1">
               <div className="text-sm font-medium text-gray-700 mb-3">En attente</div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
                   <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
                   <div className="text-sm text-gray-600">Aujourd'hui</div>

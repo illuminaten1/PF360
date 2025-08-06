@@ -26,6 +26,7 @@ const demandeSchema = z.object({
   // Infos militaires
   nigend: z.string().optional(),
   grade: z.string().optional(),
+  statutDemandeur: z.enum(['OG', 'OCTA', 'SOG', 'CSTAGN', 'GAV', 'Civil', 'Réserviste', 'Retraité', 'Ayant-droit'], { message: 'Statut demandeur invalide' }).optional(),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),
   adresse1: z.string().optional(),

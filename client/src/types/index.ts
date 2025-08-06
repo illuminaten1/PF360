@@ -26,6 +26,7 @@ export interface Demande {
   type: 'VICTIME' | 'MIS_EN_CAUSE'
   nigend?: string
   grade?: string
+  statutDemandeur?: 'OG' | 'OCTA' | 'SOG' | 'CSTAGN' | 'GAV' | 'Civil' | 'Réserviste' | 'Retraité' | 'Ayant-droit'
   nom: string
   prenom: string
   adresse1?: string

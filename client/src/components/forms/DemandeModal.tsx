@@ -15,6 +15,7 @@ const demandeSchema = z.object({
   // Infos militaires
   nigend: z.string().optional(),
   grade: z.string().optional(),
+  statutDemandeur: z.enum(['OG', 'OCTA', 'SOG', 'CSTAGN', 'GAV', 'Civil', 'Réserviste', 'Retraité', 'Ayant-droit'], { message: 'Statut demandeur invalide' }).optional(),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),
   adresse1: z.string().optional(),
@@ -97,6 +98,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         type: demande.type as 'VICTIME' | 'MIS_EN_CAUSE',
         nigend: demande.nigend || '',
         grade: demande.grade || '',
+        statutDemandeur: demande.statutDemandeur || undefined,
         nom: demande.nom,
         prenom: demande.prenom,
         adresse1: demande.adresse1 || '',
@@ -297,6 +299,31 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           placeholder="Ex: Adjudant"
                           disabled={isSubmitting}
                         />
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Statut du demandeur
+                        </label>
+                        <select
+                          {...register('statutDemandeur')}
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        >
+                          <option value="">Sélectionner un statut</option>
+                          <option value="OG">OG</option>
+                          <option value="OCTA">OCTA</option>
+                          <option value="SOG">SOG</option>
+                          <option value="CSTAGN">CSTAGN</option>
+                          <option value="GAV">GAV</option>
+                          <option value="Civil">Civil</option>
+                          <option value="Réserviste">Réserviste</option>
+                          <option value="Retraité">Retraité</option>
+                          <option value="Ayant-droit">Ayant-droit</option>
+                        </select>
+                        {errors.statutDemandeur && (
+                          <p className="mt-1 text-sm text-red-600">{errors.statutDemandeur.message}</p>
+                        )}
                       </div>
 
                       <div>

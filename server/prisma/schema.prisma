@@ -41,6 +41,7 @@ model Demande {
   // Infos militaires
   nigend                 String?
   grade                  String?
+  statutDemandeur        String? // OG | OCTA | SOG | CSTAGN | GAV | Civil | Réserviste | Retraité | Ayant-droit
   nom                    String
   prenom                 String
   adresse1               String?
@@ -279,3 +280,4 @@ model ConventionDemande {
 // - Position: "EN_SERVICE" | "HORS_SERVICE"
 // - TypeDecision: "OCTROI" | "OCTROI_PARTIEL" | "REJET"
 // - NaturePaiement: "AVOCAT" | "AUTRES_INTERVENANTS"
+// - StatutDemandeur: "OG" | "OCTA" | "SOG" | "CSTAGN" | "GAV" | "Civil" | "Réserviste" | "Retraité" | "Ayant-droit"

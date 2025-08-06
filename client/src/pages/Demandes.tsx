@@ -167,22 +167,33 @@ const Demandes: React.FC = () => {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
-              <div className="text-sm text-gray-600">Total de l'année {new Date().getFullYear()}</div>
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            {/* Statistiques de l'année */}
+            <div className="flex-1">
+              <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
+                  <div className="text-sm text-gray-600">Total</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="text-2xl font-bold text-sky-600">{stats.demandesVictimes}</div>
+                  <div className="text-sm text-gray-600">Victimes</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="text-2xl font-bold text-orange-600">{stats.demandesMisEnCause}</div>
+                  <div className="text-sm text-gray-600">Mis en cause</div>
+                </div>
+              </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
-              <div className="text-sm text-gray-600">Aujourd'hui</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-sky-600">{stats.demandesVictimes}</div>
-              <div className="text-sm text-gray-600">Victimes</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-orange-600">{stats.demandesMisEnCause}</div>
-              <div className="text-sm text-gray-600">Mis en cause</div>
+            
+            {/* Statistique du jour */}
+            <div className="w-full md:w-auto">
+              <div className="text-sm font-medium text-gray-700 mb-3">Aujourd'hui</div>
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
+                <div className="text-sm text-gray-600">Nouvelles demandes</div>
+              </div>
             </div>
           </div>
         )}

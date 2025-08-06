@@ -71,6 +71,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th>Numéro DS</th>
+              <th>Date réception</th>
               <th>Type</th>
               <th>Militaire</th>
               <th>Unité</th>
@@ -78,7 +79,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               <th>Faits</th>
               <th>Dossier</th>
               <th>Date audience</th>
-              <th>Date réception</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -97,6 +97,11 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       NIGEND: {demande.nigend}
                     </div>
                   )}
+                </td>
+                <td>
+                  <div className="text-sm text-gray-900">
+                    {dayjs(demande.dateReception).format('DD/MM/YYYY')}
+                  </div>
                 </td>
                 <td>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
@@ -170,11 +175,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                     ) : (
                       <span className="text-gray-500">-</span>
                     )}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-sm text-gray-900">
-                    {dayjs(demande.dateReception).format('DD/MM/YYYY')}
                   </div>
                 </td>
                 <td>

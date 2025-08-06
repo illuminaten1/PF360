@@ -1,5 +1,4 @@
 import axios from 'axios'
-import toast from 'react-hot-toast'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
@@ -27,8 +26,9 @@ api.interceptors.response.use(
       window.location.href = '/login'
     }
     
-    const message = error.response?.data?.error || 'Une erreur est survenue'
-    toast.error(message)
+    // Ne pas afficher de toast ici car les mutations gèrent leurs propres erreurs
+    // const message = error.response?.data?.error || 'Une erreur est survenue'
+    // toast.error(message)
     
     return Promise.reject(error)
   }

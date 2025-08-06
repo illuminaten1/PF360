@@ -194,7 +194,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
                         <option value="">Sélectionner un utilisateur</option>
                         {users.map((user) => (
                           <option key={user.id} value={user.id}>
-                            {user.prenom} {user.nom}
+                            {user.grade && `${user.grade} `}{user.prenom} {user.nom}
                           </option>
                         ))}
                       </select>

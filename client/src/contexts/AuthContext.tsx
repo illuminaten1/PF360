@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData))
       setUser(userData)
       
-      toast.success(`Bienvenue ${userData.prenom} ${userData.nom}`)
+      toast.success(`Bienvenue ${userData.grade ? `${userData.grade} ` : ''}${userData.prenom} ${userData.nom}`)
     } catch (error) {
       throw error
     }

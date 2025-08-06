@@ -85,7 +85,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
                     </div>
                     {dossier.demandes.length > 0 && (
                       <div className="text-gray-500 text-xs">
-                        {dossier.demandes.slice(0, 2).map(d => `${d.prenom} ${d.nom}`).join(', ')}
+                        {dossier.demandes.slice(0, 2).map(d => `${d.grade ? `${d.grade} ` : ''}${d.prenom} ${d.nom}`).join(', ')}
                         {dossier.demandes.length > 2 && ` +${dossier.demandes.length - 2} autre(s)`}
                       </div>
                     )}

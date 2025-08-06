@@ -112,7 +112,7 @@ const Dashboard: React.FC = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">
-          Bienvenue, {user?.prenom} {user?.nom}
+          Bienvenue, {user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}
         </h1>
         <p className="mt-1 text-sm text-gray-600">
           Vue d'ensemble de l'activité PF360

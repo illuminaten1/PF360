@@ -90,7 +90,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDel
                   </div>
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {user.prenom} {user.nom}
+                      {user.grade && `${user.grade} `}{user.prenom} {user.nom}
                     </div>
                     {user.telephone && (
                       <div className="text-sm text-gray-500">{user.telephone}</div>

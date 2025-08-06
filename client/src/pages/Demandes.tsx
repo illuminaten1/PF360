@@ -165,6 +165,28 @@ const Demandes: React.FC = () => {
           </button>
         </div>
 
+        {/* Stats */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
+              <div className="text-sm text-gray-600">Total de l'année {new Date().getFullYear()}</div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
+              <div className="text-sm text-gray-600">Aujourd'hui</div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="text-2xl font-bold text-sky-600">{stats.demandesVictimes}</div>
+              <div className="text-sm text-gray-600">Victimes</div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="text-2xl font-bold text-orange-600">{stats.demandesMisEnCause}</div>
+              <div className="text-sm text-gray-600">Mis en cause</div>
+            </div>
+          </div>
+        )}
+
         {/* Search and filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1">
@@ -228,28 +250,6 @@ const Demandes: React.FC = () => {
                   <option value="false">Sans partie civile</option>
                 </select>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Stats */}
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
-              <div className="text-sm text-gray-600">Total de l'année {new Date().getFullYear()}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
-              <div className="text-sm text-gray-600">Aujourd'hui</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-sky-600">{stats.demandesVictimes}</div>
-              <div className="text-sm text-gray-600">Victimes</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-2xl font-bold text-orange-600">{stats.demandesMisEnCause}</div>
-              <div className="text-sm text-gray-600">Mis en cause</div>
             </div>
           </div>
         )}

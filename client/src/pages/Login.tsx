@@ -14,6 +14,7 @@ const loginSchema = z.object({
 const Login: React.FC = () => {
   const { login, isAuthenticated, loading } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const location = useLocation()
   
   const from = location.state?.from?.pathname || '/dashboard'
@@ -40,10 +41,13 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginCredentials) => {
     setIsSubmitting(true)
+    setErrorMessage(null)
     try {
       await login(data)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error)
+      const message = error.response?.data?.error || 'Erreur de connexion'
+      setErrorMessage(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -63,6 +67,21 @@ const Login: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">PF360</h2>
             <p className="text-gray-600 mb-8">Gestion des dossiers de protection fonctionnelle</p>
           </div>
+
+          {errorMessage && (
+            <div className="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-800">{errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>

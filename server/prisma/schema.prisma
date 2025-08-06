@@ -20,6 +20,7 @@ model User {
   mail        String   @unique
   telephone   String?
   role        String   @default("REDACTEUR")
+  active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -257,8 +257,8 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Supprimer un utilisateur
-const deleteUser = async (req, res) => {
+// Désactiver un utilisateur
+const deactivateUser = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -271,20 +271,93 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable' });
     }
 
-    // Empêcher la suppression de son propre compte
+    // Empêcher la désactivation de son propre compte
     if (req.user.id === id) {
-      return res.status(400).json({ message: 'Vous ne pouvez pas supprimer votre propre compte' });
+      return res.status(400).json({ message: 'Vous ne pouvez pas désactiver votre propre compte' });
     }
 
-    await prisma.user.delete({
+    // Vérifier si l'utilisateur est déjà désactivé
+    if (!existingUser.active) {
+      return res.status(400).json({ message: 'Cet utilisateur est déjà désactivé' });
+    }
+
+    // Désactiver l'utilisateur
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { active: false },
+      select: {
+        id: true,
+        identifiant: true,
+        nom: true,
+        prenom: true,
+        mail: true,
+        role: true,
+        grade: true,
+        telephone: true,
+        active: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    await logAction(req.user.id, 'DEACTIVATE_USER', 'USER', id, `Désactivé l'utilisateur: ${existingUser.identifiant}`);
+
+    res.json({ 
+      message: 'Utilisateur désactivé avec succès',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Erreur lors de la désactivation de l\'utilisateur:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Réactiver un utilisateur
+const reactivateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Vérifier si l'utilisateur existe
+    const existingUser = await prisma.user.findUnique({
       where: { id }
     });
 
-    await logAction(req.user.id, 'DELETE_USER', 'USER', id, `Supprimé l'utilisateur: ${existingUser.identifiant}`);
+    if (!existingUser) {
+      return res.status(404).json({ message: 'Utilisateur introuvable' });
+    }
 
-    res.json({ message: 'Utilisateur supprimé avec succès' });
+    // Vérifier si l'utilisateur est déjà actif
+    if (existingUser.active) {
+      return res.status(400).json({ message: 'Cet utilisateur est déjà actif' });
+    }
+
+    // Réactiver l'utilisateur
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { active: true },
+      select: {
+        id: true,
+        identifiant: true,
+        nom: true,
+        prenom: true,
+        mail: true,
+        role: true,
+        grade: true,
+        telephone: true,
+        active: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    await logAction(req.user.id, 'REACTIVATE_USER', 'USER', id, `Réactivé l'utilisateur: ${existingUser.identifiant}`);
+
+    res.json({ 
+      message: 'Utilisateur réactivé avec succès',
+      user: updatedUser
+    });
   } catch (error) {
-    console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+    console.error('Erreur lors de la réactivation de l\'utilisateur:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
@@ -294,5 +367,6 @@ module.exports = {
   getUsersStats,
   createUser,
   updateUser,
-  deleteUser
+  deactivateUser,
+  reactivateUser
 };

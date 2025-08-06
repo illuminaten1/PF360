@@ -1,15 +1,16 @@
 import React from 'react'
-import { PencilIcon, TrashIcon, UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { User } from '@/types'
 
 interface UsersTableProps {
   users: User[]
   isLoading: boolean
   onEdit: (user: User) => void
-  onDelete: (id: string) => void
+  onDeactivate: (id: string) => void
+  onReactivate: (id: string) => void
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDelete }) => {
+const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDeactivate, onReactivate }) => {
   if (isLoading) {
     return (
       <div className="p-8 text-center">
@@ -87,6 +88,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDel
               Grade
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Statut
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Créé le
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -127,6 +131,17 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDel
                 <span className="text-sm text-gray-600">{user.grade || '-'}</span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
+                {user.active === false ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Désactivé
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Actif
+                  </span>
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
                 <span className="text-sm text-gray-600">{formatDate(user.createdAt)}</span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -138,13 +153,23 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDel
                   >
                     <PencilIcon className="w-4 h-4" />
                   </button>
-                  <button
-                    onClick={() => onDelete(user.id)}
-                    className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
-                    title="Supprimer"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
+                  {user.active === false ? (
+                    <button
+                      onClick={() => onReactivate(user.id)}
+                      className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded text-xs px-2 py-1"
+                      title="Réactiver"
+                    >
+                      Réactiver
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onDeactivate(user.id)}
+                      className="text-orange-600 hover:text-orange-900 p-1 hover:bg-orange-50 rounded text-xs px-2 py-1"
+                      title="Désactiver"
+                    >
+                      Désactiver
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

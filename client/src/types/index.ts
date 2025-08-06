@@ -7,6 +7,7 @@ export interface User {
   role: 'ADMIN' | 'REDACTEUR' | 'GREFFIER'
   grade?: string
   telephone?: string
+  active?: boolean
   createdAt?: string
 }
 

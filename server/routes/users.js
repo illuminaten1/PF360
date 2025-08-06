@@ -5,7 +5,8 @@ const {
   getUsersStats,
   createUser,
   updateUser,
-  deleteUser
+  deactivateUser,
+  reactivateUser
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -24,7 +25,10 @@ router.post('/', adminMiddleware, createUser);
 // Mettre à jour un utilisateur
 router.put('/:id', adminMiddleware, updateUser);
 
-// Supprimer un utilisateur
-router.delete('/:id', adminMiddleware, deleteUser);
+// Désactiver un utilisateur
+router.put('/:id/deactivate', adminMiddleware, deactivateUser);
+
+// Réactiver un utilisateur
+router.put('/:id/reactivate', adminMiddleware, reactivateUser);
 
 module.exports = router;

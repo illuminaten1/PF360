@@ -22,12 +22,17 @@ const authMiddleware = async (req, res, next) => {
         prenom: true,
         mail: true,
         role: true,
-        grade: true
+        grade: true,
+        active: true
       }
     });
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid token.' });
+    }
+
+    if (!user.active) {
+      return res.status(401).json({ error: 'Account deactivated. Please contact administrator.' });
     }
 
     req.user = user;

@@ -62,6 +62,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
   }
 
+  const getTypeLabel = (type: string) => {
+    return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
+  }
+
   const getAudienceUrgency = (dateAudience?: string) => {
     if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
     
@@ -128,7 +132,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                     {demande.numeroDS}
                   </div>
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getTypeColor(demande.type)}`}>
-                    {demande.type}
+                    {getTypeLabel(demande.type)}
                   </span>
                 </td>
                 <td>

@@ -44,6 +44,10 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Identifiants invalides' });
     }
 
+    if (!user.active) {
+      return res.status(401).json({ error: 'Compte désactivé. Veuillez contacter l\'administrateur.' });
+    }
+
     const token = generateToken(user.id);
 
     await logAction(user.id, 'LOGIN', 'Connexion utilisateur');
@@ -57,7 +61,8 @@ const login = async (req, res) => {
         prenom: user.prenom,
         mail: user.mail,
         role: user.role,
-        grade: user.grade
+        grade: user.grade,
+        active: user.active
       }
     });
   } catch (error) {

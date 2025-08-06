@@ -22,9 +22,7 @@ const Demandes: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(true)
   const [filters, setFilters] = useState({
-    type: '',
-    position: '',
-    partieCivile: ''
+    type: ''
   })
 
   const queryClient = useQueryClient()
@@ -36,8 +34,6 @@ const Demandes: React.FC = () => {
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (filters.type) params.append('type', filters.type)
-      if (filters.position) params.append('position', filters.position)
-      if (filters.partieCivile) params.append('partieCivile', filters.partieCivile)
       
       const response = await api.get(`/demandes?${params.toString()}`)
       return response.data
@@ -236,7 +232,7 @@ const Demandes: React.FC = () => {
         {/* Advanced filters */}
         {showFilters && (
           <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               <div>
                 <label className="label block text-gray-700 mb-2">Type</label>
                 <select
@@ -247,30 +243,6 @@ const Demandes: React.FC = () => {
                   <option value="">Tous les types</option>
                   <option value="VICTIME">Victime</option>
                   <option value="MIS_EN_CAUSE">Mis en cause</option>
-                </select>
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Position</label>
-                <select
-                  value={filters.position}
-                  onChange={(e) => handleFilterChange('position', e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Toutes les positions</option>
-                  <option value="EN_SERVICE">En service</option>
-                  <option value="HORS_SERVICE">Hors service</option>
-                </select>
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Partie civile</label>
-                <select
-                  value={filters.partieCivile}
-                  onChange={(e) => handleFilterChange('partieCivile', e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Toutes</option>
-                  <option value="true">Avec partie civile</option>
-                  <option value="false">Sans partie civile</option>
                 </select>
               </div>
             </div>

@@ -1,24 +1,30 @@
 const express = require('express');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const {
+  getUsers,
+  getUsersStats,
+  createUser,
+  updateUser,
+  deleteUser
+} = require('../controllers/userController');
 
 const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get('/', adminMiddleware, (req, res) => {
-  res.json({ message: 'Get all users - TODO' });
-});
+// Récupérer tous les utilisateurs
+router.get('/', adminMiddleware, getUsers);
 
-router.post('/', adminMiddleware, (req, res) => {
-  res.json({ message: 'Create user - TODO' });
-});
+// Récupérer les statistiques des utilisateurs
+router.get('/stats', adminMiddleware, getUsersStats);
 
-router.put('/:id', adminMiddleware, (req, res) => {
-  res.json({ message: 'Update user - TODO' });
-});
+// Créer un utilisateur
+router.post('/', adminMiddleware, createUser);
 
-router.delete('/:id', adminMiddleware, (req, res) => {
-  res.json({ message: 'Delete user - TODO' });
-});
+// Mettre à jour un utilisateur
+router.put('/:id', adminMiddleware, updateUser);
+
+// Supprimer un utilisateur
+router.delete('/:id', adminMiddleware, deleteUser);
 
 module.exports = router;

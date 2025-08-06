@@ -213,8 +213,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       (() => {
                         const urgency = getAudienceUrgency(demande.dateAudience)
                         const IconComponent = urgency.icon
-                        const today = dayjs()
-                        const audienceDate = dayjs(demande.dateAudience)
+                        const today = dayjs().startOf('day')
+                        const audienceDate = dayjs(demande.dateAudience).startOf('day')
                         const daysDiff = audienceDate.diff(today, 'day')
                         
                         return (

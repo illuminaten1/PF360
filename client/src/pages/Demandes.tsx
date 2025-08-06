@@ -185,7 +185,7 @@ const Demandes: React.FC = () => {
             {/* Statistiques de l'année */}
             <div className="flex-1">
               <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="bg-white rounded-lg shadow p-4">
                   <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
                   <div className="text-sm text-gray-600">Total</div>

@@ -72,7 +72,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             <tr>
               <th>Numéro DS</th>
               <th>Date réception</th>
-              <th>Type</th>
               <th>Militaire</th>
               <th>Unité</th>
               <th>Position</th>
@@ -92,11 +91,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                   >
                     {demande.numeroDS}
                   </div>
-                  {demande.nigend && (
-                    <div className="text-xs text-gray-500">
-                      NIGEND: {demande.nigend}
-                    </div>
-                  )}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getTypeColor(demande.type)}`}>
+                    {demande.type}
+                  </span>
                 </td>
                 <td>
                   <div className="text-sm text-gray-900">
@@ -104,18 +101,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                   </div>
                 </td>
                 <td>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
-                    {demande.type}
-                  </span>
-                </td>
-                <td>
                   <div className="text-sm">
                     <div className="font-medium text-gray-900">
                       {demande.grade ? `${demande.grade} ` : ''}{demande.prenom} {demande.nom}
                     </div>
-                    {(demande.telephone1 || demande.telephone2) && (
+                    {demande.nigend && (
                       <div className="text-gray-500 text-xs">
-                        {demande.telephone1 || demande.telephone2}
+                        NIGEND: {demande.nigend}
                       </div>
                     )}
                   </div>

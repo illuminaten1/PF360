@@ -61,7 +61,7 @@ const Login: React.FC = () => {
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">PF360</h2>
-            <p className="text-gray-600 mb-8">Gestion des demandes d'aide juridique</p>
+            <p className="text-gray-600 mb-8">Gestion des dossiers de protection fonctionnelle</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -114,9 +114,11 @@ const Login: React.FC = () => {
           </form>
 
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-center text-sm text-gray-500">
-              Application sécurisée pour les professionnels autorisés
-            </p>
+            <div className="text-center text-sm text-gray-500">
+              <p className="font-bold mb-2">CONFIDENTIEL</p>
+              <p className="mb-1">Accès réservé au personnel autorisé (BRPF).</p>
+              <p>Toutes les connexions sont enregistrées et conservées pendant 3 ans.</p>
+            </div>
           </div>
         </div>
       </div>

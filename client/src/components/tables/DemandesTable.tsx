@@ -77,7 +77,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               <th>Position</th>
               <th>Faits</th>
               <th>Dossier</th>
-              <th>Partie civile</th>
+              <th>Date audience</th>
               <th>Date réception</th>
               <th>Actions</th>
             </tr>
@@ -163,19 +163,12 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                 </td>
                 <td>
                   <div className="text-sm">
-                    {demande.partieCivile ? (
-                      <div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          Oui
-                        </span>
-                        {demande.montantPartieCivile && (
-                          <div className="text-gray-500 text-xs mt-1">
-                            {demande.montantPartieCivile.toLocaleString('fr-FR')} €
-                          </div>
-                        )}
+                    {demande.dateAudience ? (
+                      <div className="text-gray-900">
+                        {dayjs(demande.dateAudience).format('DD/MM/YYYY')}
                       </div>
                     ) : (
-                      <span className="text-gray-500">Non</span>
+                      <span className="text-gray-500">-</span>
                     )}
                   </div>
                 </td>

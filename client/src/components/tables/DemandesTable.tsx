@@ -61,11 +61,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
   }
 
-  const getPositionColor = (position?: string) => {
-    if (!position) return 'bg-gray-100 text-gray-800'
-    return position === 'EN_SERVICE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-  }
-
   const getAudienceUrgency = (dateAudience?: string) => {
     if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
     
@@ -114,7 +109,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               <th>Date réception</th>
               <th>Militaire</th>
               <th>Unité</th>
-              <th>Position</th>
               <th>Faits</th>
               <th>Dossier</th>
               <th>Assigné à</th>
@@ -156,11 +150,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                 <td>
                   <span className="text-sm text-gray-900">
                     {demande.unite || '-'}
-                  </span>
-                </td>
-                <td>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPositionColor(demande.position)}`}>
-                    {demande.position || 'Non précisé'}
                   </span>
                 </td>
                 <td>

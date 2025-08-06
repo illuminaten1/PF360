@@ -7,6 +7,7 @@ import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Dossiers from '@/pages/Dossiers'
 import Demandes from '@/pages/Demandes'
+import Users from '@/pages/Users'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -49,7 +50,7 @@ function App() {
             path="utilisateurs"
             element={
               <ProtectedRoute adminOnly>
-                <PlaceholderPage title="Utilisateurs" />
+                <Users />
               </ProtectedRoute>
             }
           />

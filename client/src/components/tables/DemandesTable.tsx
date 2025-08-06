@@ -213,6 +213,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       (() => {
                         const urgency = getAudienceUrgency(demande.dateAudience)
                         const IconComponent = urgency.icon
+                        const today = dayjs()
+                        const audienceDate = dayjs(demande.dateAudience)
+                        const daysDiff = audienceDate.diff(today, 'day')
+                        
                         return (
                           <div className="flex items-center">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
@@ -220,6 +224,11 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                                 <IconComponent className="h-3 w-3 mr-1" />
                               )}
                               {dayjs(demande.dateAudience).format('DD/MM/YYYY')}
+                              {daysDiff >= 0 && (
+                                <span className="ml-1">
+                                  - {daysDiff} j.
+                                </span>
+                              )}
                             </span>
                           </div>
                         )

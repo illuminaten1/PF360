@@ -247,8 +247,8 @@ const Demandes: React.FC = () => {
         {/* Advanced filters */}
         {showFilters && (
           <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+              <div className="md:col-span-2">
                 <label className="label block text-gray-700 mb-2">Type</label>
                 <select
                   value={filters.type}
@@ -293,7 +293,7 @@ const Demandes: React.FC = () => {
                   className="input w-full"
                 />
               </div>
-              <div>
+              <div className="md:col-span-2">
                 <label className="label block text-gray-700 mb-2">Assigné à</label>
                 <select
                   value={filters.assigneAId}

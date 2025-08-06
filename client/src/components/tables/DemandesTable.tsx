@@ -9,7 +9,8 @@ import {
   FolderIcon,
   ExclamationTriangleIcon,
   ClockIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline'
 
 dayjs.locale('fr')
@@ -78,7 +79,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       return { 
         type: 'passed', 
         style: 'bg-gray-100 text-gray-800', 
-        icon: null 
+        icon: XCircleIcon 
       }
     } else if (daysDiff < 7) {
       // Urgent (moins de 7 jours)

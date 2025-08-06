@@ -57,6 +57,11 @@ export interface Demande {
       nom: string
     }
   }
+  assigneA?: {
+    id: string
+    nom: string
+    prenom: string
+  }
   decisions?: Array<{
     decision: {
       id: string

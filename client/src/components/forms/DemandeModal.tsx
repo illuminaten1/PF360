@@ -48,7 +48,10 @@ const demandeSchema = z.object({
   dateReception: z.string().optional(),
   
   // Association dossier (uniquement pour modification)
-  dossierId: z.string().optional()
+  dossierId: z.string().optional(),
+  
+  // Affectation utilisateur
+  assigneAId: z.string().optional()
 })
 
 type DemandeFormData = z.infer<typeof demandeSchema>
@@ -91,6 +94,15 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
     enabled: !!demande // Only fetch when editing an existing demande
   })
 
+  // Fetch users for assignment
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api.get('/demandes/users')
+      return response.data
+    }
+  })
+
   useEffect(() => {
     if (demande) {
       reset({
@@ -120,7 +132,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         soutienSocial: demande.soutienSocial,
         soutienMedical: demande.soutienMedical,
         dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : '',
-        dossierId: demande.dossier?.id || ''
+        dossierId: demande.dossier?.id || '',
+        assigneAId: demande.assigneA?.id || ''
       })
     } else {
       reset({
@@ -271,6 +284,25 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         </p>
                       </div>
                     )}
+
+                    {/* Affectation utilisateur */}
+                    <div className="mt-4">
+                      <label className="label block text-gray-700 mb-2">
+                        Affecter à un utilisateur
+                      </label>
+                      <select
+                        {...register('assigneAId')}
+                        className="input w-full"
+                        disabled={isSubmitting}
+                      >
+                        <option value="">Aucun utilisateur</option>
+                        {users.map((user: any) => (
+                          <option key={user.id} value={user.id}>
+                            {user.grade && `${user.grade} `}{user.prenom} {user.nom}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   {/* Informations militaires */}

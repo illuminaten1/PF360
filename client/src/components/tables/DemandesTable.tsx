@@ -117,6 +117,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               <th>Position</th>
               <th>Faits</th>
               <th>Dossier</th>
+              <th>Assigné à</th>
               <th>Date audience</th>
               <th>Actions</th>
             </tr>
@@ -197,6 +198,19 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       Lier au dossier
                     </button>
                   )}
+                </td>
+                <td>
+                  <div className="text-sm">
+                    {demande.assigneA ? (
+                      <div className="text-gray-900">
+                        <div className="font-medium">
+                          {demande.assigneA.prenom} {demande.assigneA.nom}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-500 italic">Non assigné</span>
+                    )}
+                  </div>
                 </td>
                 <td>
                   <div className="text-sm">

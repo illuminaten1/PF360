@@ -56,7 +56,10 @@ const demandeSchema = z.object({
   dateReception: z.string().optional(),
   
   // Association au dossier
-  dossierId: z.string().optional()
+  dossierId: z.string().optional(),
+  
+  // Affectation utilisateur
+  assigneAId: z.string().optional()
 });
 
 const getAllDemandes = async (req, res) => {
@@ -90,6 +93,13 @@ const getAllDemandes = async (req, res) => {
               id: true,
               numero: true,
               sgami: { select: { nom: true } }
+            }
+          },
+          assigneA: {
+            select: {
+              id: true,
+              nom: true,
+              prenom: true
             }
           },
           decisions: {
@@ -159,6 +169,13 @@ const getDemandeById = async (req, res) => {
                 prenom: true
               }
             }
+          }
+        },
+        assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true
           }
         },
         decisions: {
@@ -240,6 +257,16 @@ const createDemande = async (req, res) => {
     
     // Pour la création, on ignore complètement le dossierId - les demandes sont créées sans dossier
     delete dataToCreate.dossierId;
+    
+    // Valider l'utilisateur assigné si fourni
+    if (dataToCreate.assigneAId) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: dataToCreate.assigneAId }
+      });
+      if (!userExists) {
+        return res.status(400).json({ error: 'L\'utilisateur sélectionné n\'existe pas' });
+      }
+    }
 
     const demande = await prisma.demande.create({
       data: dataToCreate,
@@ -249,6 +276,13 @@ const createDemande = async (req, res) => {
             id: true,
             numero: true,
             sgami: { select: { nom: true } }
+          }
+        },
+        assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true
           }
         }
       }
@@ -321,6 +355,19 @@ const updateDemande = async (req, res) => {
         return res.status(400).json({ error: 'Le dossier sélectionné n\'existe pas' });
       }
     }
+    
+    // Handle user assignment
+    if (dataToUpdate.assigneAId === '') {
+      dataToUpdate.assigneAId = null; // Disconnect user
+    } else if (dataToUpdate.assigneAId) {
+      // Vérifier que l'utilisateur existe
+      const userExists = await prisma.user.findUnique({
+        where: { id: dataToUpdate.assigneAId }
+      });
+      if (!userExists) {
+        return res.status(400).json({ error: 'L\'utilisateur sélectionné n\'existe pas' });
+      }
+    }
 
     const demande = await prisma.demande.update({
       where: { id: req.params.id },
@@ -331,6 +378,13 @@ const updateDemande = async (req, res) => {
             id: true,
             numero: true,
             sgami: { select: { nom: true } }
+          }
+        },
+        assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true
           }
         }
       }
@@ -368,6 +422,28 @@ const deleteDemande = async (req, res) => {
     res.json({ message: 'Demande supprimée avec succès' });
   } catch (error) {
     console.error('Delete demande error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
+const getUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        grade: true
+      },
+      orderBy: [
+        { nom: 'asc' },
+        { prenom: 'asc' }
+      ]
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error('Get users error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
@@ -437,5 +513,6 @@ module.exports = {
   createDemande,
   updateDemande,
   deleteDemande,
+  getUsers,
   getStats
 };

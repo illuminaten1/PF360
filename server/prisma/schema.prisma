@@ -26,6 +26,7 @@ model User {
   // Relations
   logs             Log[]
   dossiersAssignes Dossier[]
+  demandesAssignees Demande[]
   decisions        Decision[]
   conventions      Convention[]
   paiements        Paiement[]
@@ -74,6 +75,8 @@ model Demande {
   // Relations
   dossier                Dossier?  @relation(fields: [dossierId], references: [id])
   dossierId              String?
+  assigneA               User?     @relation(fields: [assigneAId], references: [id])
+  assigneAId             String?
   decisions              DecisionDemande[]
   conventions            ConventionDemande[]
   

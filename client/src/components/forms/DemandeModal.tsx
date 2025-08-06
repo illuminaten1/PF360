@@ -146,7 +146,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       await onSubmit(data)
       onClose()
     } catch (error) {
-      console.error('Form submission error:', error)
+      // L'erreur sera gérée par la mutation dans le parent
+      // Ne pas fermer le modal en cas d'erreur
     }
   }
 

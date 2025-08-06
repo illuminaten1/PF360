@@ -20,7 +20,7 @@ const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
+  const [showFilters, setShowFilters] = useState(true)
   const [filters, setFilters] = useState({
     type: '',
     position: '',

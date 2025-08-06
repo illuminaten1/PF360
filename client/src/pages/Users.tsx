@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon, UserGroupIcon } from '@heroicons/react/24/outline'
@@ -17,14 +17,24 @@ const Users: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
 
   const queryClient = useQueryClient()
 
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
   const { data: usersData, isLoading } = useQuery({
-    queryKey: ['users', searchTerm],
+    queryKey: ['users', debouncedSearchTerm],
     queryFn: async () => {
       const params = new URLSearchParams()
-      if (searchTerm) params.append('search', searchTerm)
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
       const response = await api.get(`/users?${params.toString()}`)
       return response.data
     }

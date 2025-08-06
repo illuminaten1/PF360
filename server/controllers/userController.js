@@ -32,33 +32,56 @@ const getUsers = async (req, res) => {
   try {
     const { search } = req.query;
     
-    const where = search ? {
-      OR: [
-        { nom: { contains: search, mode: 'insensitive' } },
-        { prenom: { contains: search, mode: 'insensitive' } },
-        { mail: { contains: search, mode: 'insensitive' } },
-        { identifiant: { contains: search, mode: 'insensitive' } }
-      ]
-    } : {};
-
-    const users = await prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        identifiant: true,
-        nom: true,
-        prenom: true,
-        mail: true,
-        role: true,
-        grade: true,
-        telephone: true,
-        createdAt: true,
-        updatedAt: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    let users;
+    
+    if (search) {
+      // Pour SQLite, on fait la recherche insensible à la casse manuellement
+      const searchLower = search.toLowerCase();
+      
+      const allUsers = await prisma.user.findMany({
+        select: {
+          id: true,
+          identifiant: true,
+          nom: true,
+          prenom: true,
+          mail: true,
+          role: true,
+          grade: true,
+          telephone: true,
+          createdAt: true,
+          updatedAt: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      
+      // Filtrer côté application pour recherche insensible à la casse
+      users = allUsers.filter(user => 
+        user.nom.toLowerCase().includes(searchLower) ||
+        user.prenom.toLowerCase().includes(searchLower) ||
+        user.mail.toLowerCase().includes(searchLower) ||
+        user.identifiant.toLowerCase().includes(searchLower)
+      );
+    } else {
+      users = await prisma.user.findMany({
+        select: {
+          id: true,
+          identifiant: true,
+          nom: true,
+          prenom: true,
+          mail: true,
+          role: true,
+          grade: true,
+          telephone: true,
+          createdAt: true,
+          updatedAt: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+    }
 
     await logAction(req.user.id, 'VIEW_USERS', 'USER', null, `Consulté la liste des utilisateurs${search ? ` (recherche: ${search})` : ''}`);
 

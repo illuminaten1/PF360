@@ -6,7 +6,9 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  FolderIcon
+  FolderIcon,
+  ExclamationTriangleIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline'
 
 dayjs.locale('fr')
@@ -62,6 +64,44 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   const getPositionColor = (position?: string) => {
     if (!position) return 'bg-gray-100 text-gray-800'
     return position === 'EN_SERVICE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+  }
+
+  const getAudienceUrgency = (dateAudience?: string) => {
+    if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
+    
+    const today = dayjs()
+    const audienceDate = dayjs(dateAudience)
+    const daysDiff = audienceDate.diff(today, 'day')
+    
+    if (daysDiff < 0) {
+      // Date passée
+      return { 
+        type: 'passed', 
+        style: 'bg-gray-100 text-gray-800', 
+        icon: null 
+      }
+    } else if (daysDiff < 7) {
+      // Urgent (moins de 7 jours)
+      return { 
+        type: 'urgent', 
+        style: 'bg-red-100 text-red-800', 
+        icon: ExclamationTriangleIcon 
+      }
+    } else if (daysDiff < 14) {
+      // Proche (7-14 jours)
+      return { 
+        type: 'soon', 
+        style: 'bg-orange-100 text-orange-800', 
+        icon: ClockIcon 
+      }
+    } else {
+      // Éloignée (plus de 14 jours)
+      return { 
+        type: 'normal', 
+        style: 'bg-green-100 text-green-800', 
+        icon: null 
+      }
+    }
   }
 
   return (
@@ -161,11 +201,24 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                 <td>
                   <div className="text-sm">
                     {demande.dateAudience ? (
-                      <div className="text-gray-900">
-                        {dayjs(demande.dateAudience).format('DD/MM/YYYY')}
-                      </div>
+                      (() => {
+                        const urgency = getAudienceUrgency(demande.dateAudience)
+                        const IconComponent = urgency.icon
+                        return (
+                          <div className="flex items-center">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
+                              {IconComponent && (
+                                <IconComponent className="h-3 w-3 mr-1" />
+                              )}
+                              {dayjs(demande.dateAudience).format('DD/MM/YYYY')}
+                            </span>
+                          </div>
+                        )
+                      })()
                     ) : (
-                      <span className="text-gray-500">-</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        -
+                      </span>
                     )}
                   </div>
                 </td>

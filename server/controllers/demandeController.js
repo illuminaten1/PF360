@@ -9,7 +9,7 @@ const cleanEmptyStrings = (data) => {
   const cleaned = { ...data };
   Object.keys(cleaned).forEach(key => {
     if (cleaned[key] === '') {
-      if (key === 'dateFaits' || key === 'dateAudience' || key === 'position') {
+      if (key === 'position') {
         delete cleaned[key];
       } else {
         cleaned[key] = null;

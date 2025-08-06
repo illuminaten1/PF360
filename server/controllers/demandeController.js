@@ -526,7 +526,10 @@ const getStats = async (req, res) => {
       }),
       prisma.demande.count({ 
         where: { 
-          assigneAId: null // Demandes non affectées à un utilisateur
+          assigneAId: null, // Demandes non affectées à un utilisateur
+          dateReception: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)) // Seulement aujourd'hui
+          }
         } 
       })
     ]);

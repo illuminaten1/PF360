@@ -268,19 +268,33 @@ const Demandes: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col justify-end">
-                <button
-                  onClick={() => {
-                    const today = new Date().toISOString().split('T')[0]
-                    setFilters(prev => ({
-                      ...prev,
-                      dateDebut: today,
-                      dateFin: today
-                    }))
-                  }}
-                  className="btn-secondary h-10"
-                >
-                  Aujourd'hui
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      const today = new Date().toISOString().split('T')[0]
+                      setFilters(prev => ({
+                        ...prev,
+                        dateDebut: today,
+                        dateFin: today
+                      }))
+                    }}
+                    className="btn-secondary h-10 text-sm"
+                  >
+                    Aujourd'hui
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFilters({
+                        type: '',
+                        dateDebut: '',
+                        dateFin: ''
+                      })
+                    }}
+                    className="btn-secondary h-10 text-sm"
+                  >
+                    Effacer
+                  </button>
+                </div>
               </div>
             </div>
           </div>

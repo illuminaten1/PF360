@@ -12,8 +12,9 @@ interface DemandesStats {
   demandesToday: number
   demandesVictimes: number
   demandesMisEnCause: number
+  demandesNonAffecteesAnnee: number
   demandesSansDecision: number
-  demandesNonAffectees: number
+  demandesNonAffecteesToday: number
 }
 
 const Demandes: React.FC = () => {
@@ -198,6 +199,10 @@ const Demandes: React.FC = () => {
                   <div className="text-sm text-gray-600">Mis en cause</div>
                 </div>
                 <div className="bg-white rounded-lg shadow p-4">
+                  <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesAnnee}</div>
+                  <div className="text-sm text-gray-600">Non affectées</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
                   <div className="text-2xl font-bold text-purple-600">{stats.demandesSansDecision}</div>
                   <div className="text-sm text-gray-600">Sans décision</div>
                 </div>
@@ -213,7 +218,7 @@ const Demandes: React.FC = () => {
                   <div className="text-sm text-gray-600">Reçues</div>
                 </div>
                 <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
-                  <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffectees}</div>
+                  <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesToday}</div>
                   <div className="text-sm text-gray-600">Non affectées</div>
                 </div>
               </div>

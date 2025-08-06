@@ -19,7 +19,7 @@ model User {
   prenom      String
   mail        String   @unique
   telephone   String?
-  role        String   @default("UTILISATEUR")
+  role        String   @default("REDACTEUR")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -278,7 +278,7 @@ model ConventionDemande {
 
 // Note: Using strings instead of enums for SQLite compatibility
 // Valid values:
-// - Role: "ADMIN" | "UTILISATEUR"
+// - Role: "ADMIN" | "REDACTEUR" | "GREFFIER"
 // - TypeDemande: "VICTIME" | "MIS_EN_CAUSE"  
 // - Position: "EN_SERVICE" | "HORS_SERVICE"
 // - TypeDecision: "OCTROI" | "OCTROI_PARTIEL" | "REJET"

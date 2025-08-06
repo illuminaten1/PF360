@@ -122,7 +122,7 @@ async function main() {
       nom: 'Test',
       prenom: 'Utilisateur',
       mail: 'test@pf360.fr',
-      role: 'UTILISATEUR',
+      role: 'REDACTEUR',
       grade: 'Adjudant'
     }
   })

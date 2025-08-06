@@ -19,7 +19,7 @@ const registerSchema = z.object({
   mail: z.string().email('Email invalide'),
   grade: z.string().optional(),
   telephone: z.string().optional(),
-  role: z.enum(['ADMIN', 'UTILISATEUR']).default('UTILISATEUR')
+  role: z.enum(['ADMIN', 'REDACTEUR', 'GREFFIER']).default('REDACTEUR')
 });
 
 const generateToken = (userId) => {

@@ -16,7 +16,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
     nom: '',
     prenom: '',
     mail: '',
-    role: 'UTILISATEUR' as 'ADMIN' | 'UTILISATEUR',
+    role: 'REDACTEUR' as 'ADMIN' | 'REDACTEUR' | 'GREFFIER',
     grade: '',
     telephone: '',
     password: ''
@@ -31,7 +31,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
         nom: user.nom || '',
         prenom: user.prenom || '',
         mail: user.mail || '',
-        role: user.role || 'UTILISATEUR',
+        role: user.role || 'REDACTEUR',
         grade: user.grade || '',
         telephone: user.telephone || '',
         password: ''
@@ -42,7 +42,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
         nom: '',
         prenom: '',
         mail: '',
-        role: 'UTILISATEUR',
+        role: 'REDACTEUR',
         grade: '',
         telephone: '',
         password: ''
@@ -163,7 +163,8 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isSubmitting}
               >
-                <option value="UTILISATEUR">Utilisateur</option>
+                <option value="REDACTEUR">Rédacteur</option>
+                <option value="GREFFIER">Greffier</option>
                 <option value="ADMIN">Administrateur</option>
               </select>
             </div>

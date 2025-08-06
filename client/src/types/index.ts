@@ -4,7 +4,7 @@ export interface User {
   nom: string
   prenom: string
   mail: string
-  role: 'ADMIN' | 'UTILISATEUR'
+  role: 'ADMIN' | 'REDACTEUR' | 'GREFFIER'
   grade?: string
   telephone?: string
   createdAt?: string

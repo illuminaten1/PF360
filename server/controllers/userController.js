@@ -13,7 +13,7 @@ const createUserSchema = z.object({
   mail: z.string().email('Email invalide'),
   grade: z.string().optional(),
   telephone: z.string().optional(),
-  role: z.enum(['ADMIN', 'UTILISATEUR']).default('UTILISATEUR')
+  role: z.enum(['ADMIN', 'REDACTEUR', 'GREFFIER']).default('REDACTEUR')
 });
 
 const updateUserSchema = z.object({
@@ -24,7 +24,7 @@ const updateUserSchema = z.object({
   mail: z.string().email('Email invalide').optional(),
   grade: z.string().optional(),
   telephone: z.string().optional(),
-  role: z.enum(['ADMIN', 'UTILISATEUR']).optional()
+  role: z.enum(['ADMIN', 'REDACTEUR', 'GREFFIER']).optional()
 });
 
 // Récupérer tous les utilisateurs avec recherche

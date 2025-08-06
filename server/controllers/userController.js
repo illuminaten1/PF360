@@ -48,6 +48,7 @@ const getUsers = async (req, res) => {
           role: true,
           grade: true,
           telephone: true,
+          active: true,
           createdAt: true,
           updatedAt: true
         },
@@ -74,6 +75,7 @@ const getUsers = async (req, res) => {
           role: true,
           grade: true,
           telephone: true,
+          active: true,
           createdAt: true,
           updatedAt: true
         },

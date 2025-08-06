@@ -82,17 +82,31 @@ const Users: React.FC = () => {
     }
   })
 
-  const deleteUserMutation = useMutation({
+  const deactivateUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/users/${id}`)
+      await api.put(`/users/${id}/deactivate`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       queryClient.invalidateQueries({ queryKey: ['users-stats'] })
-      toast.success('Utilisateur supprimé avec succès')
+      toast.success('Utilisateur désactivé avec succès')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erreur lors de la suppression de l\'utilisateur')
+      toast.error(error.response?.data?.message || 'Erreur lors de la désactivation de l\'utilisateur')
+    }
+  })
+
+  const reactivateUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.put(`/users/${id}/reactivate`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['users-stats'] })
+      toast.success('Utilisateur réactivé avec succès')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Erreur lors de la réactivation de l\'utilisateur')
     }
   })
 
@@ -106,9 +120,15 @@ const Users: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleDeleteUser = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      deleteUserMutation.mutate(id)
+  const handleDeactivateUser = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir désactiver cet utilisateur ? Il ne pourra plus se connecter.')) {
+      deactivateUserMutation.mutate(id)
+    }
+  }
+
+  const handleReactivateUser = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir réactiver cet utilisateur ?')) {
+      reactivateUserMutation.mutate(id)
     }
   }
 
@@ -200,7 +220,8 @@ const Users: React.FC = () => {
           users={users}
           isLoading={isLoading}
           onEdit={handleEditUser}
-          onDelete={handleDeleteUser}
+          onDeactivate={handleDeactivateUser}
+          onReactivate={handleReactivateUser}
         />
       </div>
 

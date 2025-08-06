@@ -25,7 +25,7 @@ export interface Demande {
   numeroDS: string
   type: 'VICTIME' | 'MIS_EN_CAUSE'
   nigend?: string
-  grade?: string
+  grade?: 'Général' | 'Colonel' | 'Lieutenant-colonel' | 'Chef d\'escadron' | 'Commandant' | 'Capitaine' | 'Lieutenant' | 'Sous-lieutenant' | 'Aspirant' | 'Major' | 'Adjudant-chef' | 'Adjudant' | 'Maréchal des logis-chef' | 'Gendarme' | 'Élève gendarme' | 'Maréchal des logis' | 'Brigadier-chef' | 'Brigadier' | 'Gendarme adjoint volontaire' | 'Gendarme adjoint de 2ème classe' | 'Madame' | 'Monsieur'
   statutDemandeur?: 'OG' | 'OCTA' | 'SOG' | 'CSTAGN' | 'GAV' | 'Civil' | 'Réserviste' | 'Retraité' | 'Ayant-droit'
   nom: string
   prenom: string

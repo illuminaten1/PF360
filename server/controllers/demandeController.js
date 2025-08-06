@@ -25,7 +25,7 @@ const demandeSchema = z.object({
   
   // Infos militaires
   nigend: z.string().optional(),
-  grade: z.string().optional(),
+  grade: z.enum(['Général', 'Colonel', 'Lieutenant-colonel', 'Chef d\'escadron', 'Commandant', 'Capitaine', 'Lieutenant', 'Sous-lieutenant', 'Aspirant', 'Major', 'Adjudant-chef', 'Adjudant', 'Maréchal des logis-chef', 'Gendarme', 'Élève gendarme', 'Maréchal des logis', 'Brigadier-chef', 'Brigadier', 'Gendarme adjoint volontaire', 'Gendarme adjoint de 2ème classe', 'Madame', 'Monsieur'], { message: 'Grade invalide' }).optional(),
   statutDemandeur: z.enum(['OG', 'OCTA', 'SOG', 'CSTAGN', 'GAV', 'Civil', 'Réserviste', 'Retraité', 'Ayant-droit'], { message: 'Statut demandeur invalide' }).optional(),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),

@@ -14,7 +14,7 @@ const demandeSchema = z.object({
   
   // Infos militaires
   nigend: z.string().optional(),
-  grade: z.string().optional(),
+  grade: z.enum(['Général', 'Colonel', 'Lieutenant-colonel', 'Chef d\'escadron', 'Commandant', 'Capitaine', 'Lieutenant', 'Sous-lieutenant', 'Aspirant', 'Major', 'Adjudant-chef', 'Adjudant', 'Maréchal des logis-chef', 'Gendarme', 'Élève gendarme', 'Maréchal des logis', 'Brigadier-chef', 'Brigadier', 'Gendarme adjoint volontaire', 'Gendarme adjoint de 2ème classe', 'Madame', 'Monsieur'], { message: 'Grade invalide' }).optional(),
   statutDemandeur: z.enum(['OG', 'OCTA', 'SOG', 'CSTAGN', 'GAV', 'Civil', 'Réserviste', 'Retraité', 'Ayant-droit'], { message: 'Statut demandeur invalide' }).optional(),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),
@@ -97,7 +97,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         numeroDS: demande.numeroDS,
         type: demande.type as 'VICTIME' | 'MIS_EN_CAUSE',
         nigend: demande.nigend || '',
-        grade: demande.grade || '',
+        grade: demande.grade || undefined,
         statutDemandeur: demande.statutDemandeur || undefined,
         nom: demande.nom,
         prenom: demande.prenom,
@@ -293,12 +293,38 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <label className="label block text-gray-700 mb-2">
                           Grade
                         </label>
-                        <input
+                        <select
                           {...register('grade')}
                           className="input w-full"
-                          placeholder="Ex: Adjudant"
                           disabled={isSubmitting}
-                        />
+                        >
+                          <option value="">Sélectionner un grade</option>
+                          <option value="Général">Général</option>
+                          <option value="Colonel">Colonel</option>
+                          <option value="Lieutenant-colonel">Lieutenant-colonel</option>
+                          <option value="Chef d'escadron">Chef d'escadron</option>
+                          <option value="Commandant">Commandant</option>
+                          <option value="Capitaine">Capitaine</option>
+                          <option value="Lieutenant">Lieutenant</option>
+                          <option value="Sous-lieutenant">Sous-lieutenant</option>
+                          <option value="Aspirant">Aspirant</option>
+                          <option value="Major">Major</option>
+                          <option value="Adjudant-chef">Adjudant-chef</option>
+                          <option value="Adjudant">Adjudant</option>
+                          <option value="Maréchal des logis-chef">Maréchal des logis-chef</option>
+                          <option value="Gendarme">Gendarme</option>
+                          <option value="Élève gendarme">Élève gendarme</option>
+                          <option value="Maréchal des logis">Maréchal des logis</option>
+                          <option value="Brigadier-chef">Brigadier-chef</option>
+                          <option value="Brigadier">Brigadier</option>
+                          <option value="Gendarme adjoint volontaire">Gendarme adjoint volontaire</option>
+                          <option value="Gendarme adjoint de 2ème classe">Gendarme adjoint de 2ème classe</option>
+                          <option value="Madame">Madame</option>
+                          <option value="Monsieur">Monsieur</option>
+                        </select>
+                        {errors.grade && (
+                          <p className="mt-1 text-sm text-red-600">{errors.grade.message}</p>
+                        )}
                       </div>
 
                       <div>

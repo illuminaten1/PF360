@@ -199,7 +199,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                     {demande.assigneA ? (
                       <div className="text-gray-900">
                         <div className="font-medium">
-                          {demande.assigneA.prenom} {demande.assigneA.nom}
+                          {demande.assigneA.grade && `${demande.assigneA.grade} `}{demande.assigneA.prenom} {demande.assigneA.nom}
                         </div>
                       </div>
                     ) : (

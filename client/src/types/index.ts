@@ -61,6 +61,7 @@ export interface Demande {
     id: string
     nom: string
     prenom: string
+    grade?: string
   }
   decisions?: Array<{
     decision: {
@@ -103,6 +104,7 @@ export interface Dossier {
     id: string
     nom: string
     prenom: string
+    grade?: string
   }
   decisions: Array<{
     id: string

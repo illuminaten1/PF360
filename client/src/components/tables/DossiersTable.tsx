@@ -103,7 +103,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
                     <div className="flex items-center">
                       <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
                       <span className="text-sm text-gray-900">
-                        {dossier.assigneA.prenom} {dossier.assigneA.nom}
+                        {dossier.assigneA.grade && `${dossier.assigneA.grade} `}{dossier.assigneA.prenom} {dossier.assigneA.nom}
                       </span>
                     </div>
                   ) : (

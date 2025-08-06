@@ -40,7 +40,8 @@ router.get('/', async (req, res) => {
           select: {
             id: true,
             nom: true,
-            prenom: true
+            prenom: true,
+            grade: true
           }
         },
         decisions: {
@@ -160,7 +161,8 @@ router.get('/:id', async (req, res) => {
           select: {
             id: true,
             nom: true,
-            prenom: true
+            prenom: true,
+            grade: true
           }
         },
         decisions: {

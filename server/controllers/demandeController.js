@@ -117,7 +117,8 @@ const getAllDemandes = async (req, res) => {
             select: {
               id: true,
               nom: true,
-              prenom: true
+              prenom: true,
+              grade: true
             }
           },
           decisions: {
@@ -184,7 +185,8 @@ const getDemandeById = async (req, res) => {
             assigneA: {
               select: {
                 nom: true,
-                prenom: true
+                prenom: true,
+                grade: true
               }
             }
           }
@@ -193,7 +195,8 @@ const getDemandeById = async (req, res) => {
           select: {
             id: true,
             nom: true,
-            prenom: true
+            prenom: true,
+            grade: true
           }
         },
         decisions: {
@@ -300,7 +303,8 @@ const createDemande = async (req, res) => {
           select: {
             id: true,
             nom: true,
-            prenom: true
+            prenom: true,
+            grade: true
           }
         }
       }
@@ -402,7 +406,8 @@ const updateDemande = async (req, res) => {
           select: {
             id: true,
             nom: true,
-            prenom: true
+            prenom: true,
+            grade: true
           }
         }
       }

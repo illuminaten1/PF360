@@ -247,7 +247,7 @@ const Demandes: React.FC = () => {
         {/* Advanced filters */}
         {showFilters && (
           <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               <div>
                 <label className="label block text-gray-700 mb-2">Type</label>
                 <select
@@ -260,8 +260,23 @@ const Demandes: React.FC = () => {
                   <option value="MIS_EN_CAUSE">Mis en cause</option>
                 </select>
               </div>
+              <div className="flex flex-col justify-end">
+                <button
+                  onClick={() => {
+                    const today = new Date().toISOString().split('T')[0]
+                    setFilters(prev => ({
+                      ...prev,
+                      dateDebut: today,
+                      dateFin: today
+                    }))
+                  }}
+                  className="btn-secondary h-10 text-sm whitespace-nowrap"
+                >
+                  Aujourd'hui
+                </button>
+              </div>
               <div>
-                <label className="label block text-gray-700 mb-2">Date de début</label>
+                <label className="label block text-gray-700 mb-2">Date début</label>
                 <input
                   type="date"
                   value={filters.dateDebut}
@@ -270,7 +285,7 @@ const Demandes: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="label block text-gray-700 mb-2">Date de fin</label>
+                <label className="label block text-gray-700 mb-2">Date fin</label>
                 <input
                   type="date"
                   value={filters.dateFin}
@@ -295,34 +310,19 @@ const Demandes: React.FC = () => {
                 </select>
               </div>
               <div className="flex flex-col justify-end">
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => {
-                      const today = new Date().toISOString().split('T')[0]
-                      setFilters(prev => ({
-                        ...prev,
-                        dateDebut: today,
-                        dateFin: today
-                      }))
-                    }}
-                    className="btn-secondary h-10 text-sm"
-                  >
-                    Aujourd'hui
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFilters({
-                        type: '',
-                        dateDebut: '',
-                        dateFin: '',
-                        assigneAId: ''
-                      })
-                    }}
-                    className="btn-secondary h-10 text-sm"
-                  >
-                    Effacer
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setFilters({
+                      type: '',
+                      dateDebut: '',
+                      dateFin: '',
+                      assigneAId: ''
+                    })
+                  }}
+                  className="btn-secondary h-10 text-sm"
+                >
+                  Effacer
+                </button>
               </div>
             </div>
           </div>

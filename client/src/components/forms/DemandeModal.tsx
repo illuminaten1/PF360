@@ -205,7 +205,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+                <form id="demande-form" onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
                   {/* Informations générales */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Informations générales</h4>
@@ -649,24 +649,29 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="btn-secondary"
-                      disabled={isSubmitting}
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn-primary"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Enregistrement...' : demande ? 'Modifier' : 'Créer'}
-                    </button>
-                  </div>
+                  {/* Spacer pour éviter que le contenu soit caché par les boutons flottants */}
+                  <div className="pb-20"></div>
                 </form>
+
+                {/* Boutons flottants */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-end space-x-3 shadow-lg">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="btn-secondary"
+                    disabled={isSubmitting}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    form="demande-form"
+                    className="btn-primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Enregistrement...' : demande ? 'Modifier' : 'Créer'}
+                  </button>
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

@@ -21,9 +21,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Ne pas rediriger si on est déjà sur la page de connexion
+      if (!window.location.pathname.includes('/login')) {
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      }
     }
     
     // Ne pas afficher de toast ici car les mutations gèrent leurs propres erreurs

@@ -10,6 +10,8 @@ import UserModal from '@/components/forms/UserModal'
 interface UsersStats {
   totalUsers: number
   adminUsers: number
+  redactorUsers: number
+  clerkUsers: number
   activeUsers: number
 }
 
@@ -162,7 +164,7 @@ const Users: React.FC = () => {
       </div>
 
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-blue-100">
@@ -183,6 +185,30 @@ const Users: React.FC = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Administrateurs</p>
                 <p className="text-2xl font-semibold text-gray-900">{stats.adminUsers}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-orange-100">
+                <UserGroupIcon className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Rédacteurs</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.redactorUsers}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-yellow-100">
+                <UserGroupIcon className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Greffiers</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.clerkUsers}</p>
               </div>
             </div>
           </div>

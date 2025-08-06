@@ -64,7 +64,7 @@ const demandeSchema = z.object({
 
 const getAllDemandes = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, dateDebut, dateFin } = req.query;
+    const { page = 1, limit = 20, search, type, dateDebut, dateFin, assigneAId } = req.query;
     const skip = (page - 1) * limit;
 
     const where = {};
@@ -90,6 +90,15 @@ const getAllDemandes = async (req, res) => {
       }
       if (dateFin) {
         where.dateReception.lte = new Date(dateFin + 'T23:59:59.999Z');
+      }
+    }
+    
+    // Filtrage par assignation
+    if (assigneAId !== undefined) {
+      if (assigneAId === 'null') {
+        where.assigneAId = null;
+      } else if (assigneAId) {
+        where.assigneAId = assigneAId;
       }
     }
 

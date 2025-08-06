@@ -24,10 +24,20 @@ const Demandes: React.FC = () => {
   const [filters, setFilters] = useState({
     type: '',
     dateDebut: '',
-    dateFin: ''
+    dateFin: '',
+    assigneAId: ''
   })
 
   const queryClient = useQueryClient()
+
+  // Fetch users for assignment filter
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api.get('/demandes/users')
+      return response.data
+    }
+  })
 
   // Fetch demandes with filters
   const { data: demandesData, isLoading } = useQuery({
@@ -38,6 +48,7 @@ const Demandes: React.FC = () => {
       if (filters.type) params.append('type', filters.type)
       if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
       if (filters.dateFin) params.append('dateFin', filters.dateFin)
+      if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
       
       const response = await api.get(`/demandes?${params.toString()}`)
       return response.data
@@ -236,7 +247,7 @@ const Demandes: React.FC = () => {
         {/* Advanced filters */}
         {showFilters && (
           <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div>
                 <label className="label block text-gray-700 mb-2">Type</label>
                 <select
@@ -267,6 +278,22 @@ const Demandes: React.FC = () => {
                   className="input w-full"
                 />
               </div>
+              <div>
+                <label className="label block text-gray-700 mb-2">Assigné à</label>
+                <select
+                  value={filters.assigneAId}
+                  onChange={(e) => handleFilterChange('assigneAId', e.target.value)}
+                  className="input w-full"
+                >
+                  <option value="">Tous les utilisateurs</option>
+                  <option value="null">Non assigné</option>
+                  {users.map((user: any) => (
+                    <option key={user.id} value={user.id}>
+                      {user.grade && `${user.grade} `}{user.prenom} {user.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="flex flex-col justify-end">
                 <div className="flex space-x-2">
                   <button
@@ -287,7 +314,8 @@ const Demandes: React.FC = () => {
                       setFilters({
                         type: '',
                         dateDebut: '',
-                        dateFin: ''
+                        dateFin: '',
+                        assigneAId: ''
                       })
                     }}
                     className="btn-secondary h-10 text-sm"

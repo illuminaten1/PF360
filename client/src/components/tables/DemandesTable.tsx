@@ -8,7 +8,8 @@ import {
   TrashIcon,
   FolderIcon,
   ExclamationTriangleIcon,
-  ClockIcon
+  ClockIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline'
 
 dayjs.locale('fr')
@@ -94,7 +95,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       return { 
         type: 'normal', 
         style: 'bg-green-100 text-green-800', 
-        icon: null 
+        icon: CheckCircleIcon 
       }
     }
   }

@@ -12,6 +12,7 @@ interface DemandesStats {
   demandesToday: number
   demandesVictimes: number
   demandesMisEnCause: number
+  demandesNonAffectees: number
 }
 
 const Demandes: React.FC = () => {
@@ -187,12 +188,18 @@ const Demandes: React.FC = () => {
               </div>
             </div>
             
-            {/* Statistique du jour */}
+            {/* Statistiques actuelles */}
             <div className="w-full md:w-auto">
-              <div className="text-sm font-medium text-gray-700 mb-3">Aujourd'hui</div>
-              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-                <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
-                <div className="text-sm text-gray-600">Nouvelles demandes</div>
+              <div className="text-sm font-medium text-gray-700 mb-3">En attente</div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                  <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
+                  <div className="text-sm text-gray-600">Aujourd'hui</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                  <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffectees}</div>
+                  <div className="text-sm text-gray-600">Non affectées</div>
+                </div>
               </div>
             </div>
           </div>

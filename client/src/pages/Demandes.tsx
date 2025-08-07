@@ -20,38 +20,15 @@ interface DemandesStats {
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showFilters, setShowFilters] = useState(true)
-  const [filters, setFilters] = useState({
-    type: '',
-    dateDebut: '',
-    dateFin: '',
-    assigneAId: ''
-  })
 
   const queryClient = useQueryClient()
 
-  // Fetch users for assignment filter
-  const { data: users = [] } = useQuery({
-    queryKey: ['demandes-users'],
-    queryFn: async () => {
-      const response = await api.get('/demandes/users')
-      return response.data
-    }
-  })
 
-  // Fetch demandes with filters
+  // Fetch all demandes (filtering will be done client-side by TanStack)
   const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', searchTerm, filters],
+    queryKey: ['demandes'],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('search', searchTerm)
-      if (filters.type) params.append('type', filters.type)
-      if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
-      if (filters.dateFin) params.append('dateFin', filters.dateFin)
-      if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
-      
-      const response = await api.get(`/demandes?${params.toString()}`)
+      const response = await api.get('/demandes')
       return response.data
     }
   })
@@ -153,12 +130,6 @@ const Demandes: React.FC = () => {
     }
   }
 
-  const handleFilterChange = (filterName: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value
-    }))
-  }
 
   return (
     <div className="p-6">
@@ -235,29 +206,6 @@ const Demandes: React.FC = () => {
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
         loading={isLoading}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        users={users}
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters(!showFilters)}
-        onClearFilters={() => {
-          setFilters({
-            type: '',
-            dateDebut: '',
-            dateFin: '',
-            assigneAId: ''
-          })
-        }}
-        onTodayFilter={() => {
-          const today = new Date().toISOString().split('T')[0]
-          setFilters(prev => ({
-            ...prev,
-            dateDebut: today,
-            dateFin: today
-          }))
-        }}
       />
 
       <DemandeModal

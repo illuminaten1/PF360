@@ -27,7 +27,6 @@ import {
   XCircleIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-  FunnelIcon,
   MagnifyingGlassIcon,
   ChevronLeftIcon,
   ChevronRightIcon
@@ -42,21 +41,6 @@ interface DemandesTableProps {
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
   loading?: boolean
-  // Filtres intégrés
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  filters: {
-    type: string
-    dateDebut: string
-    dateFin: string
-    assigneAId: string
-  }
-  onFilterChange: (filterName: string, value: string) => void
-  users: any[]
-  showFilters: boolean
-  onToggleFilters: () => void
-  onClearFilters: () => void
-  onTodayFilter: () => void
 }
 
 const columnHelper = createColumnHelper<Demande>()
@@ -111,19 +95,11 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onEdit,
   onDelete,
   onAddToDossier,
-  loading = false,
-  searchTerm,
-  onSearchChange,
-  filters,
-  onFilterChange,
-  users,
-  showFilters,
-  onToggleFilters,
-  onClearFilters,
-  onTodayFilter
+  loading = false
 }) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
 
   const columns = useMemo(() => [
     columnHelper.accessor('numeroDS', {
@@ -143,7 +119,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: true,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: 'includesString'
     }),
     columnHelper.accessor('dateReception', {
@@ -155,7 +130,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: true,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: 'includesString'
     }),
     columnHelper.accessor('prenom', {
@@ -175,7 +149,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         const fullName = `${row.original.grade || ''} ${row.original.prenom} ${row.original.nom} ${row.original.nigend || ''}`.toLowerCase()
@@ -191,7 +164,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: true,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: 'includesString'
     }),
     columnHelper.accessor('commune', {
@@ -213,7 +185,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         const commune = row.original.commune?.toLowerCase() || ''
@@ -247,7 +218,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         if (filterValue === 'non-lie') return !row.original.dossier
@@ -274,7 +244,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         if (filterValue === 'non-assigne') return !row.original.assigneA
@@ -319,7 +288,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       },
       enableSorting: true,
       enableColumnFilter: true,
-      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         if (filterValue === 'urgent') {
@@ -375,11 +343,11 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     state: {
       sorting,
       columnFilters,
-      globalFilter: searchTerm
+      globalFilter
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: onSearchChange,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -388,11 +356,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
     globalFilterFn: (row, _, filterValue) => {
-      // Recherche uniquement dans Numéro DS, NIGEND, Nom/Prénom
+      // Recherche dans Numéro DS, NIGEND, Nom/Prénom, Unité
       const numeroDS = row.original.numeroDS?.toLowerCase() || ''
       const nigend = row.original.nigend?.toLowerCase() || ''
       const nom = row.original.nom?.toLowerCase() || ''
       const prenom = row.original.prenom?.toLowerCase() || ''
+      const unite = row.original.unite?.toLowerCase() || ''
+      const commune = row.original.commune?.toLowerCase() || ''
       const nomComplet1 = `${prenom} ${nom}`.toLowerCase()
       const nomComplet2 = `${nom} ${prenom}`.toLowerCase()
       
@@ -402,6 +372,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
              nigend.includes(searchValue) ||
              nom.includes(searchValue) ||
              prenom.includes(searchValue) ||
+             unite.includes(searchValue) ||
+             commune.includes(searchValue) ||
              nomComplet1.includes(searchValue) ||
              nomComplet2.includes(searchValue)
     },
@@ -443,100 +415,30 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      {/* Barre de recherche et filtres intégrés */}
+      {/* Barre de recherche globale TanStack */}
       <div className="px-6 py-4 border-b border-gray-200">
-        {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher par numéro DS, nom, NIGEND..."
-                value={searchTerm}
-                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Rechercher par numéro DS, nom, NIGEND, unité, commune..."
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
-          <button
-            onClick={onToggleFilters}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <FunnelIcon className="h-4 w-4 mr-2" />
-            Filtres
-          </button>
+          {globalFilter && (
+            <button
+              onClick={() => setGlobalFilter('')}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Effacer
+            </button>
+          )}
         </div>
-
-        {/* Advanced filters */}
-        {showFilters && (
-          <div className="border-t pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                <select
-                  value={filters.type}
-                  onChange={(e) => onFilterChange('type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Tous les types</option>
-                  <option value="VICTIME">Victime</option>
-                  <option value="MIS_EN_CAUSE">Mis en cause</option>
-                </select>
-              </div>
-              <div className="flex flex-col justify-end">
-                <button
-                  onClick={onTodayFilter}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
-                >
-                  Aujourd'hui
-                </button>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date début</label>
-                <input
-                  type="date"
-                  value={filters.dateDebut}
-                  onChange={(e) => onFilterChange('dateDebut', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
-                <input
-                  type="date"
-                  value={filters.dateFin}
-                  onChange={(e) => onFilterChange('dateFin', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Assigné à</label>
-                <select
-                  value={filters.assigneAId}
-                  onChange={(e) => onFilterChange('assigneAId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Tous les utilisateurs</option>
-                  <option value="null">Non assigné</option>
-                  {users?.map((user: any) => (
-                    <option key={user.id} value={user.id}>
-                      {user.grade && `${user.grade} `}{user.prenom} {user.nom}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col justify-end">
-                <button
-                  onClick={onClearFilters}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
-                >
-                  Effacer les filtres
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Table */}

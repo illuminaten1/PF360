@@ -11,8 +11,7 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState,
-  type GlobalFilterState
+  type ColumnFiltersState
 } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
@@ -55,6 +54,22 @@ function Filter({ column }: { column: any }) {
       placeholder={`Filtrer...`}
       className="w-32 border shadow rounded px-2 py-1 text-xs"
     />
+  )
+}
+
+function SelectFilter({ column }: { column: any }) {
+  const columnFilterValue = column.getFilterValue()
+  
+  return (
+    <select
+      value={(columnFilterValue ?? '') as string}
+      onChange={(e) => column.setFilterValue(e.target.value || undefined)}
+      className="w-32 border shadow rounded px-2 py-1 text-xs"
+    >
+      <option value="">Tous</option>
+      <option value="VICTIME">Victime</option>
+      <option value="MIS_EN_CAUSE">Mis en cause</option>
+    </select>
   )
 }
 
@@ -459,7 +474,11 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       </div>
                       {header.column.getCanFilter() && (
                         <div>
-                          <Filter column={header.column} />
+                          {header.column.id === 'type' ? (
+                            <SelectFilter column={header.column} />
+                          ) : (
+                            <Filter column={header.column} />
+                          )}
                         </div>
                       )}
                     </div>

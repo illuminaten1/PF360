@@ -6,7 +6,6 @@ import { Demande } from '@/types'
 import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
 import DemandeModal from '@/components/forms/DemandeModal'
-import { useDebounce } from '@/hooks/useDebounce'
 
 interface DemandesStats {
   totalDemandes: number
@@ -35,12 +34,9 @@ const Demandes: React.FC = () => {
 
   const queryClient = useQueryClient()
   
-  // Debounce pour la recherche serveur
-  const debouncedGlobalFilter = useDebounce(globalFilter, 500)
-
   // Fetch demandes avec server-side pagination/filtering (méthode TanStack officielle)
   const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', debouncedGlobalFilter, filters, pagination.pageIndex, pagination.pageSize],
+    queryKey: ['demandes', globalFilter, filters, pagination.pageIndex, pagination.pageSize],
     queryFn: async () => {
       const params = new URLSearchParams()
       
@@ -49,7 +45,7 @@ const Demandes: React.FC = () => {
       params.append('limit', String(pagination.pageSize))
       
       // Global filter (recherche)
-      if (debouncedGlobalFilter) params.append('search', debouncedGlobalFilter)
+      if (globalFilter) params.append('search', globalFilter)
       
       // Column filters
       if (filters.type) params.append('type', filters.type)

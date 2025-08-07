@@ -31,6 +31,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline'
+import DebouncedInput from '@/components/common/DebouncedInput'
 
 dayjs.locale('fr')
 
@@ -366,21 +367,11 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     columns,
     state: {
       sorting,
-      columnFilters,
-      globalFilter,
       pagination
     },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: onGlobalFilterChange,
     onPaginationChange: onPaginationChange,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
     // Server-side configuration (TanStack officiel)
     manualPagination: true,
     manualFiltering: true, 
@@ -427,11 +418,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             <div className="flex-1">
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher par numéro DS, nom, NIGEND, unité, commune..."
+                <DebouncedInput
                   value={globalFilter}
-                  onChange={(e) => onGlobalFilterChange(e.target.value)}
+                  onChange={onGlobalFilterChange}
+                  placeholder="Rechercher par numéro DS, nom, NIGEND, unité, commune..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

@@ -226,112 +226,6 @@ const Demandes: React.FC = () => {
           </div>
         )}
 
-        {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par numéro DS, nom, NIGEND, commune..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input w-full pl-10"
-              />
-            </div>
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn-secondary flex items-center"
-          >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            Filtres
-          </button>
-        </div>
-
-        {/* Advanced filters */}
-        {showFilters && (
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
-              <div className="md:col-span-2">
-                <label className="label block text-gray-700 mb-2">Type</label>
-                <select
-                  value={filters.type}
-                  onChange={(e) => handleFilterChange('type', e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Tous les types</option>
-                  <option value="VICTIME">Victime</option>
-                  <option value="MIS_EN_CAUSE">Mis en cause</option>
-                </select>
-              </div>
-              <div className="flex flex-col justify-end">
-                <button
-                  onClick={() => {
-                    const today = new Date().toISOString().split('T')[0]
-                    setFilters(prev => ({
-                      ...prev,
-                      dateDebut: today,
-                      dateFin: today
-                    }))
-                  }}
-                  className="btn-secondary h-10 text-sm whitespace-nowrap"
-                >
-                  Aujourd'hui
-                </button>
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Date début</label>
-                <input
-                  type="date"
-                  value={filters.dateDebut}
-                  onChange={(e) => handleFilterChange('dateDebut', e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Date fin</label>
-                <input
-                  type="date"
-                  value={filters.dateFin}
-                  onChange={(e) => handleFilterChange('dateFin', e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="label block text-gray-700 mb-2">Assigné à</label>
-                <select
-                  value={filters.assigneAId}
-                  onChange={(e) => handleFilterChange('assigneAId', e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Tous les utilisateurs</option>
-                  <option value="null">Non assigné</option>
-                  {users?.map((user: any) => (
-                    <option key={user.id} value={user.id}>
-                      {user.grade && `${user.grade} `}{user.prenom} {user.nom}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col justify-end">
-                <button
-                  onClick={() => {
-                    setFilters({
-                      type: '',
-                      dateDebut: '',
-                      dateFin: '',
-                      assigneAId: ''
-                    })
-                  }}
-                  className="btn-secondary h-10 text-sm whitespace-nowrap"
-                >
-                  Effacer les filtres
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <DemandesTable
@@ -341,6 +235,29 @@ const Demandes: React.FC = () => {
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
         loading={isLoading}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        users={users}
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+        onClearFilters={() => {
+          setFilters({
+            type: '',
+            dateDebut: '',
+            dateFin: '',
+            assigneAId: ''
+          })
+        }}
+        onTodayFilter={() => {
+          const today = new Date().toISOString().split('T')[0]
+          setFilters(prev => ({
+            ...prev,
+            dateDebut: today,
+            dateFin: today
+          }))
+        }}
       />
 
       <DemandeModal

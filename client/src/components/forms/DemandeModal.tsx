@@ -14,8 +14,8 @@ const demandeSchema = z.object({
   
   // Infos militaires
   nigend: z.string().optional(),
-  grade: z.enum(['Général', 'Colonel', 'Lieutenant-colonel', 'Chef d\'escadron', 'Commandant', 'Capitaine', 'Lieutenant', 'Sous-lieutenant', 'Aspirant', 'Major', 'Adjudant-chef', 'Adjudant', 'Maréchal des logis-chef', 'Gendarme', 'Élève gendarme', 'Maréchal des logis', 'Brigadier-chef', 'Brigadier', 'Gendarme adjoint volontaire', 'Gendarme adjoint de 2ème classe', 'Madame', 'Monsieur'], { message: 'Grade requis' }),
-  statutDemandeur: z.enum(['OG', 'OCTA', 'SOG', 'CSTAGN', 'GAV', 'Civil', 'Réserviste', 'Retraité', 'Ayant-droit'], { message: 'Statut du demandeur requis' }),
+  grade: z.string().min(1, 'Grade requis'),
+  statutDemandeur: z.string().min(1, 'Statut du demandeur requis'),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),
   adresse1: z.string().optional(),
@@ -80,6 +80,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
     formState: { errors, isSubmitting }
   } = useForm<DemandeFormData>({
     resolver: zodResolver(demandeSchema),
+    mode: 'onBlur',
     defaultValues: {
       numeroDS: '',
       type: 'VICTIME',
@@ -139,8 +140,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
         numeroDS: demande.numeroDS,
         type: demande.type as 'VICTIME' | 'MIS_EN_CAUSE',
         nigend: demande.nigend || '',
-        grade: demande.grade || undefined,
-        statutDemandeur: demande.statutDemandeur || undefined,
+        grade: demande.grade || '',
+        statutDemandeur: demande.statutDemandeur || '',
         nom: demande.nom,
         prenom: demande.prenom,
         adresse1: demande.adresse1 || '',
@@ -362,7 +363,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           Grade <span className="text-red-500">*</span>
                         </label>
                         <select
-                          {...register('grade')}
+                          {...register('grade', { required: 'Grade requis' })}
                           className="input w-full"
                           disabled={isSubmitting}
                         >
@@ -400,7 +401,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           Statut du demandeur <span className="text-red-500">*</span>
                         </label>
                         <select
-                          {...register('statutDemandeur')}
+                          {...register('statutDemandeur', { required: 'Statut du demandeur requis' })}
                           className="input w-full"
                           disabled={isSubmitting}
                         >

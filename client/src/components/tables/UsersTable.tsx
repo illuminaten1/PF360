@@ -432,16 +432,17 @@ const UsersTable: React.FC<UsersTableProps> = ({
               <button
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
-                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                title="Première page"
               >
-                <ChevronLeftIcon className="h-4 w-4" />
-                <ChevronLeftIcon className="h-4 w-4 -ml-2" />
+                {'<<'}
               </button>
               
               <button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                title="Page précédente"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
@@ -454,6 +455,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                title="Page suivante"
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
@@ -461,10 +463,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
               <button
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
-                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                title="Dernière page"
               >
-                <ChevronRightIcon className="h-4 w-4" />
-                <ChevronRightIcon className="h-4 w-4 -ml-2" />
+                {'>>'}
               </button>
             </div>
           </div>

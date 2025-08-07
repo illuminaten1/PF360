@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -39,6 +39,74 @@ interface DemandesTableProps {
 
 const columnHelper = createColumnHelper<Demande>()
 
+// Fonctions utilitaires déplacées hors du composant
+const getTypeColor = (type: string) => {
+  return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+}
+
+const getTypeLabel = (type: string) => {
+  return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
+}
+
+const getAudienceUrgency = (dateAudience?: string) => {
+  if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
+  
+  const today = dayjs()
+  const audienceDate = dayjs(dateAudience)
+  const daysDiff = audienceDate.diff(today, 'day')
+  
+  if (daysDiff < 0) {
+    return { 
+      type: 'passed', 
+      style: 'bg-gray-100 text-gray-800', 
+      icon: XCircleIcon 
+    }
+  } else if (daysDiff < 7) {
+    return { 
+      type: 'urgent', 
+      style: 'bg-red-100 text-red-800', 
+      icon: ExclamationTriangleIcon 
+    }
+  } else if (daysDiff < 14) {
+    return { 
+      type: 'soon', 
+      style: 'bg-orange-100 text-orange-800', 
+      icon: ClockIcon 
+    }
+  } else {
+    return { 
+      type: 'normal', 
+      style: 'bg-green-100 text-green-800', 
+      icon: CheckCircleIcon 
+    }
+  }
+}
+
+// Composant de loading
+const LoadingTable = () => (
+  <div className="bg-white rounded-lg shadow">
+    <div className="animate-pulse">
+      <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
+      ))}
+    </div>
+  </div>
+)
+
+// Composant empty state
+const EmptyTable = () => (
+  <div className="bg-white rounded-lg shadow p-8 text-center">
+    <div className="text-gray-400 mb-4">
+      <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m5-9H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2z" />
+      </svg>
+    </div>
+    <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
+    <p className="text-gray-600">Commencez par créer votre première demande.</p>
+  </div>
+)
+
 const DemandesTable: React.FC<DemandesTableProps> = ({
   demandes,
   onView,
@@ -47,77 +115,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onAddToDossier,
   loading = false
 }) => {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const parentRef = React.useRef<HTMLDivElement>(null)
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow">
-        <div className="animate-pulse">
-          <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (demandes.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <div className="text-gray-400 mb-4">
-          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m5-9H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2z" />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
-        <p className="text-gray-600">Commencez par créer votre première demande.</p>
-      </div>
-    )
-  }
-
-  const getTypeColor = (type: string) => {
-    return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
-  }
-
-  const getTypeLabel = (type: string) => {
-    return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
-  }
-
-  const getAudienceUrgency = React.useCallback((dateAudience?: string) => {
-    if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
-    
-    const today = dayjs()
-    const audienceDate = dayjs(dateAudience)
-    const daysDiff = audienceDate.diff(today, 'day')
-    
-    if (daysDiff < 0) {
-      return { 
-        type: 'passed', 
-        style: 'bg-gray-100 text-gray-800', 
-        icon: XCircleIcon 
-      }
-    } else if (daysDiff < 7) {
-      return { 
-        type: 'urgent', 
-        style: 'bg-red-100 text-red-800', 
-        icon: ExclamationTriangleIcon 
-      }
-    } else if (daysDiff < 14) {
-      return { 
-        type: 'soon', 
-        style: 'bg-orange-100 text-orange-800', 
-        icon: ClockIcon 
-      }
-    } else {
-      return { 
-        type: 'normal', 
-        style: 'bg-green-100 text-green-800', 
-        icon: CheckCircleIcon 
-      }
-    }
-  }, [])
+  // Tous les hooks en premier, inconditionnellement
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const parentRef = useRef<HTMLDivElement>(null)
 
   const columns = useMemo(() => [
     columnHelper.accessor('numeroDS', {
@@ -306,7 +307,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false
     })
-  ], [onView, onEdit, onDelete, onAddToDossier, getAudienceUrgency])
+  ], [onView, onEdit, onDelete, onAddToDossier])
 
   const table = useReactTable({
     data: demandes,
@@ -330,6 +331,15 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     estimateSize: () => 70,
     overscan: 10
   })
+
+  // Rendu conditionnel APRÈS tous les hooks
+  if (loading) {
+    return <LoadingTable />
+  }
+
+  if (demandes.length === 0) {
+    return <EmptyTable />
+  }
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">

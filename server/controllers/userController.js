@@ -97,15 +97,19 @@ const getUsers = async (req, res) => {
 // Récupérer les statistiques des utilisateurs
 const getUsersStats = async (req, res) => {
   try {
-    const [totalUsers, adminUsers, activeUsers] = await Promise.all([
+    const [totalUsers, adminUsers, redactorUsers, clerkUsers, activeUsers] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: 'ADMIN' } }),
+      prisma.user.count({ where: { role: 'REDACTEUR' } }),
+      prisma.user.count({ where: { role: 'GREFFIER' } }),
       prisma.user.count({ where: { active: true } })
     ]);
 
     res.json({
       totalUsers,
       adminUsers,
+      redactorUsers,
+      clerkUsers,
       activeUsers
     });
   } catch (error) {

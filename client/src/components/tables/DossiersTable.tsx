@@ -99,19 +99,64 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         header: 'Demandeurs',
         accessorFn: (row) => {
           if (row.demandes.length === 0) return 'Aucun'
-          return row.demandes.slice(0, 2).map(d => `${d.grade ? `${d.grade} ` : ''}${d.prenom} ${d.nom}`).join(', ')
+          // Inclure TOUS les demandeurs pour la recherche
+          return row.demandes.map(d => `${d.grade ? `${d.grade} ` : ''}${d.prenom} ${d.nom}`).join(', ')
         },
         cell: ({ row }) => {
           const dossier = row.original
           if (dossier.demandes.length === 0) {
             return <span className="text-gray-400">Aucun demandeur</span>
           }
+
+          const [showAll, setShowAll] = React.useState(false)
+          
           return (
             <div className="text-sm">
               <div className="text-gray-900">
-                {dossier.demandes.slice(0, 2).map(d => `${d.grade ? `${d.grade} ` : ''}${d.prenom} ${d.nom}`).join(', ')}
-                {dossier.demandes.length > 2 && (
-                  <span className="text-gray-500"> +{dossier.demandes.length - 2} autre(s)</span>
+                {showAll ? (
+                  // Afficher tous les demandeurs
+                  <div className="space-y-1">
+                    {dossier.demandes.map((d, index) => (
+                      <div key={index}>
+                        {d.grade ? `${d.grade} ` : ''}{d.prenom} {d.nom}
+                      </div>
+                    ))}
+                    {dossier.demandes.length > 2 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowAll(false)
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-xs underline"
+                      >
+                        Réduire
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  // Afficher les 2 premiers + bouton
+                  <>
+                    {dossier.demandes.slice(0, 2).map((d, index) => (
+                      <span key={index}>
+                        {index > 0 && ', '}
+                        {d.grade ? `${d.grade} ` : ''}{d.prenom} {d.nom}
+                      </span>
+                    ))}
+                    {dossier.demandes.length > 2 && (
+                      <>
+                        <span className="text-gray-500"> +{dossier.demandes.length - 2} autre(s)</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowAll(true)
+                          }}
+                          className="ml-2 text-blue-600 hover:text-blue-800 text-xs underline"
+                        >
+                          Voir tous
+                        </button>
+                      </>
+                    )}
+                  </>
                 )}
               </div>
             </div>

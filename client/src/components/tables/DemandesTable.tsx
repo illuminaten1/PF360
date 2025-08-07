@@ -238,8 +238,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         filterFn: 'includesString'
       },
       {
-        accessorKey: 'dossier.numero',
+        id: 'dossier',
         header: 'Dossier',
+        accessorFn: (row) => row.dossier?.numero || 'Non lié',
         cell: ({ row }) => {
           const demande = row.original
           return demande.dossier ? (
@@ -258,7 +259,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             </button>
           )
         },
-        enableColumnFilter: false,
+        enableColumnFilter: true,
+        filterFn: 'includesString',
         enableSorting: false
       },
       {

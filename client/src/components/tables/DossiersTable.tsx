@@ -11,8 +11,7 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState,
-  type GlobalFilterState
+  type ColumnFiltersState
 } from '@tanstack/react-table'
 import { Dossier } from '@/types'
 import dayjs from 'dayjs'

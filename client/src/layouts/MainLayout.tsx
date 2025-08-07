@@ -13,7 +13,8 @@ import {
   UserCircleIcon,
   ClockIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  GlobeAltIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -50,10 +51,7 @@ const MainLayout: React.FC = () => {
           <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center">
               <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L12 6M12 18L12 22M22 12L18 12M6 12L2 12M19.07 4.93L16.24 7.76M7.76 16.24L4.93 19.07M19.07 19.07L16.24 16.24M7.76 7.76L4.93 4.93M12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10L14 12L12 14L10 12Z" fill="currentColor" />
-                </svg>
+                <GlobeAltIcon className="h-5 w-5 text-white" />
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">PF360</span>
             </div>
@@ -121,10 +119,7 @@ const MainLayout: React.FC = () => {
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
           <div className="flex items-center h-16 px-4 border-b border-gray-200">
             <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
-              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L12 6M12 18L12 22M22 12L18 12M6 12L2 12M19.07 4.93L16.24 7.76M7.76 16.24L4.93 19.07M19.07 19.07L16.24 16.24M7.76 7.76L4.93 4.93M12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10L14 12L12 14L10 12Z" fill="currentColor" />
-              </svg>
+              <GlobeAltIcon className="h-5 w-5 text-white" />
             </div>
             <span className="ml-2 text-xl font-bold text-gray-900">PF360</span>
           </div>

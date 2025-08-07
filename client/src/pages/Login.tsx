@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { LoginCredentials } from '@/types'
+import { GlobeAltIcon } from '@heroicons/react/24/outline'
 
 const loginSchema = z.object({
   identifiant: z.string().min(1, 'Identifiant requis'),
@@ -59,10 +60,7 @@ const Login: React.FC = () => {
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center">
             <div className="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center mb-4">
-              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L12 6M12 18L12 22M22 12L18 12M6 12L2 12M19.07 4.93L16.24 7.76M7.76 16.24L4.93 19.07M19.07 19.07L16.24 16.24M7.76 7.76L4.93 4.93M12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10L14 12L12 14L10 12Z" fill="currentColor" />
-              </svg>
+              <GlobeAltIcon className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">PF360</h2>
             <p className="text-gray-600 mb-8">Gestion des dossiers de protection fonctionnelle</p>

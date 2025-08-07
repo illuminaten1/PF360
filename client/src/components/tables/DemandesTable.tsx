@@ -4,6 +4,10 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
   flexRender,
   createColumnHelper,
   SortingState,
@@ -22,7 +26,11 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ChevronUpIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 
 dayjs.locale('fr')
@@ -81,6 +89,106 @@ const getAudienceUrgency = (dateAudience?: string) => {
   }
 }
 
+// Composant de filtre pour les colonnes
+function Filter({ column, table }: { column: any; table: any }) {
+  const firstValue = table
+    .getPreFilteredRowModel()
+    .flatRows[0]?.getValue(column.id)
+
+  const columnFilterValue = column.getFilterValue()
+
+  const sortedUniqueValues = React.useMemo(
+    () =>
+      typeof firstValue === 'number'
+        ? []
+        : Array.from(column.getFacetedUniqueValues().keys()).sort(),
+    [column.getFacetedUniqueValues()]
+  )
+
+  return typeof firstValue === 'number' ? (
+    <div>
+      <div className="flex space-x-2">
+        <DebouncedInput
+          type="number"
+          min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
+          max={Number(column.getFacetedMinMaxValues()?.[1] ?? '')}
+          value={(columnFilterValue as [number, number])?.[0] ?? ''}
+          onChange={(value) =>
+            column.setFilterValue((old: [number, number]) => [value, old?.[1]])
+          }
+          placeholder={`Min ${
+            column.getFacetedMinMaxValues()?.[0]
+              ? `(${column.getFacetedMinMaxValues()?.[0]})`
+              : ''
+          }`}
+          className="w-24 border shadow rounded"
+        />
+        <DebouncedInput
+          type="number"
+          min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
+          max={Number(column.getFacetedMinMaxValues()?.[1] ?? '')}
+          value={(columnFilterValue as [number, number])?.[1] ?? ''}
+          onChange={(value) =>
+            column.setFilterValue((old: [number, number]) => [old?.[0], value])
+          }
+          placeholder={`Max ${
+            column.getFacetedMinMaxValues()?.[1]
+              ? `(${column.getFacetedMinMaxValues()?.[1]})`
+              : ''
+          }`}
+          className="w-24 border shadow rounded"
+        />
+      </div>
+    </div>
+  ) : (
+    <>
+      <datalist id={column.id + 'list'}>
+        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
+          <option value={value} key={value} />
+        ))}
+      </datalist>
+      <DebouncedInput
+        type="text"
+        value={(columnFilterValue ?? '') as string}
+        onChange={(value) => column.setFilterValue(value)}
+        placeholder={`Rechercher... (${column.getFacetedUniqueValues().size})`}
+        className="w-36 border shadow rounded px-2 py-1 text-xs"
+        list={column.id + 'list'}
+      />
+    </>
+  )
+}
+
+// Composant input avec debounce
+function DebouncedInput({
+  value: initialValue,
+  onChange,
+  debounce = 500,
+  ...props
+}: {
+  value: string | number
+  onChange: (value: string | number) => void
+  debounce?: number
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
+  const [value, setValue] = React.useState(initialValue)
+
+  React.useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
+
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange(value)
+    }, debounce)
+
+    return () => clearTimeout(timeout)
+  }, [value])
+
+  return (
+    <input {...props} value={value} onChange={(e) => setValue(e.target.value)} />
+  )
+}
+
 const DemandesTable: React.FC<DemandesTableProps> = ({
   demandes,
   onView,
@@ -91,6 +199,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 }) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [showColumnFilters, setShowColumnFilters] = useState(false)
 
   const columns = useMemo(() => [
     columnHelper.accessor('numeroDS', {
@@ -109,7 +219,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         </div>
       ),
       enableSorting: true,
-      sortingFn: 'alphanumeric'
+      enableColumnFilter: true,
+      filterFn: 'includesString'
     }),
     columnHelper.accessor('dateReception', {
       header: 'Date réception',
@@ -119,7 +230,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         </div>
       ),
       enableSorting: true,
-      sortingFn: 'datetime'
+      enableColumnFilter: true,
+      filterFn: 'includesString'
     }),
     columnHelper.display({
       id: 'militaire',
@@ -136,7 +248,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           )}
         </div>
       ),
-      enableSorting: false
+      enableSorting: false,
+      enableColumnFilter: true,
+      filterFn: (row, _, filterValue) => {
+        if (!filterValue) return true
+        const fullName = `${row.original.grade || ''} ${row.original.prenom} ${row.original.nom} ${row.original.nigend || ''}`.toLowerCase()
+        return fullName.includes(filterValue.toLowerCase())
+      }
     }),
     columnHelper.accessor('unite', {
       header: 'Unité',
@@ -146,7 +264,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         </span>
       ),
       enableSorting: true,
-      sortingFn: 'alphanumeric'
+      enableColumnFilter: true,
+      filterFn: 'includesString'
     }),
     columnHelper.display({
       id: 'faits',
@@ -165,7 +284,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           )}
         </div>
       ),
-      enableSorting: false
+      enableSorting: false,
+      enableColumnFilter: true,
+      filterFn: (row, _, filterValue) => {
+        if (!filterValue) return true
+        const commune = row.original.commune?.toLowerCase() || ''
+        return commune.includes(filterValue.toLowerCase())
+      }
     }),
     columnHelper.display({
       id: 'dossier',
@@ -192,7 +317,15 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           </button>
         )
       ),
-      enableSorting: false
+      enableSorting: false,
+      enableColumnFilter: true,
+      filterFn: (row, _, filterValue) => {
+        if (!filterValue) return true
+        if (filterValue === 'non-lie') return !row.original.dossier
+        if (filterValue === 'lie') return !!row.original.dossier
+        const dossierInfo = `${row.original.dossier?.numero || ''} ${row.original.dossier?.sgami?.nom || ''}`.toLowerCase()
+        return dossierInfo.includes(filterValue.toLowerCase())
+      }
     }),
     columnHelper.display({
       id: 'assigneA',
@@ -210,7 +343,15 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           )}
         </div>
       ),
-      enableSorting: false
+      enableSorting: false,
+      enableColumnFilter: true,
+      filterFn: (row, _, filterValue) => {
+        if (!filterValue) return true
+        if (filterValue === 'non-assigne') return !row.original.assigneA
+        if (filterValue === 'assigne') return !!row.original.assigneA
+        const assigneInfo = `${row.original.assigneA?.grade || ''} ${row.original.assigneA?.prenom || ''} ${row.original.assigneA?.nom || ''}`.toLowerCase()
+        return assigneInfo.includes(filterValue.toLowerCase())
+      }
     }),
     columnHelper.accessor('dateAudience', {
       header: 'Date audience',
@@ -247,7 +388,22 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         )
       },
       enableSorting: true,
-      sortingFn: 'datetime'
+      enableColumnFilter: true,
+      filterFn: (row, _, filterValue) => {
+        if (!filterValue) return true
+        if (filterValue === 'urgent') {
+          if (!row.original.dateAudience) return false
+          const daysDiff = dayjs(row.original.dateAudience).diff(dayjs(), 'day')
+          return daysDiff >= 0 && daysDiff < 7
+        }
+        if (filterValue === 'proche') {
+          if (!row.original.dateAudience) return false
+          const daysDiff = dayjs(row.original.dateAudience).diff(dayjs(), 'day')
+          return daysDiff >= 7 && daysDiff < 14
+        }
+        if (filterValue === 'sans-date') return !row.original.dateAudience
+        return true
+      }
     }),
     columnHelper.display({
       id: 'actions',
@@ -277,7 +433,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           </button>
         </div>
       ),
-      enableSorting: false
+      enableSorting: false,
+      enableColumnFilter: false
     })
   ], [onView, onEdit, onDelete, onAddToDossier])
 
@@ -286,13 +443,25 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     columns,
     state: {
       sorting,
-      columnFilters
+      columnFilters,
+      globalFilter
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel()
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    globalFilterFn: 'includesString',
+    initialState: {
+      pagination: {
+        pageSize: 50
+      }
+    }
   })
 
   // Loading state
@@ -326,47 +495,97 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto max-h-[600px]">
+      {/* Barre d'outils de recherche et filtres */}
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          {/* Recherche globale */}
+          <div className="relative flex-1 max-w-sm">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <DebouncedInput
+              value={globalFilter ?? ''}
+              onChange={(value) => setGlobalFilter(String(value))}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Rechercher dans toutes les colonnes..."
+            />
+          </div>
+          
+          {/* Bouton pour afficher/masquer les filtres par colonne */}
+          <button
+            onClick={() => setShowColumnFilters(!showColumnFilters)}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <FunnelIcon className="h-4 w-4 mr-2" />
+            {showColumnFilters ? 'Masquer les filtres' : 'Filtres par colonne'}
+          </button>
+        </div>
+
+        {/* Filtres par colonne */}
+        {showColumnFilters && (
+          <div className="mt-4 border-t pt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {table.getAllColumns().map((column) => {
+                return column.getCanFilter() ? (
+                  <div key={column.id}>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      {typeof column.columnDef.header === 'string' 
+                        ? column.columnDef.header 
+                        : column.id}
+                    </label>
+                    <Filter column={column} table={table} />
+                  </div>
+                ) : null
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 sticky top-0 z-10">
+          <thead className="bg-gray-50">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
-                    onClick={header.column.getToggleSortingHandler()}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div className="flex items-center space-x-1">
-                      <span>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </span>
-                      {header.column.getCanSort() && (
-                        <div className="flex flex-col">
-                          <ChevronUpIcon 
-                            className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
-                          />
-                          <ChevronDownIcon 
-                            className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={`flex items-center space-x-1 ${
+                          header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-gray-100 rounded px-2 py-1 -mx-2 -my-1' : ''
+                        }`}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        <span>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </span>
+                        {header.column.getCanSort() && (
+                          <div className="flex flex-col">
+                            <ChevronUpIcon 
+                              className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
+                            />
+                            <ChevronDownIcon 
+                              className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {table.getRowModel().rows.map((row, index) => (
+            {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                className="hover:bg-gray-50"
               >
                 {row.getVisibleCells().map(cell => (
                   <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
@@ -379,13 +598,39 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         </table>
       </div>
       
-      {/* Info sur le nombre de lignes */}
-      <div className="bg-gray-50 px-6 py-3 border-t">
-        <div className="text-sm text-gray-700">
-          Affichage de <strong>{table.getRowModel().rows.length}</strong> demande(s)
-          {table.getState().columnFilters.length > 0 && (
-            <span> (filtrées)</span>
-          )}
+      {/* Pagination */}
+      <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+        <div className="flex-1 flex justify-between items-center">
+          <div className="text-sm text-gray-700">
+            Page{' '}
+            <strong>
+              {table.getState().pagination.pageIndex + 1} sur{' '}
+              {table.getPageCount()}
+            </strong>{' '}
+            — Affichage de{' '}
+            <strong>{table.getRowModel().rows.length}</strong> sur{' '}
+            <strong>{table.getFilteredRowModel().rows.length}</strong> demande(s)
+            {table.getState().columnFilters.length > 0 && (
+              <span className="text-blue-600"> (filtrées)</span>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            <button
+              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

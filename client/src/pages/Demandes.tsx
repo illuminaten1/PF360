@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { type PaginationState, type SortingState } from '@tanstack/react-table'
 import toast from 'react-hot-toast'
 import { PlusIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
@@ -28,6 +29,15 @@ const Demandes: React.FC = () => {
     dateFin: '',
     assigneAId: ''
   })
+  
+  // Table state
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20
+  })
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'dateReception', desc: true }
+  ])
 
   const queryClient = useQueryClient()
 
@@ -40,11 +50,24 @@ const Demandes: React.FC = () => {
     }
   })
 
-  // Fetch demandes with filters
+  // Fetch demandes with pagination, sorting and filters
   const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', searchTerm, filters],
+    queryKey: ['demandes', searchTerm, filters, pagination, sorting],
     queryFn: async () => {
       const params = new URLSearchParams()
+      
+      // Pagination
+      params.append('page', String(pagination.pageIndex + 1))
+      params.append('limit', String(pagination.pageSize))
+      
+      // Sorting
+      if (sorting.length > 0) {
+        const sort = sorting[0]
+        params.append('sortBy', sort.id)
+        params.append('sortOrder', sort.desc ? 'desc' : 'asc')
+      }
+      
+      // Filters
       if (searchTerm) params.append('search', searchTerm)
       if (filters.type) params.append('type', filters.type)
       if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
@@ -66,6 +89,7 @@ const Demandes: React.FC = () => {
   })
 
   const demandes = demandesData?.demandes || []
+  const totalCount = demandesData?.total || 0
 
   // Create demande mutation
   const createDemandeMutation = useMutation({
@@ -158,6 +182,18 @@ const Demandes: React.FC = () => {
       ...prev,
       [filterName]: value
     }))
+    // Reset to first page when filters change
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
+  }
+
+  const handlePaginationChange = (updater: PaginationState | ((old: PaginationState) => PaginationState)) => {
+    setPagination(updater)
+  }
+
+  const handleSortingChange = (updater: SortingState | ((old: SortingState) => SortingState)) => {
+    setSorting(updater)
+    // Reset to first page when sorting changes
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   return (
@@ -235,7 +271,10 @@ const Demandes: React.FC = () => {
                 type="text"
                 placeholder="Rechercher par numéro DS, nom, NIGEND, commune..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setPagination(prev => ({ ...prev, pageIndex: 0 }))
+                }}
                 className="input w-full pl-10"
               />
             </div>
@@ -323,6 +362,7 @@ const Demandes: React.FC = () => {
                       dateFin: '',
                       assigneAId: ''
                     })
+                    setPagination(prev => ({ ...prev, pageIndex: 0 }))
                   }}
                   className="btn-secondary h-10 text-sm whitespace-nowrap"
                 >
@@ -335,12 +375,17 @@ const Demandes: React.FC = () => {
       </div>
 
       <DemandesTable
-        demandes={demandes}
+        data={demandes}
+        totalCount={totalCount}
+        loading={isLoading}
+        pagination={pagination}
+        sorting={sorting}
+        onPaginationChange={handlePaginationChange}
+        onSortingChange={handleSortingChange}
         onView={handleViewDemande}
         onEdit={handleEditDemande}
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
-        loading={isLoading}
       />
 
       <DemandeModal

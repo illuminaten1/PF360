@@ -135,52 +135,74 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
   })
 
   useEffect(() => {
-    if (demande) {
-      reset({
-        numeroDS: demande.numeroDS,
-        type: demande.type as 'VICTIME' | 'MIS_EN_CAUSE',
-        nigend: demande.nigend || '',
-        grade: demande.grade || '',
-        statutDemandeur: demande.statutDemandeur || '',
-        nom: demande.nom,
-        prenom: demande.prenom,
-        adresse1: demande.adresse1 || '',
-        adresse2: demande.adresse2 || '',
-        telephone1: demande.telephone1 || '',
-        telephone2: demande.telephone2 || '',
-        unite: demande.unite || '',
-        dateFaits: demande.dateFaits ? new Date(demande.dateFaits).toISOString().split('T')[0] : '',
-        commune: demande.commune || '',
-        codePostal: demande.codePostal || '',
-        position: demande.position || '',
-        resume: demande.resume || '',
-        blessures: demande.blessures || '',
-        partieCivile: demande.partieCivile,
-        montantPartieCivile: demande.montantPartieCivile || undefined,
-        qualificationsPenales: demande.qualificationsPenales || '',
-        dateAudience: demande.dateAudience ? new Date(demande.dateAudience).toISOString().split('T')[0] : '',
-        soutienPsychologique: demande.soutienPsychologique,
-        soutienSocial: demande.soutienSocial,
-        soutienMedical: demande.soutienMedical,
-        dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : '',
-        dossierId: demande.dossier?.id || '',
-        assigneAId: demande.assigneA?.id || ''
-      })
-    } else {
-      reset({
-        numeroDS: '',
-        type: 'VICTIME',
-        nom: '',
-        prenom: '',
-        partieCivile: false,
-        soutienPsychologique: false,
-        soutienSocial: false,
-        soutienMedical: false,
-        dateReception: new Date().toISOString().split('T')[0] // Date actuelle par défaut
-        // Pas de dossierId pour les nouvelles demandes
-      })
+    if (isOpen) {
+      if (demande) {
+        // Mode édition : remplir avec les données existantes
+        reset({
+          numeroDS: demande.numeroDS,
+          type: demande.type as 'VICTIME' | 'MIS_EN_CAUSE',
+          nigend: demande.nigend || '',
+          grade: demande.grade || '',
+          statutDemandeur: demande.statutDemandeur || '',
+          nom: demande.nom,
+          prenom: demande.prenom,
+          adresse1: demande.adresse1 || '',
+          adresse2: demande.adresse2 || '',
+          telephone1: demande.telephone1 || '',
+          telephone2: demande.telephone2 || '',
+          unite: demande.unite || '',
+          dateFaits: demande.dateFaits ? new Date(demande.dateFaits).toISOString().split('T')[0] : '',
+          commune: demande.commune || '',
+          codePostal: demande.codePostal || '',
+          position: demande.position || '',
+          resume: demande.resume || '',
+          blessures: demande.blessures || '',
+          partieCivile: demande.partieCivile,
+          montantPartieCivile: demande.montantPartieCivile || undefined,
+          qualificationsPenales: demande.qualificationsPenales || '',
+          dateAudience: demande.dateAudience ? new Date(demande.dateAudience).toISOString().split('T')[0] : '',
+          soutienPsychologique: demande.soutienPsychologique,
+          soutienSocial: demande.soutienSocial,
+          soutienMedical: demande.soutienMedical,
+          dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : '',
+          dossierId: demande.dossier?.id || '',
+          assigneAId: demande.assigneA?.id || ''
+        })
+      } else {
+        // Mode création : réinitialiser complètement le formulaire
+        reset({
+          numeroDS: '',
+          type: 'VICTIME',
+          nigend: '',
+          grade: '',
+          statutDemandeur: '',
+          nom: '',
+          prenom: '',
+          adresse1: '',
+          adresse2: '',
+          telephone1: '',
+          telephone2: '',
+          unite: '',
+          dateFaits: '',
+          commune: '',
+          codePostal: '',
+          position: '',
+          resume: '',
+          blessures: '',
+          partieCivile: false,
+          montantPartieCivile: undefined,
+          qualificationsPenales: '',
+          dateAudience: '',
+          soutienPsychologique: false,
+          soutienSocial: false,
+          soutienMedical: false,
+          dateReception: new Date().toISOString().split('T')[0], // Date actuelle par défaut
+          dossierId: '',
+          assigneAId: ''
+        })
+      }
     }
-  }, [demande, reset])
+  }, [isOpen, demande, reset])
 
   const handleFormSubmit = async (data: DemandeFormData) => {
     try {
@@ -190,12 +212,6 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       }
       
       await onSubmit(data)
-      
-      // Réinitialiser le formulaire après une création réussie
-      if (!demande) {
-        reset()
-      }
-      
       onClose()
     } catch (error) {
       // L'erreur sera gérée par la mutation dans le parent

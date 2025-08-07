@@ -60,6 +60,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+  const [columnVisibility, setColumnVisibility] = React.useState({
+    mail: false,
+    telephone: false
+  })
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-'
@@ -166,7 +170,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
           </span>
         ),
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        filterFn: 'includesString',
+        enableHiding: true
       },
       {
         accessorKey: 'telephone',
@@ -177,7 +182,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
           </span>
         ),
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        filterFn: 'includesString',
+        enableHiding: true
       },
       {
         accessorKey: 'role',
@@ -263,11 +269,13 @@ const UsersTable: React.FC<UsersTableProps> = ({
     state: {
       sorting,
       columnFilters,
-      globalFilter
+      globalFilter,
+      columnVisibility
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon, UserIcon, MapPinIcon, CalendarIcon, DocumentTextIcon, HeartIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, UserIcon, MapPinIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
@@ -117,9 +117,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           {demande.grade && (
                             <div>
                               <span className="block text-sm font-medium text-gray-600 mb-1">Grade</span>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {demande.grade}
-                              </span>
+                              <p className="text-gray-900 font-medium">{demande.grade}</p>
                             </div>
                           )}
                           
@@ -333,7 +331,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                     <div className="mt-8 bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl border border-green-200">
                       <div className="flex items-center mb-4">
                         <div className="bg-green-100 p-2 rounded-lg mr-3">
-                          <HeartIcon className="h-5 w-5 text-green-600" />
+                          <ShieldCheckIcon className="h-5 w-5 text-green-600" />
                         </div>
                         <h4 className="text-lg font-semibold text-gray-900">Soutiens demandés</h4>
                       </div>

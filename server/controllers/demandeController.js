@@ -64,7 +64,7 @@ const demandeSchema = z.object({
 
 const getAllDemandes = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, dateDebut, dateFin, assigneAId } = req.query;
+    const { page = 1, limit = 20, search, type, dateDebut, dateFin, assigneAId, sortBy, sortOrder } = req.query;
     const skip = (page - 1) * limit;
 
     const where = {};
@@ -99,6 +99,27 @@ const getAllDemandes = async (req, res) => {
         where.assigneAId = null;
       } else if (assigneAId) {
         where.assigneAId = assigneAId;
+      }
+    }
+
+    // Build orderBy clause
+    let orderBy = { dateReception: 'desc' }; // Default sort
+    
+    if (sortBy) {
+      const validSortFields = {
+        'numeroDS': 'numeroDS',
+        'dateReception': 'dateReception',
+        'dateAudience': 'dateAudience',
+        'dateFaits': 'dateFaits',
+        'nom': 'nom',
+        'prenom': 'prenom',
+        'unite': 'unite',
+        'commune': 'commune'
+      };
+      
+      if (validSortFields[sortBy]) {
+        const direction = sortOrder === 'asc' ? 'asc' : 'desc';
+        orderBy = { [validSortFields[sortBy]]: direction };
       }
     }
 
@@ -150,7 +171,7 @@ const getAllDemandes = async (req, res) => {
             }
           }
         },
-        orderBy: { dateReception: 'desc' },
+        orderBy,
         skip: parseInt(skip),
         take: parseInt(limit)
       }),
@@ -161,6 +182,7 @@ const getAllDemandes = async (req, res) => {
 
     res.json({
       demandes,
+      total,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

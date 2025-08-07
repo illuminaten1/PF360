@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { PlusIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
 import DossiersTable from '@/components/tables/DossiersTable'
@@ -10,14 +10,12 @@ import DossierModal from '@/components/forms/DossierModal'
 const Dossiers: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDossier, setSelectedDossier] = useState<Dossier | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
 
   const queryClient = useQueryClient()
 
-  // Fetch dossiers
+  // Fetch all dossiers (client-side filtering with TanStack)
   const { data: dossiers = [], isLoading } = useQuery<Dossier[]>({
-    queryKey: ['dossiers'],
+    queryKey: ['dossiers-all'],
     queryFn: async () => {
       const response = await api.get('/dossiers')
       return response.data
@@ -31,7 +29,7 @@ const Dossiers: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
       toast.success('Dossier créé avec succès')
     },
     onError: (error: any) => {
@@ -46,7 +44,7 @@ const Dossiers: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
       toast.success('Dossier modifié avec succès')
     },
     onError: (error: any) => {
@@ -60,7 +58,7 @@ const Dossiers: React.FC = () => {
       await api.delete(`/dossiers/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
       toast.success('Dossier supprimé avec succès')
     },
     onError: (error: any) => {
@@ -97,28 +95,10 @@ const Dossiers: React.FC = () => {
     }
   }
 
-  // Filter dossiers based on search term
-  const filteredDossiers = dossiers.filter(dossier => {
-    if (!searchTerm) return true
-    
-    const searchLower = searchTerm.toLowerCase()
-    return (
-      dossier.numero.toLowerCase().includes(searchLower) ||
-      dossier.sgami?.nom.toLowerCase().includes(searchLower) ||
-      dossier.assigneA?.nom.toLowerCase().includes(searchLower) ||
-      dossier.assigneA?.prenom.toLowerCase().includes(searchLower) ||
-      dossier.demandes.some(d => 
-        d.nom.toLowerCase().includes(searchLower) ||
-        d.prenom.toLowerCase().includes(searchLower) ||
-        d.numeroDS.toLowerCase().includes(searchLower)
-      )
-    )
-  })
-
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dossiers</h1>
             <p className="mt-1 text-sm text-gray-600">
@@ -133,58 +113,6 @@ const Dossiers: React.FC = () => {
             Nouveau dossier
           </button>
         </div>
-
-        {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par numéro, SGAMI, assigné ou demandeur..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input w-full pl-10"
-              />
-            </div>
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn-secondary flex items-center"
-          >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            Filtres
-          </button>
-        </div>
-
-        {/* Advanced filters */}
-        {showFilters && (
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="label block text-gray-700 mb-2">SGAMI</label>
-                <select className="input w-full">
-                  <option value="">Tous les SGAMI</option>
-                </select>
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Assigné à</label>
-                <select className="input w-full">
-                  <option value="">Tous les utilisateurs</option>
-                </select>
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Statut</label>
-                <select className="input w-full">
-                  <option value="">Tous les statuts</option>
-                  <option value="en_attente">En attente</option>
-                  <option value="en_cours">En cours</option>
-                  <option value="termine">Terminé</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -214,7 +142,7 @@ const Dossiers: React.FC = () => {
       </div>
 
       <DossiersTable
-        dossiers={filteredDossiers}
+        data={dossiers}
         onView={handleViewDossier}
         onEdit={handleEditDossier}
         onDelete={handleDeleteDossier}

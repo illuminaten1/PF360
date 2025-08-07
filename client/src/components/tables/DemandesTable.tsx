@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,9 +9,10 @@ import {
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
   flexRender,
-  createColumnHelper,
-  SortingState,
-  ColumnFiltersState
+  type ColumnDef,
+  type SortingState,
+  type ColumnFiltersState,
+  type GlobalFilterState
 } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
@@ -27,367 +28,368 @@ import {
   XCircleIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-  MagnifyingGlassIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import DebouncedInput from '@/components/common/DebouncedInput'
-import SearchBar from '@/components/tables/SearchBar'
 
 dayjs.locale('fr')
 
 interface DemandesTableProps {
-  demandes: Demande[]
+  data: Demande[]
+  loading?: boolean
   onView: (demande: Demande) => void
   onEdit: (demande: Demande) => void
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
-  loading?: boolean
-  // Server-side props (TanStack officiel)
-  globalFilter: string
-  onGlobalFilterChange: (value: string) => void
-  pagination: {
-    pageIndex: number
-    pageSize: number
-  }
-  onPaginationChange: (updater: any) => void
-  totalRows: number
-  pageCount: number
-  filters: {
-    type: string
-    dateDebut: string
-    dateFin: string
-    assigneAId: string
-  }
-  onFilterChange: (filterName: string, value: string) => void
 }
 
-const columnHelper = createColumnHelper<Demande>()
+function Filter({ column }: { column: any }) {
+  const columnFilterValue = column.getFilterValue()
 
-// Fonctions utilitaires
-const getTypeColor = (type: string) => {
-  return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+  return (
+    <input
+      type="text"
+      value={(columnFilterValue ?? '') as string}
+      onChange={(e) => column.setFilterValue(e.target.value)}
+      placeholder={`Filtrer...`}
+      className="w-32 border shadow rounded px-2 py-1 text-xs"
+    />
+  )
 }
-
-const getTypeLabel = (type: string) => {
-  return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
-}
-
-const getAudienceUrgency = (dateAudience?: string) => {
-  if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
-  
-  const today = dayjs()
-  const audienceDate = dayjs(dateAudience)
-  const daysDiff = audienceDate.diff(today, 'day')
-  
-  if (daysDiff < 0) {
-    return { 
-      type: 'passed', 
-      style: 'bg-gray-100 text-gray-800', 
-      icon: XCircleIcon 
-    }
-  } else if (daysDiff < 7) {
-    return { 
-      type: 'urgent', 
-      style: 'bg-red-100 text-red-800', 
-      icon: ExclamationTriangleIcon 
-    }
-  } else if (daysDiff < 14) {
-    return { 
-      type: 'soon', 
-      style: 'bg-orange-100 text-orange-800', 
-      icon: ClockIcon 
-    }
-  } else {
-    return { 
-      type: 'normal', 
-      style: 'bg-green-100 text-green-800', 
-      icon: CheckCircleIcon 
-    }
-  }
-}
-
 
 const DemandesTable: React.FC<DemandesTableProps> = ({
-  demandes,
+  data,
+  loading = false,
   onView,
   onEdit,
   onDelete,
-  onAddToDossier,
-  loading = false,
-  globalFilter,
-  onGlobalFilterChange,
-  pagination,
-  onPaginationChange,
-  totalRows,
-  pageCount,
-  filters,
-  onFilterChange
+  onAddToDossier
 }) => {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'dateReception', desc: true }
+  ])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = React.useState('')
 
-  const columns = useMemo(() => [
-    columnHelper.accessor('numeroDS', {
-      header: 'Numéro DS',
-      cell: ({ row }) => (
-        <div>
+  const getTypeColor = (type: string) => {
+    return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+  }
+
+  const getTypeLabel = (type: string) => {
+    return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
+  }
+
+  const getAudienceUrgency = (dateAudience?: string) => {
+    if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
+    
+    const today = dayjs()
+    const audienceDate = dayjs(dateAudience)
+    const daysDiff = audienceDate.diff(today, 'day')
+    
+    if (daysDiff < 0) {
+      return { 
+        type: 'passed', 
+        style: 'bg-gray-100 text-gray-800', 
+        icon: XCircleIcon 
+      }
+    } else if (daysDiff < 7) {
+      return { 
+        type: 'urgent', 
+        style: 'bg-red-100 text-red-800', 
+        icon: ExclamationTriangleIcon 
+      }
+    } else if (daysDiff < 14) {
+      return { 
+        type: 'soon', 
+        style: 'bg-orange-100 text-orange-800', 
+        icon: ClockIcon 
+      }
+    } else {
+      return { 
+        type: 'normal', 
+        style: 'bg-green-100 text-green-800', 
+        icon: CheckCircleIcon 
+      }
+    }
+  }
+
+  const columns = useMemo<ColumnDef<Demande>[]>(
+    () => [
+      {
+        accessorKey: 'numeroDS',
+        header: 'Numéro DS',
+        cell: ({ getValue, row }) => (
           <div 
             className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
             onClick={() => onView(row.original)}
           >
-            {row.original.numeroDS}
+            {getValue<string>()}
           </div>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getTypeColor(row.original.type)}`}>
-            {getTypeLabel(row.original.type)}
-          </span>
-        </div>
-      ),
-      enableSorting: true,
-      enableColumnFilter: true,
-      filterFn: 'includesString'
-    }),
-    columnHelper.accessor('dateReception', {
-      header: 'Date réception',
-      cell: ({ getValue }) => (
-        <div className="text-sm text-gray-900">
-          {dayjs(getValue()).format('DD/MM/YYYY')}
-        </div>
-      ),
-      enableSorting: true,
-      enableColumnFilter: true,
-      filterFn: 'includesString'
-    }),
-    columnHelper.accessor('prenom', {
-      id: 'militaire',
-      header: 'Militaire',
-      cell: ({ row }) => (
-        <div className="text-sm">
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'type',
+        header: 'Type',
+        cell: ({ getValue }) => {
+          const type = getValue<string>()
+          return (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(type)}`}>
+              {getTypeLabel(type)}
+            </span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'equals'
+      },
+      {
+        accessorKey: 'dateReception',
+        header: 'Date réception',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {dayjs(getValue<string>()).format('DD/MM/YYYY')}
+          </div>
+        ),
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
+      },
+      {
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ getValue }) => (
           <div className="font-medium text-gray-900">
-            {row.original.grade ? `${row.original.grade} ` : ''}{row.original.prenom} {row.original.nom}
+            {getValue<string>()}
           </div>
-          {row.original.nigend && (
-            <div className="text-gray-500 text-xs">
-              NIGEND: {row.original.nigend}
-            </div>
-          )}
-        </div>
-      ),
-      enableSorting: false,
-      enableColumnFilter: true,
-      filterFn: (row, _, filterValue) => {
-        if (!filterValue) return true
-        const fullName = `${row.original.grade || ''} ${row.original.prenom} ${row.original.nom} ${row.original.nigend || ''}`.toLowerCase()
-        return fullName.includes(filterValue.toLowerCase())
-      }
-    }),
-    columnHelper.accessor('unite', {
-      header: 'Unité',
-      cell: ({ getValue }) => (
-        <span className="text-sm text-gray-900">
-          {getValue() || '-'}
-        </span>
-      ),
-      enableSorting: true,
-      enableColumnFilter: true,
-      filterFn: 'includesString'
-    }),
-    columnHelper.accessor('commune', {
-      id: 'faits',
-      header: 'Faits',
-      cell: ({ row }) => (
-        <div className="text-sm">
-          {row.original.dateFaits && (
-            <div className="text-gray-900">
-              {dayjs(row.original.dateFaits).format('DD/MM/YYYY')}
-            </div>
-          )}
-          {row.original.commune && (
-            <div className="text-gray-500 text-xs">
-              {row.original.commune}
-            </div>
-          )}
-        </div>
-      ),
-      enableSorting: false,
-      enableColumnFilter: true,
-      filterFn: (row, _, filterValue) => {
-        if (!filterValue) return true
-        const commune = row.original.commune?.toLowerCase() || ''
-        return commune.includes(filterValue.toLowerCase())
-      }
-    }),
-    columnHelper.accessor('resume', {
-      id: 'dossier',
-      header: 'Dossier',
-      cell: ({ row }) => (
-        row.original.dossier ? (
-          <div className="text-sm">
-            <div className="font-medium text-blue-600">
-              {row.original.dossier.numero}
-            </div>
-            {row.original.dossier.sgami && (
-              <div className="text-gray-500 text-xs">
-                {row.original.dossier.sgami.nom}
-              </div>
-            )}
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'prenom',
+        header: 'Prénom',
+        cell: ({ getValue }) => (
+          <div className="text-gray-900">
+            {getValue<string>()}
           </div>
-        ) : (
-          <button
-            onClick={() => onAddToDossier(row.original)}
-            className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-          >
-            <FolderIcon className="h-4 w-4 mr-1" />
-            Lier au dossier
-          </button>
-        )
-      ),
-      enableSorting: false,
-      enableColumnFilter: true,
-      filterFn: (row, _, filterValue) => {
-        if (!filterValue) return true
-        if (filterValue === 'non-lie') return !row.original.dossier
-        if (filterValue === 'lie') return !!row.original.dossier
-        const dossierInfo = `${row.original.dossier?.numero || ''} ${row.original.dossier?.sgami?.nom || ''}`.toLowerCase()
-        return dossierInfo.includes(filterValue.toLowerCase())
-      }
-    }),
-    columnHelper.accessor('blessures', {
-      id: 'assigneA',
-      header: 'Assigné à',
-      cell: ({ row }) => (
-        <div className="text-sm">
-          {row.original.assigneA ? (
-            <div className="text-gray-900">
-              <div className="font-medium">
-                {row.original.assigneA.grade && `${row.original.assigneA.grade} `}{row.original.assigneA.prenom} {row.original.assigneA.nom}
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'grade',
+        header: 'Grade',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'equals'
+      },
+      {
+        accessorKey: 'nigend',
+        header: 'NIGEND',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-500">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'unite',
+        header: 'Unité',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </span>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'dateFaits',
+        header: 'Date faits',
+        cell: ({ getValue }) => {
+          const date = getValue<string>()
+          return date ? (
+            <div className="text-sm text-gray-900">
+              {dayjs(date).format('DD/MM/YYYY')}
+            </div>
+          ) : (
+            <span className="text-gray-400">-</span>
+          )
+        },
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
+      },
+      {
+        accessorKey: 'commune',
+        header: 'Commune',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        id: 'dossier',
+        header: 'Dossier',
+        accessorFn: (row) => row.dossier?.numero || 'Non lié',
+        cell: ({ row }) => {
+          const demande = row.original
+          return demande.dossier ? (
+            <div className="text-sm">
+              <div className="font-medium text-blue-600">
+                {demande.dossier.numero}
               </div>
             </div>
           ) : (
-            <span className="text-gray-500 italic">Non assigné</span>
-          )}
-        </div>
-      ),
-      enableSorting: false,
-      enableColumnFilter: true,
-      filterFn: (row, _, filterValue) => {
-        if (!filterValue) return true
-        if (filterValue === 'non-assigne') return !row.original.assigneA
-        if (filterValue === 'assigne') return !!row.original.assigneA
-        const assigneInfo = `${row.original.assigneA?.grade || ''} ${row.original.assigneA?.prenom || ''} ${row.original.assigneA?.nom || ''}`.toLowerCase()
-        return assigneInfo.includes(filterValue.toLowerCase())
-      }
-    }),
-    columnHelper.accessor('dateAudience', {
-      header: 'Date audience',
-      cell: ({ getValue }) => {
-        const dateAudience = getValue()
-        if (!dateAudience) {
-          return (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-              -
-            </span>
+            <button
+              onClick={() => onAddToDossier(demande)}
+              className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+            >
+              <FolderIcon className="h-4 w-4 mr-1" />
+              Lier
+            </button>
           )
-        }
-        
-        const urgency = getAudienceUrgency(dateAudience)
-        const IconComponent = urgency.icon
-        const today = dayjs().startOf('day')
-        const audienceDate = dayjs(dateAudience).startOf('day')
-        const daysDiff = audienceDate.diff(today, 'day')
-        
-        return (
-          <div className="flex items-center">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
-              {IconComponent && (
-                <IconComponent className="h-3 w-3 mr-1" />
-              )}
-              {dayjs(dateAudience).format('DD/MM/YYYY')}
-              {daysDiff >= 0 && (
-                <span className="ml-1">
-                  - {daysDiff} j.
-                </span>
-              )}
-            </span>
-          </div>
-        )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+        enableSorting: false
       },
-      enableSorting: true,
-      enableColumnFilter: true,
-      filterFn: (row, _, filterValue) => {
-        if (!filterValue) return true
-        if (filterValue === 'urgent') {
-          if (!row.original.dateAudience) return false
-          const daysDiff = dayjs(row.original.dateAudience).diff(dayjs(), 'day')
-          return daysDiff >= 0 && daysDiff < 7
-        }
-        if (filterValue === 'proche') {
-          if (!row.original.dateAudience) return false
-          const daysDiff = dayjs(row.original.dateAudience).diff(dayjs(), 'day')
-          return daysDiff >= 7 && daysDiff < 14
-        }
-        if (filterValue === 'sans-date') return !row.original.dateAudience
-        return true
+      {
+        id: 'assigneA',
+        header: 'Assigné à',
+        accessorFn: (row) => row.assigneA ? `${row.assigneA.grade || ''} ${row.assigneA.prenom} ${row.assigneA.nom}`.trim() : 'Non assigné',
+        cell: ({ row }) => {
+          const assigneA = row.original.assigneA
+          return (
+            <div className="text-sm">
+              {assigneA ? (
+                <div className="text-gray-900">
+                  <div className="font-medium">
+                    {assigneA.grade && `${assigneA.grade} `}{assigneA.prenom} {assigneA.nom}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-gray-500 italic">Non assigné</span>
+              )}
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'dateAudience',
+        header: 'Date audience',
+        cell: ({ getValue }) => {
+          const dateAudience = getValue<string>()
+          if (!dateAudience) {
+            return (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                -
+              </span>
+            )
+          }
+
+          const urgency = getAudienceUrgency(dateAudience)
+          const IconComponent = urgency.icon
+          const today = dayjs().startOf('day')
+          const audienceDate = dayjs(dateAudience).startOf('day')
+          const daysDiff = audienceDate.diff(today, 'day')
+          
+          return (
+            <div className="flex items-center">
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
+                {IconComponent && (
+                  <IconComponent className="h-3 w-3 mr-1" />
+                )}
+                {dayjs(dateAudience).format('DD/MM/YYYY')}
+                {daysDiff >= 0 && (
+                  <span className="ml-1">
+                    - {daysDiff} j.
+                  </span>
+                )}
+              </span>
+            </div>
+          )
+        },
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onView(row.original)}
+              className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
+              title="Voir"
+            >
+              <EyeIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => onEdit(row.original)}
+              className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
+              title="Modifier"
+            >
+              <PencilIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => onDelete(row.original)}
+              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
+              title="Supprimer"
+            >
+              <TrashIcon className="h-5 w-5" />
+            </button>
+          </div>
+        ),
+        enableColumnFilter: false,
+        enableSorting: false
       }
-    }),
-    columnHelper.display({
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => onView(row.original)}
-            className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
-            title="Voir"
-          >
-            <EyeIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onEdit(row.original)}
-            className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
-            title="Modifier"
-          >
-            <PencilIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onDelete(row.original)}
-            className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
-            title="Supprimer"
-          >
-            <TrashIcon className="h-5 w-5" />
-          </button>
-        </div>
-      ),
-      enableSorting: false,
-      enableColumnFilter: false
-    })
-  ], [onView, onEdit, onDelete, onAddToDossier])
+    ],
+    [onView, onEdit, onDelete, onAddToDossier]
+  )
 
   const table = useReactTable({
-    data: demandes,
+    data,
     columns,
     state: {
       sorting,
-      pagination
+      columnFilters,
+      globalFilter
     },
     onSortingChange: setSorting,
-    onPaginationChange: onPaginationChange,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
-    // Server-side configuration (TanStack officiel)
-    manualPagination: true,
-    manualFiltering: true, 
-    manualSorting: true,
-    pageCount: pageCount,
-    rowCount: totalRows
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    initialState: {
+      pagination: {
+        pageSize: 50
+      }
+    }
   })
 
-  // Loading state
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow">
         <div className="animate-pulse">
           <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
-          {[...Array(5)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
           ))}
         </div>
@@ -395,57 +397,23 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     )
   }
 
-  // Empty state - différencier "pas de données" vs "recherche sans résultat"
-  if (demandes.length === 0 && !loading) {
-    const isSearching = globalFilter || Object.values(filters).some(f => f)
-    
-    if (isSearching) {
-      // Recherche sans résultats - on garde la même SearchBar
-      return (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <SearchBar
-            globalFilter={globalFilter}
-            onGlobalFilterChange={onGlobalFilterChange}
-            totalRows={totalRows}
-            pageCount={pageCount}
-            pagination={pagination}
-          />
-
-          {/* Message pas de résultats */}
-          <div className="p-8 text-center">
-            <div className="text-gray-400 mb-4">
-              <MagnifyingGlassIcon className="mx-auto h-12 w-12" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun résultat</h3>
-            <p className="text-gray-600">Essayez d'autres mots-clés ou effacez la recherche.</p>
-          </div>
-        </div>
-      )
-    } else {
-      // Vraiment pas de données
-      return (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <div className="text-gray-400 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m5-9H7a2 2 0 00-2 2v10a2 2 0 002-2V6a2 2 0 00-2-2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
-          <p className="text-gray-600">Commencez par créer votre première demande.</p>
-        </div>
-      )
-    }
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <SearchBar
-        globalFilter={globalFilter}
-        onGlobalFilterChange={onGlobalFilterChange}
-        totalRows={totalRows}
-        pageCount={pageCount}
-        pagination={pagination}
-      />
+    <div className="bg-white rounded-lg shadow">
+      {/* Global Search */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          <input
+            value={globalFilter ?? ''}
+            onChange={(e) => setGlobalFilter(String(e.target.value))}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Recherche globale dans toutes les colonnes..."
+          />
+          <span className="text-sm text-gray-500">
+            {table.getFilteredRowModel().rows.length} résultat(s)
+          </span>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -458,44 +426,56 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                     key={header.id}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={`flex items-center space-x-1 ${
-                          header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-gray-100 rounded px-2 py-1 -mx-2 -my-1' : ''
-                        }`}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <span>
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </span>
-                        {header.column.getCanSort() && (
-                          <div className="flex flex-col">
-                            <ChevronUpIcon 
-                              className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
-                            />
-                            <ChevronDownIcon 
-                              className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
-                            />
-                          </div>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        {header.isPlaceholder ? null : (
+                          <>
+                            <div
+                              className={`cursor-pointer select-none flex items-center ${
+                                header.column.getCanSort() ? 'hover:text-gray-700' : ''
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                              {header.column.getCanSort() && (
+                                <span className="ml-1">
+                                  {header.column.getIsSorted() === 'asc' ? (
+                                    <ChevronUpIcon className="h-4 w-4" />
+                                  ) : header.column.getIsSorted() === 'desc' ? (
+                                    <ChevronDownIcon className="h-4 w-4" />
+                                  ) : (
+                                    <div className="h-4 w-4 opacity-0 group-hover:opacity-100">
+                                      <ChevronUpIcon className="h-4 w-4" />
+                                    </div>
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                          </>
                         )}
                       </div>
-                    )}
+                      {header.column.getCanFilter() && (
+                        <div>
+                          <Filter column={header.column} />
+                        </div>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className="hover:bg-gray-50"
-              >
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-50">
                 {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4 whitespace-nowrap"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -504,42 +484,73 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           </tbody>
         </table>
       </div>
-      
-      {/* Server-side Pagination */}
-      <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
-        <div className="flex-1 flex justify-between items-center">
-          <div className="text-sm text-gray-700">
-            Page{' '}
-            <strong>
-              {pagination.pageIndex + 1} sur{' '}
-              {pageCount}
-            </strong>{' '}
-            — Affichage de{' '}
-            <strong>{demandes.length}</strong> sur{' '}
-            <strong>{totalRows.toLocaleString()}</strong> demande(s)
-            {(globalFilter || Object.values(filters).some(f => f)) && (
-              <span className="text-blue-600"> (filtrées)</span>
-            )}
+
+      {/* Pagination */}
+      <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-700">
+            <span>
+              Page {table.getState().pagination.pageIndex + 1} sur{' '}
+              {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
+            </span>
           </div>
           
           <div className="flex items-center space-x-2">
-            <button
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={e => {
+                table.setPageSize(Number(e.target.value))
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
             >
-              <ChevronLeftIcon className="h-5 w-5" />
-            </button>
-            <span className="px-3 py-2 text-sm text-gray-700">
-              {pagination.pageIndex + 1}
-            </span>
-            <button
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
+              {[10, 20, 50, 100, 200].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize} par page
+                </option>
+              ))}
+            </select>
+            
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                title="Première page"
+              >
+                {'<<'}
+              </button>
+              
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                title="Page précédente"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </button>
+              
+              <span className="px-3 py-1 text-sm">
+                {table.getState().pagination.pageIndex + 1}
+              </span>
+              
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                title="Page suivante"
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+              </button>
+              
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                title="Dernière page"
+              >
+                {'>>'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { PlusIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
 import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
@@ -20,43 +20,16 @@ interface DemandesStats {
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 50
-  })
-  const [filters, setFilters] = useState({
-    type: '',
-    dateDebut: '',
-    dateFin: '',
-    assigneAId: ''
-  })
 
   const queryClient = useQueryClient()
-  
-  // Fetch demandes avec server-side pagination/filtering (méthode TanStack officielle)
-  const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', globalFilter, filters, pagination.pageIndex, pagination.pageSize],
+
+  // Fetch all demandes (client-side filtering with TanStack)
+  const { data: demandes = [], isLoading } = useQuery({
+    queryKey: ['demandes-all'],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      
-      // Pagination
-      params.append('page', String(pagination.pageIndex + 1)) // Le serveur utilise 1-based indexing
-      params.append('limit', String(pagination.pageSize))
-      
-      // Global filter (recherche)
-      if (globalFilter) params.append('search', globalFilter)
-      
-      // Column filters
-      if (filters.type) params.append('type', filters.type)
-      if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
-      if (filters.dateFin) params.append('dateFin', filters.dateFin)
-      if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
-      
-      const response = await api.get(`/demandes?${params.toString()}`)
-      return response.data
-    },
-    keepPreviousData: true // Évite les flickers pendant la navigation
+      const response = await api.get('/demandes?limit=25000') // Get all demandes for client-side processing
+      return response.data.demandes
+    }
   })
 
   // Fetch stats
@@ -68,11 +41,6 @@ const Demandes: React.FC = () => {
     }
   })
 
-
-  const demandes = demandesData?.demandes || []
-  const totalRows = demandesData?.pagination?.total || 0
-  const totalPages = demandesData?.pagination?.pages || 0
-
   // Create demande mutation
   const createDemandeMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -80,9 +48,9 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] }) // Update dossiers list
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande créée avec succès')
     },
     onError: (error: any) => {
@@ -97,7 +65,7 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande modifiée avec succès')
@@ -113,7 +81,7 @@ const Demandes: React.FC = () => {
       await api.delete(`/demandes/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande supprimée avec succès')
@@ -134,7 +102,6 @@ const Demandes: React.FC = () => {
   }
 
   const handleViewDemande = (demande: Demande) => {
-    // Pour l'instant, ouvre la demande en mode édition
     setSelectedDemande(demande)
     setIsModalOpen(true)
   }
@@ -146,7 +113,6 @@ const Demandes: React.FC = () => {
   }
 
   const handleAddToDossier = (demande: Demande) => {
-    // This will open the modal in edit mode to allow assigning to a dossier
     setSelectedDemande(demande)
     setIsModalOpen(true)
   }
@@ -159,18 +125,10 @@ const Demandes: React.FC = () => {
     }
   }
 
-  const handleFilterChange = (filterName: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value
-    }))
-  }
-
-
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Demandes</h1>
             <p className="mt-1 text-sm text-gray-600">
@@ -232,25 +190,15 @@ const Demandes: React.FC = () => {
             </div>
           </div>
         )}
-
       </div>
 
       <DemandesTable
-        demandes={demandes}
+        data={demandes}
+        loading={isLoading}
         onView={handleViewDemande}
         onEdit={handleEditDemande}
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
-        loading={isLoading}
-        // Server-side state management (TanStack officiel)
-        globalFilter={globalFilter}
-        onGlobalFilterChange={setGlobalFilter}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        totalRows={totalRows}
-        pageCount={totalPages}
-        filters={filters}
-        onFilterChange={handleFilterChange}
       />
 
       <DemandeModal

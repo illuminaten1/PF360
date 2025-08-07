@@ -18,13 +18,14 @@ interface DemandesStats {
   demandesNonAffecteesToday: number
 }
 
-// Seuil pour déterminer le mode de recherche
-const LARGE_DATASET_THRESHOLD = 1000
-
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
-  const [searchInput, setSearchInput] = useState('')
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 50
+  })
   const [filters, setFilters] = useState({
     type: '',
     dateDebut: '',
@@ -35,44 +36,40 @@ const Demandes: React.FC = () => {
   const queryClient = useQueryClient()
   
   // Debounce pour la recherche serveur
-  const debouncedSearch = useDebounce(searchInput, 500)
-  
-  // Fetch stats d'abord pour connaître la taille du dataset
+  const debouncedGlobalFilter = useDebounce(globalFilter, 500)
+
+  // Fetch demandes avec server-side pagination/filtering (méthode TanStack officielle)
+  const { data: demandesData, isLoading } = useQuery({
+    queryKey: ['demandes', debouncedGlobalFilter, filters, pagination.pageIndex, pagination.pageSize],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      
+      // Pagination
+      params.append('page', String(pagination.pageIndex))
+      params.append('pageSize', String(pagination.pageSize))
+      
+      // Global filter (recherche)
+      if (debouncedGlobalFilter) params.append('search', debouncedGlobalFilter)
+      
+      // Column filters
+      if (filters.type) params.append('type', filters.type)
+      if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
+      if (filters.dateFin) params.append('dateFin', filters.dateFin)
+      if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
+      
+      const response = await api.get(`/demandes?${params.toString()}`)
+      return response.data
+    },
+    keepPreviousData: true // Évite les flickers pendant la navigation
+  })
+
+  // Fetch stats
   const { data: stats } = useQuery<DemandesStats>({
     queryKey: ['demandes-stats'],
     queryFn: async () => {
       const response = await api.get('/demandes/stats')
       return response.data
     }
-  })
-
-  // Déterminer si on utilise la recherche serveur ou client
-  const useServerSearch = useMemo(() => {
-    return stats ? stats.totalDemandes > LARGE_DATASET_THRESHOLD : false
-  }, [stats?.totalDemandes])
-
-  // Fetch demandes avec logique hybride
-  const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', useServerSearch ? debouncedSearch : '', useServerSearch ? filters : ''],
-    queryFn: async () => {
-      if (useServerSearch) {
-        // Mode serveur : envoyer search et filters
-        const params = new URLSearchParams()
-        if (debouncedSearch) params.append('search', debouncedSearch)
-        if (filters.type) params.append('type', filters.type)
-        if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
-        if (filters.dateFin) params.append('dateFin', filters.dateFin)
-        if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
-        
-        const response = await api.get(`/demandes?${params.toString()}`)
-        return response.data
-      } else {
-        // Mode client : charger toutes les données
-        const response = await api.get('/demandes')
-        return response.data
-      }
-    },
-    enabled: !!stats // Attendre les stats avant de charger les données
   })
 
 
@@ -247,13 +244,15 @@ const Demandes: React.FC = () => {
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
         loading={isLoading}
-        // Props pour la recherche hybride
-        useServerSearch={useServerSearch}
-        searchInput={searchInput}
-        onSearchChange={setSearchInput}
-        filters={useServerSearch ? filters : undefined}
-        onFilterChange={useServerSearch ? handleFilterChange : undefined}
-        totalCount={stats?.totalDemandes}
+        // Server-side state management (TanStack officiel)
+        globalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        totalRows={demandesData?.totalCount || 0}
+        pageCount={demandesData?.totalPages || 0}
+        filters={filters}
+        onFilterChange={handleFilterChange}
       />
 
       <DemandeModal

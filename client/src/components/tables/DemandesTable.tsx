@@ -41,18 +41,23 @@ interface DemandesTableProps {
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
   loading?: boolean
-  // Props pour recherche hybride
-  useServerSearch?: boolean
-  searchInput?: string
-  onSearchChange?: (value: string) => void
-  filters?: {
+  // Server-side props (TanStack officiel)
+  globalFilter: string
+  onGlobalFilterChange: (value: string) => void
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  onPaginationChange: (updater: any) => void
+  totalRows: number
+  pageCount: number
+  filters: {
     type: string
     dateDebut: string
     dateFin: string
     assigneAId: string
   }
-  onFilterChange?: (filterName: string, value: string) => void
-  totalCount?: number
+  onFilterChange: (filterName: string, value: string) => void
 }
 
 const columnHelper = createColumnHelper<Demande>()
@@ -108,16 +113,17 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onDelete,
   onAddToDossier,
   loading = false,
-  useServerSearch = false,
-  searchInput = '',
-  onSearchChange,
+  globalFilter,
+  onGlobalFilterChange,
+  pagination,
+  onPaginationChange,
+  totalRows,
+  pageCount,
   filters,
-  onFilterChange,
-  totalCount
+  onFilterChange
 }) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
 
   const columns = useMemo(() => [
     columnHelper.accessor('numeroDS', {
@@ -361,11 +367,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     state: {
       sorting,
       columnFilters,
-      globalFilter
+      globalFilter,
+      pagination
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: onGlobalFilterChange,
+    onPaginationChange: onPaginationChange,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -373,33 +381,12 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    globalFilterFn: (row, _, filterValue) => {
-      // Recherche dans Numéro DS, NIGEND, Nom/Prénom, Unité
-      const numeroDS = row.original.numeroDS?.toLowerCase() || ''
-      const nigend = row.original.nigend?.toLowerCase() || ''
-      const nom = row.original.nom?.toLowerCase() || ''
-      const prenom = row.original.prenom?.toLowerCase() || ''
-      const unite = row.original.unite?.toLowerCase() || ''
-      const commune = row.original.commune?.toLowerCase() || ''
-      const nomComplet1 = `${prenom} ${nom}`.toLowerCase()
-      const nomComplet2 = `${nom} ${prenom}`.toLowerCase()
-      
-      const searchValue = filterValue.toLowerCase()
-      
-      return numeroDS.includes(searchValue) || 
-             nigend.includes(searchValue) ||
-             nom.includes(searchValue) ||
-             prenom.includes(searchValue) ||
-             unite.includes(searchValue) ||
-             commune.includes(searchValue) ||
-             nomComplet1.includes(searchValue) ||
-             nomComplet2.includes(searchValue)
-    },
-    initialState: {
-      pagination: {
-        pageSize: 50
-      }
-    }
+    // Server-side configuration (TanStack officiel)
+    manualPagination: true,
+    manualFiltering: true, 
+    manualSorting: true,
+    pageCount: pageCount,
+    rowCount: totalRows
   })
 
   // Loading state
@@ -433,7 +420,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      {/* Barre de recherche hybride */}
+      {/* Server-side Search & Filters (TanStack officiel) */}
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -442,22 +429,16 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={useServerSearch 
-                    ? "Rechercher sur le serveur (25000+ enregistrements)..." 
-                    : "Rechercher localement..."}
-                  value={useServerSearch ? searchInput : globalFilter}
-                  onChange={(e) => useServerSearch 
-                    ? onSearchChange?.(e.target.value)
-                    : setGlobalFilter(e.target.value)}
+                  placeholder="Rechercher par numéro DS, nom, NIGEND, unité, commune..."
+                  value={globalFilter}
+                  onChange={(e) => onGlobalFilterChange(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
-            {((useServerSearch && searchInput) || (!useServerSearch && globalFilter)) && (
+            {globalFilter && (
               <button
-                onClick={() => useServerSearch 
-                  ? onSearchChange?.('')
-                  : setGlobalFilter('')}
+                onClick={() => onGlobalFilterChange('')}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 Effacer
@@ -465,23 +446,12 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             )}
           </div>
           
-          {/* Indicateur du mode */}
+          {/* Indicateur server-side */}
           <div className="text-xs text-gray-500 flex items-center gap-2">
-            {useServerSearch ? (
-              <>
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                  Mode serveur
-                </span>
-                <span>Dataset volumineux ({totalCount?.toLocaleString()} enregistrements) - recherche avec 500ms de délai</span>
-              </>
-            ) : (
-              <>
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Mode client
-                </span>
-                <span>Recherche instantanée sur {demandes.length} enregistrements</span>
-              </>
-            )}
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Server-side
+            </span>
+            <span>Pagination et filtrage côté serveur • Page {pagination.pageIndex + 1} sur {pageCount} • {totalRows.toLocaleString()} total</span>
           </div>
         </div>
       </div>
@@ -544,19 +514,19 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         </table>
       </div>
       
-      {/* Pagination */}
+      {/* Server-side Pagination */}
       <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
         <div className="flex-1 flex justify-between items-center">
           <div className="text-sm text-gray-700">
             Page{' '}
             <strong>
-              {table.getState().pagination.pageIndex + 1} sur{' '}
-              {table.getPageCount()}
+              {pagination.pageIndex + 1} sur{' '}
+              {pageCount}
             </strong>{' '}
             — Affichage de{' '}
-            <strong>{table.getRowModel().rows.length}</strong> sur{' '}
-            <strong>{table.getFilteredRowModel().rows.length}</strong> demande(s)
-            {table.getState().columnFilters.length > 0 && (
+            <strong>{demandes.length}</strong> sur{' '}
+            <strong>{totalRows.toLocaleString()}</strong> demande(s)
+            {(globalFilter || Object.values(filters).some(f => f)) && (
               <span className="text-blue-600"> (filtrées)</span>
             )}
           </div>
@@ -569,6 +539,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
+            <span className="px-3 py-2 text-sm text-gray-700">
+              {pagination.pageIndex + 1}
+            </span>
             <button
               className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               onClick={() => table.nextPage()}

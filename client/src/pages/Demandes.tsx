@@ -6,6 +6,7 @@ import { Demande } from '@/types'
 import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
 import DemandeModal from '@/components/forms/DemandeModal'
+import DemandeViewModal from '@/components/forms/DemandeViewModal'
 
 interface DemandesStats {
   totalDemandes: number
@@ -19,6 +20,7 @@ interface DemandesStats {
 
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
 
   const queryClient = useQueryClient()
@@ -103,7 +105,7 @@ const Demandes: React.FC = () => {
 
   const handleViewDemande = (demande: Demande) => {
     setSelectedDemande(demande)
-    setIsModalOpen(true)
+    setIsViewModalOpen(true)
   }
 
   const handleDeleteDemande = (demande: Demande) => {
@@ -210,6 +212,15 @@ const Demandes: React.FC = () => {
         onSubmit={handleSubmitDemande}
         demande={selectedDemande}
         title={selectedDemande ? 'Modifier la demande' : 'Créer une nouvelle demande'}
+      />
+
+      <DemandeViewModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false)
+          setSelectedDemande(null)
+        }}
+        demande={selectedDemande}
       />
     </div>
   )

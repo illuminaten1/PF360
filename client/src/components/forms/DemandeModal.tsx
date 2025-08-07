@@ -16,6 +16,9 @@ const demandeSchema = z.object({
   nigend: z.string().optional(),
   grade: z.string().min(1, 'Grade requis'),
   statutDemandeur: z.string().min(1, 'Statut du demandeur requis'),
+  branche: z.string().optional(),
+  formationAdministrative: z.string().optional(),
+  departement: z.string().optional(),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),
   adresse1: z.string().optional(),
@@ -32,6 +35,8 @@ const demandeSchema = z.object({
     (val) => !val || ['EN_SERVICE', 'HORS_SERVICE'].includes(val),
     { message: 'Position invalide' }
   ),
+  contexteMissionnel: z.string().optional(),
+  qualificationInfraction: z.string().optional(),
   resume: z.string().optional(),
   blessures: z.string().optional(),
   partieCivile: z.boolean().default(false),
@@ -87,6 +92,9 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       nigend: '',
       grade: '',
       statutDemandeur: '',
+      branche: '',
+      formationAdministrative: '',
+      departement: '',
       nom: '',
       prenom: '',
       adresse1: '',
@@ -98,6 +106,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       commune: '',
       codePostal: '',
       position: '',
+      contexteMissionnel: '',
+      qualificationInfraction: '',
       resume: '',
       blessures: '',
       partieCivile: false,
@@ -144,6 +154,9 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           nigend: demande.nigend || '',
           grade: demande.grade || '',
           statutDemandeur: demande.statutDemandeur || '',
+          branche: demande.branche || '',
+          formationAdministrative: demande.formationAdministrative || '',
+          departement: demande.departement || '',
           nom: demande.nom,
           prenom: demande.prenom,
           adresse1: demande.adresse1 || '',
@@ -155,6 +168,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           commune: demande.commune || '',
           codePostal: demande.codePostal || '',
           position: demande.position || '',
+          contexteMissionnel: demande.contexteMissionnel || '',
+          qualificationInfraction: demande.qualificationInfraction || '',
           resume: demande.resume || '',
           blessures: demande.blessures || '',
           partieCivile: demande.partieCivile,
@@ -176,6 +191,9 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           nigend: '',
           grade: '',
           statutDemandeur: '',
+          branche: '',
+          formationAdministrative: '',
+          departement: '',
           nom: '',
           prenom: '',
           adresse1: '',
@@ -187,6 +205,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           commune: '',
           codePostal: '',
           position: '',
+          contexteMissionnel: '',
+          qualificationInfraction: '',
           resume: '',
           blessures: '',
           partieCivile: false,
@@ -439,6 +459,223 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
+                          Branche
+                        </label>
+                        <select
+                          {...register('branche')}
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        >
+                          <option value="">-- Sélectionner une branche --</option>
+                          <option value="GD">GD</option>
+                          <option value="GM">GM</option>
+                          <option value="GR">GR</option>
+                          <option value="État-Major">État-Major</option>
+                          <option value="GIE SPÉ">GIE SPÉ</option>
+                          <option value="DG et ORG. CENTRAUX">DG et ORG. CENTRAUX</option>
+                          <option value="GIGN">GIGN</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Formation administrative
+                        </label>
+                        <select
+                          {...register('formationAdministrative')}
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        >
+                          <option value="">-- Sélectionner une formation --</option>
+                          <option value="Auvergne-Rhône-Alpes">Auvergne-Rhône-Alpes</option>
+                          <option value="Bourgogne-Franche-Comté">Bourgogne-Franche-Comté</option>
+                          <option value="Bretagne">Bretagne</option>
+                          <option value="Centre-Val-de-Loire">Centre-Val-de-Loire</option>
+                          <option value="Corse">Corse</option>
+                          <option value="Grand Est">Grand Est</option>
+                          <option value="Hauts-de-France">Hauts-de-France</option>
+                          <option value="Ile-de-France">Ile-de-France</option>
+                          <option value="Nouvelle-Aquitaine">Nouvelle-Aquitaine</option>
+                          <option value="Normandie">Normandie</option>
+                          <option value="Occitanie">Occitanie</option>
+                          <option value="Pays-de-la-Loire">Pays-de-la-Loire</option>
+                          <option value="Provence-Alpes-Côte-d'Azur">Provence-Alpes-Côte-d'Azur</option>
+                          <option value="Guadeloupe">Guadeloupe</option>
+                          <option value="Guyane">Guyane</option>
+                          <option value="Martinique">Martinique</option>
+                          <option value="Mayotte">Mayotte</option>
+                          <option value="Nouvelle-Calédonie">Nouvelle-Calédonie</option>
+                          <option value="Wallis-et-Futuna">Wallis-et-Futuna</option>
+                          <option value="Polynésie française">Polynésie française</option>
+                          <option value="La Réunion">La Réunion</option>
+                          <option value="Saint Barthélémy / Saint-Martin">Saint Barthélémy / Saint-Martin</option>
+                          <option value="Saint-Pierre-et-Miquelon">Saint-Pierre-et-Miquelon</option>
+                          <option value="Garde républicaine">Garde républicaine</option>
+                          <option value="IGAG">IGAG</option>
+                          <option value="IGGN">IGGN</option>
+                          <option value="DGGN">DGGN</option>
+                          <option value="GIGN">GIGN</option>
+                          <option value="COMSOPGN">COMSOPGN</option>
+                          <option value="PJGN">PJGN</option>
+                          <option value="CEGN">CEGN</option>
+                          <option value="CGOM">CGOM</option>
+                          <option value="CRJ">CRJ</option>
+                          <option value="ANFSI">ANFSI</option>
+                          <option value="COSSEN">COSSEN</option>
+                          <option value="COMCYBER-MI">COMCYBER-MI</option>
+                          <option value="CESAN">CESAN</option>
+                          <option value="SAILMI">SAILMI</option>
+                          <option value="GSAN">GSAN</option>
+                          <option value="GTA">GTA</option>
+                          <option value="GARM">GARM</option>
+                          <option value="CFAGN">CFAGN</option>
+                          <option value="GMAR">GMAR</option>
+                          <option value="GAIR">GAIR</option>
+                          <option value="AUTRE">AUTRE</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Département d'affectation
+                        </label>
+                        <select
+                          {...register('departement')}
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        >
+                          <option value="">-- Sélectionner un département --</option>
+                          <option value="1">1</option>
+                          <option value="2A">2A</option>
+                          <option value="2B">2B</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5">5</option>
+                          <option value="6">6</option>
+                          <option value="7">7</option>
+                          <option value="8">8</option>
+                          <option value="9">9</option>
+                          <option value="10">10</option>
+                          <option value="11">11</option>
+                          <option value="12">12</option>
+                          <option value="13">13</option>
+                          <option value="14">14</option>
+                          <option value="15">15</option>
+                          <option value="16">16</option>
+                          <option value="17">17</option>
+                          <option value="18">18</option>
+                          <option value="19">19</option>
+                          <option value="20">20</option>
+                          <option value="21">21</option>
+                          <option value="22">22</option>
+                          <option value="23">23</option>
+                          <option value="24">24</option>
+                          <option value="25">25</option>
+                          <option value="26">26</option>
+                          <option value="27">27</option>
+                          <option value="28">28</option>
+                          <option value="29">29</option>
+                          <option value="30">30</option>
+                          <option value="31">31</option>
+                          <option value="32">32</option>
+                          <option value="33">33</option>
+                          <option value="34">34</option>
+                          <option value="35">35</option>
+                          <option value="36">36</option>
+                          <option value="37">37</option>
+                          <option value="38">38</option>
+                          <option value="39">39</option>
+                          <option value="40">40</option>
+                          <option value="41">41</option>
+                          <option value="42">42</option>
+                          <option value="43">43</option>
+                          <option value="44">44</option>
+                          <option value="45">45</option>
+                          <option value="46">46</option>
+                          <option value="47">47</option>
+                          <option value="48">48</option>
+                          <option value="49">49</option>
+                          <option value="50">50</option>
+                          <option value="51">51</option>
+                          <option value="52">52</option>
+                          <option value="53">53</option>
+                          <option value="54">54</option>
+                          <option value="55">55</option>
+                          <option value="56">56</option>
+                          <option value="57">57</option>
+                          <option value="58">58</option>
+                          <option value="59">59</option>
+                          <option value="60">60</option>
+                          <option value="61">61</option>
+                          <option value="62">62</option>
+                          <option value="63">63</option>
+                          <option value="64">64</option>
+                          <option value="65">65</option>
+                          <option value="66">66</option>
+                          <option value="67">67</option>
+                          <option value="68">68</option>
+                          <option value="69">69</option>
+                          <option value="70">70</option>
+                          <option value="71">71</option>
+                          <option value="72">72</option>
+                          <option value="73">73</option>
+                          <option value="74">74</option>
+                          <option value="75">75</option>
+                          <option value="76">76</option>
+                          <option value="77">77</option>
+                          <option value="78">78</option>
+                          <option value="79">79</option>
+                          <option value="80">80</option>
+                          <option value="81">81</option>
+                          <option value="82">82</option>
+                          <option value="83">83</option>
+                          <option value="84">84</option>
+                          <option value="85">85</option>
+                          <option value="86">86</option>
+                          <option value="87">87</option>
+                          <option value="88">88</option>
+                          <option value="89">89</option>
+                          <option value="90">90</option>
+                          <option value="91">91</option>
+                          <option value="92">92</option>
+                          <option value="93">93</option>
+                          <option value="94">94</option>
+                          <option value="95">95</option>
+                          <option value="971">971</option>
+                          <option value="972">972</option>
+                          <option value="973">973</option>
+                          <option value="974">974</option>
+                          <option value="976">976</option>
+                          <option value="986">986</option>
+                          <option value="987">987</option>
+                          <option value="988">988</option>
+                          <option value="975">975</option>
+                          <option value="978">978</option>
+                          <option value="GGM I/3">GGM I/3</option>
+                          <option value="GGM I/5">GGM I/5</option>
+                          <option value="GGM I/6">GGM I/6</option>
+                          <option value="GGM I/7">GGM I/7</option>
+                          <option value="GGM I/9">GGM I/9</option>
+                          <option value="GGM II/1">GGM II/1</option>
+                          <option value="GGM II/2">GGM II/2</option>
+                          <option value="GGM II/3">GGM II/3</option>
+                          <option value="GGM II/5">GGM II/5</option>
+                          <option value="GGM II/6">GGM II/6</option>
+                          <option value="GGM II/7">GGM II/7</option>
+                          <option value="GGM III/3">GGM III/3</option>
+                          <option value="GGM III/6">GGM III/6</option>
+                          <option value="GGM III/7">GGM III/7</option>
+                          <option value="GGM IV/2">GGM IV/2</option>
+                          <option value="GGM IV/3">GGM IV/3</option>
+                          <option value="GGM IV/7">GGM IV/7</option>
+                          <option value="GTGM">GTGM</option>
+                          <option value="GBGM">GBGM</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
                           Nom <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -559,6 +796,57 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         {errors.position && (
                           <p className="mt-1 text-sm text-red-600">{errors.position.message}</p>
                         )}
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Contexte missionnel
+                        </label>
+                        <select
+                          {...register('contexteMissionnel')}
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        >
+                          <option value="">-- Sélectionner un contexte --</option>
+                          <option value="Prévention de proximité">Prévention de proximité</option>
+                          <option value="Police route">Police route</option>
+                          <option value="MO/RO">MO/RO</option>
+                          <option value="Police judiciaire">Police judiciaire</option>
+                          <option value="Chargé d'accueil">Chargé d'accueil</option>
+                          <option value="Sécurisation d'événement">Sécurisation d'événement</option>
+                          <option value="Intervention spécialisée">Intervention spécialisée</option>
+                          <option value="Surveillance particulière">Surveillance particulière</option>
+                          <option value="Escorte/Transfèrement">Escorte/Transfèrement</option>
+                          <option value="International">International</option>
+                          <option value="Relations interpersonnelles">Relations interpersonnelles</option>
+                          <option value="Hors service">Hors service</option>
+                          <option value="Autre">Autre</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Qualification de l'infraction
+                        </label>
+                        <select
+                          {...register('qualificationInfraction')}
+                          className="input w-full"
+                          disabled={isSubmitting}
+                        >
+                          <option value="">-- Sélectionner une qualification --</option>
+                          <option value="OUTRAGE / MENACES">OUTRAGE / MENACES</option>
+                          <option value="RÉBELLION avec ou sans outrage">RÉBELLION avec ou sans outrage</option>
+                          <option value="VIOLENCES hors rébellion">VIOLENCES hors rébellion</option>
+                          <option value="REFUS D'OBTEMPÉRER / Mise en danger de la vie d'autrui">REFUS D'OBTEMPÉRER / Mise en danger de la vie d'autrui</option>
+                          <option value="HARCÈLEMENT MORAL AU TRAVAIL / DISCRIMINATION">HARCÈLEMENT MORAL AU TRAVAIL / DISCRIMINATION</option>
+                          <option value="VIOLENCES SEXUELLES ET SEXISTES">VIOLENCES SEXUELLES ET SEXISTES</option>
+                          <option value="DÉFENSEUR DES DROITS">DÉFENSEUR DES DROITS</option>
+                          <option value="ACCIDENT DE LA CIRC. ROUTIÈRE">ACCIDENT DE LA CIRC. ROUTIÈRE</option>
+                          <option value="DIFFAMATION / INJURES">DIFFAMATION / INJURES</option>
+                          <option value="TENTATIVE D'HOMICIDE">TENTATIVE D'HOMICIDE</option>
+                          <option value="INFRACTION INVOLONTAIRE HORS ACCIDENT CIRC. ROUTIÈRE">INFRACTION INVOLONTAIRE HORS ACCIDENT CIRC. ROUTIÈRE</option>
+                          <option value="AUTRE">AUTRE</option>
+                        </select>
                       </div>
 
                       <div>

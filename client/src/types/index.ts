@@ -28,6 +28,9 @@ export interface Demande {
   nigend?: string
   grade?: 'Général' | 'Colonel' | 'Lieutenant-colonel' | 'Chef d\'escadron' | 'Commandant' | 'Capitaine' | 'Lieutenant' | 'Sous-lieutenant' | 'Aspirant' | 'Major' | 'Adjudant-chef' | 'Adjudant' | 'Maréchal des logis-chef' | 'Gendarme' | 'Élève gendarme' | 'Maréchal des logis' | 'Brigadier-chef' | 'Brigadier' | 'Gendarme adjoint volontaire' | 'Gendarme adjoint de 2ème classe' | 'Madame' | 'Monsieur'
   statutDemandeur?: 'OG' | 'OCTA' | 'SOG' | 'CSTAGN' | 'GAV' | 'Civil' | 'Réserviste' | 'Retraité' | 'Ayant-droit'
+  branche?: 'GD' | 'GM' | 'GR' | 'État-Major' | 'GIE SPÉ' | 'DG et ORG. CENTRAUX' | 'GIGN'
+  formationAdministrative?: 'Auvergne-Rhône-Alpes' | 'Bourgogne-Franche-Comté' | 'Bretagne' | 'Centre-Val-de-Loire' | 'Corse' | 'Grand Est' | 'Hauts-de-France' | 'Ile-de-France' | 'Nouvelle-Aquitaine' | 'Normandie' | 'Occitanie' | 'Pays-de-la-Loire' | 'Provence-Alpes-Côte-d\'Azur' | 'Guadeloupe' | 'Guyane' | 'Martinique' | 'Mayotte' | 'Nouvelle-Calédonie' | 'Wallis-et-Futuna' | 'Polynésie française' | 'La Réunion' | 'Saint Barthélémy / Saint-Martin' | 'Saint-Pierre-et-Miquelon' | 'Garde républicaine' | 'IGAG' | 'IGGN' | 'DGGN' | 'GIGN' | 'COMSOPGN' | 'PJGN' | 'CEGN' | 'CGOM' | 'CRJ' | 'ANFSI' | 'COSSEN' | 'COMCYBER-MI' | 'CESAN' | 'SAILMI' | 'GSAN' | 'GTA' | 'GARM' | 'CFAGN' | 'GMAR' | 'GAIR' | 'AUTRE'
+  departement?: '1' | '2A' | '2B' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23' | '24' | '25' | '26' | '27' | '28' | '29' | '30' | '31' | '32' | '33' | '34' | '35' | '36' | '37' | '38' | '39' | '40' | '41' | '42' | '43' | '44' | '45' | '46' | '47' | '48' | '49' | '50' | '51' | '52' | '53' | '54' | '55' | '56' | '57' | '58' | '59' | '60' | '61' | '62' | '63' | '64' | '65' | '66' | '67' | '68' | '69' | '70' | '71' | '72' | '73' | '74' | '75' | '76' | '77' | '78' | '79' | '80' | '81' | '82' | '83' | '84' | '85' | '86' | '87' | '88' | '89' | '90' | '91' | '92' | '93' | '94' | '95' | '971' | '972' | '973' | '974' | '976' | '986' | '987' | '988' | '975' | '978' | 'GGM I/3' | 'GGM I/5' | 'GGM I/6' | 'GGM I/7' | 'GGM I/9' | 'GGM II/1' | 'GGM II/2' | 'GGM II/3' | 'GGM II/5' | 'GGM II/6' | 'GGM II/7' | 'GGM III/3' | 'GGM III/6' | 'GGM III/7' | 'GGM IV/2' | 'GGM IV/3' | 'GGM IV/7' | 'GTGM' | 'GBGM'
   nom: string
   prenom: string
   adresse1?: string
@@ -39,6 +42,8 @@ export interface Demande {
   commune?: string
   codePostal?: string
   position?: 'EN_SERVICE' | 'HORS_SERVICE'
+  contexteMissionnel?: 'Prévention de proximité' | 'Police route' | 'MO/RO' | 'Police judiciaire' | 'Chargé d\'accueil' | 'Sécurisation d\'événement' | 'Intervention spécialisée' | 'Surveillance particulière' | 'Escorte/Transfèrement' | 'International' | 'Relations interpersonnelles' | 'Hors service' | 'Autre'
+  qualificationInfraction?: 'OUTRAGE / MENACES' | 'RÉBELLION avec ou sans outrage' | 'VIOLENCES hors rébellion' | 'REFUS D\'OBTEMPÉRER / Mise en danger de la vie d\'autrui' | 'HARCÈLEMENT MORAL AU TRAVAIL / DISCRIMINATION' | 'VIOLENCES SEXUELLES ET SEXISTES' | 'DÉFENSEUR DES DROITS' | 'ACCIDENT DE LA CIRC. ROUTIÈRE' | 'DIFFAMATION / INJURES' | 'TENTATIVE D\'HOMICIDE' | 'INFRACTION INVOLONTAIRE HORS ACCIDENT CIRC. ROUTIÈRE' | 'AUTRE'
   resume?: string
   blessures?: string
   partieCivile: boolean

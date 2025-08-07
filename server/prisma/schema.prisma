@@ -44,6 +44,9 @@ model Demande {
   nigend                 String?
   grade                  String?
   statutDemandeur        String? // OG | OCTA | SOG | CSTAGN | GAV | Civil | Réserviste | Retraité | Ayant-droit
+  branche                String? // GD | GM | GR | État-Major | GIE SPÉ | DG et ORG. CENTRAUX | GIGN
+  formationAdministrative String? // Liste des formations administratives
+  departement            String? // Départements et codes spéciaux
   nom                    String
   prenom                 String
   adresse1               String?
@@ -57,6 +60,8 @@ model Demande {
   commune                String?
   codePostal             String?
   position               String? // EN_SERVICE | HORS_SERVICE
+  contexteMissionnel     String? // Liste des contextes missionnels
+  qualificationInfraction String? // Liste des qualifications d'infraction
   resume                 String?
   blessures              String?
   partieCivile           Boolean   @default(false)
@@ -286,3 +291,8 @@ model ConventionDemande {
 // - NaturePaiement: "AVOCAT" | "AUTRES_INTERVENANTS"
 // - StatutDemandeur: "OG" | "OCTA" | "SOG" | "CSTAGN" | "GAV" | "Civil" | "Réserviste" | "Retraité" | "Ayant-droit"
 // - Grade: "Général" | "Colonel" | "Lieutenant-colonel" | "Chef d'escadron" | "Commandant" | "Capitaine" | "Lieutenant" | "Sous-lieutenant" | "Aspirant" | "Major" | "Adjudant-chef" | "Adjudant" | "Maréchal des logis-chef" | "Gendarme" | "Élève gendarme" | "Maréchal des logis" | "Brigadier-chef" | "Brigadier" | "Gendarme adjoint volontaire" | "Gendarme adjoint de 2ème classe" | "Madame" | "Monsieur"
+// - Branche: "GD" | "GM" | "GR" | "État-Major" | "GIE SPÉ" | "DG et ORG. CENTRAUX" | "GIGN"
+// - FormationAdministrative: Liste complète des formations administratives françaises
+// - Departement: Liste complète des départements et codes spéciaux
+// - ContexteMissionnel: Liste des contextes missionnels
+// - QualificationInfraction: Liste des qualifications d'infraction

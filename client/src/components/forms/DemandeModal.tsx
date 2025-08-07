@@ -249,7 +249,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                     <div className={`grid grid-cols-1 gap-4 ${demande ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Numéro DS *
+                          Numéro DS <span className="text-red-500">*</span>
                         </label>
                         <input
                           {...register('numeroDS')}
@@ -264,7 +264,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Type *
+                          Type <span className="text-red-500">*</span>
                         </label>
                         <select
                           {...register('type')}
@@ -281,7 +281,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Date de réception *
+                          Date de réception <span className="text-red-500">*</span>
                         </label>
                         <input
                           {...register('dateReception')}
@@ -423,7 +423,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Nom *
+                          Nom <span className="text-red-500">*</span>
                         </label>
                         <input
                           {...register('nom')}
@@ -438,7 +438,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Prénom *
+                          Prénom <span className="text-red-500">*</span>
                         </label>
                         <input
                           {...register('prenom')}

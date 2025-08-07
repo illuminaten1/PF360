@@ -45,8 +45,8 @@ const Demandes: React.FC = () => {
       const params = new URLSearchParams()
       
       // Pagination
-      params.append('page', String(pagination.pageIndex))
-      params.append('pageSize', String(pagination.pageSize))
+      params.append('page', String(pagination.pageIndex + 1)) // Le serveur utilise 1-based indexing
+      params.append('limit', String(pagination.pageSize))
       
       // Global filter (recherche)
       if (debouncedGlobalFilter) params.append('search', debouncedGlobalFilter)
@@ -74,6 +74,8 @@ const Demandes: React.FC = () => {
 
 
   const demandes = demandesData?.demandes || []
+  const totalRows = demandesData?.pagination?.total || 0
+  const totalPages = demandesData?.pagination?.pages || 0
 
   // Create demande mutation
   const createDemandeMutation = useMutation({
@@ -249,8 +251,8 @@ const Demandes: React.FC = () => {
         onGlobalFilterChange={setGlobalFilter}
         pagination={pagination}
         onPaginationChange={setPagination}
-        totalRows={demandesData?.totalCount || 0}
-        pageCount={demandesData?.totalPages || 0}
+        totalRows={totalRows}
+        pageCount={totalPages}
         filters={filters}
         onFilterChange={handleFilterChange}
       />

@@ -220,6 +220,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: true,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: 'includesString'
     }),
     columnHelper.accessor('dateReception', {
@@ -231,9 +232,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: true,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: 'includesString'
     }),
-    columnHelper.display({
+    columnHelper.accessor('prenom', {
       id: 'militaire',
       header: 'Militaire',
       cell: ({ row }) => (
@@ -250,6 +252,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         const fullName = `${row.original.grade || ''} ${row.original.prenom} ${row.original.nom} ${row.original.nigend || ''}`.toLowerCase()
@@ -265,9 +268,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: true,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: 'includesString'
     }),
-    columnHelper.display({
+    columnHelper.accessor('commune', {
       id: 'faits',
       header: 'Faits',
       cell: ({ row }) => (
@@ -286,13 +290,14 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         const commune = row.original.commune?.toLowerCase() || ''
         return commune.includes(filterValue.toLowerCase())
       }
     }),
-    columnHelper.display({
+    columnHelper.accessor('resume', {
       id: 'dossier',
       header: 'Dossier',
       cell: ({ row }) => (
@@ -319,6 +324,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         if (filterValue === 'non-lie') return !row.original.dossier
@@ -327,7 +333,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         return dossierInfo.includes(filterValue.toLowerCase())
       }
     }),
-    columnHelper.display({
+    columnHelper.accessor('blessures', {
       id: 'assigneA',
       header: 'Assigné à',
       cell: ({ row }) => (
@@ -345,6 +351,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       ),
       enableSorting: false,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         if (filterValue === 'non-assigne') return !row.original.assigneA
@@ -389,6 +396,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       },
       enableSorting: true,
       enableColumnFilter: true,
+      enableGlobalFilter: true,
       filterFn: (row, _, filterValue) => {
         if (!filterValue) return true
         if (filterValue === 'urgent') {

@@ -1,33 +1,65 @@
-import React from 'react'
-import { PencilIcon, UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import React, { useMemo } from 'react'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
+  flexRender,
+  type ColumnDef,
+  type SortingState,
+  type ColumnFiltersState,
+  type GlobalFilterState
+} from '@tanstack/react-table'
+import { 
+  PencilIcon, 
+  UserIcon, 
+  ShieldCheckIcon, 
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MagnifyingGlassIcon 
+} from '@heroicons/react/24/outline'
 import { User } from '@/types'
 
 interface UsersTableProps {
-  users: User[]
-  isLoading: boolean
+  data: User[]
+  loading?: boolean
   onEdit: (user: User) => void
   onDeactivate: (id: string) => void
   onReactivate: (id: string) => void
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDeactivate, onReactivate }) => {
-  if (isLoading) {
-    return (
-      <div className="p-8 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="mt-2 text-gray-600">Chargement...</p>
-      </div>
-    )
-  }
+function Filter({ column }: { column: any }) {
+  const columnFilterValue = column.getFilterValue()
 
-  if (users.length === 0) {
-    return (
-      <div className="p-8 text-center">
-        <UserIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500">Aucun utilisateur trouvé</p>
-      </div>
-    )
-  }
+  return (
+    <input
+      type="text"
+      value={(columnFilterValue ?? '') as string}
+      onChange={(e) => column.setFilterValue(e.target.value)}
+      placeholder={`Filtrer...`}
+      className="w-32 border shadow rounded px-2 py-1 text-xs"
+    />
+  )
+}
+
+const UsersTable: React.FC<UsersTableProps> = ({
+  data,
+  loading = false,
+  onEdit,
+  onDeactivate,
+  onReactivate
+}) => {
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'nom', desc: false }
+  ])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = React.useState('')
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-'
@@ -45,7 +77,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDea
     }
     if (role === 'REDACTEUR') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
           <UserIcon className="w-4 h-4 mr-1" />
           Rédacteur
         </span>
@@ -53,7 +85,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDea
     }
     if (role === 'GREFFIER') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
           <UserIcon className="w-4 h-4 mr-1" />
           Greffier
         </span>
@@ -67,115 +99,369 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, isLoading, onEdit, onDea
     )
   }
 
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Utilisateur
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Identifiant
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Email
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Rôle
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Grade
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Statut
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Créé le
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
-            <tr key={user.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-medium text-sm">
-                      {user.prenom.charAt(0)}{user.nom.charAt(0)}
-                    </span>
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {user.grade && `${user.grade} `}{user.prenom} {user.nom}
-                    </div>
-                    {user.telephone && (
-                      <div className="text-sm text-gray-500">{user.telephone}</div>
-                    )}
-                  </div>
+  const columns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ getValue, row }) => {
+          const user = row.original
+          return (
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-medium text-sm">
+                  {user.prenom.charAt(0)}{user.nom.charAt(0)}
+                </span>
+              </div>
+              <div className="ml-4">
+                <div className="text-sm font-medium text-gray-900">
+                  {getValue<string>()}
                 </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-900 font-mono">{user.identifiant}</span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-600">{user.mail}</span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getRoleBadge(user.role)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-600">{user.grade || '-'}</span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {user.active === false ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    Désactivé
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Actif
-                  </span>
-                )}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-sm text-gray-600">{formatDate(user.createdAt)}</span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex justify-end space-x-2">
-                  <button
-                    onClick={() => onEdit(user)}
-                    className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
-                    title="Modifier"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                  </button>
-                  {user.active === false ? (
-                    <button
-                      onClick={() => onReactivate(user.id)}
-                      className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded text-xs px-2 py-1"
-                      title="Réactiver"
-                    >
-                      Réactiver
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => onDeactivate(user.id)}
-                      className="text-orange-600 hover:text-orange-900 p-1 hover:bg-orange-50 rounded text-xs px-2 py-1"
-                      title="Désactiver"
-                    >
-                      Désactiver
-                    </button>
-                  )}
-                </div>
-              </td>
-            </tr>
+              </div>
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'prenom',
+        header: 'Prénom',
+        cell: ({ getValue }) => (
+          <div className="text-sm font-medium text-gray-900">
+            {getValue<string>()}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'grade',
+        header: 'Grade',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'identifiant',
+        header: 'Identifiant',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-900 font-mono">
+            {getValue<string>()}
+          </span>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'mail',
+        header: 'Email',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-600">
+            {getValue<string>()}
+          </span>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'telephone',
+        header: 'Téléphone',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-600">
+            {getValue<string>() || '-'}
+          </span>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'role',
+        header: 'Rôle',
+        cell: ({ getValue }) => getRoleBadge(getValue<string>()),
+        enableColumnFilter: true,
+        filterFn: 'equals'
+      },
+      {
+        id: 'statut',
+        header: 'Statut',
+        accessorFn: (row) => row.active === false ? 'Désactivé' : 'Actif',
+        cell: ({ row }) => {
+          const user = row.original
+          return user.active === false ? (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              Désactivé
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              Actif
+            </span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'equals'
+      },
+      {
+        accessorKey: 'createdAt',
+        header: 'Créé le',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-600">
+            {formatDate(getValue<string>())}
+          </span>
+        ),
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const user = row.original
+          return (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onEdit(user)}
+                className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
+                title="Modifier"
+              >
+                <PencilIcon className="h-4 w-4" />
+              </button>
+              {user.active === false ? (
+                <button
+                  onClick={() => onReactivate(user.id)}
+                  className="px-2 py-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded text-xs"
+                  title="Réactiver"
+                >
+                  Réactiver
+                </button>
+              ) : (
+                <button
+                  onClick={() => onDeactivate(user.id)}
+                  className="px-2 py-1 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded text-xs"
+                  title="Désactiver"
+                >
+                  Désactiver
+                </button>
+              )}
+            </div>
+          )
+        },
+        enableColumnFilter: false,
+        enableSorting: false
+      }
+    ],
+    [onEdit, onDeactivate, onReactivate]
+  )
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    initialState: {
+      pagination: {
+        pageSize: 20
+      }
+    }
+  })
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow">
+        <div className="animate-pulse">
+          <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
+    )
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <div className="text-gray-400 mb-4">
+          <UserIcon className="w-12 h-12 text-gray-400 mx-auto" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun utilisateur</h3>
+        <p className="text-gray-600">Aucun utilisateur ne correspond aux critères de recherche.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow">
+      {/* Global Search */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          <input
+            value={globalFilter ?? ''}
+            onChange={(e) => setGlobalFilter(String(e.target.value))}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Recherche globale dans toutes les colonnes..."
+          />
+          <span className="text-sm text-gray-500">
+            {table.getFilteredRowModel().rows.length} résultat(s)
+          </span>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th
+                    key={header.id}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        {header.isPlaceholder ? null : (
+                          <>
+                            <div
+                              className={`cursor-pointer select-none flex items-center ${
+                                header.column.getCanSort() ? 'hover:text-gray-700' : ''
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                              {header.column.getCanSort() && (
+                                <span className="ml-1">
+                                  {header.column.getIsSorted() === 'asc' ? (
+                                    <ChevronUpIcon className="h-4 w-4" />
+                                  ) : header.column.getIsSorted() === 'desc' ? (
+                                    <ChevronDownIcon className="h-4 w-4" />
+                                  ) : (
+                                    <div className="h-4 w-4 opacity-0 group-hover:opacity-100">
+                                      <ChevronUpIcon className="h-4 w-4" />
+                                    </div>
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {header.column.getCanFilter() && (
+                        <div>
+                          <Filter column={header.column} />
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                {row.getVisibleCells().map(cell => (
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4 whitespace-nowrap"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-700">
+            <span>
+              Page {table.getState().pagination.pageIndex + 1} sur{' '}
+              {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
+            </span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={e => {
+                table.setPageSize(Number(e.target.value))
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              {[10, 20, 50, 100].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize} par page
+                </option>
+              ))}
+            </select>
+            
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+                <ChevronLeftIcon className="h-4 w-4 -ml-2" />
+              </button>
+              
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </button>
+              
+              <span className="px-3 py-1 text-sm">
+                {table.getState().pagination.pageIndex + 1}
+              </span>
+              
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+              </button>
+              
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+                <ChevronRightIcon className="h-4 w-4 -ml-2" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon, UserGroupIcon } from '@heroicons/react/24/outline'
@@ -18,26 +18,14 @@ interface UsersStats {
 const Users: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
 
   const queryClient = useQueryClient()
 
-  // Debounce search term
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [searchTerm])
-
+  // Fetch all users (client-side filtering with TanStack)
   const { data: usersData, isLoading } = useQuery({
-    queryKey: ['users', debouncedSearchTerm],
+    queryKey: ['users-all'],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
-      const response = await api.get(`/users?${params.toString()}`)
+      const response = await api.get('/users')
       return response.data
     }
   })
@@ -56,7 +44,7 @@ const Users: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['users-all'] })
       queryClient.invalidateQueries({ queryKey: ['users-stats'] })
       setIsModalOpen(false)
       setSelectedUser(null)
@@ -73,7 +61,7 @@ const Users: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['users-all'] })
       queryClient.invalidateQueries({ queryKey: ['users-stats'] })
       setIsModalOpen(false)
       setSelectedUser(null)
@@ -89,7 +77,7 @@ const Users: React.FC = () => {
       await api.put(`/users/${id}/deactivate`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['users-all'] })
       queryClient.invalidateQueries({ queryKey: ['users-stats'] })
       toast.success('Utilisateur désactivé avec succès')
     },
@@ -103,7 +91,7 @@ const Users: React.FC = () => {
       await api.put(`/users/${id}/reactivate`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['users-all'] })
       queryClient.invalidateQueries({ queryKey: ['users-stats'] })
       toast.success('Utilisateur réactivé avec succès')
     },
@@ -227,29 +215,13 @@ const Users: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1 max-w-md">
-              <input
-                type="text"
-                placeholder="Rechercher un utilisateur..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <UsersTable
-          users={users}
-          isLoading={isLoading}
-          onEdit={handleEditUser}
-          onDeactivate={handleDeactivateUser}
-          onReactivate={handleReactivateUser}
-        />
-      </div>
+      <UsersTable
+        data={users}
+        loading={isLoading}
+        onEdit={handleEditUser}
+        onDeactivate={handleDeactivateUser}
+        onReactivate={handleReactivateUser}
+      />
 
       {isModalOpen && (
         <UserModal

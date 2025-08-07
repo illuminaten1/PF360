@@ -73,6 +73,44 @@ function SelectFilter({ column }: { column: any }) {
   )
 }
 
+function DynamicSelectFilter({ column, data }: { column: any; data: Demande[] }) {
+  const columnFilterValue = column.getFilterValue()
+  
+  // Extraire les valeurs uniques de la colonne
+  const uniqueValues = useMemo(() => {
+    let values: any[]
+    
+    if (column.id === 'assigneA') {
+      // Pour la colonne assigneA, utiliser l'accessorFn définie dans la colonne
+      values = data
+        .map(row => row.assigneA ? `${row.assigneA.grade || ''} ${row.assigneA.prenom} ${row.assigneA.nom}`.trim() : 'Non assigné')
+        .filter(value => value !== null && value !== undefined && value !== '')
+    } else {
+      // Pour les autres colonnes, utiliser l'accessorKey standard
+      values = data
+        .map(row => row[column.id as keyof Demande])
+        .filter(value => value !== null && value !== undefined && value !== '')
+    }
+    
+    return Array.from(new Set(values)).sort()
+  }, [data, column.id])
+  
+  return (
+    <select
+      value={(columnFilterValue ?? '') as string}
+      onChange={(e) => column.setFilterValue(e.target.value || undefined)}
+      className="w-32 border shadow rounded px-2 py-1 text-xs"
+    >
+      <option value="">Tous</option>
+      {uniqueValues.map((value) => (
+        <option key={String(value)} value={String(value)}>
+          {String(value)}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 const DemandesTable: React.FC<DemandesTableProps> = ({
   data,
   loading = false,
@@ -476,6 +514,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                         <div>
                           {header.column.id === 'type' ? (
                             <SelectFilter column={header.column} />
+                          ) : header.column.id === 'grade' || header.column.id === 'assigneA' ? (
+                            <DynamicSelectFilter column={header.column} data={data} />
                           ) : (
                             <Filter column={header.column} />
                           )}

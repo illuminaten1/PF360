@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
@@ -6,6 +6,7 @@ import { Demande } from '@/types'
 import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
 import DemandeModal from '@/components/forms/DemandeModal'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface DemandesStats {
   totalDemandes: number
@@ -17,23 +18,26 @@ interface DemandesStats {
   demandesNonAffecteesToday: number
 }
 
+// Seuil pour déterminer le mode de recherche
+const LARGE_DATASET_THRESHOLD = 1000
+
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
-
-  const queryClient = useQueryClient()
-
-
-  // Fetch all demandes (filtering will be done client-side by TanStack)
-  const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes'],
-    queryFn: async () => {
-      const response = await api.get('/demandes')
-      return response.data
-    }
+  const [searchInput, setSearchInput] = useState('')
+  const [filters, setFilters] = useState({
+    type: '',
+    dateDebut: '',
+    dateFin: '',
+    assigneAId: ''
   })
 
-  // Fetch stats
+  const queryClient = useQueryClient()
+  
+  // Debounce pour la recherche serveur
+  const debouncedSearch = useDebounce(searchInput, 500)
+  
+  // Fetch stats d'abord pour connaître la taille du dataset
   const { data: stats } = useQuery<DemandesStats>({
     queryKey: ['demandes-stats'],
     queryFn: async () => {
@@ -41,6 +45,36 @@ const Demandes: React.FC = () => {
       return response.data
     }
   })
+
+  // Déterminer si on utilise la recherche serveur ou client
+  const useServerSearch = useMemo(() => {
+    return stats ? stats.totalDemandes > LARGE_DATASET_THRESHOLD : false
+  }, [stats?.totalDemandes])
+
+  // Fetch demandes avec logique hybride
+  const { data: demandesData, isLoading } = useQuery({
+    queryKey: ['demandes', useServerSearch ? debouncedSearch : '', useServerSearch ? filters : ''],
+    queryFn: async () => {
+      if (useServerSearch) {
+        // Mode serveur : envoyer search et filters
+        const params = new URLSearchParams()
+        if (debouncedSearch) params.append('search', debouncedSearch)
+        if (filters.type) params.append('type', filters.type)
+        if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
+        if (filters.dateFin) params.append('dateFin', filters.dateFin)
+        if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
+        
+        const response = await api.get(`/demandes?${params.toString()}`)
+        return response.data
+      } else {
+        // Mode client : charger toutes les données
+        const response = await api.get('/demandes')
+        return response.data
+      }
+    },
+    enabled: !!stats // Attendre les stats avant de charger les données
+  })
+
 
   const demandes = demandesData?.demandes || []
 
@@ -130,6 +164,13 @@ const Demandes: React.FC = () => {
     }
   }
 
+  const handleFilterChange = (filterName: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }))
+  }
+
 
   return (
     <div className="p-6">
@@ -206,6 +247,13 @@ const Demandes: React.FC = () => {
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
         loading={isLoading}
+        // Props pour la recherche hybride
+        useServerSearch={useServerSearch}
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        filters={useServerSearch ? filters : undefined}
+        onFilterChange={useServerSearch ? handleFilterChange : undefined}
+        totalCount={stats?.totalDemandes}
       />
 
       <DemandeModal

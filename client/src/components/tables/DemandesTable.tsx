@@ -41,6 +41,18 @@ interface DemandesTableProps {
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
   loading?: boolean
+  // Props pour recherche hybride
+  useServerSearch?: boolean
+  searchInput?: string
+  onSearchChange?: (value: string) => void
+  filters?: {
+    type: string
+    dateDebut: string
+    dateFin: string
+    assigneAId: string
+  }
+  onFilterChange?: (filterName: string, value: string) => void
+  totalCount?: number
 }
 
 const columnHelper = createColumnHelper<Demande>()
@@ -95,7 +107,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onEdit,
   onDelete,
   onAddToDossier,
-  loading = false
+  loading = false,
+  useServerSearch = false,
+  searchInput = '',
+  onSearchChange,
+  filters,
+  onFilterChange,
+  totalCount
 }) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -415,29 +433,56 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      {/* Barre de recherche globale TanStack */}
+      {/* Barre de recherche hybride */}
       <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par numéro DS, nom, NIGEND, unité, commune..."
-                value={globalFilter}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={useServerSearch 
+                    ? "Rechercher sur le serveur (25000+ enregistrements)..." 
+                    : "Rechercher localement..."}
+                  value={useServerSearch ? searchInput : globalFilter}
+                  onChange={(e) => useServerSearch 
+                    ? onSearchChange?.(e.target.value)
+                    : setGlobalFilter(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
             </div>
+            {((useServerSearch && searchInput) || (!useServerSearch && globalFilter)) && (
+              <button
+                onClick={() => useServerSearch 
+                  ? onSearchChange?.('')
+                  : setGlobalFilter('')}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Effacer
+              </button>
+            )}
           </div>
-          {globalFilter && (
-            <button
-              onClick={() => setGlobalFilter('')}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Effacer
-            </button>
-          )}
+          
+          {/* Indicateur du mode */}
+          <div className="text-xs text-gray-500 flex items-center gap-2">
+            {useServerSearch ? (
+              <>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                  Mode serveur
+                </span>
+                <span>Dataset volumineux ({totalCount?.toLocaleString()} enregistrements) - recherche avec 500ms de délai</span>
+              </>
+            ) : (
+              <>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Mode client
+                </span>
+                <span>Recherche instantanée sur {demandes.length} enregistrements</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

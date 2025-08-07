@@ -1,4 +1,15 @@
-import React from 'react'
+import React, { useMemo } from 'react'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  flexRender,
+  createColumnHelper,
+  SortingState,
+  ColumnFiltersState
+} from '@tanstack/react-table'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
@@ -10,7 +21,9 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  ChevronUpIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
 
 dayjs.locale('fr')
@@ -24,6 +37,8 @@ interface DemandesTableProps {
   loading?: boolean
 }
 
+const columnHelper = createColumnHelper<Demande>()
+
 const DemandesTable: React.FC<DemandesTableProps> = ({
   demandes,
   onView,
@@ -32,6 +47,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onAddToDossier,
   loading = false
 }) => {
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const parentRef = React.useRef<HTMLDivElement>(null)
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow">
@@ -67,7 +85,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
   }
 
-  const getAudienceUrgency = (dateAudience?: string) => {
+  const getAudienceUrgency = React.useCallback((dateAudience?: string) => {
     if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
     
     const today = dayjs()
@@ -75,198 +93,315 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     const daysDiff = audienceDate.diff(today, 'day')
     
     if (daysDiff < 0) {
-      // Date passée
       return { 
         type: 'passed', 
         style: 'bg-gray-100 text-gray-800', 
         icon: XCircleIcon 
       }
     } else if (daysDiff < 7) {
-      // Urgent (moins de 7 jours)
       return { 
         type: 'urgent', 
         style: 'bg-red-100 text-red-800', 
         icon: ExclamationTriangleIcon 
       }
     } else if (daysDiff < 14) {
-      // Proche (7-14 jours)
       return { 
         type: 'soon', 
         style: 'bg-orange-100 text-orange-800', 
         icon: ClockIcon 
       }
     } else {
-      // Éloignée (plus de 14 jours)
       return { 
         type: 'normal', 
         style: 'bg-green-100 text-green-800', 
         icon: CheckCircleIcon 
       }
     }
-  }
+  }, [])
+
+  const columns = useMemo(() => [
+    columnHelper.accessor('numeroDS', {
+      header: 'Numéro DS',
+      cell: ({ row }) => (
+        <div>
+          <div 
+            className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+            onClick={() => onView(row.original)}
+          >
+            {row.original.numeroDS}
+          </div>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getTypeColor(row.original.type)}`}>
+            {getTypeLabel(row.original.type)}
+          </span>
+        </div>
+      ),
+      enableSorting: true,
+      sortingFn: 'alphanumeric'
+    }),
+    columnHelper.accessor('dateReception', {
+      header: 'Date réception',
+      cell: ({ getValue }) => (
+        <div className="text-sm text-gray-900">
+          {dayjs(getValue()).format('DD/MM/YYYY')}
+        </div>
+      ),
+      enableSorting: true,
+      sortingFn: 'datetime'
+    }),
+    columnHelper.display({
+      id: 'militaire',
+      header: 'Militaire',
+      cell: ({ row }) => (
+        <div className="text-sm">
+          <div className="font-medium text-gray-900">
+            {row.original.grade ? `${row.original.grade} ` : ''}{row.original.prenom} {row.original.nom}
+          </div>
+          {row.original.nigend && (
+            <div className="text-gray-500 text-xs">
+              NIGEND: {row.original.nigend}
+            </div>
+          )}
+        </div>
+      ),
+      enableSorting: false
+    }),
+    columnHelper.accessor('unite', {
+      header: 'Unité',
+      cell: ({ getValue }) => (
+        <span className="text-sm text-gray-900">
+          {getValue() || '-'}
+        </span>
+      ),
+      enableSorting: true,
+      sortingFn: 'alphanumeric'
+    }),
+    columnHelper.display({
+      id: 'faits',
+      header: 'Faits',
+      cell: ({ row }) => (
+        <div className="text-sm">
+          {row.original.dateFaits && (
+            <div className="text-gray-900">
+              {dayjs(row.original.dateFaits).format('DD/MM/YYYY')}
+            </div>
+          )}
+          {row.original.commune && (
+            <div className="text-gray-500 text-xs">
+              {row.original.commune}
+            </div>
+          )}
+        </div>
+      ),
+      enableSorting: false
+    }),
+    columnHelper.display({
+      id: 'dossier',
+      header: 'Dossier',
+      cell: ({ row }) => (
+        row.original.dossier ? (
+          <div className="text-sm">
+            <div className="font-medium text-blue-600">
+              {row.original.dossier.numero}
+            </div>
+            {row.original.dossier.sgami && (
+              <div className="text-gray-500 text-xs">
+                {row.original.dossier.sgami.nom}
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => onAddToDossier(row.original)}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+          >
+            <FolderIcon className="h-4 w-4 mr-1" />
+            Lier au dossier
+          </button>
+        )
+      ),
+      enableSorting: false
+    }),
+    columnHelper.display({
+      id: 'assigneA',
+      header: 'Assigné à',
+      cell: ({ row }) => (
+        <div className="text-sm">
+          {row.original.assigneA ? (
+            <div className="text-gray-900">
+              <div className="font-medium">
+                {row.original.assigneA.grade && `${row.original.assigneA.grade} `}{row.original.assigneA.prenom} {row.original.assigneA.nom}
+              </div>
+            </div>
+          ) : (
+            <span className="text-gray-500 italic">Non assigné</span>
+          )}
+        </div>
+      ),
+      enableSorting: false
+    }),
+    columnHelper.accessor('dateAudience', {
+      header: 'Date audience',
+      cell: ({ getValue }) => {
+        const dateAudience = getValue()
+        if (!dateAudience) {
+          return (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              -
+            </span>
+          )
+        }
+        
+        const urgency = getAudienceUrgency(dateAudience)
+        const IconComponent = urgency.icon
+        const today = dayjs().startOf('day')
+        const audienceDate = dayjs(dateAudience).startOf('day')
+        const daysDiff = audienceDate.diff(today, 'day')
+        
+        return (
+          <div className="flex items-center">
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
+              {IconComponent && (
+                <IconComponent className="h-3 w-3 mr-1" />
+              )}
+              {dayjs(dateAudience).format('DD/MM/YYYY')}
+              {daysDiff >= 0 && (
+                <span className="ml-1">
+                  - {daysDiff} j.
+                </span>
+              )}
+            </span>
+          </div>
+        )
+      },
+      enableSorting: true,
+      sortingFn: 'datetime'
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onView(row.original)}
+            className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
+            title="Voir"
+          >
+            <EyeIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => onEdit(row.original)}
+            className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
+            title="Modifier"
+          >
+            <PencilIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => onDelete(row.original)}
+            className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
+            title="Supprimer"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+        </div>
+      ),
+      enableSorting: false
+    })
+  ], [onView, onEdit, onDelete, onAddToDossier, getAudienceUrgency])
+
+  const table = useReactTable({
+    data: demandes,
+    columns,
+    state: {
+      sorting,
+      columnFilters
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel()
+  })
+
+  const { rows } = table.getRowModel()
+  
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 70,
+    overscan: 10
+  })
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead className="bg-gray-50">
-            <tr>
-              <th>Numéro DS</th>
-              <th>Date réception</th>
-              <th>Militaire</th>
-              <th>Unité</th>
-              <th>Faits</th>
-              <th>Dossier</th>
-              <th>Assigné à</th>
-              <th>Date audience</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {demandes.map((demande) => (
-              <tr key={demande.id}>
-                <td>
-                  <div 
-                    className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-                    onClick={() => onView(demande)}
+      <div 
+        ref={parentRef}
+        className="overflow-auto"
+        style={{ height: '600px' }}
+      >
+        <table className="w-full">
+          <thead className="bg-gray-50 sticky top-0 z-10">
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th
+                    key={header.id}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                    onClick={header.column.getToggleSortingHandler()}
                   >
-                    {demande.numeroDS}
-                  </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getTypeColor(demande.type)}`}>
-                    {getTypeLabel(demande.type)}
-                  </span>
-                </td>
-                <td>
-                  <div className="text-sm text-gray-900">
-                    {dayjs(demande.dateReception).format('DD/MM/YYYY')}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-sm">
-                    <div className="font-medium text-gray-900">
-                      {demande.grade ? `${demande.grade} ` : ''}{demande.prenom} {demande.nom}
-                    </div>
-                    {demande.nigend && (
-                      <div className="text-gray-500 text-xs">
-                        NIGEND: {demande.nigend}
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <span className="text-sm text-gray-900">
-                    {demande.unite || '-'}
-                  </span>
-                </td>
-                <td>
-                  <div className="text-sm">
-                    {demande.dateFaits && (
-                      <div className="text-gray-900">
-                        {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
-                      </div>
-                    )}
-                    {demande.commune && (
-                      <div className="text-gray-500 text-xs">
-                        {demande.commune}
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  {demande.dossier ? (
-                    <div className="text-sm">
-                      <div className="font-medium text-blue-600">
-                        {demande.dossier.numero}
-                      </div>
-                      {demande.dossier.sgami && (
-                        <div className="text-gray-500 text-xs">
-                          {demande.dossier.sgami.nom}
-                        </div>
+                    <div className="flex items-center space-x-1">
+                      <span>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </span>
+                      {header.column.getCanSort() && (
+                        <span className="flex flex-col">
+                          <ChevronUpIcon 
+                            className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
+                          />
+                          <ChevronDownIcon 
+                            className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
+                          />
+                        </span>
                       )}
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => onAddToDossier(demande)}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                    >
-                      <FolderIcon className="h-4 w-4 mr-1" />
-                      Lier au dossier
-                    </button>
-                  )}
-                </td>
-                <td>
-                  <div className="text-sm">
-                    {demande.assigneA ? (
-                      <div className="text-gray-900">
-                        <div className="font-medium">
-                          {demande.assigneA.grade && `${demande.assigneA.grade} `}{demande.assigneA.prenom} {demande.assigneA.nom}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-gray-500 italic">Non assigné</span>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div className="text-sm">
-                    {demande.dateAudience ? (
-                      (() => {
-                        const urgency = getAudienceUrgency(demande.dateAudience)
-                        const IconComponent = urgency.icon
-                        const today = dayjs().startOf('day')
-                        const audienceDate = dayjs(demande.dateAudience).startOf('day')
-                        const daysDiff = audienceDate.diff(today, 'day')
-                        
-                        return (
-                          <div className="flex items-center">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
-                              {IconComponent && (
-                                <IconComponent className="h-3 w-3 mr-1" />
-                              )}
-                              {dayjs(demande.dateAudience).format('DD/MM/YYYY')}
-                              {daysDiff >= 0 && (
-                                <span className="ml-1">
-                                  - {daysDiff} j.
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        )
-                      })()
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        -
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => onView(demande)}
-                      className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
-                      title="Voir"
-                    >
-                      <EyeIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => onEdit(demande)}
-                      className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
-                      title="Modifier"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(demande)}
-                      className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
-                      title="Supprimer"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
+                  </th>
+                ))}
               </tr>
             ))}
+          </thead>
+          <tbody
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              position: 'relative'
+            }}
+          >
+            {virtualizer.getVirtualItems().map(virtualRow => {
+              const row = rows[virtualRow.index]
+              return (
+                <tr
+                  key={row.id}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  className="border-b border-gray-200 hover:bg-gray-50"
+                >
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

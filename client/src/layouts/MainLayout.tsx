@@ -221,9 +221,12 @@ const MainLayout: React.FC = () => {
             </button>
 
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-1 sm:space-y-0">
                 <div className="text-sm text-gray-700">
-                  <span className="font-medium">{user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}</span>
+                  <span className="font-medium">
+                    <span className="hidden sm:inline">{user?.grade && `${user.grade} `}</span>
+                    {user?.prenom} {user?.nom}
+                  </span>
                 </div>
                 {user?.role && getRoleBadge(user.role)}
               </div>

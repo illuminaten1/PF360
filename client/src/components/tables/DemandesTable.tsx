@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,7 +9,6 @@ import {
   SortingState,
   ColumnFiltersState
 } from '@tanstack/react-table'
-import { useVirtualizer } from '@tanstack/react-virtual'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
@@ -39,7 +38,7 @@ interface DemandesTableProps {
 
 const columnHelper = createColumnHelper<Demande>()
 
-// Fonctions utilitaires déplacées hors du composant
+// Fonctions utilitaires
 const getTypeColor = (type: string) => {
   return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
 }
@@ -82,31 +81,6 @@ const getAudienceUrgency = (dateAudience?: string) => {
   }
 }
 
-// Composant de loading
-const LoadingTable = () => (
-  <div className="bg-white rounded-lg shadow">
-    <div className="animate-pulse">
-      <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
-      ))}
-    </div>
-  </div>
-)
-
-// Composant empty state
-const EmptyTable = () => (
-  <div className="bg-white rounded-lg shadow p-8 text-center">
-    <div className="text-gray-400 mb-4">
-      <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m5-9H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2z" />
-      </svg>
-    </div>
-    <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
-    <p className="text-gray-600">Commencez par créer votre première demande.</p>
-  </div>
-)
-
 const DemandesTable: React.FC<DemandesTableProps> = ({
   demandes,
   onView,
@@ -115,10 +89,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onAddToDossier,
   loading = false
 }) => {
-  // Tous les hooks en premier, inconditionnellement
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const parentRef = useRef<HTMLDivElement>(null)
 
   const columns = useMemo(() => [
     columnHelper.accessor('numeroDS', {
@@ -323,97 +295,97 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     getFilteredRowModel: getFilteredRowModel()
   })
 
-  const { rows } = table.getRowModel()
-  
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 70,
-    overscan: 10
-  })
-
-  // Rendu conditionnel APRÈS tous les hooks
+  // Loading state
   if (loading) {
-    return <LoadingTable />
+    return (
+      <div className="bg-white rounded-lg shadow">
+        <div className="animate-pulse">
+          <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
+  // Empty state
   if (demandes.length === 0) {
-    return <EmptyTable />
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <div className="text-gray-400 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m5-9H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
+        <p className="text-gray-600">Commencez par créer votre première demande.</p>
+      </div>
+    )
   }
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div 
-        ref={parentRef}
-        className="overflow-auto"
-        style={{ height: '600px' }}
-      >
-        <div className="w-full">
-          {/* Header fixe */}
-          <div className="bg-gray-50 sticky top-0 z-10 border-b">
-            <div className="grid grid-cols-9 gap-4 px-6 py-3">
-              {table.getHeaderGroups().map(headerGroup => 
-                headerGroup.headers.map(header => (
-                  <div
+      <div className="overflow-x-auto max-h-[600px]">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50 sticky top-0 z-10">
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th
                     key={header.id}
-                    className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none flex items-center space-x-1"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <span>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </span>
-                    {header.column.getCanSort() && (
-                      <span className="flex flex-col">
-                        <ChevronUpIcon 
-                          className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
-                        />
-                        <ChevronDownIcon 
-                          className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
-                        />
+                    <div className="flex items-center space-x-1">
+                      <span>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </span>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-          
-          {/* Contenu virtualisé */}
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              position: 'relative'
-            }}
-          >
-            {virtualizer.getVirtualItems().map(virtualRow => {
-              const row = rows[virtualRow.index]
-              return (
-                <div
-                  key={row.id}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                  className="border-b border-gray-200 hover:bg-gray-50 grid grid-cols-9 gap-4 px-6 py-4 items-center"
-                >
-                  {row.getVisibleCells().map(cell => (
-                    <div key={cell.id} className="whitespace-nowrap">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {header.column.getCanSort() && (
+                        <div className="flex flex-col">
+                          <ChevronUpIcon 
+                            className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
+                          />
+                          <ChevronDownIcon 
+                            className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
+                          />
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )
-            })}
-          </div>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {table.getRowModel().rows.map((row, index) => (
+              <tr
+                key={row.id}
+                className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+              >
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      {/* Info sur le nombre de lignes */}
+      <div className="bg-gray-50 px-6 py-3 border-t">
+        <div className="text-sm text-gray-700">
+          Affichage de <strong>{table.getRowModel().rows.length}</strong> demande(s)
+          {table.getState().columnFilters.length > 0 && (
+            <span> (filtrées)</span>
+          )}
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
-  type GlobalFilterState
+  type VisibilityState
 } from '@tanstack/react-table'
 import { 
   PencilIcon, 
@@ -60,7 +60,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
-  const [columnVisibility, setColumnVisibility] = React.useState({
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     mail: false,
     telephone: false
   })

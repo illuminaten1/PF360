@@ -348,42 +348,43 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         className="overflow-auto"
         style={{ height: '600px' }}
       >
-        <table className="w-full">
-          <thead className="bg-gray-50 sticky top-0 z-10">
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th
+        <div className="w-full">
+          {/* Header fixe */}
+          <div className="bg-gray-50 sticky top-0 z-10 border-b">
+            <div className="grid grid-cols-9 gap-4 px-6 py-3">
+              {table.getHeaderGroups().map(headerGroup => 
+                headerGroup.headers.map(header => (
+                  <div
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                    className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none flex items-center space-x-1"
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div className="flex items-center space-x-1">
-                      <span>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                    <span>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </span>
+                    {header.column.getCanSort() && (
+                      <span className="flex flex-col">
+                        <ChevronUpIcon 
+                          className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
+                        />
+                        <ChevronDownIcon 
+                          className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
+                        />
                       </span>
-                      {header.column.getCanSort() && (
-                        <span className="flex flex-col">
-                          <ChevronUpIcon 
-                            className={`h-3 w-3 ${header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
-                          />
-                          <ChevronDownIcon 
-                            className={`h-3 w-3 -mt-1 ${header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
-                          />
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          
+          {/* Contenu virtualisé */}
+          <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
               position: 'relative'
@@ -392,7 +393,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             {virtualizer.getVirtualItems().map(virtualRow => {
               const row = rows[virtualRow.index]
               return (
-                <tr
+                <div
                   key={row.id}
                   style={{
                     position: 'absolute',
@@ -402,18 +403,18 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                     height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
-                  className="border-b border-gray-200 hover:bg-gray-50"
+                  className="border-b border-gray-200 hover:bg-gray-50 grid grid-cols-9 gap-4 px-6 py-4 items-center"
                 >
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    <div key={cell.id} className="whitespace-nowrap">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
+                    </div>
                   ))}
-                </tr>
+                </div>
               )
             })}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     </div>
   )

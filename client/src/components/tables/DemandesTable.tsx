@@ -5,6 +5,9 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
   flexRender,
   type ColumnDef,
   type SortingState,
@@ -41,74 +44,17 @@ interface DemandesTableProps {
   onAddToDossier: (demande: Demande) => void
 }
 
-function Filter({ column, table }: { column: any, table: any }) {
-  const firstValue = table
-    .getPreFilteredRowModel()
-    .flatRows[0]?.getValue(column.id)
-
+function Filter({ column }: { column: any }) {
   const columnFilterValue = column.getFilterValue()
 
-  const sortedUniqueValues = React.useMemo(
-    () =>
-      typeof firstValue === 'number'
-        ? []
-        : Array.from(column.getFacetedUniqueValues().keys()).sort(),
-    [column.getFacetedUniqueValues()]
-  )
-
-  return typeof firstValue === 'number' ? (
-    <div>
-      <div className="flex space-x-2">
-        <input
-          type="number"
-          value={(columnFilterValue as [number, number])?.[0] ?? ''}
-          onChange={(e) =>
-            column.setFilterValue((old: [number, number]) => [
-              e.target.value,
-              old?.[1]
-            ])
-          }
-          placeholder={`Min ${
-            column.getFacetedMinMaxValues()?.[0]
-              ? `(${column.getFacetedMinMaxValues()?.[0]})`
-              : ''
-          }`}
-          className="w-24 border shadow rounded px-1"
-        />
-        <input
-          type="number"
-          value={(columnFilterValue as [number, number])?.[1] ?? ''}
-          onChange={(e) =>
-            column.setFilterValue((old: [number, number]) => [
-              old?.[0],
-              e.target.value
-            ])
-          }
-          placeholder={`Max ${
-            column.getFacetedMinMaxValues()?.[1]
-              ? `(${column.getFacetedMinMaxValues()?.[1]})`
-              : ''
-          }`}
-          className="w-24 border shadow rounded px-1"
-        />
-      </div>
-    </div>
-  ) : (
-    <>
-      <datalist id={column.id + 'list'}>
-        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
-          <option value={value} key={value} />
-        ))}
-      </datalist>
-      <input
-        type="text"
-        value={(columnFilterValue ?? '') as string}
-        onChange={(e) => column.setFilterValue(e.target.value)}
-        placeholder={`Rechercher... (${column.getFacetedUniqueValues().size})`}
-        className="w-36 border shadow rounded px-1"
-        list={column.id + 'list'}
-      />
-    </>
+  return (
+    <input
+      type="text"
+      value={(columnFilterValue ?? '') as string}
+      onChange={(e) => column.setFilterValue(e.target.value)}
+      placeholder={`Filtrer...`}
+      className="w-32 border shadow rounded px-2 py-1 text-xs"
+    />
   )
 }
 
@@ -414,7 +360,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   const table = useReactTable({
     data,
     columns,
-    filterFns: {},
     state: {
       sorting,
       columnFilters,
@@ -427,9 +372,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getCoreRowModel(),
-    getFacetedUniqueValues: () => new Map(),
-    getFacetedMinMaxValues: () => undefined,
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
     initialState: {
       pagination: {
         pageSize: 50
@@ -512,7 +457,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       </div>
                       {header.column.getCanFilter() && (
                         <div>
-                          <Filter column={header.column} table={table} />
+                          <Filter column={header.column} />
                         </div>
                       )}
                     </div>

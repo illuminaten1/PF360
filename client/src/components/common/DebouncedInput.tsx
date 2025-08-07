@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface DebouncedInputProps {
   value: string
@@ -16,22 +16,15 @@ const DebouncedInput: React.FC<DebouncedInputProps> = ({
   debounce = 500
 }) => {
   const [value, setValue] = useState(initialValue)
-  const isFirstRender = useRef(true)
 
-  // Sync seulement au premier render ou si c'est un clear explicite
+  // Sync avec la prop SEULEMENT si elle est différente et vient de l'extérieur (ex: clear)
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
+    if (initialValue !== value) {
+      setValue(initialValue)
     }
-    
-    // Sync seulement si le parent nous envoie explicitement une string vide (clear button)
-    if (initialValue === '' && value !== '') {
-      setValue('')
-    }
-  }, [initialValue, value])
+  }, [initialValue])
 
-  // Debounce l'appel au parent
+  // Debounce l'appel au callback parent
   useEffect(() => {
     const timeout = setTimeout(() => {
       onChange(value)

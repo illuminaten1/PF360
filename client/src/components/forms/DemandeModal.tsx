@@ -617,16 +617,16 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                   <div className="bg-red-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Partie civile</h4>
                     <div className="space-y-4">
-                      <div className="flex items-center">
+                      <label className="flex items-center cursor-pointer p-2 rounded-md hover:bg-red-100 transition-colors">
                         <input
                           {...register('partieCivile')}
                           type="checkbox"
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                         />
-                        <label className="ml-2 text-sm text-gray-700">
+                        <span className="ml-3 text-sm font-medium text-gray-700 select-none">
                           Constitution de partie civile
-                        </label>
-                      </div>
+                        </span>
+                      </label>
 
                       {partieCivile && (
                         <div>
@@ -649,39 +649,39 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                   {/* Soutiens */}
                   <div className="bg-green-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Soutiens demandés</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center">
+                    <div className="space-y-2">
+                      <label className="flex items-center cursor-pointer p-2 rounded-md hover:bg-green-100 transition-colors">
                         <input
                           {...register('soutienPsychologique')}
                           type="checkbox"
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                         />
-                        <label className="ml-2 text-sm text-gray-700">
+                        <span className="ml-3 text-sm font-medium text-gray-700 select-none">
                           Soutien psychologique
-                        </label>
-                      </div>
+                        </span>
+                      </label>
 
-                      <div className="flex items-center">
+                      <label className="flex items-center cursor-pointer p-2 rounded-md hover:bg-green-100 transition-colors">
                         <input
                           {...register('soutienSocial')}
                           type="checkbox"
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                         />
-                        <label className="ml-2 text-sm text-gray-700">
+                        <span className="ml-3 text-sm font-medium text-gray-700 select-none">
                           Soutien social
-                        </label>
-                      </div>
+                        </span>
+                      </label>
 
-                      <div className="flex items-center">
+                      <label className="flex items-center cursor-pointer p-2 rounded-md hover:bg-green-100 transition-colors">
                         <input
                           {...register('soutienMedical')}
                           type="checkbox"
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                         />
-                        <label className="ml-2 text-sm text-gray-700">
+                        <span className="ml-3 text-sm font-medium text-gray-700 select-none">
                           Soutien médical
-                        </label>
-                      </div>
+                        </span>
+                      </label>
                     </div>
                   </div>
 

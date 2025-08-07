@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { type PaginationState, type SortingState } from '@tanstack/react-table'
 import toast from 'react-hot-toast'
-import { PlusIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
 import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
@@ -21,61 +20,15 @@ interface DemandesStats {
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showFilters, setShowFilters] = useState(true)
-  const [filters, setFilters] = useState({
-    type: '',
-    dateDebut: '',
-    dateFin: '',
-    assigneAId: ''
-  })
-  
-  // Table state
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 20
-  })
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'dateReception', desc: true }
-  ])
 
   const queryClient = useQueryClient()
 
-  // Fetch users for assignment filter
-  const { data: users = [] } = useQuery({
-    queryKey: ['demandes-users'],
+  // Fetch all demandes (client-side filtering with TanStack)
+  const { data: demandes = [], isLoading } = useQuery({
+    queryKey: ['demandes-all'],
     queryFn: async () => {
-      const response = await api.get('/demandes/users')
-      return response.data
-    }
-  })
-
-  // Fetch demandes with pagination, sorting and filters
-  const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', searchTerm, filters, pagination, sorting],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      
-      // Pagination
-      params.append('page', String(pagination.pageIndex + 1))
-      params.append('limit', String(pagination.pageSize))
-      
-      // Sorting
-      if (sorting.length > 0) {
-        const sort = sorting[0]
-        params.append('sortBy', sort.id)
-        params.append('sortOrder', sort.desc ? 'desc' : 'asc')
-      }
-      
-      // Filters
-      if (searchTerm) params.append('search', searchTerm)
-      if (filters.type) params.append('type', filters.type)
-      if (filters.dateDebut) params.append('dateDebut', filters.dateDebut)
-      if (filters.dateFin) params.append('dateFin', filters.dateFin)
-      if (filters.assigneAId) params.append('assigneAId', filters.assigneAId)
-      
-      const response = await api.get(`/demandes?${params.toString()}`)
-      return response.data
+      const response = await api.get('/demandes?limit=25000') // Get all demandes for client-side processing
+      return response.data.demandes
     }
   })
 
@@ -88,9 +41,6 @@ const Demandes: React.FC = () => {
     }
   })
 
-  const demandes = demandesData?.demandes || []
-  const totalCount = demandesData?.total || 0
-
   // Create demande mutation
   const createDemandeMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -98,9 +48,9 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] }) // Update dossiers list
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande créée avec succès')
     },
     onError: (error: any) => {
@@ -115,7 +65,7 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande modifiée avec succès')
@@ -131,7 +81,7 @@ const Demandes: React.FC = () => {
       await api.delete(`/demandes/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande supprimée avec succès')
@@ -152,7 +102,6 @@ const Demandes: React.FC = () => {
   }
 
   const handleViewDemande = (demande: Demande) => {
-    // Pour l'instant, ouvre la demande en mode édition
     setSelectedDemande(demande)
     setIsModalOpen(true)
   }
@@ -164,7 +113,6 @@ const Demandes: React.FC = () => {
   }
 
   const handleAddToDossier = (demande: Demande) => {
-    // This will open the modal in edit mode to allow assigning to a dossier
     setSelectedDemande(demande)
     setIsModalOpen(true)
   }
@@ -177,29 +125,10 @@ const Demandes: React.FC = () => {
     }
   }
 
-  const handleFilterChange = (filterName: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value
-    }))
-    // Reset to first page when filters change
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
-  }
-
-  const handlePaginationChange = (updater: PaginationState | ((old: PaginationState) => PaginationState)) => {
-    setPagination(updater)
-  }
-
-  const handleSortingChange = (updater: SortingState | ((old: SortingState) => SortingState)) => {
-    setSorting(updater)
-    // Reset to first page when sorting changes
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
-  }
-
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Demandes</h1>
             <p className="mt-1 text-sm text-gray-600">
@@ -261,127 +190,11 @@ const Demandes: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par numéro DS, nom, NIGEND, commune..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value)
-                  setPagination(prev => ({ ...prev, pageIndex: 0 }))
-                }}
-                className="input w-full pl-10"
-              />
-            </div>
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn-secondary flex items-center"
-          >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            Filtres
-          </button>
-        </div>
-
-        {/* Advanced filters */}
-        {showFilters && (
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
-              <div className="md:col-span-2">
-                <label className="label block text-gray-700 mb-2">Type</label>
-                <select
-                  value={filters.type}
-                  onChange={(e) => handleFilterChange('type', e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Tous les types</option>
-                  <option value="VICTIME">Victime</option>
-                  <option value="MIS_EN_CAUSE">Mis en cause</option>
-                </select>
-              </div>
-              <div className="flex flex-col justify-end">
-                <button
-                  onClick={() => {
-                    const today = new Date().toISOString().split('T')[0]
-                    setFilters(prev => ({
-                      ...prev,
-                      dateDebut: today,
-                      dateFin: today
-                    }))
-                  }}
-                  className="btn-secondary h-10 text-sm whitespace-nowrap"
-                >
-                  Aujourd'hui
-                </button>
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Date début</label>
-                <input
-                  type="date"
-                  value={filters.dateDebut}
-                  onChange={(e) => handleFilterChange('dateDebut', e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div>
-                <label className="label block text-gray-700 mb-2">Date fin</label>
-                <input
-                  type="date"
-                  value={filters.dateFin}
-                  onChange={(e) => handleFilterChange('dateFin', e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="label block text-gray-700 mb-2">Assigné à</label>
-                <select
-                  value={filters.assigneAId}
-                  onChange={(e) => handleFilterChange('assigneAId', e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Tous les utilisateurs</option>
-                  <option value="null">Non assigné</option>
-                  {users?.map((user: any) => (
-                    <option key={user.id} value={user.id}>
-                      {user.grade && `${user.grade} `}{user.prenom} {user.nom}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col justify-end">
-                <button
-                  onClick={() => {
-                    setFilters({
-                      type: '',
-                      dateDebut: '',
-                      dateFin: '',
-                      assigneAId: ''
-                    })
-                    setPagination(prev => ({ ...prev, pageIndex: 0 }))
-                  }}
-                  className="btn-secondary h-10 text-sm whitespace-nowrap"
-                >
-                  Effacer les filtres
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <DemandesTable
         data={demandes}
-        totalCount={totalCount}
         loading={isLoading}
-        pagination={pagination}
-        sorting={sorting}
-        onPaginationChange={handlePaginationChange}
-        onSortingChange={handleSortingChange}
         onView={handleViewDemande}
         onEdit={handleEditDemande}
         onDelete={handleDeleteDemande}

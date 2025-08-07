@@ -3,10 +3,13 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
   flexRender,
   type ColumnDef,
   type SortingState,
-  type PaginationState
+  type ColumnFiltersState,
+  type GlobalFilterState
 } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
@@ -23,38 +26,106 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 
 dayjs.locale('fr')
 
 interface DemandesTableProps {
   data: Demande[]
-  totalCount: number
   loading?: boolean
-  pagination: PaginationState
-  sorting: SortingState
-  onPaginationChange: (pagination: PaginationState | ((old: PaginationState) => PaginationState)) => void
-  onSortingChange: (sorting: SortingState | ((old: SortingState) => SortingState)) => void
   onView: (demande: Demande) => void
   onEdit: (demande: Demande) => void
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
 }
 
+function Filter({ column, table }: { column: any, table: any }) {
+  const firstValue = table
+    .getPreFilteredRowModel()
+    .flatRows[0]?.getValue(column.id)
+
+  const columnFilterValue = column.getFilterValue()
+
+  const sortedUniqueValues = React.useMemo(
+    () =>
+      typeof firstValue === 'number'
+        ? []
+        : Array.from(column.getFacetedUniqueValues().keys()).sort(),
+    [column.getFacetedUniqueValues()]
+  )
+
+  return typeof firstValue === 'number' ? (
+    <div>
+      <div className="flex space-x-2">
+        <input
+          type="number"
+          value={(columnFilterValue as [number, number])?.[0] ?? ''}
+          onChange={(e) =>
+            column.setFilterValue((old: [number, number]) => [
+              e.target.value,
+              old?.[1]
+            ])
+          }
+          placeholder={`Min ${
+            column.getFacetedMinMaxValues()?.[0]
+              ? `(${column.getFacetedMinMaxValues()?.[0]})`
+              : ''
+          }`}
+          className="w-24 border shadow rounded px-1"
+        />
+        <input
+          type="number"
+          value={(columnFilterValue as [number, number])?.[1] ?? ''}
+          onChange={(e) =>
+            column.setFilterValue((old: [number, number]) => [
+              old?.[0],
+              e.target.value
+            ])
+          }
+          placeholder={`Max ${
+            column.getFacetedMinMaxValues()?.[1]
+              ? `(${column.getFacetedMinMaxValues()?.[1]})`
+              : ''
+          }`}
+          className="w-24 border shadow rounded px-1"
+        />
+      </div>
+    </div>
+  ) : (
+    <>
+      <datalist id={column.id + 'list'}>
+        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
+          <option value={value} key={value} />
+        ))}
+      </datalist>
+      <input
+        type="text"
+        value={(columnFilterValue ?? '') as string}
+        onChange={(e) => column.setFilterValue(e.target.value)}
+        placeholder={`Rechercher... (${column.getFacetedUniqueValues().size})`}
+        className="w-36 border shadow rounded px-1"
+        list={column.id + 'list'}
+      />
+    </>
+  )
+}
+
 const DemandesTable: React.FC<DemandesTableProps> = ({
   data,
-  totalCount,
   loading = false,
-  pagination,
-  sorting,
-  onPaginationChange,
-  onSortingChange,
   onView,
   onEdit,
   onDelete,
   onAddToDossier
 }) => {
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'dateReception', desc: true }
+  ])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = React.useState('')
+
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
   }
@@ -102,20 +173,30 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       {
         accessorKey: 'numeroDS',
         header: 'Numéro DS',
-        cell: ({ row, getValue }) => (
-          <div>
-            <div 
-              className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-              onClick={() => onView(row.original)}
-            >
-              {getValue<string>()}
-            </div>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getTypeColor(row.original.type)}`}>
-              {getTypeLabel(row.original.type)}
-            </span>
+        cell: ({ getValue, row }) => (
+          <div 
+            className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+            onClick={() => onView(row.original)}
+          >
+            {getValue<string>()}
           </div>
         ),
-        size: 150
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'type',
+        header: 'Type',
+        cell: ({ getValue }) => {
+          const type = getValue<string>()
+          return (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(type)}`}>
+              {getTypeLabel(type)}
+            </span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'equals'
       },
       {
         accessorKey: 'dateReception',
@@ -125,28 +206,52 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             {dayjs(getValue<string>()).format('DD/MM/YYYY')}
           </div>
         ),
-        size: 120
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
       },
       {
-        accessorKey: 'militaire',
-        header: 'Militaire',
-        cell: ({ row }) => {
-          const demande = row.original
-          return (
-            <div className="text-sm">
-              <div className="font-medium text-gray-900">
-                {demande.grade ? `${demande.grade} ` : ''}{demande.prenom} {demande.nom}
-              </div>
-              {demande.nigend && (
-                <div className="text-gray-500 text-xs">
-                  NIGEND: {demande.nigend}
-                </div>
-              )}
-            </div>
-          )
-        },
-        enableSorting: false,
-        size: 200
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ getValue }) => (
+          <div className="font-medium text-gray-900">
+            {getValue<string>()}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'prenom',
+        header: 'Prénom',
+        cell: ({ getValue }) => (
+          <div className="text-gray-900">
+            {getValue<string>()}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'grade',
+        header: 'Grade',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'equals'
+      },
+      {
+        accessorKey: 'nigend',
+        header: 'NIGEND',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-500">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
       },
       {
         accessorKey: 'unite',
@@ -156,33 +261,38 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             {getValue<string>() || '-'}
           </span>
         ),
-        size: 150
+        enableColumnFilter: true,
+        filterFn: 'includesString'
       },
       {
         accessorKey: 'dateFaits',
-        header: 'Faits',
-        cell: ({ row }) => {
-          const demande = row.original
-          return (
-            <div className="text-sm">
-              {demande.dateFaits && (
-                <div className="text-gray-900">
-                  {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
-                </div>
-              )}
-              {demande.commune && (
-                <div className="text-gray-500 text-xs">
-                  {demande.commune}
-                </div>
-              )}
+        header: 'Date faits',
+        cell: ({ getValue }) => {
+          const date = getValue<string>()
+          return date ? (
+            <div className="text-sm text-gray-900">
+              {dayjs(date).format('DD/MM/YYYY')}
             </div>
+          ) : (
+            <span className="text-gray-400">-</span>
           )
         },
-        enableSorting: false,
-        size: 150
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
       },
       {
-        accessorKey: 'dossier',
+        accessorKey: 'commune',
+        header: 'Commune',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'dossier.numero',
         header: 'Dossier',
         cell: ({ row }) => {
           const demande = row.original
@@ -191,11 +301,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               <div className="font-medium text-blue-600">
                 {demande.dossier.numero}
               </div>
-              {demande.dossier.sgami && (
-                <div className="text-gray-500 text-xs">
-                  {demande.dossier.sgami.nom}
-                </div>
-              )}
             </div>
           ) : (
             <button
@@ -203,16 +308,17 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
             >
               <FolderIcon className="h-4 w-4 mr-1" />
-              Lier au dossier
+              Lier
             </button>
           )
         },
-        enableSorting: false,
-        size: 150
+        enableColumnFilter: false,
+        enableSorting: false
       },
       {
-        accessorKey: 'assigneA',
+        id: 'assigneA',
         header: 'Assigné à',
+        accessorFn: (row) => row.assigneA ? `${row.assigneA.grade || ''} ${row.assigneA.prenom} ${row.assigneA.nom}`.trim() : 'Non assigné',
         cell: ({ row }) => {
           const assigneA = row.original.assigneA
           return (
@@ -229,8 +335,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             </div>
           )
         },
-        enableSorting: false,
-        size: 150
+        enableColumnFilter: true,
+        filterFn: 'includesString'
       },
       {
         accessorKey: 'dateAudience',
@@ -267,7 +373,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             </div>
           )
         },
-        size: 180
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
       },
       {
         id: 'actions',
@@ -297,8 +404,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             </button>
           </div>
         ),
-        enableSorting: false,
-        size: 120
+        enableColumnFilter: false,
+        enableSorting: false
       }
     ],
     [onView, onEdit, onDelete, onAddToDossier]
@@ -307,17 +414,27 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   const table = useReactTable({
     data,
     columns,
-    rowCount: totalCount,
+    filterFns: {},
     state: {
-      pagination,
-      sorting
+      sorting,
+      columnFilters,
+      globalFilter
     },
-    onPaginationChange,
-    onSortingChange,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    manualPagination: true,
-    manualSorting: true
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getCoreRowModel(),
+    getFacetedUniqueValues: () => new Map(),
+    getFacetedMinMaxValues: () => undefined,
+    initialState: {
+      pagination: {
+        pageSize: 50
+      }
+    }
   })
 
   if (loading) {
@@ -333,24 +450,25 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     )
   }
 
-  if (data.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <div className="text-gray-400 mb-4">
-          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m5-9H7a2 2 0 00-2 2v10a2 2 0 002-2V6a2 2 0 00-2-2z" />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
-        <p className="text-gray-600">Aucune demande ne correspond aux critères de recherche.</p>
-      </div>
-    )
-  }
-
-  const pageCount = Math.ceil(totalCount / pagination.pageSize)
-
   return (
     <div className="bg-white rounded-lg shadow">
+      {/* Global Search */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          <input
+            value={globalFilter ?? ''}
+            onChange={(e) => setGlobalFilter(String(e.target.value))}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Recherche globale dans toutes les colonnes..."
+          />
+          <span className="text-sm text-gray-500">
+            {table.getFilteredRowModel().rows.length} résultat(s)
+          </span>
+        </div>
+      </div>
+
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -359,24 +477,43 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    style={{ width: header.getSize() }}
-                    onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </span>
-                      {header.column.getCanSort() && (
-                        <span className="flex flex-col">
-                          {header.column.getIsSorted() === 'asc' ? (
-                            <ChevronUpIcon className="h-4 w-4 text-gray-400" />
-                          ) : header.column.getIsSorted() === 'desc' ? (
-                            <ChevronDownIcon className="h-4 w-4 text-gray-400" />
-                          ) : (
-                            <div className="h-4 w-4"></div>
-                          )}
-                        </span>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        {header.isPlaceholder ? null : (
+                          <>
+                            <div
+                              className={`cursor-pointer select-none flex items-center ${
+                                header.column.getCanSort() ? 'hover:text-gray-700' : ''
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                              {header.column.getCanSort() && (
+                                <span className="ml-1">
+                                  {header.column.getIsSorted() === 'asc' ? (
+                                    <ChevronUpIcon className="h-4 w-4" />
+                                  ) : header.column.getIsSorted() === 'desc' ? (
+                                    <ChevronDownIcon className="h-4 w-4" />
+                                  ) : (
+                                    <div className="h-4 w-4 opacity-0 group-hover:opacity-100">
+                                      <ChevronUpIcon className="h-4 w-4" />
+                                    </div>
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {header.column.getCanFilter() && (
+                        <div>
+                          <Filter column={header.column} table={table} />
+                        </div>
                       )}
                     </div>
                   </th>
@@ -400,31 +537,26 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           </tbody>
         </table>
       </div>
-      
+
       {/* Pagination */}
       <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center text-sm text-gray-700">
             <span>
-              Affichage de {pagination.pageIndex * pagination.pageSize + 1} à{' '}
-              {Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalCount)} sur{' '}
-              {totalCount} résultats
+              Page {table.getState().pagination.pageIndex + 1} sur{' '}
+              {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
             </span>
           </div>
           
           <div className="flex items-center space-x-2">
             <select
-              value={pagination.pageSize}
+              value={table.getState().pagination.pageSize}
               onChange={e => {
-                onPaginationChange({
-                  ...pagination,
-                  pageSize: Number(e.target.value),
-                  pageIndex: 0
-                })
+                table.setPageSize(Number(e.target.value))
               }}
               className="border border-gray-300 rounded px-2 py-1 text-sm"
             >
-              {[10, 20, 50, 100].map(pageSize => (
+              {[10, 20, 50, 100, 200].map(pageSize => (
                 <option key={pageSize} value={pageSize}>
                   {pageSize} par page
                 </option>
@@ -433,8 +565,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             
             <div className="flex items-center space-x-1">
               <button
-                onClick={() => onPaginationChange({ ...pagination, pageIndex: 0 })}
-                disabled={pagination.pageIndex === 0}
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
@@ -442,28 +574,28 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               </button>
               
               <button
-                onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })}
-                disabled={pagination.pageIndex === 0}
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
               
               <span className="px-3 py-1 text-sm">
-                Page {pagination.pageIndex + 1} sur {pageCount}
+                {table.getState().pagination.pageIndex + 1}
               </span>
               
               <button
-                onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })}
-                disabled={pagination.pageIndex >= pageCount - 1}
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
               
               <button
-                onClick={() => onPaginationChange({ ...pagination, pageIndex: pageCount - 1 })}
-                disabled={pagination.pageIndex >= pageCount - 1}
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 <ChevronRightIcon className="h-4 w-4" />

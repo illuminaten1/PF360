@@ -14,7 +14,9 @@ import {
   ClockIcon,
   Bars3Icon,
   XMarkIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  ShieldCheckIcon,
+  UserIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -41,6 +43,39 @@ const MainLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const isActive = (href: string) => location.pathname === href
+
+  const getRoleBadge = (role: string) => {
+    if (role === 'ADMIN') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+          <ShieldCheckIcon className="w-4 h-4 mr-1" />
+          Administrateur
+        </span>
+      )
+    }
+    if (role === 'REDACTEUR') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+          <UserIcon className="w-4 h-4 mr-1" />
+          Rédacteur
+        </span>
+      )
+    }
+    if (role === 'GREFFIER') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          <UserIcon className="w-4 h-4 mr-1" />
+          Greffier
+        </span>
+      )
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <UserIcon className="w-4 h-4 mr-1" />
+        {role}
+      </span>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -186,8 +221,11 @@ const MainLayout: React.FC = () => {
             </button>
 
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-700">
-                <span className="font-medium">{user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}</span>
+              <div className="flex items-center space-x-3">
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium">{user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}</span>
+                </div>
+                {user?.role && getRoleBadge(user.role)}
               </div>
               <button
                 onClick={logout}

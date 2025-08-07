@@ -71,22 +71,26 @@ const DossierModal: React.FC<DossierModalProps> = ({
   })
 
   useEffect(() => {
-    if (dossier) {
-      reset({
-        notes: dossier.notes || '',
-        sgamiId: dossier.sgami?.id || '',
-        assigneAId: dossier.assigneA?.id || '',
-        badges: dossier.badges.map(b => b.badge.id) || []
-      })
-    } else {
-      reset({
-        notes: '',
-        sgamiId: '',
-        assigneAId: '',
-        badges: []
-      })
+    if (isOpen) {
+      if (dossier) {
+        // Mode édition : remplir avec les données existantes
+        reset({
+          notes: dossier.notes || '',
+          sgamiId: dossier.sgami?.id || '',
+          assigneAId: dossier.assigneA?.id || '',
+          badges: dossier.badges.map(b => b.badge.id) || []
+        })
+      } else {
+        // Mode création : réinitialiser complètement le formulaire
+        reset({
+          notes: '',
+          sgamiId: '',
+          assigneAId: '',
+          badges: []
+        })
+      }
     }
-  }, [dossier, reset])
+  }, [isOpen, dossier, reset])
 
   const handleFormSubmit = async (data: DossierFormData) => {
     try {

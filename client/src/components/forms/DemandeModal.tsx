@@ -79,7 +79,37 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
     setValue,
     formState: { errors, isSubmitting }
   } = useForm<DemandeFormData>({
-    resolver: zodResolver(demandeSchema)
+    resolver: zodResolver(demandeSchema),
+    defaultValues: {
+      numeroDS: '',
+      type: 'VICTIME',
+      nigend: '',
+      grade: undefined,
+      statutDemandeur: undefined,
+      nom: '',
+      prenom: '',
+      adresse1: '',
+      adresse2: '',
+      telephone1: '',
+      telephone2: '',
+      unite: '',
+      dateFaits: '',
+      commune: '',
+      codePostal: '',
+      position: '',
+      resume: '',
+      blessures: '',
+      partieCivile: false,
+      montantPartieCivile: undefined,
+      qualificationsPenales: '',
+      dateAudience: '',
+      soutienPsychologique: false,
+      soutienSocial: false,
+      soutienMedical: false,
+      dateReception: new Date().toISOString().split('T')[0],
+      dossierId: '',
+      assigneAId: ''
+    }
   })
 
   const partieCivile = watch('partieCivile')
@@ -159,6 +189,12 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       }
       
       await onSubmit(data)
+      
+      // Réinitialiser le formulaire après une création réussie
+      if (!demande) {
+        reset()
+      }
+      
       onClose()
     } catch (error) {
       // L'erreur sera gérée par la mutation dans le parent

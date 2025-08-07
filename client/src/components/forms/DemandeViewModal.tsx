@@ -140,7 +140,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           {demande.branche && (
                             <div>
                               <span className="block text-sm font-medium text-gray-600 mb-1">Branche</span>
-                              <p className="text-gray-900">{demande.branche}</p>
+                              <p className="text-gray-900 font-medium">{demande.branche}</p>
                             </div>
                           )}
                           
@@ -153,8 +153,8 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           
                           {demande.departement && (
                             <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Département</span>
-                              <p className="text-gray-900">{demande.departement}</p>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Département d'affectation</span>
+                              <p className="text-gray-900 font-mono font-medium">{demande.departement}</p>
                             </div>
                           )}
                           

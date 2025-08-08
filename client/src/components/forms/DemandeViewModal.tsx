@@ -1,6 +1,6 @@
 import React from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon, UserIcon, MapPinIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, UserIcon, MapPinIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ExclamationTriangleIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
@@ -34,6 +34,40 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
 
   const formatDateTime = (date: string | undefined) => {
     return date ? dayjs(date).format('DD/MM/YYYY à HH:mm') : '-'
+  }
+
+  const getAudienceUrgency = (dateAudience?: string) => {
+    if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
+    
+    const today = dayjs()
+    const audienceDate = dayjs(dateAudience)
+    const daysDiff = audienceDate.diff(today, 'day')
+    
+    if (daysDiff < 0) {
+      return { 
+        type: 'passed', 
+        style: 'bg-gray-100 text-gray-800', 
+        icon: XCircleIcon 
+      }
+    } else if (daysDiff < 7) {
+      return { 
+        type: 'urgent', 
+        style: 'bg-red-100 text-red-800', 
+        icon: ExclamationTriangleIcon 
+      }
+    } else if (daysDiff < 14) {
+      return { 
+        type: 'soon', 
+        style: 'bg-orange-100 text-orange-800', 
+        icon: ClockIcon 
+      }
+    } else {
+      return { 
+        type: 'normal', 
+        style: 'bg-green-100 text-green-800', 
+        icon: CheckCircleIcon 
+      }
+    }
   }
 
   return (
@@ -197,14 +231,24 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                             {demande.emailProfessionnel && (
                               <div>
                                 <span className="block text-sm font-medium text-gray-600 mb-1">Email professionnel</span>
-                                <p className="text-gray-900 font-mono break-all">{demande.emailProfessionnel}</p>
+                                <a 
+                                  href={`mailto:${demande.emailProfessionnel}`}
+                                  className="text-blue-600 hover:text-blue-800 font-mono break-all underline transition-colors"
+                                >
+                                  {demande.emailProfessionnel}
+                                </a>
                               </div>
                             )}
                             
                             {demande.emailPersonnel && (
                               <div>
                                 <span className="block text-sm font-medium text-gray-600 mb-1">Email personnel</span>
-                                <p className="text-gray-900 font-mono break-all">{demande.emailPersonnel}</p>
+                                <a 
+                                  href={`mailto:${demande.emailPersonnel}`}
+                                  className="text-blue-600 hover:text-blue-800 font-mono break-all underline transition-colors"
+                                >
+                                  {demande.emailPersonnel}
+                                </a>
                               </div>
                             )}
                           </div>
@@ -306,7 +350,31 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <span className="block text-sm font-medium text-gray-600 mb-1">Date d'audience</span>
-                            <p className="text-gray-900">{formatDate(demande.dateAudience)}</p>
+                            {demande.dateAudience ? (() => {
+                              const urgency = getAudienceUrgency(demande.dateAudience)
+                              const IconComponent = urgency.icon
+                              const today = dayjs().startOf('day')
+                              const audienceDate = dayjs(demande.dateAudience).startOf('day')
+                              const daysDiff = audienceDate.diff(today, 'day')
+                              
+                              return (
+                                <div className="flex items-center">
+                                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${urgency.style}`}>
+                                    {IconComponent && (
+                                      <IconComponent className="h-4 w-4 mr-2" />
+                                    )}
+                                    {dayjs(demande.dateAudience).format('DD/MM/YYYY')}
+                                    {daysDiff >= 0 && (
+                                      <span className="ml-2">
+                                        - {daysDiff} jour{daysDiff !== 1 ? 's' : ''}
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                              )
+                            })() : (
+                              <p className="text-gray-900">-</p>
+                            )}
                           </div>
                           
                           <div>

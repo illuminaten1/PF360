@@ -10,8 +10,8 @@ import api from '@/utils/api'
 
 const dossierSchema = z.object({
   notes: z.string().optional(),
-  sgamiId: z.string().optional(),
-  assigneAId: z.string().optional(),
+  sgamiId: z.string().min(1, "Le SGAMI (BAP) est requis"),
+  assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional()
 })
 
@@ -20,7 +20,7 @@ type DossierFormData = z.infer<typeof dossierSchema>
 interface DossierModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: DossierFormData) => Promise<void>
+  onSubmit: (data: any) => Promise<void>
   dossier?: Dossier | null
   title: string
 }
@@ -94,7 +94,14 @@ const DossierModal: React.FC<DossierModalProps> = ({
 
   const handleFormSubmit = async (data: DossierFormData) => {
     try {
-      await onSubmit(data)
+      // Nettoyer les données : remplacer les chaînes vides par undefined
+      const cleanedData = {
+        ...data,
+        sgamiId: data.sgamiId || undefined,
+        assigneAId: data.assigneAId || undefined,
+        notes: data.notes || undefined
+      }
+      await onSubmit(cleanedData)
       onClose()
     } catch (error) {
       console.error('Form submission error:', error)

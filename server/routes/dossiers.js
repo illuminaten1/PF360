@@ -11,6 +11,13 @@ router.use(authMiddleware);
 
 const createDossierSchema = z.object({
   notes: z.string().optional(),
+  sgamiId: z.string().min(1, "Le SGAMI (BAP) est requis"),
+  assigneAId: z.string().min(1, "Le rédacteur est requis"),
+  badges: z.array(z.string()).optional()
+});
+
+const updateDossierSchema = z.object({
+  notes: z.string().optional(),
   sgamiId: z.string().optional(),
   assigneAId: z.string().optional(),
   badges: z.array(z.string()).optional()
@@ -236,7 +243,7 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const validatedData = createDossierSchema.parse(req.body);
+    const validatedData = updateDossierSchema.parse(req.body);
     const { notes, sgamiId, assigneAId, badges = [] } = validatedData;
 
     const existingDossier = await prisma.dossier.findUnique({
@@ -342,7 +349,9 @@ router.delete('/:id', async (req, res) => {
         demandes: true,
         decisions: true,
         conventions: true,
-        paiements: true
+        paiements: true,
+        badges: true,
+        attendus: true
       }
     });
 
@@ -374,6 +383,16 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
+    // Supprimer les relations en premier
+    await prisma.dossierBadge.deleteMany({
+      where: { dossierId: req.params.id }
+    });
+
+    await prisma.dossierAttendu.deleteMany({
+      where: { dossierId: req.params.id }
+    });
+
+    // Maintenant supprimer le dossier
     await prisma.dossier.delete({
       where: { id: req.params.id }
     });

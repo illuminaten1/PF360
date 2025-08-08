@@ -94,234 +94,228 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                 </div>
 
                 <div className="p-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Colonne gauche */}
-                    <div className="space-y-6">
-                      {/* Informations personnelles */}
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
-                        <div className="flex items-center mb-4">
-                          <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                            <UserIcon className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <h4 className="text-lg font-semibold text-gray-900">Informations personnelles</h4>
+                  <div className="space-y-8">
+                    {/* Informations personnelles */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                          <UserIcon className="h-5 w-5 text-blue-600" />
                         </div>
+                        <h4 className="text-lg font-semibold text-gray-900">Informations personnelles</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <span className="block text-sm font-medium text-gray-600 mb-1">Nom complet</span>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {demande.prenom} {demande.nom}
+                          </p>
+                        </div>
+                        
+                        {demande.grade && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Grade</span>
+                            <p className="text-gray-900 font-medium">{demande.grade}</p>
+                          </div>
+                        )}
+                        
+                        {demande.nigend && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">NIGEND</span>
+                            <p className="text-gray-900 font-mono">{demande.nigend}</p>
+                          </div>
+                        )}
+                        
+                        {demande.statutDemandeur && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Statut</span>
+                            <p className="text-gray-900">{demande.statutDemandeur}</p>
+                          </div>
+                        )}
+                        
+                        {demande.branche && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Branche</span>
+                            <p className="text-gray-900 font-medium">{demande.branche}</p>
+                          </div>
+                        )}
+                        
+                        {demande.formationAdministrative && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Formation administrative</span>
+                            <p className="text-gray-900">{demande.formationAdministrative}</p>
+                          </div>
+                        )}
+                        
+                        {demande.departement && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Département d'affectation</span>
+                            <p className="text-gray-900 font-mono font-medium">{demande.departement}</p>
+                          </div>
+                        )}
+                        
+                        {demande.unite && (
+                          <div className="md:col-span-2">
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Unité</span>
+                            <p className="text-gray-900">{demande.unite}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Contact */}
+                    {(demande.adresse1 || demande.telephone1 || demande.telephone2) && (
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Contact</h4>
+                        
+                        <div className="space-y-3">
+                          {demande.adresse1 && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Adresse</span>
+                              <p className="text-gray-900">{demande.adresse1}</p>
+                              {demande.adresse2 && <p className="text-gray-900">{demande.adresse2}</p>}
+                            </div>
+                          )}
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {demande.telephone1 && (
+                              <div>
+                                <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone 1</span>
+                                <p className="text-gray-900 font-mono">{demande.telephone1}</p>
+                              </div>
+                            )}
+                            
+                            {demande.telephone2 && (
+                              <div>
+                                <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone 2</span>
+                                <p className="text-gray-900 font-mono">{demande.telephone2}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Informations sur les faits */}
+                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-yellow-100 p-2 rounded-lg mr-3">
+                          <MapPinIcon className="h-5 w-5 text-yellow-600" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-gray-900">Informations sur les faits</h4>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Date des faits</span>
+                            <p className="text-gray-900">{formatDate(demande.dateFaits)}</p>
+                          </div>
+                          
+                          {demande.position && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Position</span>
+                              <p className="text-gray-900">
+                                {demande.position === 'EN_SERVICE' ? 'En service' : 'Hors service'}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {demande.commune && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Commune</span>
+                              <p className="text-gray-900">{demande.commune}</p>
+                            </div>
+                          )}
+                          
+                          {demande.codePostal && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Code postal</span>
+                              <p className="text-gray-900 font-mono">{demande.codePostal}</p>
+                            </div>
+                          )}
+                          
+                          {demande.contexteMissionnel && (
+                            <div className="md:col-span-2">
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Contexte missionnel</span>
+                              <p className="text-gray-900">{demande.contexteMissionnel}</p>
+                            </div>
+                          )}
+                          
+                          {demande.qualificationInfraction && (
+                            <div className="md:col-span-2">
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Qualification de l'infraction</span>
+                              <p className="text-gray-900 font-medium">{demande.qualificationInfraction}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {demande.resume && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-2">Résumé des faits</span>
+                            <div className="bg-white p-4 rounded-lg border">
+                              <p className="text-gray-900 whitespace-pre-wrap">{demande.resume}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {demande.blessures && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-2">Blessures</span>
+                            <div className="bg-white p-4 rounded-lg border">
+                              <p className="text-gray-900 whitespace-pre-wrap">{demande.blessures}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Informations judiciaires */}
+                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                          <CalendarIcon className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-gray-900">Informations judiciaires</h4>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {demande.qualificationsPenales && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Qualifications pénales</span>
+                            <p className="text-gray-900">{demande.qualificationsPenales}</p>
+                          </div>
+                        )}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <span className="block text-sm font-medium text-gray-600 mb-1">Nom complet</span>
-                            <p className="text-lg font-semibold text-gray-900">
-                              {demande.prenom} {demande.nom}
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Date d'audience</span>
+                            <p className="text-gray-900">{formatDate(demande.dateAudience)}</p>
+                          </div>
+                          
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Partie civile</span>
+                            <p className="text-gray-900">
+                              {demande.partieCivile ? (
+                                <span className="text-green-600 font-medium">✓ Oui</span>
+                              ) : (
+                                <span className="text-gray-500">✗ Non</span>
+                              )}
                             </p>
                           </div>
-                          
-                          {demande.grade && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Grade</span>
-                              <p className="text-gray-900 font-medium">{demande.grade}</p>
-                            </div>
-                          )}
-                          
-                          {demande.nigend && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">NIGEND</span>
-                              <p className="text-gray-900 font-mono">{demande.nigend}</p>
-                            </div>
-                          )}
-                          
-                          {demande.statutDemandeur && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Statut</span>
-                              <p className="text-gray-900">{demande.statutDemandeur}</p>
-                            </div>
-                          )}
-                          
-                          {demande.branche && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Branche</span>
-                              <p className="text-gray-900 font-medium">{demande.branche}</p>
-                            </div>
-                          )}
-                          
-                          {demande.formationAdministrative && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Formation administrative</span>
-                              <p className="text-gray-900">{demande.formationAdministrative}</p>
-                            </div>
-                          )}
-                          
-                          {demande.departement && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Département d'affectation</span>
-                              <p className="text-gray-900 font-mono font-medium">{demande.departement}</p>
-                            </div>
-                          )}
-                          
-                          {demande.unite && (
-                            <div className="md:col-span-2">
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Unité</span>
-                              <p className="text-gray-900">{demande.unite}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Contact */}
-                      {(demande.adresse1 || demande.telephone1 || demande.telephone2) && (
-                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-4">Contact</h4>
-                          
-                          <div className="space-y-3">
-                            {demande.adresse1 && (
-                              <div>
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Adresse</span>
-                                <p className="text-gray-900">{demande.adresse1}</p>
-                                {demande.adresse2 && <p className="text-gray-900">{demande.adresse2}</p>}
-                              </div>
-                            )}
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {demande.telephone1 && (
-                                <div>
-                                  <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone 1</span>
-                                  <p className="text-gray-900 font-mono">{demande.telephone1}</p>
-                                </div>
-                              )}
-                              
-                              {demande.telephone2 && (
-                                <div>
-                                  <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone 2</span>
-                                  <p className="text-gray-900 font-mono">{demande.telephone2}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Colonne droite */}
-                    <div className="space-y-6">
-                      {/* Informations sur les faits */}
-                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200">
-                        <div className="flex items-center mb-4">
-                          <div className="bg-yellow-100 p-2 rounded-lg mr-3">
-                            <MapPinIcon className="h-5 w-5 text-yellow-600" />
-                          </div>
-                          <h4 className="text-lg font-semibold text-gray-900">Informations sur les faits</h4>
                         </div>
                         
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Date des faits</span>
-                              <p className="text-gray-900">{formatDate(demande.dateFaits)}</p>
-                            </div>
-                            
-                            {demande.position && (
-                              <div>
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Position</span>
-                                <p className="text-gray-900">
-                                  {demande.position === 'EN_SERVICE' ? 'En service' : 'Hors service'}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {demande.commune && (
-                              <div>
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Commune</span>
-                                <p className="text-gray-900">{demande.commune}</p>
-                              </div>
-                            )}
-                            
-                            {demande.codePostal && (
-                              <div>
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Code postal</span>
-                                <p className="text-gray-900 font-mono">{demande.codePostal}</p>
-                              </div>
-                            )}
-                            
-                            {demande.contexteMissionnel && (
-                              <div className="md:col-span-2">
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Contexte missionnel</span>
-                                <p className="text-gray-900">{demande.contexteMissionnel}</p>
-                              </div>
-                            )}
-                            
-                            {demande.qualificationInfraction && (
-                              <div className="md:col-span-2">
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Qualification de l'infraction</span>
-                                <p className="text-gray-900 font-medium">{demande.qualificationInfraction}</p>
-                              </div>
-                            )}
+                        {demande.partieCivile && demande.montantPartieCivile && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Montant réclamé</span>
+                            <p className="text-xl font-bold text-green-600">
+                              {demande.montantPartieCivile.toLocaleString('fr-FR', {
+                                style: 'currency',
+                                currency: 'EUR'
+                              })}
+                            </p>
                           </div>
-                          
-                          {demande.resume && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-2">Résumé des faits</span>
-                              <div className="bg-white p-4 rounded-lg border">
-                                <p className="text-gray-900 whitespace-pre-wrap">{demande.resume}</p>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {demande.blessures && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-2">Blessures</span>
-                              <div className="bg-white p-4 rounded-lg border">
-                                <p className="text-gray-900 whitespace-pre-wrap">{demande.blessures}</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Informations judiciaires */}
-                      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200">
-                        <div className="flex items-center mb-4">
-                          <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                            <CalendarIcon className="h-5 w-5 text-purple-600" />
-                          </div>
-                          <h4 className="text-lg font-semibold text-gray-900">Informations judiciaires</h4>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          {demande.qualificationsPenales && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Qualifications pénales</span>
-                              <p className="text-gray-900">{demande.qualificationsPenales}</p>
-                            </div>
-                          )}
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Date d'audience</span>
-                              <p className="text-gray-900">{formatDate(demande.dateAudience)}</p>
-                            </div>
-                            
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Partie civile</span>
-                              <p className="text-gray-900">
-                                {demande.partieCivile ? (
-                                  <span className="text-green-600 font-medium">✓ Oui</span>
-                                ) : (
-                                  <span className="text-gray-500">✗ Non</span>
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          {demande.partieCivile && demande.montantPartieCivile && (
-                            <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Montant réclamé</span>
-                              <p className="text-xl font-bold text-green-600">
-                                {demande.montantPartieCivile.toLocaleString('fr-FR', {
-                                  style: 'currency',
-                                  currency: 'EUR'
-                                })}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>

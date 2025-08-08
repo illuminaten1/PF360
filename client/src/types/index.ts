@@ -166,8 +166,22 @@ export interface Avocat {
   id: string
   nom: string
   prenom?: string
-  cabinet?: string
-  adresse?: string
-  telephone?: string
-  mail?: string
+  region?: string
+  adressePostale?: string
+  telephonePublic1?: string
+  telephonePublic2?: string
+  telephonePrive?: string
+  email?: string
+  siretOuRidet?: string
+  villesIntervention?: string[]
+  notes?: string
+  specialisation?: string
+  titulaireDuCompteBancaire?: string
+  codeEtablissement?: string
+  codeGuichet?: string
+  numeroDeCompte?: string
+  cle?: string
+  active?: boolean
+  createdAt?: string
+  updatedAt?: string
 }

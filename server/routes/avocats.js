@@ -68,7 +68,11 @@ router.post('/', async (req, res) => {
       villesIntervention,
       notes,
       specialisation,
-      coordonneesBancaires
+      titulaireDuCompteBancaire,
+      codeEtablissement,
+      codeGuichet,
+      numeroDeCompte,
+      cle
     } = req.body;
 
     if (!nom || !prenom) {
@@ -89,7 +93,11 @@ router.post('/', async (req, res) => {
         villesIntervention: villesIntervention ? JSON.stringify(villesIntervention) : null,
         notes,
         specialisation,
-        coordonneesBancaires: coordonneesBancaires ? JSON.stringify(coordonneesBancaires) : null,
+        titulaireDuCompteBancaire,
+        codeEtablissement,
+        codeGuichet,
+        numeroDeCompte,
+        cle,
         creeParId: req.user.id
       },
       include: {
@@ -141,13 +149,6 @@ router.get('/:id', async (req, res) => {
       }
     }
 
-    if (avocat.coordonneesBancaires) {
-      try {
-        avocat.coordonneesBancaires = JSON.parse(avocat.coordonneesBancaires);
-      } catch (e) {
-        avocat.coordonneesBancaires = null;
-      }
-    }
 
     res.json(avocat);
   } catch (error) {
@@ -172,7 +173,11 @@ router.put('/:id', async (req, res) => {
       villesIntervention,
       notes,
       specialisation,
-      coordonneesBancaires
+      titulaireDuCompteBancaire,
+      codeEtablissement,
+      codeGuichet,
+      numeroDeCompte,
+      cle
     } = req.body;
 
     const avocatExistant = await prisma.avocat.findUnique({
@@ -202,7 +207,11 @@ router.put('/:id', async (req, res) => {
         villesIntervention: villesIntervention ? JSON.stringify(villesIntervention) : null,
         notes,
         specialisation,
-        coordonneesBancaires: coordonneesBancaires ? JSON.stringify(coordonneesBancaires) : null,
+        titulaireDuCompteBancaire,
+        codeEtablissement,
+        codeGuichet,
+        numeroDeCompte,
+        cle,
         modifieParId: req.user.id
       },
       include: {

@@ -17,6 +17,7 @@ model User {
   grade       String?
   nom         String
   prenom      String
+  initiales   String?
   mail        String   @unique
   telephone   String?
   role        String   @default("REDACTEUR")

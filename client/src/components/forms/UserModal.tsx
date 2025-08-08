@@ -15,6 +15,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
     identifiant: '',
     nom: '',
     prenom: '',
+    initiales: '',
     mail: '',
     role: 'REDACTEUR' as 'ADMIN' | 'REDACTEUR' | 'GREFFIER',
     grade: '',
@@ -30,6 +31,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
         identifiant: user.identifiant || '',
         nom: user.nom || '',
         prenom: user.prenom || '',
+        initiales: user.initiales || '',
         mail: user.mail || '',
         role: user.role || 'REDACTEUR',
         grade: user.grade || '',
@@ -41,6 +43,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
         identifiant: '',
         nom: '',
         prenom: '',
+        initiales: '',
         mail: '',
         role: 'REDACTEUR',
         grade: '',
@@ -101,6 +104,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
       identifiant: formData.identifiant.trim(),
       nom: formData.nom.trim(),
       prenom: formData.prenom.trim(),
+      initiales: formData.initiales.trim() || undefined,
       mail: formData.mail.trim(),
       role: formData.role,
       grade: formData.grade.trim() || undefined,
@@ -210,24 +214,43 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              name="mail"
-              value={formData.mail}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.mail ? 'border-red-500' : 'border-gray-300'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.mail && (
-              <p className="text-red-500 text-sm mt-1">{errors.mail}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Initiales
+              </label>
+              <input
+                type="text"
+                name="initiales"
+                value={formData.initiales}
+                onChange={handleInputChange}
+                placeholder="Ex: ASB pour Anne-Sophie Billard"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isSubmitting}
+              />
+              <p className="text-gray-500 text-xs mt-1">Laissez vide si non applicable</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                name="mail"
+                value={formData.mail}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.mail ? 'border-red-500' : 'border-gray-300'
+                }`}
+                disabled={isSubmitting}
+              />
+              {errors.mail && (
+                <p className="text-red-500 text-sm mt-1">{errors.mail}</p>
+              )}
+            </div>
           </div>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

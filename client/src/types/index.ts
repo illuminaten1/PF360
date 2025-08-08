@@ -3,6 +3,7 @@ export interface User {
   identifiant: string
   nom: string
   prenom: string
+  initiales?: string
   mail: string
   role: 'ADMIN' | 'REDACTEUR' | 'GREFFIER'
   grade?: string

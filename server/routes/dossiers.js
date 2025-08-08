@@ -51,6 +51,22 @@ router.get('/', async (req, res) => {
             grade: true
           }
         },
+        creePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        modifiePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
         decisions: {
           select: {
             id: true,
@@ -116,6 +132,7 @@ router.post('/', async (req, res) => {
           notes,
           sgamiId,
           assigneAId,
+          creeParId: req.user.id,
           ...(badges.length > 0 && {
             badges: {
               create: badges.map(badgeId => ({
@@ -136,6 +153,22 @@ router.post('/', async (req, res) => {
               id: true,
               nom: true,
               prenom: true
+            }
+          },
+          creePar: {
+            select: {
+              id: true,
+              nom: true,
+              prenom: true,
+              grade: true
+            }
+          },
+          modifiePar: {
+            select: {
+              id: true,
+              nom: true,
+              prenom: true,
+              grade: true
             }
           }
         }
@@ -180,6 +213,22 @@ router.get('/:id', async (req, res) => {
           }
         },
         assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        creePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        modifiePar: {
           select: {
             id: true,
             nom: true,
@@ -280,6 +329,7 @@ router.put('/:id', async (req, res) => {
         notes,
         sgamiId,
         assigneAId,
+        modifieParId: req.user.id,
         badges: {
           create: badges.map(badgeId => ({
             badgeId
@@ -304,6 +354,22 @@ router.put('/:id', async (req, res) => {
           }
         },
         assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        creePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        modifiePar: {
           select: {
             id: true,
             nom: true,

@@ -34,6 +34,19 @@ Cette commande va :
 3. Créer la base de données SQLite
 4. Insérer les données de test
 
+### Configuration des fichiers d'environnement
+Après l'installation, copiez les fichiers de configuration :
+
+```bash
+# Requis pour le serveur
+cp server/.env.example server/.env
+
+# Recommandé pour le client (optionnel)
+cp client/.env.example client/.env
+```
+
+**Note :** Le fichier `.env` du client n'est pas strictement nécessaire car l'application utilise des valeurs par défaut appropriées pour le développement local. Cependant, il est recommandé de le copier pour pouvoir personnaliser facilement l'URL de l'API si nécessaire.
+
 ### Démarrage
 ```bash
 # Démarrer client et serveur simultanément

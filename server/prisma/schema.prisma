@@ -54,6 +54,8 @@ model Demande {
   adressePostaleLigne2   String?
   telephoneProfessionnel String?
   telephonePersonnel     String?
+  emailProfessionnel     String?
+  emailPersonnel         String?
   unite                  String?
   
   // Infos faits

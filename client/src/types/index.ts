@@ -38,6 +38,8 @@ export interface Demande {
   adressePostaleLigne2?: string
   telephoneProfessionnel?: string
   telephonePersonnel?: string
+  emailProfessionnel?: string
+  emailPersonnel?: string
   unite?: string
   dateFaits?: string
   commune?: string

@@ -25,6 +25,8 @@ const demandeSchema = z.object({
   adressePostaleLigne2: z.string().optional(),
   telephoneProfessionnel: z.string().optional(),
   telephonePersonnel: z.string().optional(),
+  emailProfessionnel: z.string().email('Email professionnel invalide').optional().or(z.literal('')),
+  emailPersonnel: z.string().email('Email personnel invalide').optional().or(z.literal('')),
   unite: z.string().optional(),
   
   // Infos faits
@@ -114,6 +116,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       adressePostaleLigne2: '',
       telephoneProfessionnel: '',
       telephonePersonnel: '',
+      emailProfessionnel: '',
+      emailPersonnel: '',
       unite: '',
       dateFaits: '',
       commune: '',
@@ -183,6 +187,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           adressePostaleLigne2: demande.adressePostaleLigne2 || '',
           telephoneProfessionnel: demande.telephoneProfessionnel || '',
           telephonePersonnel: demande.telephonePersonnel || '',
+          emailProfessionnel: demande.emailProfessionnel || '',
+          emailPersonnel: demande.emailPersonnel || '',
           unite: demande.unite || '',
           dateFaits: demande.dateFaits ? new Date(demande.dateFaits).toISOString().split('T')[0] : '',
           commune: demande.commune || '',
@@ -220,6 +226,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           adressePostaleLigne2: '',
           telephoneProfessionnel: '',
           telephonePersonnel: '',
+          emailProfessionnel: '',
+          emailPersonnel: '',
           unite: '',
           dateFaits: '',
           commune: '',
@@ -790,6 +798,38 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           placeholder="Ex: 01.23.45.67.89"
                           disabled={isSubmitting}
                         />
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Email professionnel
+                        </label>
+                        <input
+                          {...register('emailProfessionnel')}
+                          type="email"
+                          className="input w-full"
+                          placeholder="prenom.nom@gendarmerie.interieur.gouv.fr"
+                          disabled={isSubmitting}
+                        />
+                        {errors.emailProfessionnel && (
+                          <p className="text-red-500 text-sm mt-1">{errors.emailProfessionnel.message}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="label block text-gray-700 mb-2">
+                          Email personnel
+                        </label>
+                        <input
+                          {...register('emailPersonnel')}
+                          type="email"
+                          className="input w-full"
+                          placeholder="exemple@gmail.com"
+                          disabled={isSubmitting}
+                        />
+                        {errors.emailPersonnel && (
+                          <p className="text-red-500 text-sm mt-1">{errors.emailPersonnel.message}</p>
+                        )}
                       </div>
                     </div>
                   </div>

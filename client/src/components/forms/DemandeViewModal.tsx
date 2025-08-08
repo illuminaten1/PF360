@@ -164,7 +164,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                     </div>
 
                     {/* Contact */}
-                    {(demande.adressePostaleLigne1 || demande.telephoneProfessionnel || demande.telephonePersonnel) && (
+                    {(demande.adressePostaleLigne1 || demande.telephoneProfessionnel || demande.telephonePersonnel || demande.emailProfessionnel || demande.emailPersonnel) && (
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
                         <h4 className="text-lg font-semibold text-gray-900 mb-4">Contact</h4>
                         
@@ -189,6 +189,22 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                               <div>
                                 <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone personnel</span>
                                 <p className="text-gray-900 font-mono">{demande.telephonePersonnel}</p>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            {demande.emailProfessionnel && (
+                              <div>
+                                <span className="block text-sm font-medium text-gray-600 mb-1">Email professionnel</span>
+                                <p className="text-gray-900 font-mono break-all">{demande.emailProfessionnel}</p>
+                              </div>
+                            )}
+                            
+                            {demande.emailPersonnel && (
+                              <div>
+                                <span className="block text-sm font-medium text-gray-600 mb-1">Email personnel</span>
+                                <p className="text-gray-900 font-mono break-all">{demande.emailPersonnel}</p>
                               </div>
                             )}
                           </div>

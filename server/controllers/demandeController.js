@@ -36,6 +36,8 @@ const demandeSchema = z.object({
   adressePostaleLigne2: z.string().optional(),
   telephoneProfessionnel: z.string().optional(),
   telephonePersonnel: z.string().optional(),
+  emailProfessionnel: z.string().email('Email professionnel invalide').optional().or(z.literal('')),
+  emailPersonnel: z.string().email('Email personnel invalide').optional().or(z.literal('')),
   unite: z.string().optional(),
   
   // Infos faits

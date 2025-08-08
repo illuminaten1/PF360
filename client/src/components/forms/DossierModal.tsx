@@ -10,7 +10,7 @@ import api from '@/utils/api'
 
 const dossierSchema = z.object({
   notes: z.string().optional(),
-  sgamiId: z.string().min(1, "Le SGAMI (BAP) est requis"),
+  sgamiId: z.string().min(1, "Le SGAMI est requis"),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional()
 })

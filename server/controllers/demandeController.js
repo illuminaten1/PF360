@@ -149,6 +149,22 @@ const getAllDemandes = async (req, res) => {
               grade: true
             }
           },
+          creePar: {
+            select: {
+              id: true,
+              nom: true,
+              prenom: true,
+              grade: true
+            }
+          },
+          modifiePar: {
+            select: {
+              id: true,
+              nom: true,
+              prenom: true,
+              grade: true
+            }
+          },
           decisions: {
             include: {
               decision: {
@@ -221,6 +237,22 @@ const getDemandeById = async (req, res) => {
           }
         },
         assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        creePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        modifiePar: {
           select: {
             id: true,
             nom: true,
@@ -319,7 +351,10 @@ const createDemande = async (req, res) => {
     }
 
     const demande = await prisma.demande.create({
-      data: dataToCreate,
+      data: {
+        ...dataToCreate,
+        creeParId: req.user.id
+      },
       include: {
         dossier: {
           select: {
@@ -329,6 +364,22 @@ const createDemande = async (req, res) => {
           }
         },
         assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        creePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        modifiePar: {
           select: {
             id: true,
             nom: true,
@@ -422,7 +473,10 @@ const updateDemande = async (req, res) => {
 
     const demande = await prisma.demande.update({
       where: { id: req.params.id },
-      data: dataToUpdate,
+      data: {
+        ...dataToUpdate,
+        modifieParId: req.user.id
+      },
       include: {
         dossier: {
           select: {
@@ -432,6 +486,22 @@ const updateDemande = async (req, res) => {
           }
         },
         assigneA: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        creePar: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            grade: true
+          }
+        },
+        modifiePar: {
           select: {
             id: true,
             nom: true,

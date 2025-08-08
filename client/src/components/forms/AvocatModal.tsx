@@ -1,49 +1,12 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { XMarkIcon, PlusIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { Avocat } from '@/types'
-
-const avocatSchema = z.object({
-  nom: z.string().min(1, 'Le nom est requis'),
-  prenom: z.string().min(1, 'Le prénom est requis'),
-  region: z.string().optional(),
-  adressePostale: z.string().optional(),
-  telephonePublic1: z.string().optional().refine(
-    (val) => !val || /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/.test(val),
-    { message: 'Format de téléphone invalide' }
-  ),
-  telephonePublic2: z.string().optional().refine(
-    (val) => !val || /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/.test(val),
-    { message: 'Format de téléphone invalide' }
-  ),
-  telephonePrive: z.string().optional().refine(
-    (val) => !val || /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/.test(val),
-    { message: 'Format de téléphone invalide' }
-  ),
-  email: z.string().email('Format d\'email invalide').optional().or(z.literal('')),
-  siretOuRidet: z.string().optional().refine(
-    (val) => !val || /^[0-9]{9,14}$/.test(val.replace(/\s/g, '')),
-    { message: 'Format de SIRET/RIDET invalide (9 à 14 chiffres)' }
-  ),
-  villesIntervention: z.array(z.string()).default([]),
-  notes: z.string().optional(),
-  specialisation: z.string().optional(),
-  titulaireDuCompteBancaire: z.string().optional(),
-  codeEtablissement: z.string().optional(),
-  codeGuichet: z.string().optional(),
-  numeroDeCompte: z.string().optional(),
-  cle: z.string().optional()
-})
-
-type AvocatFormData = z.infer<typeof avocatSchema>
 
 interface AvocatModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: AvocatFormData) => Promise<void>
+  onSubmit: (data: any) => Promise<void>
   avocat?: Avocat | null
   title: string
 }
@@ -82,42 +45,33 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
   avocat,
   title
 }) => {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors, isSubmitting }
-  } = useForm<AvocatFormData>({
-    resolver: zodResolver(avocatSchema),
-    defaultValues: {
-      nom: '',
-      prenom: '',
-      region: '',
-      adressePostale: '',
-      telephonePublic1: '',
-      telephonePublic2: '',
-      telephonePrive: '',
-      email: '',
-      siretOuRidet: '',
-      villesIntervention: [],
-      notes: '',
-      specialisation: '',
-      titulaireDuCompteBancaire: '',
-      codeEtablissement: '',
-      codeGuichet: '',
-      numeroDeCompte: '',
-      cle: ''
-    }
+  const [formData, setFormData] = useState({
+    nom: '',
+    prenom: '',
+    region: '',
+    adressePostale: '',
+    telephonePublic1: '',
+    telephonePublic2: '',
+    telephonePrive: '',
+    email: '',
+    siretOuRidet: '',
+    villesIntervention: [] as string[],
+    notes: '',
+    specialisation: '',
+    titulaireDuCompteBancaire: '',
+    codeEtablissement: '',
+    codeGuichet: '',
+    numeroDeCompte: '',
+    cle: ''
   })
 
-  const watchedVilles = watch('villesIntervention')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (isOpen) {
       if (avocat) {
-        reset({
+        setFormData({
           nom: avocat.nom || '',
           prenom: avocat.prenom || '',
           region: avocat.region || '',
@@ -137,7 +91,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
           cle: avocat.cle || ''
         })
       } else {
-        reset({
+        setFormData({
           nom: '',
           prenom: '',
           region: '',
@@ -157,15 +111,71 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
           cle: ''
         })
       }
+      setErrors({})
     }
-  }, [isOpen, avocat, reset])
+  }, [isOpen, avocat])
 
-  const handleFormSubmit = async (data: AvocatFormData) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.nom.trim()) newErrors.nom = 'Le nom est requis'
+    if (!formData.prenom.trim()) newErrors.prenom = 'Le prénom est requis'
+
+    // Validation téléphone français
+    const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/
+    if (formData.telephonePublic1 && !phoneRegex.test(formData.telephonePublic1)) {
+      newErrors.telephonePublic1 = 'Format de téléphone invalide'
+    }
+    if (formData.telephonePublic2 && !phoneRegex.test(formData.telephonePublic2)) {
+      newErrors.telephonePublic2 = 'Format de téléphone invalide'
+    }
+    if (formData.telephonePrive && !phoneRegex.test(formData.telephonePrive)) {
+      newErrors.telephonePrive = 'Format de téléphone invalide'
+    }
+
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = 'Format d\'email invalide'
+    }
+
+    // Validation SIRET/RIDET
+    if (formData.siretOuRidet && !/^[0-9]{9,14}$/.test(formData.siretOuRidet.replace(/\s/g, ''))) {
+      newErrors.siretOuRidet = 'Format de SIRET/RIDET invalide (9 à 14 chiffres)'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!validateForm()) return
+
+    setIsSubmitting(true)
     try {
-      await onSubmit(data)
+      await onSubmit(formData)
       onClose()
     } catch (error) {
       // L'erreur sera gérée par la mutation dans le parent
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }))
     }
   }
 
@@ -173,14 +183,20 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
     const input = document.getElementById('nouvelle-ville') as HTMLInputElement
     const nouvelleVille = input?.value.trim()
     
-    if (nouvelleVille && !watchedVilles.includes(nouvelleVille)) {
-      setValue('villesIntervention', [...watchedVilles, nouvelleVille])
+    if (nouvelleVille && !formData.villesIntervention.includes(nouvelleVille)) {
+      setFormData(prev => ({
+        ...prev,
+        villesIntervention: [...prev.villesIntervention, nouvelleVille]
+      }))
       input.value = ''
     }
   }
 
   const removeVille = (index: number) => {
-    setValue('villesIntervention', watchedVilles.filter((_, i) => i !== index))
+    setFormData(prev => ({
+      ...prev,
+      villesIntervention: prev.villesIntervention.filter((_, i) => i !== index)
+    }))
   }
 
   return (
@@ -222,62 +238,65 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
                   {/* Informations générales */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-blue-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Informations générales</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="nom" className="block text-sm font-medium text-gray-700">
+                        <label className="label block text-gray-700 mb-2">
                           Nom <span className="text-red-500">*</span>
                         </label>
                         <input
-                          {...register('nom', {
-                            setValueAs: (value) => value.toUpperCase()
-                          })}
-                          type="text"
-                          id="nom"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.nom}
+                          onChange={(e) => handleInputChange('nom', e.target.value.toUpperCase())}
+                          className="input w-full"
+                          placeholder="Nom de famille"
+                          disabled={isSubmitting}
                         />
                         {errors.nom && (
-                          <p className="mt-1 text-sm text-red-600">{errors.nom.message}</p>
+                          <p className="mt-1 text-sm text-red-600">{errors.nom}</p>
                         )}
                       </div>
 
                       <div>
-                        <label htmlFor="prenom" className="block text-sm font-medium text-gray-700">
+                        <label className="label block text-gray-700 mb-2">
                           Prénom <span className="text-red-500">*</span>
                         </label>
                         <input
-                          {...register('prenom')}
-                          type="text"
-                          id="prenom"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.prenom}
+                          onChange={(e) => handleInputChange('prenom', e.target.value)}
+                          className="input w-full"
+                          placeholder="Prénom"
+                          disabled={isSubmitting}
                         />
                         {errors.prenom && (
-                          <p className="mt-1 text-sm text-red-600">{errors.prenom.message}</p>
+                          <p className="mt-1 text-sm text-red-600">{errors.prenom}</p>
                         )}
                       </div>
 
                       <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                        <label className="label block text-gray-700 mb-2">Email</label>
                         <input
-                          {...register('email')}
+                          value={formData.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
                           type="email"
-                          id="email"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          className="input w-full"
+                          placeholder="exemple@avocat.fr"
+                          disabled={isSubmitting}
                         />
                         {errors.email && (
-                          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                          <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                         )}
                       </div>
 
                       <div>
-                        <label htmlFor="region" className="block text-sm font-medium text-gray-700">Région</label>
+                        <label className="label block text-gray-700 mb-2">Région</label>
                         <select
-                          {...register('region')}
-                          id="region"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.region}
+                          onChange={(e) => handleInputChange('region', e.target.value)}
+                          className="input w-full"
+                          disabled={isSubmitting}
                         >
                           <option value="">Sélectionnez une région</option>
                           {regions.map((region) => (
@@ -287,14 +306,28 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                       </div>
 
                       <div className="md:col-span-2">
-                        <label htmlFor="specialisation" className="block text-sm font-medium text-gray-700">Spécialisation</label>
+                        <label className="label block text-gray-700 mb-2">Spécialisation</label>
                         <input
-                          {...register('specialisation')}
-                          type="text"
-                          id="specialisation"
+                          value={formData.specialisation}
+                          onChange={(e) => handleInputChange('specialisation', e.target.value)}
+                          className="input w-full"
                           placeholder="Ex: Droit pénal, Droit civil..."
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          disabled={isSubmitting}
                         />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="label block text-gray-700 mb-2">SIRET/RIDET</label>
+                        <input
+                          value={formData.siretOuRidet}
+                          onChange={(e) => handleInputChange('siretOuRidet', e.target.value)}
+                          className="input w-full"
+                          placeholder="Ex: 123 456 789 00012"
+                          disabled={isSubmitting}
+                        />
+                        {errors.siretOuRidet && (
+                          <p className="mt-1 text-sm text-red-600">{errors.siretOuRidet}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -303,18 +336,20 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Adresse</h4>
                     <div>
-                      <label htmlFor="adressePostale" className="block text-sm font-medium text-gray-700">Adresse postale</label>
+                      <label className="label block text-gray-700 mb-2">Adresse postale</label>
                       <textarea
-                        {...register('adressePostale')}
-                        id="adressePostale"
+                        value={formData.adressePostale}
+                        onChange={(e) => handleInputChange('adressePostale', e.target.value)}
                         rows={3}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="input w-full h-20 resize-none"
+                        placeholder="Adresse complète du cabinet..."
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
 
                   {/* Villes d'intervention */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-yellow-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Villes d'intervention</h4>
                     
                     <div className="flex gap-2 mb-4">
@@ -322,13 +357,15 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                         type="text"
                         id="nouvelle-ville"
                         placeholder="Ajouter une ville d'intervention"
-                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addVille())}
+                        className="input flex-1"
+                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addVille())}
+                        disabled={isSubmitting}
                       />
                       <button
                         type="button"
                         onClick={addVille}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+                        className="btn-primary inline-flex items-center px-4 py-2"
+                        disabled={isSubmitting}
                       >
                         <PlusIcon className="h-4 w-4 mr-1" />
                         Ajouter
@@ -336,19 +373,20 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                     </div>
 
                     <div className="flex flex-wrap gap-2 min-h-[40px] p-3 border border-gray-200 rounded-md bg-white">
-                      {watchedVilles.length === 0 ? (
+                      {formData.villesIntervention.length === 0 ? (
                         <span className="text-gray-500 italic">Aucune ville d'intervention ajoutée</span>
                       ) : (
-                        watchedVilles.map((ville, index) => (
+                        formData.villesIntervention.map((ville, index) => (
                           <span
                             key={index}
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"
                           >
                             {ville}
                             <button
                               type="button"
                               onClick={() => removeVille(index)}
-                              className="ml-2 text-blue-600 hover:text-blue-800"
+                              className="ml-2 text-yellow-600 hover:text-yellow-800"
+                              disabled={isSubmitting}
                             >
                               <XCircleIcon className="h-4 w-4" />
                             </button>
@@ -359,159 +397,149 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                   </div>
 
                   {/* Contacts */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-green-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Contacts</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="telephonePublic1" className="block text-sm font-medium text-gray-700">Téléphone public 1</label>
+                        <label className="label block text-gray-700 mb-2">Téléphone public 1</label>
                         <input
-                          {...register('telephonePublic1')}
+                          value={formData.telephonePublic1}
+                          onChange={(e) => handleInputChange('telephonePublic1', e.target.value)}
                           type="tel"
-                          id="telephonePublic1"
+                          className="input w-full"
                           placeholder="Ex: 06 12 34 56 78"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          disabled={isSubmitting}
                         />
                         {errors.telephonePublic1 && (
-                          <p className="mt-1 text-sm text-red-600">{errors.telephonePublic1.message}</p>
+                          <p className="mt-1 text-sm text-red-600">{errors.telephonePublic1}</p>
                         )}
                       </div>
 
                       <div>
-                        <label htmlFor="telephonePublic2" className="block text-sm font-medium text-gray-700">Téléphone public 2</label>
+                        <label className="label block text-gray-700 mb-2">Téléphone public 2</label>
                         <input
-                          {...register('telephonePublic2')}
+                          value={formData.telephonePublic2}
+                          onChange={(e) => handleInputChange('telephonePublic2', e.target.value)}
                           type="tel"
-                          id="telephonePublic2"
+                          className="input w-full"
                           placeholder="Ex: 01 23 45 67 89"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          disabled={isSubmitting}
                         />
                         {errors.telephonePublic2 && (
-                          <p className="mt-1 text-sm text-red-600">{errors.telephonePublic2.message}</p>
+                          <p className="mt-1 text-sm text-red-600">{errors.telephonePublic2}</p>
                         )}
                       </div>
 
                       <div className="md:col-span-2">
-                        <label htmlFor="telephonePrive" className="block text-sm font-medium text-gray-700">
+                        <label className="label block text-gray-700 mb-2">
                           Téléphone privé <span className="text-sm text-gray-500">(non communiqué aux bénéficiaires)</span>
                         </label>
                         <input
-                          {...register('telephonePrive')}
+                          value={formData.telephonePrive}
+                          onChange={(e) => handleInputChange('telephonePrive', e.target.value)}
                           type="tel"
-                          id="telephonePrive"
+                          className="input w-full"
                           placeholder="Ex: 07 98 76 54 32"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          disabled={isSubmitting}
                         />
                         {errors.telephonePrive && (
-                          <p className="mt-1 text-sm text-red-600">{errors.telephonePrive.message}</p>
+                          <p className="mt-1 text-sm text-red-600">{errors.telephonePrive}</p>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Informations bancaires */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-purple-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Informations bancaires</h4>
                     
                     <div className="mb-4">
-                      <label htmlFor="titulaireDuCompteBancaire" className="block text-sm font-medium text-gray-700">Titulaire du compte bancaire</label>
+                      <label className="label block text-gray-700 mb-2">Titulaire du compte bancaire</label>
                       <input
-                        {...register('titulaireDuCompteBancaire')}
-                        type="text"
-                        id="titulaireDuCompteBancaire"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        value={formData.titulaireDuCompteBancaire}
+                        onChange={(e) => handleInputChange('titulaireDuCompteBancaire', e.target.value)}
+                        className="input w-full"
+                        placeholder="Nom du titulaire du compte"
+                        disabled={isSubmitting}
                       />
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <label htmlFor="codeEtablissement" className="block text-sm font-medium text-gray-700">Code établissement</label>
+                        <label className="label block text-gray-700 mb-2">Code établissement</label>
                         <input
-                          {...register('codeEtablissement')}
-                          type="text"
-                          id="codeEtablissement"
-                          maxLength={5}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.codeEtablissement}
+                          onChange={(e) => handleInputChange('codeEtablissement', e.target.value.replace(/\D/g, '').substring(0, 5))}
+                          className="input w-full"
+                          placeholder="12345"
+                          disabled={isSubmitting}
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="codeGuichet" className="block text-sm font-medium text-gray-700">Code guichet</label>
+                        <label className="label block text-gray-700 mb-2">Code guichet</label>
                         <input
-                          {...register('codeGuichet')}
-                          type="text"
-                          id="codeGuichet"
-                          maxLength={5}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.codeGuichet}
+                          onChange={(e) => handleInputChange('codeGuichet', e.target.value.replace(/\D/g, '').substring(0, 5))}
+                          className="input w-full"
+                          placeholder="67890"
+                          disabled={isSubmitting}
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="numeroDeCompte" className="block text-sm font-medium text-gray-700">Numéro de compte</label>
+                        <label className="label block text-gray-700 mb-2">Numéro de compte</label>
                         <input
-                          {...register('numeroDeCompte')}
-                          type="text"
-                          id="numeroDeCompte"
-                          maxLength={11}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.numeroDeCompte}
+                          onChange={(e) => handleInputChange('numeroDeCompte', e.target.value.replace(/\D/g, '').substring(0, 11))}
+                          className="input w-full"
+                          placeholder="12345678901"
+                          disabled={isSubmitting}
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="cle" className="block text-sm font-medium text-gray-700">Clé</label>
+                        <label className="label block text-gray-700 mb-2">Clé</label>
                         <input
-                          {...register('cle')}
-                          type="text"
-                          id="cle"
-                          maxLength={2}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={formData.cle}
+                          onChange={(e) => handleInputChange('cle', e.target.value.replace(/\D/g, '').substring(0, 2))}
+                          className="input w-full"
+                          placeholder="12"
+                          disabled={isSubmitting}
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Autres informations */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-md font-medium text-gray-900 mb-4">Autres informations</h4>
-                    
-                    <div className="mb-4">
-                      <label htmlFor="siretOuRidet" className="block text-sm font-medium text-gray-700">SIRET/RIDET</label>
-                      <input
-                        {...register('siretOuRidet')}
-                        type="text"
-                        id="siretOuRidet"
-                        placeholder="Ex: 123 456 789 00012"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                      {errors.siretOuRidet && (
-                        <p className="mt-1 text-sm text-red-600">{errors.siretOuRidet.message}</p>
-                      )}
-                    </div>
-
+                  {/* Notes */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="text-md font-medium text-gray-900 mb-4">Notes</h4>
                     <div>
-                      <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notes</label>
+                      <label className="label block text-gray-700 mb-2">Notes</label>
                       <textarea
-                        {...register('notes')}
-                        id="notes"
+                        value={formData.notes}
+                        onChange={(e) => handleInputChange('notes', e.target.value)}
                         rows={4}
+                        className="input w-full h-24 resize-none"
                         placeholder="Informations complémentaires sur l'avocat..."
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex justify-end space-x-3 pt-6 border-t">
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      className="btn-secondary"
+                      disabled={isSubmitting}
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
+                      className="btn-primary"
                       disabled={isSubmitting}
-                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? 'En cours...' : (avocat ? 'Modifier' : 'Créer')}
                     </button>

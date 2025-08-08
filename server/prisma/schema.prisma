@@ -36,6 +36,8 @@ model User {
   decisions        Decision[]
   conventions      Convention[]
   paiements        Paiement[]
+  avocatsCrees     Avocat[]    @relation("AvocatCreateur")
+  avocatsModifies  Avocat[]    @relation("AvocatModificateur")
 
   @@map("users")
 }
@@ -191,19 +193,32 @@ model Paiement {
 }
 
 model Avocat {
-  id          String   @id @default(cuid())
-  nom         String
-  prenom      String?
-  cabinet     String?
-  adresse     String?
-  telephone   String?
-  mail        String?
+  id                   String   @id @default(cuid())
+  nom                  String
+  prenom               String
+  region               String?
+  adressePostale       String?
+  telephonePublic1     String?
+  telephonePublic2     String?
+  telephonePrive       String?
+  email                String?
+  siretOuRidet         String?
+  villesIntervention   String?  // JSON string pour stocker un array de villes
+  notes                String?  // Notes utiles sur l'avocat
+  specialisation       String?
+  coordonneesBancaires String?  // RIB au format JSON pour sécurité
+  
+  // Champs de logging
+  creePar              User?    @relation("AvocatCreateur", fields: [creeParId], references: [id])
+  creeParId            String?
+  modifiePar           User?    @relation("AvocatModificateur", fields: [modifieParId], references: [id])
+  modifieParId         String?
   
   // Relations
-  conventions Convention[]
+  conventions          Convention[]
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
   
   @@map("avocats")
 }

@@ -9,7 +9,33 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
   try {
+    const { search, region, specialisation } = req.query;
+    
+    const where = {};
+    if (search) {
+      where.OR = [
+        { nom: { contains: search, mode: 'insensitive' } },
+        { prenom: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+    if (region) {
+      where.region = { contains: region, mode: 'insensitive' };
+    }
+    if (specialisation) {
+      where.specialisation = { contains: specialisation, mode: 'insensitive' };
+    }
+
     const avocats = await prisma.avocat.findMany({
+      where,
+      include: {
+        creePar: {
+          select: { nom: true, prenom: true }
+        },
+        modifiePar: {
+          select: { nom: true, prenom: true }
+        }
+      },
       orderBy: {
         nom: 'asc'
       }
@@ -21,20 +47,205 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
-  res.json({ message: 'Create avocat - TODO' });
+router.post('/', async (req, res) => {
+  try {
+    const {
+      nom,
+      prenom,
+      region,
+      adressePostale,
+      telephonePublic1,
+      telephonePublic2,
+      telephonePrive,
+      email,
+      siretOuRidet,
+      villesIntervention,
+      notes,
+      specialisation,
+      coordonneesBancaires
+    } = req.body;
+
+    if (!nom || !prenom) {
+      return res.status(400).json({ error: 'Le nom et le prénom sont obligatoires' });
+    }
+
+    const avocat = await prisma.avocat.create({
+      data: {
+        nom,
+        prenom,
+        region,
+        adressePostale,
+        telephonePublic1,
+        telephonePublic2,
+        telephonePrive,
+        email,
+        siretOuRidet,
+        villesIntervention: villesIntervention ? JSON.stringify(villesIntervention) : null,
+        notes,
+        specialisation,
+        coordonneesBancaires: coordonneesBancaires ? JSON.stringify(coordonneesBancaires) : null,
+        creeParId: req.user.id
+      },
+      include: {
+        creePar: {
+          select: { nom: true, prenom: true }
+        }
+      }
+    });
+
+    res.status(201).json(avocat);
+  } catch (error) {
+    console.error('Create avocat error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Get avocat by id - TODO' });
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const avocat = await prisma.avocat.findUnique({
+      where: { id },
+      include: {
+        creePar: {
+          select: { nom: true, prenom: true }
+        },
+        modifiePar: {
+          select: { nom: true, prenom: true }
+        },
+        conventions: {
+          include: {
+            dossier: {
+              select: { numero: true }
+            }
+          }
+        }
+      }
+    });
+
+    if (!avocat) {
+      return res.status(404).json({ error: 'Avocat non trouvé' });
+    }
+
+    if (avocat.villesIntervention) {
+      try {
+        avocat.villesIntervention = JSON.parse(avocat.villesIntervention);
+      } catch (e) {
+        avocat.villesIntervention = [];
+      }
+    }
+
+    if (avocat.coordonneesBancaires) {
+      try {
+        avocat.coordonneesBancaires = JSON.parse(avocat.coordonneesBancaires);
+      } catch (e) {
+        avocat.coordonneesBancaires = null;
+      }
+    }
+
+    res.json(avocat);
+  } catch (error) {
+    console.error('Get avocat by id error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
-router.put('/:id', (req, res) => {
-  res.json({ message: 'Update avocat - TODO' });
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      nom,
+      prenom,
+      region,
+      adressePostale,
+      telephonePublic1,
+      telephonePublic2,
+      telephonePrive,
+      email,
+      siretOuRidet,
+      villesIntervention,
+      notes,
+      specialisation,
+      coordonneesBancaires
+    } = req.body;
+
+    const avocatExistant = await prisma.avocat.findUnique({
+      where: { id }
+    });
+
+    if (!avocatExistant) {
+      return res.status(404).json({ error: 'Avocat non trouvé' });
+    }
+
+    if (!nom || !prenom) {
+      return res.status(400).json({ error: 'Le nom et le prénom sont obligatoires' });
+    }
+
+    const avocat = await prisma.avocat.update({
+      where: { id },
+      data: {
+        nom,
+        prenom,
+        region,
+        adressePostale,
+        telephonePublic1,
+        telephonePublic2,
+        telephonePrive,
+        email,
+        siretOuRidet,
+        villesIntervention: villesIntervention ? JSON.stringify(villesIntervention) : null,
+        notes,
+        specialisation,
+        coordonneesBancaires: coordonneesBancaires ? JSON.stringify(coordonneesBancaires) : null,
+        modifieParId: req.user.id
+      },
+      include: {
+        creePar: {
+          select: { nom: true, prenom: true }
+        },
+        modifiePar: {
+          select: { nom: true, prenom: true }
+        }
+      }
+    });
+
+    res.json(avocat);
+  } catch (error) {
+    console.error('Update avocat error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
-router.delete('/:id', (req, res) => {
-  res.json({ message: 'Delete avocat - TODO' });
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const avocatExistant = await prisma.avocat.findUnique({
+      where: { id },
+      include: {
+        conventions: true
+      }
+    });
+
+    if (!avocatExistant) {
+      return res.status(404).json({ error: 'Avocat non trouvé' });
+    }
+
+    if (avocatExistant.conventions.length > 0) {
+      return res.status(400).json({ 
+        error: 'Impossible de supprimer cet avocat car il est lié à des conventions' 
+      });
+    }
+
+    await prisma.avocat.delete({
+      where: { id }
+    });
+
+    res.json({ message: 'Avocat supprimé avec succès' });
+  } catch (error) {
+    console.error('Delete avocat error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
 module.exports = router;

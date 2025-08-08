@@ -9,9 +9,15 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
   try {
-    const { search, region, specialisation } = req.query;
+    const { search, region, specialisation, includeInactive } = req.query;
     
     const where = {};
+    
+    // Par défaut, ne montrer que les avocats actifs
+    if (includeInactive !== 'true') {
+      where.active = true;
+    }
+    
     if (search) {
       where.OR = [
         { nom: { contains: search, mode: 'insensitive' } },
@@ -105,7 +111,7 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     
     const avocat = await prisma.avocat.findUnique({
-      where: { id },
+      where: { id, active: true },
       include: {
         creePar: {
           select: { nom: true, prenom: true }
@@ -170,7 +176,7 @@ router.put('/:id', async (req, res) => {
     } = req.body;
 
     const avocatExistant = await prisma.avocat.findUnique({
-      where: { id }
+      where: { id, active: true }
     });
 
     if (!avocatExistant) {
@@ -221,27 +227,26 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     
     const avocatExistant = await prisma.avocat.findUnique({
-      where: { id },
-      include: {
-        conventions: true
-      }
+      where: { id }
     });
 
     if (!avocatExistant) {
       return res.status(404).json({ error: 'Avocat non trouvé' });
     }
 
-    if (avocatExistant.conventions.length > 0) {
-      return res.status(400).json({ 
-        error: 'Impossible de supprimer cet avocat car il est lié à des conventions' 
-      });
+    if (!avocatExistant.active) {
+      return res.status(400).json({ error: 'Avocat déjà désactivé' });
     }
 
-    await prisma.avocat.delete({
-      where: { id }
+    await prisma.avocat.update({
+      where: { id },
+      data: { 
+        active: false,
+        modifieParId: req.user.id
+      }
     });
 
-    res.json({ message: 'Avocat supprimé avec succès' });
+    res.json({ message: 'Avocat désactivé avec succès' });
   } catch (error) {
     console.error('Delete avocat error:', error);
     res.status(500).json({ error: 'Erreur serveur' });

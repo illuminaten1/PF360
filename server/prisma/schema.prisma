@@ -207,6 +207,7 @@ model Avocat {
   notes                String?  // Notes utiles sur l'avocat
   specialisation       String?
   coordonneesBancaires String?  // RIB au format JSON pour sécurité
+  active               Boolean  @default(true) // Soft delete
   
   // Champs de logging
   creePar              User?    @relation("AvocatCreateur", fields: [creeParId], references: [id])

@@ -15,11 +15,11 @@ async function main() {
     create: {
       identifiant: 'admin',
       password: hashedPassword,
-      nom: 'Administrateur',
-      prenom: 'Système',
-      mail: 'admin@pf360.fr',
+      nom: 'LECHEF',
+      prenom: 'Michel',
+      mail: 'miche.lechef@interieur.gouv.fr',
       role: 'ADMIN',
-      grade: 'Administrateur'
+      grade: 'LCL'
     }
   })
 
@@ -48,14 +48,9 @@ async function main() {
 
   // Create badges
   const badgesData = [
-    { nom: 'Urgent', couleur: '#ef4444' },
-    { nom: 'Complexe', couleur: '#f97316' },
-    { nom: 'Médical', couleur: '#10b981' },
-    { nom: 'Juridique', couleur: '#3b82f6' },
-    { nom: 'Social', couleur: '#8b5cf6' },
-    { nom: 'Psychologique', couleur: '#ec4899' },
-    { nom: 'Prioritaire', couleur: '#dc2626' },
-    { nom: 'Suivi particulier', couleur: '#059669' }
+    { nom: 'Signalé', couleur: '#ef4444' },
+    { nom: 'UDA', couleur: '#f97316' },
+    { nom: 'VSS', couleur: '#10b981' }
   ]
 
   for (const badge of badgesData) {
@@ -119,11 +114,11 @@ async function main() {
     create: {
       identifiant: 'test',
       password: testUserPassword,
-      nom: 'Test',
-      prenom: 'Utilisateur',
-      mail: 'test@pf360.fr',
+      nom: 'PASCHEF',
+      prenom: 'Laurent',
+      mail: 'laurent.pachef@interieur.gouv.fr',
       role: 'REDACTEUR',
-      grade: 'Adjudant'
+      grade: 'GAV'
     }
   })
 

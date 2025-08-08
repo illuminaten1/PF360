@@ -185,3 +185,34 @@ export interface Avocat {
   createdAt?: string
   updatedAt?: string
 }
+
+export interface Paiement {
+  id: string
+  facture?: string
+  montantHT: number
+  montantTTC: number
+  nature: 'AVOCAT' | 'AUTRES_INTERVENANTS'
+  ficheReglement?: string
+  dossier?: {
+    id: string
+    numero: string
+  }
+  convention?: {
+    id: string
+    montantHT: number
+    date: string
+  }
+  avocat?: {
+    id: string
+    nom: string
+    prenom?: string
+  }
+  creePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  createdAt: string
+  updatedAt: string
+}

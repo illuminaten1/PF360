@@ -183,6 +183,8 @@ model Paiement {
   dossierId       String
   convention      Convention? @relation(fields: [conventionId], references: [id])
   conventionId    String?
+  avocat          Avocat?     @relation(fields: [avocatId], references: [id])
+  avocatId        String?
   creePar         User        @relation(fields: [creeParId], references: [id])
   creeParId       String
   
@@ -221,6 +223,7 @@ model Avocat {
   
   // Relations
   conventions          Convention[]
+  paiements            Paiement[]
   
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt

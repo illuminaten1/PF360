@@ -371,19 +371,6 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
     )
   }
 
-  if (data.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <div className="text-gray-400 mb-4">
-          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun dossier</h3>
-        <p className="text-gray-600">Aucun dossier ne correspond aux critères de recherche.</p>
-      </div>
-    )
-  }
 
   return (
     <div className="bg-white rounded-lg shadow">

@@ -303,17 +303,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
     )
   }
 
-  if (data.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <div className="text-gray-400 mb-4">
-          <UserIcon className="w-12 h-12 text-gray-400 mx-auto" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun utilisateur</h3>
-        <p className="text-gray-600">Aucun utilisateur ne correspond aux critères de recherche.</p>
-      </div>
-    )
-  }
 
   return (
     <div className="bg-white rounded-lg shadow">

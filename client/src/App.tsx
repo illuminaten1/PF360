@@ -7,6 +7,7 @@ import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Dossiers from '@/pages/Dossiers'
 import Demandes from '@/pages/Demandes'
+import Avocats from '@/pages/Avocats'
 import Users from '@/pages/Users'
 
 // Placeholder components for other pages
@@ -42,7 +43,7 @@ function App() {
           <Route path="decisions" element={<PlaceholderPage title="Décisions" />} />
           <Route path="conventions" element={<PlaceholderPage title="Conventions" />} />
           <Route path="paiements" element={<PlaceholderPage title="Paiements" />} />
-          <Route path="avocats" element={<PlaceholderPage title="Avocats" />} />
+          <Route path="avocats" element={<Avocats />} />
           <Route path="suivi-2-mois" element={<PlaceholderPage title="Suivi 2 mois" />} />
           
           {/* Admin routes */}

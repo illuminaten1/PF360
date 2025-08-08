@@ -46,7 +46,18 @@ router.get('/', async (req, res) => {
         nom: 'asc'
       }
     });
-    res.json(avocats);
+
+    // Parser le JSON des villes d'intervention
+    const avocatsWithParsedData = avocats.map(avocat => ({
+      ...avocat,
+      villesIntervention: avocat.villesIntervention ? 
+        (typeof avocat.villesIntervention === 'string' ? 
+          JSON.parse(avocat.villesIntervention) : 
+          avocat.villesIntervention) : 
+        []
+    }));
+
+    res.json(avocatsWithParsedData);
   } catch (error) {
     console.error('Get avocats error:', error);
     res.status(500).json({ error: 'Erreur serveur' });

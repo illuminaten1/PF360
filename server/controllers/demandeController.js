@@ -34,8 +34,8 @@ const demandeSchema = z.object({
   prenom: z.string().min(1, 'Prénom requis'),
   adressePostaleLigne1: z.string().optional(),
   adressePostaleLigne2: z.string().optional(),
-  telephone1: z.string().optional(),
-  telephone2: z.string().optional(),
+  telephoneProfessionnel: z.string().optional(),
+  telephonePersonnel: z.string().optional(),
   unite: z.string().optional(),
   
   // Infos faits

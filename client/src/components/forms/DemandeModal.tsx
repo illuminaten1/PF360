@@ -23,8 +23,8 @@ const demandeSchema = z.object({
   prenom: z.string().min(1, 'Prénom requis'),
   adressePostaleLigne1: z.string().optional(),
   adressePostaleLigne2: z.string().optional(),
-  telephone1: z.string().optional(),
-  telephone2: z.string().optional(),
+  telephoneProfessionnel: z.string().optional(),
+  telephonePersonnel: z.string().optional(),
   unite: z.string().optional(),
   
   // Infos faits
@@ -112,8 +112,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       prenom: '',
       adressePostaleLigne1: '',
       adressePostaleLigne2: '',
-      telephone1: '',
-      telephone2: '',
+      telephoneProfessionnel: '',
+      telephonePersonnel: '',
       unite: '',
       dateFaits: '',
       commune: '',
@@ -181,8 +181,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           prenom: demande.prenom,
           adressePostaleLigne1: demande.adressePostaleLigne1 || '',
           adressePostaleLigne2: demande.adressePostaleLigne2 || '',
-          telephone1: demande.telephone1 || '',
-          telephone2: demande.telephone2 || '',
+          telephoneProfessionnel: demande.telephoneProfessionnel || '',
+          telephonePersonnel: demande.telephonePersonnel || '',
           unite: demande.unite || '',
           dateFaits: demande.dateFaits ? new Date(demande.dateFaits).toISOString().split('T')[0] : '',
           commune: demande.commune || '',
@@ -218,8 +218,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           prenom: '',
           adressePostaleLigne1: '',
           adressePostaleLigne2: '',
-          telephone1: '',
-          telephone2: '',
+          telephoneProfessionnel: '',
+          telephonePersonnel: '',
           unite: '',
           dateFaits: '',
           commune: '',
@@ -768,10 +768,11 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Téléphone 1
+                          Téléphone professionnel
                         </label>
                         <input
-                          {...register('telephone1')}
+                          {...register('telephoneProfessionnel')}
+                          type="tel"
                           className="input w-full"
                           placeholder="Ex: 06.12.34.56.78"
                           disabled={isSubmitting}
@@ -780,10 +781,11 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Téléphone 2
+                          Téléphone personnel
                         </label>
                         <input
-                          {...register('telephone2')}
+                          {...register('telephonePersonnel')}
+                          type="tel"
                           className="input w-full"
                           placeholder="Ex: 01.23.45.67.89"
                           disabled={isSubmitting}

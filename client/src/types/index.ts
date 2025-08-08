@@ -36,8 +36,8 @@ export interface Demande {
   prenom: string
   adressePostaleLigne1?: string
   adressePostaleLigne2?: string
-  telephone1?: string
-  telephone2?: string
+  telephoneProfessionnel?: string
+  telephonePersonnel?: string
   unite?: string
   dateFaits?: string
   commune?: string

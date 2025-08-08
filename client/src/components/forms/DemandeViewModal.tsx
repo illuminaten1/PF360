@@ -164,7 +164,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                     </div>
 
                     {/* Contact */}
-                    {(demande.adressePostaleLigne1 || demande.telephone1 || demande.telephone2) && (
+                    {(demande.adressePostaleLigne1 || demande.telephoneProfessionnel || demande.telephonePersonnel) && (
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
                         <h4 className="text-lg font-semibold text-gray-900 mb-4">Contact</h4>
                         
@@ -178,17 +178,17 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           )}
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {demande.telephone1 && (
+                            {demande.telephoneProfessionnel && (
                               <div>
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone 1</span>
-                                <p className="text-gray-900 font-mono">{demande.telephone1}</p>
+                                <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone professionnel</span>
+                                <p className="text-gray-900 font-mono">{demande.telephoneProfessionnel}</p>
                               </div>
                             )}
                             
-                            {demande.telephone2 && (
+                            {demande.telephonePersonnel && (
                               <div>
-                                <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone 2</span>
-                                <p className="text-gray-900 font-mono">{demande.telephone2}</p>
+                                <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone personnel</span>
+                                <p className="text-gray-900 font-mono">{demande.telephonePersonnel}</p>
                               </div>
                             )}
                           </div>

@@ -73,7 +73,7 @@ router.get('/', async (req, res) => {
         }
       },
       orderBy: {
-        dateReceptionGlobale: 'desc'
+        createdAt: 'desc'
       }
     });
 

@@ -101,7 +101,6 @@ model Demande {
 model Dossier {
   id                  String    @id @default(cuid())
   numero              String    @unique // Auto-généré via transaction séquentielle
-  dateReceptionGlobale DateTime  @default(now())
   notes               String?
   
   // Relations

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon, PencilIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
-import { PhoneIcon, EnvelopeIcon, MapPinIcon, IdentificationIcon } from '@heroicons/react/24/solid'
+import { XMarkIcon, UserIcon, MapPinIcon, PhoneIcon, EnvelopeIcon, BanknotesIcon, DocumentTextIcon, IdentificationIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
 import { Avocat } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -18,7 +17,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
   avocat,
   onEdit
 }) => {
-  if (!isOpen || !avocat) return null
+  if (!avocat) return null
 
   const copyCoordinates = async () => {
     try {
@@ -74,212 +73,293 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
+              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6 pb-4 border-b">
-                  <div className="flex items-center space-x-3">
-                    <Dialog.Title as="h3" className="text-xl font-semibold text-gray-900">
-                      Maître {avocat.prenom} {avocat.nom}
-                    </Dialog.Title>
-                    {avocat.specialisation && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {avocat.specialisation}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={copyCoordinates}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                      title="Copier les coordonnées"
-                    >
-                      <ClipboardDocumentIcon className="h-5 w-5" />
-                    </button>
-                    {onEdit && (
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <UserIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <Dialog.Title as="h3" className="text-xl font-semibold text-white">
+                          Maître {avocat.prenom} {avocat.nom}
+                        </Dialog.Title>
+                        <div className="flex items-center space-x-3 mt-1">
+                          {avocat.specialisation && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-white bg-opacity-20 text-blue-100 border-blue-300">
+                              {avocat.specialisation}
+                            </span>
+                          )}
+                          {avocat.region && (
+                            <span className="text-blue-100 text-sm">
+                              {avocat.region}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
                       <button
-                        onClick={onEdit}
-                        className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-full"
-                        title="Modifier"
+                        onClick={copyCoordinates}
+                        className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+                        title="Copier les coordonnées"
                       >
-                        <PencilIcon className="h-5 w-5" />
+                        <ClipboardDocumentIcon className="h-5 w-5" />
                       </button>
-                    )}
-                    <button
-                      onClick={onClose}
-                      className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
-                    >
-                      <XMarkIcon className="h-5 w-5" />
-                    </button>
+                      <button
+                        onClick={onClose}
+                        className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="space-y-6">
-                  {/* Informations générales */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-md font-medium text-gray-900 mb-4">Informations générales</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Région */}
-                      {avocat.region && (
-                        <div className="flex items-start space-x-3">
-                          <MapPinIcon className="h-5 w-5 text-blue-600 mt-0.5" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-500">Région</div>
-                            <div className="text-base text-gray-900">{avocat.region}</div>
-                          </div>
+                <div className="p-6">
+                  <div className="space-y-8">
+                    {/* Informations générales */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                          <IdentificationIcon className="h-5 w-5 text-blue-600" />
                         </div>
-                      )}
-
-                      {/* SIRET/RIDET */}
-                      {avocat.siretOuRidet && (
-                        <div className="flex items-start space-x-3">
-                          <IdentificationIcon className="h-5 w-5 text-blue-600 mt-0.5" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-500">SIRET/RIDET</div>
-                            <div className="text-base text-gray-900">{avocat.siretOuRidet}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Adresse */}
-                  {avocat.adressePostale && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Adresse</h4>
-                      <div className="flex items-start space-x-3">
-                        <MapPinIcon className="h-5 w-5 text-blue-600 mt-0.5" />
+                        <h4 className="text-lg font-semibold text-gray-900">Informations générales</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <div className="text-base text-gray-900 whitespace-pre-line">{avocat.adressePostale}</div>
+                          <span className="block text-sm font-medium text-gray-600 mb-1">Nom complet</span>
+                          <p className="text-lg font-semibold text-gray-900">
+                            Maître {avocat.prenom} {avocat.nom}
+                          </p>
                         </div>
+                        
+                        {avocat.region && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Région</span>
+                            <p className="text-gray-900 font-medium">{avocat.region}</p>
+                          </div>
+                        )}
+                        
+                        {avocat.siretOuRidet && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">SIRET/RIDET</span>
+                            <p className="text-gray-900 font-mono">{avocat.siretOuRidet}</p>
+                          </div>
+                        )}
+
+                        {avocat.specialisation && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Spécialisation</span>
+                            <p className="text-gray-900">{avocat.specialisation}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
 
-                  {/* Contacts */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-md font-medium text-gray-900 mb-4">Contacts</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {avocat.telephonePublic1 && (
-                        <div className="flex items-center space-x-3">
-                          <PhoneIcon className="h-5 w-5 text-green-600" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-500">Téléphone public 1</div>
-                            <a href={`tel:${avocat.telephonePublic1}`} className="text-base text-blue-600 hover:text-blue-800 hover:underline">
-                              {avocat.telephonePublic1}
-                            </a>
+                    {/* Adresse */}
+                    {avocat.adressePostale && (
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+                        <div className="flex items-center mb-4">
+                          <div className="bg-gray-100 p-2 rounded-lg mr-3">
+                            <MapPinIcon className="h-5 w-5 text-gray-600" />
                           </div>
+                          <h4 className="text-lg font-semibold text-gray-900">Adresse</h4>
                         </div>
-                      )}
+                        <div className="bg-white p-4 rounded-lg border">
+                          <p className="text-gray-900 whitespace-pre-line">{avocat.adressePostale}</p>
+                        </div>
+                      </div>
+                    )}
 
-                      {avocat.telephonePublic2 && (
-                        <div className="flex items-center space-x-3">
+                    {/* Contacts */}
+                    <div className="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl border border-green-200">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-green-100 p-2 rounded-lg mr-3">
                           <PhoneIcon className="h-5 w-5 text-green-600" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-500">Téléphone public 2</div>
-                            <a href={`tel:${avocat.telephonePublic2}`} className="text-base text-blue-600 hover:text-blue-800 hover:underline">
-                              {avocat.telephonePublic2}
-                            </a>
-                          </div>
                         </div>
-                      )}
-
-                      {avocat.telephonePrive && (
-                        <div className="flex items-center space-x-3 md:col-span-2">
-                          <PhoneIcon className="h-5 w-5 text-red-600" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-500">
-                              Téléphone privé <span className="text-red-500">(non communiqué aux bénéficiaires)</span>
+                        <h4 className="text-lg font-semibold text-gray-900">Contacts</h4>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {avocat.telephonePublic1 && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone public 1</span>
+                              <a 
+                                href={`tel:${avocat.telephonePublic1}`}
+                                className="text-green-600 hover:text-green-800 font-mono underline transition-colors"
+                              >
+                                {avocat.telephonePublic1}
+                              </a>
                             </div>
-                            <a href={`tel:${avocat.telephonePrive}`} className="text-base text-blue-600 hover:text-blue-800 hover:underline">
+                          )}
+                          
+                          {avocat.telephonePublic2 && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone public 2</span>
+                              <a 
+                                href={`tel:${avocat.telephonePublic2}`}
+                                className="text-green-600 hover:text-green-800 font-mono underline transition-colors"
+                              >
+                                {avocat.telephonePublic2}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {avocat.telephonePrive && (
+                          <div>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">
+                              Téléphone privé <span className="text-red-500">(non communiqué aux bénéficiaires)</span>
+                            </span>
+                            <a 
+                              href={`tel:${avocat.telephonePrive}`}
+                              className="text-red-600 hover:text-red-800 font-mono underline transition-colors"
+                            >
                               {avocat.telephonePrive}
                             </a>
                           </div>
-                        </div>
-                      )}
-
-                      {avocat.email && (
-                        <div className="flex items-center space-x-3 md:col-span-2">
-                          <EnvelopeIcon className="h-5 w-5 text-purple-600" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-500">Email</div>
-                            <a href={`mailto:${avocat.email}`} className="text-base text-blue-600 hover:text-blue-800 hover:underline">
+                        )}
+                        
+                        {avocat.email && (
+                          <div className="mt-4">
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Email</span>
+                            <a 
+                              href={`mailto:${avocat.email}`}
+                              className="text-blue-600 hover:text-blue-800 font-mono break-all underline transition-colors"
+                            >
                               {avocat.email}
                             </a>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Villes d'intervention */}
-                  {avocat.villesIntervention && avocat.villesIntervention.length > 0 && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Villes d'intervention</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {avocat.villesIntervention.map((ville, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
-                          >
-                            {ville}
-                          </span>
-                        ))}
+                        )}
                       </div>
                     </div>
-                  )}
 
-                  {/* Informations bancaires */}
-                  {(avocat.titulaireDuCompteBancaire || avocat.codeEtablissement || avocat.codeGuichet || avocat.numeroDeCompte || avocat.cle) && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Informations bancaires</h4>
-                      
-                      {avocat.titulaireDuCompteBancaire && (
-                        <div className="mb-4">
-                          <div className="text-sm font-medium text-gray-500">Titulaire du compte bancaire</div>
-                          <div className="text-base text-gray-900">{avocat.titulaireDuCompteBancaire}</div>
-                        </div>
-                      )}
-
-                      {(avocat.codeEtablissement || avocat.codeGuichet || avocat.numeroDeCompte || avocat.cle) && (
-                        <div>
-                          <div className="text-sm font-medium text-gray-500 mb-1">Coordonnées bancaires (RIB)</div>
-                          <div className="text-base text-gray-900 font-mono bg-white px-3 py-2 rounded border">
-                            {avocat.codeEtablissement || '-----'} {avocat.codeGuichet || '-----'} {avocat.numeroDeCompte || '-----------'} {avocat.cle || '--'}
+                    {/* Villes d'intervention */}
+                    {avocat.villesIntervention && avocat.villesIntervention.length > 0 && (
+                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200">
+                        <div className="flex items-center mb-4">
+                          <div className="bg-yellow-100 p-2 rounded-lg mr-3">
+                            <MapPinIcon className="h-5 w-5 text-yellow-600" />
                           </div>
+                          <h4 className="text-lg font-semibold text-gray-900">Villes d'intervention</h4>
                         </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Notes */}
-                  {avocat.notes && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Notes</h4>
-                      <div className="bg-white border border-gray-200 rounded-md p-4">
-                        <div className="text-base text-gray-900 whitespace-pre-line">{avocat.notes}</div>
+                        <div className="flex flex-wrap gap-2">
+                          {avocat.villesIntervention.map((ville, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-300"
+                            >
+                              {ville}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Dates */}
-                  {(avocat.createdAt || avocat.updatedAt) && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Informations système</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    {/* Informations bancaires */}
+                    {(avocat.titulaireDuCompteBancaire || avocat.codeEtablissement || avocat.codeGuichet || avocat.numeroDeCompte || avocat.cle) && (
+                      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200">
+                        <div className="flex items-center mb-4">
+                          <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                            <BanknotesIcon className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <h4 className="text-lg font-semibold text-gray-900">Informations bancaires</h4>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {avocat.titulaireDuCompteBancaire && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Titulaire du compte bancaire</span>
+                              <p className="text-gray-900 font-medium">{avocat.titulaireDuCompteBancaire}</p>
+                            </div>
+                          )}
+
+                          {(avocat.codeEtablissement || avocat.codeGuichet || avocat.numeroDeCompte || avocat.cle) && (
+                            <div>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Coordonnées bancaires (RIB)</span>
+                              <div className="bg-white p-4 rounded-lg border border-purple-200">
+                                <p className="text-gray-900 font-mono text-lg">
+                                  {avocat.codeEtablissement || '-----'} {avocat.codeGuichet || '-----'} {avocat.numeroDeCompte || '-----------'} {avocat.cle || '--'}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    {avocat.notes && (
+                      <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+                        <div className="flex items-center mb-4">
+                          <div className="bg-orange-100 p-2 rounded-lg mr-3">
+                            <DocumentTextIcon className="h-5 w-5 text-orange-600" />
+                          </div>
+                          <h4 className="text-lg font-semibold text-gray-900">Notes</h4>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border border-orange-200">
+                          <p className="text-gray-900 whitespace-pre-line">{avocat.notes}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Informations administratives */}
+                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Informations administratives</h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {avocat.createdAt && (
                           <div>
-                            <span className="font-medium">Créé le :</span> {new Date(avocat.createdAt).toLocaleDateString('fr-FR')}
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Créé le</span>
+                            <p className="text-gray-900 text-sm">
+                              {new Date(avocat.createdAt).toLocaleDateString('fr-FR')} à {new Date(avocat.createdAt).toLocaleTimeString('fr-FR')}
+                              {avocat.creePar && (
+                                <span className="block text-gray-600 text-xs mt-1">
+                                  par {avocat.creePar.prenom} {avocat.creePar.nom}
+                                </span>
+                              )}
+                            </p>
                           </div>
                         )}
+                        
                         {avocat.updatedAt && (
                           <div>
-                            <span className="font-medium">Modifié le :</span> {new Date(avocat.updatedAt).toLocaleDateString('fr-FR')}
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Modifié le</span>
+                            <p className="text-gray-900 text-sm">
+                              {new Date(avocat.updatedAt).toLocaleDateString('fr-FR')} à {new Date(avocat.updatedAt).toLocaleTimeString('fr-FR')}
+                              {avocat.modifiePar && (
+                                <span className="block text-gray-600 text-xs mt-1">
+                                  par {avocat.modifiePar.prenom} {avocat.modifiePar.nom}
+                                </span>
+                              )}
+                            </p>
                           </div>
                         )}
                       </div>
                     </div>
-                  )}
+
+                    {/* Boutons d'action */}
+                    <div className="flex justify-end space-x-3 pt-6 mt-8 border-t border-gray-200">
+                      {onEdit && (
+                        <button
+                          onClick={onEdit}
+                          className="px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium"
+                        >
+                          Modifier
+                        </button>
+                      )}
+                      <button
+                        onClick={onClose}
+                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                      >
+                        Fermer
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

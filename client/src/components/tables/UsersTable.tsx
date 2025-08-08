@@ -21,10 +21,10 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
-  ChevronRightIcon,
-  MagnifyingGlassIcon 
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { User } from '@/types'
+import SearchBar from './SearchBar'
 
 interface UsersTableProps {
   data: User[]
@@ -317,21 +317,11 @@ const UsersTable: React.FC<UsersTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow">
-      {/* Global Search */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-          <input
-            value={globalFilter ?? ''}
-            onChange={(e) => setGlobalFilter(String(e.target.value))}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Recherche globale dans toutes les colonnes..."
-          />
-          <span className="text-sm text-gray-500">
-            {table.getFilteredRowModel().rows.length} résultat(s)
-          </span>
-        </div>
-      </div>
+      <SearchBar 
+        globalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
+        filteredRowsCount={table.getFilteredRowModel().rows.length}
+      />
 
       {/* Table */}
       <div className="overflow-x-auto">

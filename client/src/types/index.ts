@@ -72,6 +72,18 @@ export interface Demande {
     prenom: string
     grade?: string
   }
+  creePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
   decisions?: Array<{
     decision: {
       id: string

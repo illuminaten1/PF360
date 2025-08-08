@@ -29,6 +29,8 @@ model User {
   logs             Log[]
   dossiersAssignes Dossier[]
   demandesAssignees Demande[]
+  demandesCrees    Demande[]   @relation("DemandeCreateur")
+  demandesModifiees Demande[]  @relation("DemandeModificateur")
   decisions        Decision[]
   conventions      Convention[]
   paiements        Paiement[]
@@ -86,6 +88,10 @@ model Demande {
   dossierId              String?
   assigneA               User?     @relation(fields: [assigneAId], references: [id])
   assigneAId             String?
+  creePar                User?     @relation("DemandeCreateur", fields: [creeParId], references: [id])
+  creeParId              String?
+  modifiePar             User?     @relation("DemandeModificateur", fields: [modifieParId], references: [id])
+  modifieParId           String?
   decisions              DecisionDemande[]
   conventions            ConventionDemande[]
   

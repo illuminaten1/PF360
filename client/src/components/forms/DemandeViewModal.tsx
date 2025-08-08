@@ -488,9 +488,25 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                       
                       <div>
                         <span className="block text-sm font-medium text-gray-600 mb-1">Créée le</span>
-                        <p className="text-gray-900 text-sm">{formatDateTime(demande.createdAt)}</p>
+                        <p className="text-gray-900 text-sm">
+                          {formatDateTime(demande.createdAt)}
+                          {demande.creePar && (
+                            <span className="block text-gray-600 text-xs mt-1">
+                              par {demande.creePar.grade && `${demande.creePar.grade} `}
+                              {demande.creePar.prenom} {demande.creePar.nom}
+                            </span>
+                          )}
+                        </p>
                         <span className="block text-sm font-medium text-gray-600 mb-1 mt-2">Modifiée le</span>
-                        <p className="text-gray-900 text-sm">{formatDateTime(demande.updatedAt)}</p>
+                        <p className="text-gray-900 text-sm">
+                          {formatDateTime(demande.updatedAt)}
+                          {demande.modifiePar && (
+                            <span className="block text-gray-600 text-xs mt-1">
+                              par {demande.modifiePar.grade && `${demande.modifiePar.grade} `}
+                              {demande.modifiePar.prenom} {demande.modifiePar.nom}
+                            </span>
+                          )}
+                        </p>
                       </div>
                     </div>
                   </div>

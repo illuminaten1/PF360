@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/utils/api'
@@ -22,6 +22,15 @@ interface DashboardStats {
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth()
+  const [currentDateTime, setCurrentDateTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
@@ -111,12 +120,32 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Bienvenue, {user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Vue d'ensemble de l'activité PF360
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Bienvenue, {user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Vue d'ensemble de l'activité PF360
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-lg font-semibold text-gray-900">
+              {currentDateTime.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </div>
+            <div className="text-base font-medium text-gray-700">
+              {currentDateTime.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+              }).replace(':', 'h')}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">

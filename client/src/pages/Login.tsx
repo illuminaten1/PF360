@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { LoginCredentials } from '@/types'
 import { GlobeAltIcon } from '@heroicons/react/24/outline'
@@ -16,9 +16,8 @@ const Login: React.FC = () => {
   const { login, isAuthenticated, loading } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const location = useLocation()
   
-  const from = location.state?.from?.pathname || '/dashboard'
+  const from = '/dashboard'
 
   const {
     register,

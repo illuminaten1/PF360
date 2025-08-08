@@ -347,7 +347,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           </div>
                         )}
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <span className="block text-sm font-medium text-gray-600 mb-1">Date d'audience</span>
                             {demande.dateAudience ? (() => {
@@ -387,19 +387,23 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                               )}
                             </p>
                           </div>
-                        </div>
-                        
-                        {demande.partieCivile && demande.montantPartieCivile && (
+                          
                           <div>
                             <span className="block text-sm font-medium text-gray-600 mb-1">Montant réclamé</span>
-                            <p className="text-xl font-bold text-green-600">
-                              {demande.montantPartieCivile.toLocaleString('fr-FR', {
-                                style: 'currency',
-                                currency: 'EUR'
-                              })}
+                            <p className="text-gray-900">
+                              {demande.partieCivile && demande.montantPartieCivile ? (
+                                <span className="text-green-600 font-medium">
+                                  {demande.montantPartieCivile.toLocaleString('fr-FR', {
+                                    style: 'currency',
+                                    currency: 'EUR'
+                                  })}
+                                </span>
+                              ) : (
+                                <span className="text-gray-500">-</span>
+                              )}
                             </p>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>

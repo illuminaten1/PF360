@@ -1,6 +1,6 @@
 import React from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon, UserIcon, MapPinIcon, PhoneIcon, EnvelopeIcon, BanknotesIcon, DocumentTextIcon, IdentificationIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, UserIcon, MapPinIcon, PhoneIcon, BanknotesIcon, DocumentTextIcon, IdentificationIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
 import { Avocat } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -168,9 +168,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                           </div>
                           <h4 className="text-lg font-semibold text-gray-900">Adresse</h4>
                         </div>
-                        <div className="bg-white p-4 rounded-lg border">
-                          <p className="text-gray-900 whitespace-pre-line">{avocat.adressePostale}</p>
-                        </div>
+                        <p className="text-gray-900 whitespace-pre-line">{avocat.adressePostale}</p>
                       </div>
                     )}
 
@@ -188,24 +186,14 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                           {avocat.telephonePublic1 && (
                             <div>
                               <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone public 1</span>
-                              <a 
-                                href={`tel:${avocat.telephonePublic1}`}
-                                className="text-green-600 hover:text-green-800 font-mono underline transition-colors"
-                              >
-                                {avocat.telephonePublic1}
-                              </a>
+                              <p className="text-gray-900 font-mono">{avocat.telephonePublic1}</p>
                             </div>
                           )}
                           
                           {avocat.telephonePublic2 && (
                             <div>
                               <span className="block text-sm font-medium text-gray-600 mb-1">Téléphone public 2</span>
-                              <a 
-                                href={`tel:${avocat.telephonePublic2}`}
-                                className="text-green-600 hover:text-green-800 font-mono underline transition-colors"
-                              >
-                                {avocat.telephonePublic2}
-                              </a>
+                              <p className="text-gray-900 font-mono">{avocat.telephonePublic2}</p>
                             </div>
                           )}
                         </div>
@@ -215,12 +203,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                             <span className="block text-sm font-medium text-gray-600 mb-1">
                               Téléphone privé <span className="text-red-500">(non communiqué aux bénéficiaires)</span>
                             </span>
-                            <a 
-                              href={`tel:${avocat.telephonePrive}`}
-                              className="text-red-600 hover:text-red-800 font-mono underline transition-colors"
-                            >
-                              {avocat.telephonePrive}
-                            </a>
+                            <p className="text-gray-900 font-mono">{avocat.telephonePrive}</p>
                           </div>
                         )}
                         
@@ -319,7 +302,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                               {new Date(avocat.createdAt).toLocaleDateString('fr-FR')} à {new Date(avocat.createdAt).toLocaleTimeString('fr-FR')}
                               {avocat.creePar && (
                                 <span className="block text-gray-600 text-xs mt-1">
-                                  par {avocat.creePar.prenom} {avocat.creePar.nom}
+                                  par {avocat.creePar.grade && `${avocat.creePar.grade} `}{avocat.creePar.prenom} {avocat.creePar.nom}
                                 </span>
                               )}
                             </p>
@@ -333,7 +316,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                               {new Date(avocat.updatedAt).toLocaleDateString('fr-FR')} à {new Date(avocat.updatedAt).toLocaleTimeString('fr-FR')}
                               {avocat.modifiePar && (
                                 <span className="block text-gray-600 text-xs mt-1">
-                                  par {avocat.modifiePar.prenom} {avocat.modifiePar.nom}
+                                  par {avocat.modifiePar.grade && `${avocat.modifiePar.grade} `}{avocat.modifiePar.prenom} {avocat.modifiePar.nom}
                                 </span>
                               )}
                             </p>

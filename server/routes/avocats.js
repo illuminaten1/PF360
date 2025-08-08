@@ -36,10 +36,10 @@ router.get('/', async (req, res) => {
       where,
       include: {
         creePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         },
         modifiePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         }
       },
       orderBy: {
@@ -113,7 +113,7 @@ router.post('/', async (req, res) => {
       },
       include: {
         creePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         }
       }
     });
@@ -133,10 +133,10 @@ router.get('/:id', async (req, res) => {
       where: { id, active: true },
       include: {
         creePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         },
         modifiePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         },
         conventions: {
           include: {
@@ -227,10 +227,10 @@ router.put('/:id', async (req, res) => {
       },
       include: {
         creePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         },
         modifiePar: {
-          select: { nom: true, prenom: true }
+          select: { nom: true, prenom: true, grade: true }
         }
       }
     });

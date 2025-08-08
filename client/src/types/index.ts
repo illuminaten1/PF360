@@ -184,6 +184,18 @@ export interface Avocat {
   active?: boolean
   createdAt?: string
   updatedAt?: string
+  creePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
 }
 
 export interface Paiement {

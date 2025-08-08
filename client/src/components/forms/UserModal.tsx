@@ -136,6 +136,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Identifiant | Rôle */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -174,6 +175,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
             </div>
           </div>
 
+          {/* Nom | Prénom */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -214,7 +216,22 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
             </div>
           </div>
 
+          {/* Grade | Initiales */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Grade
+              </label>
+              <input
+                type="text"
+                name="grade"
+                value={formData.grade}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isSubmitting}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Initiales
@@ -230,7 +247,10 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
               />
               <p className="text-gray-500 text-xs mt-1">Laissez vide si non applicable</p>
             </div>
+          </div>
 
+          {/* Email | Téléphone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email *
@@ -249,23 +269,6 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
                 <p className="text-red-500 text-sm mt-1">{errors.mail}</p>
               )}
             </div>
-          </div>
-
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Grade
-              </label>
-              <input
-                type="text"
-                name="grade"
-                value={formData.grade}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={isSubmitting}
-              />
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -282,6 +285,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
             </div>
           </div>
 
+          {/* Mot de passe */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {user ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe *'}

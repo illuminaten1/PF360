@@ -21,8 +21,8 @@ const demandeSchema = z.object({
   departement: z.string().optional(),
   nom: z.string().min(1, 'Nom requis'),
   prenom: z.string().min(1, 'Prénom requis'),
-  adresse1: z.string().optional(),
-  adresse2: z.string().optional(),
+  adressePostaleLigne1: z.string().optional(),
+  adressePostaleLigne2: z.string().optional(),
   telephone1: z.string().optional(),
   telephone2: z.string().optional(),
   unite: z.string().optional(),
@@ -110,8 +110,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       departement: '',
       nom: '',
       prenom: '',
-      adresse1: '',
-      adresse2: '',
+      adressePostaleLigne1: '',
+      adressePostaleLigne2: '',
       telephone1: '',
       telephone2: '',
       unite: '',
@@ -179,8 +179,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           departement: demande.departement || '',
           nom: demande.nom,
           prenom: demande.prenom,
-          adresse1: demande.adresse1 || '',
-          adresse2: demande.adresse2 || '',
+          adressePostaleLigne1: demande.adressePostaleLigne1 || '',
+          adressePostaleLigne2: demande.adressePostaleLigne2 || '',
           telephone1: demande.telephone1 || '',
           telephone2: demande.telephone2 || '',
           unite: demande.unite || '',
@@ -216,8 +216,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           departement: '',
           nom: '',
           prenom: '',
-          adresse1: '',
-          adresse2: '',
+          adressePostaleLigne1: '',
+          adressePostaleLigne2: '',
           telephone1: '',
           telephone2: '',
           unite: '',
@@ -744,22 +744,24 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Adresse ligne 1
+                          Adresse postale ligne 1
                         </label>
                         <input
-                          {...register('adresse1')}
+                          {...register('adressePostaleLigne1')}
                           className="input w-full"
+                          placeholder="123 Rue de la République"
                           disabled={isSubmitting}
                         />
                       </div>
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Adresse ligne 2
+                          Adresse postale ligne 2
                         </label>
                         <input
-                          {...register('adresse2')}
+                          {...register('adressePostaleLigne2')}
                           className="input w-full"
+                          placeholder="Appartement, bâtiment, etc."
                           disabled={isSubmitting}
                         />
                       </div>

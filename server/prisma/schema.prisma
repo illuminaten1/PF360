@@ -50,8 +50,8 @@ model Demande {
   departement            String? // Départements et codes spéciaux
   nom                    String
   prenom                 String
-  adresse1               String?
-  adresse2               String?
+  adressePostaleLigne1   String?
+  adressePostaleLigne2   String?
   telephone1             String?
   telephone2             String?
   unite                  String?

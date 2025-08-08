@@ -164,16 +164,16 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                     </div>
 
                     {/* Contact */}
-                    {(demande.adresse1 || demande.telephone1 || demande.telephone2) && (
+                    {(demande.adressePostaleLigne1 || demande.telephone1 || demande.telephone2) && (
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
                         <h4 className="text-lg font-semibold text-gray-900 mb-4">Contact</h4>
                         
                         <div className="space-y-3">
-                          {demande.adresse1 && (
+                          {demande.adressePostaleLigne1 && (
                             <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Adresse</span>
-                              <p className="text-gray-900">{demande.adresse1}</p>
-                              {demande.adresse2 && <p className="text-gray-900">{demande.adresse2}</p>}
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Adresse postale</span>
+                              <p className="text-gray-900">{demande.adressePostaleLigne1}</p>
+                              {demande.adressePostaleLigne2 && <p className="text-gray-900">{demande.adressePostaleLigne2}</p>}
                             </div>
                           )}
                           

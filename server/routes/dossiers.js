@@ -99,32 +99,47 @@ router.post('/', async (req, res) => {
     const validatedData = createDossierSchema.parse(req.body);
     const { notes, sgamiId, assigneAId, badges = [] } = validatedData;
 
-    const dossier = await prisma.dossier.create({
-      data: {
-        notes,
-        sgamiId,
-        assigneAId,
-        badges: {
-          create: badges.map(badgeId => ({
-            badgeId
-          }))
-        }
-      },
-      include: {
-        sgami: true,
-        badges: {
-          include: {
-            badge: true
-          }
+    const dossier = await prisma.$transaction(async (tx) => {
+      // Trouver le dernier numéro utilisé
+      const lastDossier = await tx.dossier.findFirst({
+        select: { numero: true },
+        orderBy: { numero: 'desc' }
+      });
+
+      // Calculer le prochain numéro séquentiel
+      const nextNumber = (parseInt(lastDossier?.numero || '0') + 1).toString();
+
+      // Créer le dossier avec le nouveau numéro
+      return await tx.dossier.create({
+        data: {
+          numero: nextNumber,
+          notes,
+          sgamiId,
+          assigneAId,
+          ...(badges.length > 0 && {
+            badges: {
+              create: badges.map(badgeId => ({
+                badgeId
+              }))
+            }
+          })
         },
-        assigneA: {
-          select: {
-            id: true,
-            nom: true,
-            prenom: true
+        include: {
+          sgami: true,
+          badges: {
+            include: {
+              badge: true
+            }
+          },
+          assigneA: {
+            select: {
+              id: true,
+              nom: true,
+              prenom: true
+            }
           }
         }
-      }
+      });
     });
 
     await logAction(req.user.id, 'CREATE_DOSSIER', `Création du dossier ${dossier.numero}`, 'Dossier', dossier.id);

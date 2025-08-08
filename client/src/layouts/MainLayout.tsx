@@ -213,15 +213,17 @@ const MainLayout: React.FC = () => {
         {/* Top bar */}
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 lg:hidden"
-            >
-              <Bars3Icon className="h-6 w-6" />
-            </button>
+            <div className="flex items-center lg:hidden">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+            </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-1 sm:space-y-0">
+            <div className="flex items-center space-x-4 ml-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-1 sm:space-y-0 text-right sm:text-left">
                 <div className="text-sm text-gray-700">
                   <span className="font-medium">
                     <span className="hidden sm:inline">{user?.grade && `${user.grade} `}</span>

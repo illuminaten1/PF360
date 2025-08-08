@@ -423,7 +423,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('nigend')}
                           className="input w-full"
-                          placeholder="Ex: 123456789"
+                          placeholder="Ex: 375788"
                           disabled={isSubmitting}
                         />
                       </div>
@@ -769,7 +769,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('adressePostaleLigne2')}
                           className="input w-full"
-                          placeholder="Appartement, bâtiment, etc."
+                          placeholder="92240 MALAKOFF"
                           disabled={isSubmitting}
                         />
                       </div>
@@ -782,7 +782,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           {...register('telephoneProfessionnel')}
                           type="tel"
                           className="input w-full"
-                          placeholder="Ex: 06.12.34.56.78"
+                          placeholder="Ex: 06 12 34 56 78"
                           disabled={isSubmitting}
                         />
                       </div>
@@ -795,7 +795,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           {...register('telephonePersonnel')}
                           type="tel"
                           className="input w-full"
-                          placeholder="Ex: 01.23.45.67.89"
+                          placeholder="Ex: 07 23 45 67 89"
                           disabled={isSubmitting}
                         />
                       </div>

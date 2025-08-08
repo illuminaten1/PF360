@@ -40,7 +40,10 @@ const demandeSchema = z.object({
   resume: z.string().optional(),
   blessures: z.string().optional(),
   partieCivile: z.boolean().default(false),
-  montantPartieCivile: z.number().optional(),
+  montantPartieCivile: z.union([z.number(), z.nan(), z.undefined()]).optional().transform((val) => {
+    if (typeof val === 'number' && !isNaN(val)) return val;
+    return undefined;
+  }),
   qualificationsPenales: z.string().optional(),
   dateAudience: z.string().optional(),
   
@@ -57,7 +60,17 @@ const demandeSchema = z.object({
   
   // Affectation utilisateur
   assigneAId: z.string().optional()
-})
+}).refine(
+  (data) => {
+    // Si partieCivile est false, on ignore le montant
+    if (!data.partieCivile) return true;
+    // Si partieCivile est true, le montant peut être undefined (optionnel)
+    return true;
+  },
+  {
+    message: "Validation des données de partie civile"
+  }
+)
 
 type DemandeFormData = z.infer<typeof demandeSchema>
 
@@ -124,6 +137,13 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
   })
 
   const partieCivile = watch('partieCivile')
+
+  // Nettoyer le montant quand partieCivile est décochée
+  React.useEffect(() => {
+    if (!partieCivile) {
+      setValue('montantPartieCivile', undefined)
+    }
+  }, [partieCivile, setValue])
 
   // Fetch dossiers for assignment (only when editing existing demande)
   const { data: dossiers = [] } = useQuery<Dossier[]>({
@@ -226,12 +246,18 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
   const handleFormSubmit = async (data: DemandeFormData) => {
     try {
-      // Convert string numbers to numbers
-      if (data.montantPartieCivile) {
-        data.montantPartieCivile = Number(data.montantPartieCivile)
+      // Nettoyer les données avant soumission
+      const cleanedData = { ...data }
+      
+      // Si partieCivile est false, s'assurer que montantPartieCivile est undefined
+      if (!cleanedData.partieCivile) {
+        cleanedData.montantPartieCivile = undefined
+      } else if (cleanedData.montantPartieCivile) {
+        // Convert string numbers to numbers si nécessaire
+        cleanedData.montantPartieCivile = Number(cleanedData.montantPartieCivile)
       }
       
-      await onSubmit(data)
+      await onSubmit(cleanedData)
       onClose()
     } catch (error) {
       // L'erreur sera gérée par la mutation dans le parent

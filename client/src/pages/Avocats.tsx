@@ -139,9 +139,6 @@ const Avocats: React.FC = () => {
     }
   }
 
-  const topRegions = stats ? Object.entries(stats.avocatsParRegion)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5) : []
 
   return (
     <div className="p-6">
@@ -187,28 +184,6 @@ const Avocats: React.FC = () => {
           </div>
         )}
 
-        {/* Top régions */}
-        {topRegions.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Répartition par région (Top 5)</h3>
-            <div className="space-y-3">
-              {topRegions.map(([region, count]) => (
-                <div key={region} className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">{region}</span>
-                  <div className="flex items-center space-x-2">
-                    <div className="bg-blue-200 rounded-full h-2 w-24 relative">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${(count / stats!.totalAvocats) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm text-gray-500">{count}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <AvocatsTable

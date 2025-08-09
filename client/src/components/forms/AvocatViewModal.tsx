@@ -281,23 +281,23 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
 
                           {(avocat.codeEtablissement || avocat.codeGuichet || avocat.numeroDeCompte || avocat.cle) && (
                             <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="block text-sm font-medium text-gray-600">Coordonnées bancaires (RIB)</span>
+                              <span className="block text-sm font-medium text-gray-600 mb-1">Coordonnées bancaires (RIB)</span>
+                              <div className="flex items-center gap-3">
+                                <p className="text-gray-900 font-mono text-lg">
+                                  {formatRIB()}
+                                </p>
                                 <button
                                   onClick={() => setShowFullRIB(!showFullRIB)}
-                                  className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                  className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-600 hover:text-purple-700 rounded-lg transition-colors border border-purple-200"
                                   title={showFullRIB ? "Masquer le RIB" : "Révéler le RIB complet"}
                                 >
                                   {showFullRIB ? (
-                                    <EyeSlashIcon className="h-4 w-4" />
+                                    <EyeSlashIcon className="h-5 w-5" />
                                   ) : (
-                                    <EyeIcon className="h-4 w-4" />
+                                    <EyeIcon className="h-5 w-5" />
                                   )}
                                 </button>
                               </div>
-                              <p className="text-gray-900 font-mono text-lg">
-                                {formatRIB()}
-                              </p>
                             </div>
                           )}
                         </div>

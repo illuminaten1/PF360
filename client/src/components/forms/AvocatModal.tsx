@@ -121,16 +121,16 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
     if (!formData.nom.trim()) newErrors.nom = 'Le nom est requis'
     if (!formData.prenom.trim()) newErrors.prenom = 'Le prénom est requis'
 
-    // Validation téléphone français
-    const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/
+    // Validation téléphone flexible pour international et outre-mer
+    const phoneRegex = /^[+]?[0-9\s.-]{6,}$/
     if (formData.telephonePublic1 && !phoneRegex.test(formData.telephonePublic1)) {
-      newErrors.telephonePublic1 = 'Format de téléphone invalide'
+      newErrors.telephonePublic1 = 'Format de téléphone invalide (minimum 6 caractères)'
     }
     if (formData.telephonePublic2 && !phoneRegex.test(formData.telephonePublic2)) {
-      newErrors.telephonePublic2 = 'Format de téléphone invalide'
+      newErrors.telephonePublic2 = 'Format de téléphone invalide (minimum 6 caractères)'
     }
     if (formData.telephonePrive && !phoneRegex.test(formData.telephonePrive)) {
-      newErrors.telephonePrive = 'Format de téléphone invalide'
+      newErrors.telephonePrive = 'Format de téléphone invalide (minimum 6 caractères)'
     }
 
     // Validation email
@@ -139,9 +139,9 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
       newErrors.email = 'Format d\'email invalide'
     }
 
-    // Validation SIRET/RIDET
-    if (formData.siretOuRidet && !/^[0-9]{9,14}$/.test(formData.siretOuRidet.replace(/\s/g, ''))) {
-      newErrors.siretOuRidet = 'Format de SIRET/RIDET invalide (9 à 14 chiffres)'
+    // Validation SIRET/RIDET - format libre pour outre-mer
+    if (formData.siretOuRidet && formData.siretOuRidet.replace(/\s/g, '').length < 3) {
+      newErrors.siretOuRidet = 'Le SIRET/RIDET doit contenir au moins 3 caractères'
     }
 
     setErrors(newErrors)
@@ -407,7 +407,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                           onChange={(e) => handleInputChange('telephonePublic1', e.target.value)}
                           type="tel"
                           className="input w-full"
-                          placeholder="Ex: 06 12 34 56 78"
+                          placeholder="Ex: 06 12 34 56 78, +687 123 456"
                           disabled={isSubmitting}
                         />
                         {errors.telephonePublic1 && (
@@ -422,7 +422,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                           onChange={(e) => handleInputChange('telephonePublic2', e.target.value)}
                           type="tel"
                           className="input w-full"
-                          placeholder="Ex: 01 23 45 67 89"
+                          placeholder="Ex: 01 23 45 67 89, +590 123 456"
                           disabled={isSubmitting}
                         />
                         {errors.telephonePublic2 && (
@@ -439,7 +439,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                           onChange={(e) => handleInputChange('telephonePrive', e.target.value)}
                           type="tel"
                           className="input w-full"
-                          placeholder="Ex: 07 98 76 54 32"
+                          placeholder="Ex: 07 98 76 54 32, +262 123 456"
                           disabled={isSubmitting}
                         />
                         {errors.telephonePrive && (
@@ -491,7 +491,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                         <label className="label block text-gray-700 mb-2">Numéro de compte</label>
                         <input
                           value={formData.numeroDeCompte}
-                          onChange={(e) => handleInputChange('numeroDeCompte', e.target.value.replace(/\D/g, '').substring(0, 11))}
+                          onChange={(e) => handleInputChange('numeroDeCompte', e.target.value.substring(0, 11))}
                           className="input w-full"
                           placeholder="12345678901"
                           disabled={isSubmitting}

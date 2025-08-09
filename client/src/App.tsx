@@ -6,6 +6,7 @@ import MainLayout from '@/layouts/MainLayout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Dossiers from '@/pages/Dossiers'
+import DossierDetail from '@/pages/DossierDetail'
 import Demandes from '@/pages/Demandes'
 import Avocats from '@/pages/Avocats'
 import Users from '@/pages/Users'
@@ -39,7 +40,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="demandes" element={<Demandes />} />
           <Route path="dossiers" element={<Dossiers />} />
-          <Route path="dossiers/:id" element={<PlaceholderPage title="Détail du dossier" />} />
+          <Route path="dossiers/:id" element={<DossierDetail />} />
           <Route path="decisions" element={<PlaceholderPage title="Décisions" />} />
           <Route path="conventions" element={<PlaceholderPage title="Conventions" />} />
           <Route path="paiements" element={<PlaceholderPage title="Paiements" />} />

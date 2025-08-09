@@ -128,19 +128,75 @@ export interface Dossier {
     prenom: string
     grade?: string
   }
+  creePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
   decisions: Array<{
     id: string
     type: string
     date: string
+    creePar?: {
+      nom: string
+      prenom: string
+    }
+    demandes?: Array<{
+      demande: {
+        nom: string
+        prenom: string
+        numeroDS: string
+      }
+    }>
   }>
   conventions: Array<{
     id: string
     montantHT: number
     date: string
+    avocat: {
+      id: string
+      nom: string
+      prenom?: string
+    }
+    creePar?: {
+      nom: string
+      prenom: string
+    }
+    demandes?: Array<{
+      demande: {
+        nom: string
+        prenom: string
+        numeroDS: string
+      }
+    }>
   }>
   paiements: Array<{
     id: string
+    montantHT: number
     montantTTC: number
+    nature: 'AVOCAT' | 'AUTRES_INTERVENANTS'
+    facture?: string
+    convention?: {
+      id: string
+      montantHT: number
+      date: string
+    }
+    creePar?: {
+      nom: string
+      prenom: string
+    }
+  }>
+  attendus?: Array<{
+    id: string
+    nomOuNigend: string
+    commentaire?: string
   }>
   stats?: {
     totalConventionsHT: number

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
@@ -8,6 +9,7 @@ import DossiersTable from '@/components/tables/DossiersTable'
 import DossierModal from '@/components/forms/DossierModal'
 
 const Dossiers: React.FC = () => {
+  const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDossier, setSelectedDossier] = useState<Dossier | null>(null)
 
@@ -77,8 +79,7 @@ const Dossiers: React.FC = () => {
   }
 
   const handleViewDossier = (dossier: Dossier) => {
-    // Navigate to dossier detail page
-    window.location.href = `/dossiers/${dossier.id}`
+    navigate(`/dossiers/${dossier.id}`)
   }
 
   const handleDeleteDossier = (dossier: Dossier) => {

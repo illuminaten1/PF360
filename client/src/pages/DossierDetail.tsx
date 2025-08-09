@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import TextareaAutosize from 'react-textarea-autosize'
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -15,13 +17,15 @@ import {
   FolderIcon,
   CalendarIcon,
   ClipboardDocumentListIcon,
-  PlusIcon
+  PlusIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
 import DossierModal from '@/components/forms/DossierModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
+dayjs.extend(relativeTime)
 dayjs.locale('fr')
 
 const DossierDetail: React.FC = () => {
@@ -30,6 +34,10 @@ const DossierDetail: React.FC = () => {
   const queryClient = useQueryClient()
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [notes, setNotes] = useState('')
+  const [isSavingNotes, setIsSavingNotes] = useState(false)
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
+  const notesTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch dossier details
   const { data: dossier, isLoading, error } = useQuery<Dossier>({
@@ -57,6 +65,25 @@ const DossierDetail: React.FC = () => {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la modification')
+    }
+  })
+
+  // Save notes mutation
+  const saveNotesMutation = useMutation({
+    mutationFn: async (notes: string) => {
+      if (!id) throw new Error('ID du dossier manquant')
+      const response = await api.put(`/dossiers/${id}`, { notes })
+      return response.data
+    },
+    onSuccess: (updatedDossier) => {
+      // Update only the cache without invalidating (no refetch)
+      queryClient.setQueryData(['dossier', id], updatedDossier)
+      setLastSavedAt(new Date())
+      setIsSavingNotes(false)
+    },
+    onError: () => {
+      toast.error('Erreur lors de la sauvegarde des notes')
+      setIsSavingNotes(false)
     }
   })
 
@@ -89,6 +116,42 @@ const DossierDetail: React.FC = () => {
   const handleSubmitDossier = async (data: any) => {
     await updateDossierMutation.mutateAsync(data)
   }
+
+  // Initialize notes when dossier loads
+  useEffect(() => {
+    if (dossier && dossier.notes !== undefined) {
+      setNotes(dossier.notes || '')
+    }
+  }, [dossier])
+
+  // Auto-save notes with debounce
+  const debouncedSaveNotes = useCallback((newNotes: string) => {
+    if (notesTimeoutRef.current) {
+      clearTimeout(notesTimeoutRef.current)
+    }
+    
+    notesTimeoutRef.current = setTimeout(() => {
+      if (newNotes !== (dossier?.notes || '')) {
+        setIsSavingNotes(true)
+        saveNotesMutation.mutate(newNotes)
+      }
+    }, 2000)
+  }, [dossier?.notes, saveNotesMutation])
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNotes = e.target.value
+    setNotes(newNotes)
+    debouncedSaveNotes(newNotes)
+  }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (notesTimeoutRef.current) {
+        clearTimeout(notesTimeoutRef.current)
+      }
+    }
+  }, [])
 
   if (isLoading) {
     return (
@@ -481,6 +544,48 @@ const DossierDetail: React.FC = () => {
             </div>
           </div>
 
+          {/* Notes */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
+                Notes
+              </h3>
+              <div className="flex items-center text-xs text-gray-500">
+                {isSavingNotes ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Sauvegarde...
+                  </span>
+                ) : lastSavedAt ? (
+                  <span className="flex items-center">
+                    <CheckIcon className="h-3 w-3 mr-1 text-green-500" />
+                    Sauvegardé {dayjs(lastSavedAt).fromNow()}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <TextareaAutosize
+              minRows={4}
+              maxRows={20}
+              value={notes}
+              onChange={handleNotesChange}
+              placeholder="Ajoutez des notes sur ce dossier...
+              
+• Échanges avec les parties
+• Consignes particulières
+• Points d'attention
+• Historique des actions"
+              className="w-full resize-none border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              disabled={isSavingNotes}
+            />
+            <div className="mt-2 text-xs text-gray-400">
+              Les notes sont sauvegardées automatiquement après 2 secondes d'inactivité.
+            </div>
+          </div>
 
           {/* Attendus */}
           {dossier.attendus && dossier.attendus.length > 0 && (
@@ -502,16 +607,6 @@ const DossierDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Notes */}
-          {dossier.notes && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <DocumentTextIcon className="h-5 w-5 mr-2" />
-                Notes
-              </h3>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{dossier.notes}</p>
-            </div>
-          )}
         </div>
       </div>
 

@@ -18,6 +18,7 @@
     "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.20.1",
+    "react-textarea-autosize": "^8.5.9",
     "tailwindcss": "^3.3.6",
     "zod": "^3.25.76",
     "zustand": "^4.4.7"

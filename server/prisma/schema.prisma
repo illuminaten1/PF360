@@ -105,6 +105,7 @@ model Demande {
 model Dossier {
   id                  String    @id @default(cuid())
   numero              String    @unique // Auto-généré via transaction séquentielle
+  nomDossier          String?   // Nom optionnel pour les dossiers importants
   notes               String?
   
   // Relations

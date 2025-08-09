@@ -82,6 +82,22 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         filterFn: 'includesString'
       },
       {
+        accessorKey: 'nomDossier',
+        header: 'Nom du dossier',
+        cell: ({ getValue }) => {
+          const nomDossier = getValue<string>()
+          return nomDossier ? (
+            <div className="text-sm font-medium text-gray-900">
+              {nomDossier}
+            </div>
+          ) : (
+            <span className="text-gray-400 text-sm">-</span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
         id: 'nombreDemandes',
         header: 'Nb Demandes',
         accessorFn: (row) => row.stats?.nombreDemandes || row.demandes.length,

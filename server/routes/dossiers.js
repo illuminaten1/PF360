@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 router.use(authMiddleware);
 
 const createDossierSchema = z.object({
+  nomDossier: z.string().optional(),
   notes: z.string().optional(),
   sgamiId: z.string().min(1, "Le SGAMI est requis"),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
@@ -17,6 +18,7 @@ const createDossierSchema = z.object({
 });
 
 const updateDossierSchema = z.object({
+  nomDossier: z.string().optional(),
   notes: z.string().optional(),
   sgamiId: z.string().optional(),
   assigneAId: z.string().optional(),
@@ -113,7 +115,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const validatedData = createDossierSchema.parse(req.body);
-    const { notes, sgamiId, assigneAId, badges = [] } = validatedData;
+    const { nomDossier, notes, sgamiId, assigneAId, badges = [] } = validatedData;
 
     const dossier = await prisma.$transaction(async (tx) => {
       // Trouver le dernier numéro utilisé
@@ -129,6 +131,7 @@ router.post('/', async (req, res) => {
       return await tx.dossier.create({
         data: {
           numero: nextNumber,
+          nomDossier,
           notes,
           sgamiId,
           assigneAId,
@@ -308,7 +311,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const validatedData = updateDossierSchema.parse(req.body);
-    const { notes, sgamiId, assigneAId, badges = [] } = validatedData;
+    const { nomDossier, notes, sgamiId, assigneAId, badges = [] } = validatedData;
 
     const existingDossier = await prisma.dossier.findUnique({
       where: { id: req.params.id },
@@ -326,6 +329,7 @@ router.put('/:id', async (req, res) => {
     const dossier = await prisma.dossier.update({
       where: { id: req.params.id },
       data: {
+        nomDossier,
         notes,
         sgamiId,
         assigneAId,

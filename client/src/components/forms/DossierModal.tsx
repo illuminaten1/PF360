@@ -9,6 +9,7 @@ import { Dossier, Badge, Sgami, User } from '@/types'
 import api from '@/utils/api'
 
 const dossierSchema = z.object({
+  nomDossier: z.string().optional(),
   notes: z.string().optional(),
   sgamiId: z.string().min(1, "Le SGAMI est requis"),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
@@ -75,6 +76,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
       if (dossier) {
         // Mode édition : remplir avec les données existantes
         reset({
+          nomDossier: dossier.nomDossier || '',
           notes: dossier.notes || '',
           sgamiId: dossier.sgami?.id || '',
           assigneAId: dossier.assigneA?.id || '',
@@ -83,6 +85,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
       } else {
         // Mode création : réinitialiser complètement le formulaire
         reset({
+          nomDossier: '',
           notes: '',
           sgamiId: '',
           assigneAId: '',
@@ -97,6 +100,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
       // Nettoyer les données : remplacer les chaînes vides par undefined
       const cleanedData = {
         ...data,
+        nomDossier: data.nomDossier || undefined,
         sgamiId: data.sgamiId || undefined,
         assigneAId: data.assigneAId || undefined,
         notes: data.notes || undefined
@@ -156,6 +160,22 @@ const DossierModal: React.FC<DossierModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+                  <div>
+                    <label htmlFor="nomDossier" className="label block text-gray-700 mb-2">
+                      Nom du dossier (optionnel)
+                    </label>
+                    <input
+                      {...register('nomDossier')}
+                      type="text"
+                      className="input w-full"
+                      placeholder="Nom descriptif pour ce dossier important..."
+                      disabled={isSubmitting}
+                    />
+                    {errors.nomDossier && (
+                      <p className="mt-1 text-sm text-red-600">{errors.nomDossier.message}</p>
+                    )}
+                  </div>
+
                   <div>
                     <label htmlFor="notes" className="label block text-gray-700 mb-2">
                       Notes

@@ -107,6 +107,7 @@ export interface Demande {
 export interface Dossier {
   id: string
   numero: string
+  nomDossier?: string
   dateReceptionGlobale: string
   notes?: string
   demandes: Demande[]

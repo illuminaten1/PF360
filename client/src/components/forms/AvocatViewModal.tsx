@@ -30,9 +30,10 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
     if (showFullRIB) {
       return `${codeEtablissement} ${codeGuichet} ${numeroDeCompte} ${cle}`
     } else {
-      // Flouter le milieu du RIB (numéro de compte) et garder le code banque (établissement + guichet) et la clé
-      const floutedNumeroDeCompte = numeroDeCompte.replace(/./g, '●')
-      return `${codeEtablissement} ${codeGuichet} ${floutedNumeroDeCompte} ${cle}`
+      // Masquer le code guichet et le numéro de compte, garder seulement le code banque et la clé
+      const maskedCodeGuichet = codeGuichet.replace(/./g, '●')
+      const maskedNumeroDeCompte = numeroDeCompte.replace(/./g, '●')
+      return `${codeEtablissement} ${maskedCodeGuichet} ${maskedNumeroDeCompte} ${cle}`
     }
   }
 

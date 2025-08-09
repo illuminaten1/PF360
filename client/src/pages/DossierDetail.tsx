@@ -14,7 +14,6 @@ import {
   ScaleIcon,
   FolderIcon,
   CalendarIcon,
-  TagIcon,
   ClipboardDocumentListIcon,
   PlusIcon
 } from '@heroicons/react/24/outline'
@@ -136,17 +135,32 @@ const DossierDetail: React.FC = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Dossier {dossier.numero}
               {dossier.nomDossier && (
-                <span className="text-lg font-medium text-gray-600 ml-2">
-                  - {dossier.nomDossier}
+                <span className="text-2xl font-bold text-gray-600">
+                  {' - '}{dossier.nomDossier}
                 </span>
               )}
             </h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Créé le {dayjs(dossier.createdAt).format('DD/MM/YYYY à HH:mm')}
-            </p>
+            
+            {/* Badges */}
+            {dossier.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {dossier.badges.map((badgeRel) => (
+                  <span
+                    key={badgeRel.badge.id}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
+                    style={badgeRel.badge.couleur ? {
+                      backgroundColor: `${badgeRel.badge.couleur}20`,
+                      color: badgeRel.badge.couleur
+                    } : {}}
+                  >
+                    {badgeRel.badge.nom}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -467,31 +481,6 @@ const DossierDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Badges */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <TagIcon className="h-5 w-5 mr-2" />
-              Badges
-            </h3>
-            {dossier.badges.length === 0 ? (
-              <p className="text-gray-500 text-sm">Aucun badge assigné</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {dossier.badges.map((badgeRel) => (
-                  <span
-                    key={badgeRel.badge.id}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                    style={badgeRel.badge.couleur ? {
-                      backgroundColor: `${badgeRel.badge.couleur}20`,
-                      color: badgeRel.badge.couleur
-                    } : {}}
-                  >
-                    {badgeRel.badge.nom}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Attendus */}
           {dossier.attendus && dossier.attendus.length > 0 && (

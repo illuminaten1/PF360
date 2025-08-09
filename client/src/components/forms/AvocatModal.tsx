@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon, PlusIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { Avocat } from '@/types'
+import { useQuery } from '@tanstack/react-query'
+import api from '@/utils/api'
 
 interface AvocatModalProps {
   isOpen: boolean
@@ -67,6 +69,18 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [nouvelleVille, setNouvelleVille] = useState('')
+  const [showVillesSuggestions, setShowVillesSuggestions] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+
+  // Récupérer les suggestions de villes
+  const { data: villesSuggestions = [] } = useQuery({
+    queryKey: ['villes-suggestions'],
+    queryFn: async () => {
+      const response = await api.get('/avocats/suggestions/villes')
+      return response.data
+    }
+  })
 
   useEffect(() => {
     if (isOpen) {
@@ -112,6 +126,9 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
         })
       }
       setErrors({})
+      setNouvelleVille('')
+      setShowVillesSuggestions(false)
+      setSelectedSuggestionIndex(-1)
     }
   }, [isOpen, avocat])
 
@@ -179,17 +196,64 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
     }
   }
 
-  const addVille = () => {
-    const input = document.getElementById('nouvelle-ville') as HTMLInputElement
-    const nouvelleVille = input?.value.trim()
+  const addVille = (villeToAdd?: string) => {
+    const ville = villeToAdd || nouvelleVille.trim()
     
-    if (nouvelleVille && !formData.villesIntervention.includes(nouvelleVille)) {
+    if (ville && !formData.villesIntervention.includes(ville)) {
       setFormData(prev => ({
         ...prev,
-        villesIntervention: [...prev.villesIntervention, nouvelleVille]
+        villesIntervention: [...prev.villesIntervention, ville]
       }))
-      input.value = ''
+      setNouvelleVille('')
+      setShowVillesSuggestions(false)
+      setSelectedSuggestionIndex(-1)
     }
+  }
+
+  const handleVilleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNouvelleVille(e.target.value)
+    setShowVillesSuggestions(true)
+    setSelectedSuggestionIndex(-1)
+  }
+
+  const handleVilleSuggestionClick = (suggestion: string) => {
+    setNouvelleVille(suggestion)
+    setShowVillesSuggestions(false)
+    setSelectedSuggestionIndex(-1)
+  }
+
+  const handleVilleKeyDown = (e: React.KeyboardEvent) => {
+    const suggestions = getFilteredVillesSuggestions()
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev => 
+        prev < suggestions.length - 1 ? prev + 1 : 0
+      )
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev => 
+        prev > 0 ? prev - 1 : suggestions.length - 1
+      )
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
+        addVille(suggestions[selectedSuggestionIndex])
+      } else {
+        addVille()
+      }
+    } else if (e.key === 'Escape') {
+      setShowVillesSuggestions(false)
+      setSelectedSuggestionIndex(-1)
+    }
+  }
+
+  const getFilteredVillesSuggestions = () => {
+    if (!nouvelleVille) return []
+    return villesSuggestions.filter((ville: string) => 
+      ville.toLowerCase().includes(nouvelleVille.toLowerCase()) &&
+      !formData.villesIntervention.includes(ville)
+    ).slice(0, 10) // Limiter à 10 suggestions
   }
 
   const removeVille = (index: number) => {
@@ -353,17 +417,40 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                     <h4 className="text-md font-medium text-gray-900 mb-4">Villes d'intervention</h4>
                     
                     <div className="flex gap-2 mb-4">
-                      <input
-                        type="text"
-                        id="nouvelle-ville"
-                        placeholder="Ajouter une ville d'intervention"
-                        className="input flex-1"
-                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addVille())}
-                        disabled={isSubmitting}
-                      />
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          id="nouvelle-ville"
+                          placeholder="Ajouter une ville d'intervention"
+                          className="input w-full"
+                          value={nouvelleVille}
+                          onChange={handleVilleChange}
+                          onKeyDown={handleVilleKeyDown}
+                          onFocus={() => setShowVillesSuggestions(true)}
+                          onBlur={() => setTimeout(() => setShowVillesSuggestions(false), 200)}
+                          disabled={isSubmitting}
+                        />
+                        {showVillesSuggestions && getFilteredVillesSuggestions().length > 0 && (
+                          <ul className="absolute z-10 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 border-t-0 rounded-b-md shadow-lg">
+                            {getFilteredVillesSuggestions().map((suggestion: string, index: number) => (
+                              <li 
+                                key={index}
+                                className={`px-4 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                  index === selectedSuggestionIndex 
+                                    ? 'bg-blue-50 text-blue-700' 
+                                    : 'hover:bg-gray-50'
+                                }`}
+                                onClick={() => handleVilleSuggestionClick(suggestion)}
+                              >
+                                {suggestion}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                       <button
                         type="button"
-                        onClick={addVille}
+                        onClick={() => addVille()}
                         className="btn-primary inline-flex items-center px-4 py-2"
                         disabled={isSubmitting}
                       >

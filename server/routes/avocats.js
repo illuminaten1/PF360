@@ -273,4 +273,44 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.get('/suggestions/villes', async (_req, res) => {
+  try {
+    const avocats = await prisma.avocat.findMany({
+      where: { 
+        active: true,
+        villesIntervention: { not: null }
+      },
+      select: { villesIntervention: true }
+    });
+
+    const villesSet = new Set();
+    
+    avocats.forEach(avocat => {
+      if (avocat.villesIntervention) {
+        try {
+          const villes = typeof avocat.villesIntervention === 'string' 
+            ? JSON.parse(avocat.villesIntervention)
+            : avocat.villesIntervention;
+          
+          if (Array.isArray(villes)) {
+            villes.forEach(ville => {
+              if (ville && ville.trim()) {
+                villesSet.add(ville.trim());
+              }
+            });
+          }
+        } catch (e) {
+          // Ignorer les erreurs de parsing JSON
+        }
+      }
+    });
+
+    const villesUniques = Array.from(villesSet).sort();
+    res.json(villesUniques);
+  } catch (error) {
+    console.error('Get villes suggestions error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

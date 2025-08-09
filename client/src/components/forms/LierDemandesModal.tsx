@@ -36,15 +36,21 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
   const [typeFilter, setTypeFilter] = useState('')
   const [selectedDemandes, setSelectedDemandes] = useState<Set<string>>(new Set())
   const [isLinking, setIsLinking] = useState(false)
+  const [page, setPage] = useState(1)
+  const [limit] = useState(50) // Limite raisonnable par page
 
   // Fetch demandes non liées à un dossier
   const { data: demandesData, isLoading, error } = useQuery({
-    queryKey: ['demandes-non-liees', searchTerm, typeFilter],
+    queryKey: ['demandes-non-liees', searchTerm, typeFilter, page],
     queryFn: async () => {
       const params = new URLSearchParams({
-        limit: '100', // Augmenter la limite pour avoir plus de résultats
+        page: page.toString(),
+        limit: limit.toString(),
+        dossierId: 'null', // Filtrage côté serveur pour les demandes non liées
         search: searchTerm,
-        ...(typeFilter && { type: typeFilter })
+        ...(typeFilter && { type: typeFilter }),
+        sortBy: 'dateReception',
+        sortOrder: 'desc'
       })
       
       const response = await api.get(`/demandes?${params}`)
@@ -54,8 +60,10 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
     staleTime: 30000 // Cache pendant 30 secondes
   })
 
-  // Filtrer les demandes non liées
-  const demandes = demandesData?.demandes?.filter((demande: Demande) => !demande.dossier) || []
+  // Plus besoin de filtrer côté client, c'est fait côté serveur
+  const demandes = demandesData?.demandes || []
+  const totalDemandes = demandesData?.total || 0
+  const totalPages = Math.ceil(totalDemandes / limit)
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
@@ -81,9 +89,16 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
     if (selectedDemandes.size === demandes.length) {
       setSelectedDemandes(new Set())
     } else {
-      setSelectedDemandes(new Set(demandes.map(d => d.id)))
+      setSelectedDemandes(new Set(demandes.map((d: Demande) => d.id)))
     }
   }, [demandes, selectedDemandes.size])
+
+  const resetFilters = useCallback(() => {
+    setSearchTerm('')
+    setTypeFilter('')
+    setPage(1)
+    setSelectedDemandes(new Set())
+  }, [])
 
   // Mutation pour lier les demandes
   const lierDemandesMutation = useMutation({
@@ -121,10 +136,19 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
   }
 
   const handleClose = () => {
-    setSelectedDemandes(new Set())
-    setSearchTerm('')
-    setTypeFilter('')
+    resetFilters()
     onClose()
+  }
+
+  // Réinitialiser les filtres quand on change de recherche ou de type
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setPage(1) // Retourner à la première page
+  }
+
+  const handleTypeFilterChange = (value: string) => {
+    setTypeFilter(value)
+    setPage(1) // Retourner à la première page
   }
 
   return (
@@ -181,7 +205,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                         <input
                           type="text"
                           value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
+                          onChange={(e) => handleSearchChange(e.target.value)}
                           placeholder="Rechercher par nom, prénom, N° DS, commune..."
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
@@ -190,7 +214,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                     <div>
                       <select
                         value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
+                        onChange={(e) => handleTypeFilterChange(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">Tous les types</option>
@@ -243,9 +267,10 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500">
-                          {demandes.length} demande(s) disponible(s)
-                        </p>
+                        <div className="text-sm text-gray-500">
+                          <div>Page {page} sur {totalPages}</div>
+                          <div>{totalDemandes} demande(s) au total</div>
+                        </div>
                       </div>
 
                       {/* Liste des demandes */}
@@ -306,6 +331,36 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                           </div>
                         ))}
                       </div>
+
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                          <div className="text-sm text-gray-500">
+                            {demandes.length > 0 && (
+                              <>Affichage de {(page - 1) * limit + 1} à {Math.min(page * limit, totalDemandes)} sur {totalDemandes}</>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => setPage(Math.max(1, page - 1))}
+                              disabled={page <= 1}
+                              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Précédent
+                            </button>
+                            <span className="px-3 py-2 text-sm">
+                              {page} / {totalPages}
+                            </span>
+                            <button
+                              onClick={() => setPage(Math.min(totalPages, page + 1))}
+                              disabled={page >= totalPages}
+                              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Suivant
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

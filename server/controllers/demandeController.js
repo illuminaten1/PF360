@@ -71,7 +71,7 @@ const demandeSchema = z.object({
 
 const getAllDemandes = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, dateDebut, dateFin, assigneAId, sortBy, sortOrder } = req.query;
+    const { page = 1, limit = 20, search, type, dateDebut, dateFin, assigneAId, dossierId, sortBy, sortOrder } = req.query;
     const skip = (page - 1) * limit;
 
     const where = {};
@@ -106,6 +106,15 @@ const getAllDemandes = async (req, res) => {
         where.assigneAId = null;
       } else if (assigneAId) {
         where.assigneAId = assigneAId;
+      }
+    }
+    
+    // Filtrage par dossier
+    if (dossierId !== undefined) {
+      if (dossierId === 'null') {
+        where.dossierId = null; // Demandes non liées à un dossier
+      } else if (dossierId) {
+        where.dossierId = dossierId;
       }
     }
 

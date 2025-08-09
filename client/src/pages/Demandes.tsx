@@ -11,8 +11,6 @@ import DemandeViewModal from '@/components/forms/DemandeViewModal'
 interface DemandesStats {
   totalDemandes: number
   demandesToday: number
-  demandesVictimes: number
-  demandesMisEnCause: number
   demandesNonAffecteesAnnee: number
   demandesSansDecision: number
   demandesNonAffecteesToday: number
@@ -152,26 +150,18 @@ const Demandes: React.FC = () => {
             {/* Statistiques de l'année */}
             <div className="flex-1">
               <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white rounded-lg shadow p-4">
                   <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
                   <div className="text-sm text-gray-600">Total</div>
                 </div>
                 <div className="bg-white rounded-lg shadow p-4">
-                  <div className="text-2xl font-bold text-sky-600">{stats.demandesVictimes}</div>
-                  <div className="text-sm text-gray-600">Victimes</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="text-2xl font-bold text-orange-600">{stats.demandesMisEnCause}</div>
-                  <div className="text-sm text-gray-600">Mis en cause</div>
+                  <div className="text-2xl font-bold text-purple-600">{stats.demandesSansDecision}</div>
+                  <div className="text-sm text-gray-600">Sans décision</div>
                 </div>
                 <div className="bg-white rounded-lg shadow p-4">
                   <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesAnnee}</div>
                   <div className="text-sm text-gray-600">Non affectées</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="text-2xl font-bold text-purple-600">{stats.demandesSansDecision}</div>
-                  <div className="text-sm text-gray-600">Sans décision</div>
                 </div>
               </div>
             </div>

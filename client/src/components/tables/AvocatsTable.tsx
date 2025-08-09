@@ -204,19 +204,19 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           return (
             <div className="text-sm">
               {telephone && (
-                <div className="flex items-center text-blue-600 hover:text-blue-800">
-                  <PhoneIcon className="h-4 w-4 mr-1" />
-                  <a href={`tel:${telephone}`} className="hover:underline">
+                <div className="flex items-center text-gray-900">
+                  <PhoneIcon className="h-4 w-4 mr-1 text-gray-500" />
+                  <span className="font-mono">
                     {telephone}
-                  </a>
+                  </span>
                 </div>
               )}
               {telephone2 && (
-                <div className="flex items-center text-blue-600 hover:text-blue-800 mt-1">
-                  <PhoneIcon className="h-4 w-4 mr-1" />
-                  <a href={`tel:${telephone2}`} className="hover:underline">
+                <div className="flex items-center text-gray-900 mt-1">
+                  <PhoneIcon className="h-4 w-4 mr-1 text-gray-500" />
+                  <span className="font-mono">
                     {telephone2}
-                  </a>
+                  </span>
                 </div>
               )}
             </div>

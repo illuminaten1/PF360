@@ -434,18 +434,34 @@ const DossierDetail: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Date de création</label>
-                <p className="mt-1 text-sm text-gray-900 flex items-center">
-                  <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  {dayjs(dossier.createdAt).format('DD/MM/YYYY à HH:mm')}
-                </p>
+                <div className="mt-1 text-sm text-gray-900">
+                  <div className="flex items-center">
+                    <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
+                    {dayjs(dossier.createdAt).format('DD/MM/YYYY à HH:mm')}
+                  </div>
+                  {dossier.creePar && (
+                    <span className="block text-gray-600 text-xs mt-1 ml-6">
+                      par {dossier.creePar.grade && `${dossier.creePar.grade} `}
+                      {dossier.creePar.prenom} {dossier.creePar.nom}
+                    </span>
+                  )}
+                </div>
               </div>
               {dossier.updatedAt !== dossier.createdAt && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Dernière modification</label>
-                  <p className="mt-1 text-sm text-gray-900 flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
-                    {dayjs(dossier.updatedAt).format('DD/MM/YYYY à HH:mm')}
-                  </p>
+                  <div className="mt-1 text-sm text-gray-900">
+                    <div className="flex items-center">
+                      <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
+                      {dayjs(dossier.updatedAt).format('DD/MM/YYYY à HH:mm')}
+                    </div>
+                    {dossier.modifiePar && (
+                      <span className="block text-gray-600 text-xs mt-1 ml-6">
+                        par {dossier.modifiePar.grade && `${dossier.modifiePar.grade} `}
+                        {dossier.modifiePar.prenom} {dossier.modifiePar.nom}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

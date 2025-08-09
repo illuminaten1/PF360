@@ -18,8 +18,8 @@ const createDossierSchema = z.object({
 });
 
 const updateDossierSchema = z.object({
-  nomDossier: z.string().optional(),
-  notes: z.string().optional(),
+  nomDossier: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
   sgamiId: z.string().optional(),
   assigneAId: z.string().optional(),
   badges: z.array(z.string()).optional()
@@ -326,20 +326,33 @@ router.put('/:id', async (req, res) => {
       where: { dossierId: req.params.id }
     });
 
+    // Construire l'objet de données en filtrant les valeurs undefined et chaînes vides
+    const updateData = {
+      modifieParId: req.user.id,
+      badges: {
+        create: badges.map(badgeId => ({
+          badgeId
+        }))
+      }
+    };
+
+    // Ajouter seulement les champs qui ont une valeur définie
+    if (nomDossier !== undefined) {
+      updateData.nomDossier = nomDossier;
+    }
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+    if (sgamiId !== undefined && sgamiId !== '') {
+      updateData.sgamiId = sgamiId;
+    }
+    if (assigneAId !== undefined && assigneAId !== '') {
+      updateData.assigneAId = assigneAId;
+    }
+
     const dossier = await prisma.dossier.update({
       where: { id: req.params.id },
-      data: {
-        nomDossier,
-        notes,
-        sgamiId,
-        assigneAId,
-        modifieParId: req.user.id,
-        badges: {
-          create: badges.map(badgeId => ({
-            badgeId
-          }))
-        }
-      },
+      data: updateData,
       include: {
         demandes: {
           select: {

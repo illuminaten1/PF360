@@ -97,14 +97,15 @@ const DossierModal: React.FC<DossierModalProps> = ({
 
   const handleFormSubmit = async (data: DossierFormData) => {
     try {
-      // Nettoyer les données : remplacer les chaînes vides par undefined
+      // Forcer l'inclusion de tous les champs, même s'ils sont vides
       const cleanedData = {
-        ...data,
-        nomDossier: data.nomDossier || undefined,
-        sgamiId: data.sgamiId || undefined,
-        assigneAId: data.assigneAId || undefined,
-        notes: data.notes || undefined
+        nomDossier: data.nomDossier?.trim() || null,
+        sgamiId: data.sgamiId?.trim() || undefined,
+        assigneAId: data.assigneAId?.trim() || undefined,
+        notes: data.notes?.trim() || null,
+        badges: data.badges || []
       }
+      
       await onSubmit(cleanedData)
       onClose()
     } catch (error) {

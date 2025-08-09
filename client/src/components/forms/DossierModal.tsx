@@ -10,7 +10,6 @@ import api from '@/utils/api'
 
 const dossierSchema = z.object({
   nomDossier: z.string().optional(),
-  notes: z.string().optional(),
   sgamiId: z.string().min(1, "Le SGAMI est requis"),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional()
@@ -77,7 +76,6 @@ const DossierModal: React.FC<DossierModalProps> = ({
         // Mode édition : remplir avec les données existantes
         reset({
           nomDossier: dossier.nomDossier || '',
-          notes: dossier.notes || '',
           sgamiId: dossier.sgami?.id || '',
           assigneAId: dossier.assigneA?.id || '',
           badges: dossier.badges.map(b => b.badge.id) || []
@@ -86,7 +84,6 @@ const DossierModal: React.FC<DossierModalProps> = ({
         // Mode création : réinitialiser complètement le formulaire
         reset({
           nomDossier: '',
-          notes: '',
           sgamiId: '',
           assigneAId: '',
           badges: []
@@ -102,7 +99,6 @@ const DossierModal: React.FC<DossierModalProps> = ({
         nomDossier: data.nomDossier?.trim() || null,
         sgamiId: data.sgamiId?.trim() || undefined,
         assigneAId: data.assigneAId?.trim() || undefined,
-        notes: data.notes?.trim() || null,
         badges: data.badges || []
       }
       
@@ -177,20 +173,6 @@ const DossierModal: React.FC<DossierModalProps> = ({
                     )}
                   </div>
 
-                  <div>
-                    <label htmlFor="notes" className="label block text-gray-700 mb-2">
-                      Notes
-                    </label>
-                    <textarea
-                      {...register('notes')}
-                      className="input w-full h-24 resize-none"
-                      placeholder="Notes sur le dossier..."
-                      disabled={isSubmitting}
-                    />
-                    {errors.notes && (
-                      <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
-                    )}
-                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>

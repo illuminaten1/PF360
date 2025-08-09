@@ -27,7 +27,7 @@ const Demandes: React.FC = () => {
   const { data: demandes = [], isLoading } = useQuery({
     queryKey: ['demandes-all'],
     queryFn: async () => {
-      const response = await api.get('/demandes?limit=25000') // Get all demandes for client-side processing
+      const response = await api.get('/demandes?limit=50000') // Get all demandes for client-side processing
       return response.data.demandes
     }
   })

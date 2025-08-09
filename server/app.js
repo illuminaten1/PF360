@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const morgan = require('morgan');
 const winston = require('winston');
 
@@ -41,6 +42,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Middleware
 app.use(helmet());
+app.use(compression());
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true

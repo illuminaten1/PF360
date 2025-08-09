@@ -289,6 +289,62 @@ const DossierDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Informations générales */}
+      <div className="mb-8 bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Organisme payeur</label>
+            <p className="mt-1 text-sm text-gray-900">
+              {dossier.sgami?.nom || 'Non assigné'}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Assigné à</label>
+            <p className="mt-1 text-sm text-gray-900 flex items-center">
+              <UserIcon className="h-4 w-4 mr-2 text-gray-400" />
+              {dossier.assigneA ? (
+                `${dossier.assigneA.grade || ''} ${dossier.assigneA.prenom} ${dossier.assigneA.nom}`.trim()
+              ) : (
+                'Non assigné'
+              )}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Date de création</label>
+            <div className="mt-1 text-sm text-gray-900">
+              <div className="flex items-center">
+                <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
+                {dayjs(dossier.createdAt).format('DD/MM/YYYY à HH:mm')}
+              </div>
+              {dossier.creePar && (
+                <span className="block text-gray-600 text-xs mt-1 ml-6">
+                  par {dossier.creePar.grade && `${dossier.creePar.grade} `}
+                  {dossier.creePar.prenom} {dossier.creePar.nom}
+                </span>
+              )}
+            </div>
+          </div>
+          {dossier.updatedAt !== dossier.createdAt && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Dernière modification</label>
+              <div className="mt-1 text-sm text-gray-900">
+                <div className="flex items-center">
+                  <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
+                  {dayjs(dossier.updatedAt).format('DD/MM/YYYY à HH:mm')}
+                </div>
+                {dossier.modifiePar && (
+                  <span className="block text-gray-600 text-xs mt-1 ml-6">
+                    par {dossier.modifiePar.grade && `${dossier.modifiePar.grade} `}
+                    {dossier.modifiePar.prenom} {dossier.modifiePar.nom}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-8">
@@ -488,61 +544,6 @@ const DossierDetail: React.FC = () => {
 
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
-          {/* Informations générales */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">SGAMI</label>
-                <p className="mt-1 text-sm text-gray-900">
-                  {dossier.sgami?.nom || 'Non assigné'}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Assigné à</label>
-                <p className="mt-1 text-sm text-gray-900 flex items-center">
-                  <UserIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  {dossier.assigneA ? (
-                    `${dossier.assigneA.grade || ''} ${dossier.assigneA.prenom} ${dossier.assigneA.nom}`.trim()
-                  ) : (
-                    'Non assigné'
-                  )}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Date de création</label>
-                <div className="mt-1 text-sm text-gray-900">
-                  <div className="flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
-                    {dayjs(dossier.createdAt).format('DD/MM/YYYY à HH:mm')}
-                  </div>
-                  {dossier.creePar && (
-                    <span className="block text-gray-600 text-xs mt-1 ml-6">
-                      par {dossier.creePar.grade && `${dossier.creePar.grade} `}
-                      {dossier.creePar.prenom} {dossier.creePar.nom}
-                    </span>
-                  )}
-                </div>
-              </div>
-              {dossier.updatedAt !== dossier.createdAt && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Dernière modification</label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
-                      {dayjs(dossier.updatedAt).format('DD/MM/YYYY à HH:mm')}
-                    </div>
-                    {dossier.modifiePar && (
-                      <span className="block text-gray-600 text-xs mt-1 ml-6">
-                        par {dossier.modifiePar.grade && `${dossier.modifiePar.grade} `}
-                        {dossier.modifiePar.prenom} {dossier.modifiePar.nom}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Notes */}
           <div className="bg-white rounded-lg shadow p-6">

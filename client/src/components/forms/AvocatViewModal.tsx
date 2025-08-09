@@ -295,11 +295,9 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                                   )}
                                 </button>
                               </div>
-                              <div className="bg-white p-4 rounded-lg border border-purple-200">
-                                <p className="text-gray-900 font-mono text-lg">
-                                  {formatRIB()}
-                                </p>
-                              </div>
+                              <p className="text-gray-900 font-mono text-lg">
+                                {formatRIB()}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -315,9 +313,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                           </div>
                           <h4 className="text-lg font-semibold text-gray-900">Notes</h4>
                         </div>
-                        <div className="bg-white p-4 rounded-lg border border-orange-200">
-                          <p className="text-gray-900 whitespace-pre-line">{avocat.notes}</p>
-                        </div>
+                        <p className="text-gray-900 whitespace-pre-line">{avocat.notes}</p>
                       </div>
                     )}
 

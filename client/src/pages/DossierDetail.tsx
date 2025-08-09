@@ -186,6 +186,14 @@ const DossierDetail: React.FC = () => {
     nombreDecisions: dossier.decisions.length
   }
 
+  const getTypeColor = (type: string) => {
+    return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+  }
+
+  const getTypeLabel = (type: string) => {
+    return type.replace(/_/g, ' ')
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -376,8 +384,8 @@ const DossierDetail: React.FC = () => {
                               {demande.grade && `${demande.grade} `}
                               {demande.prenom} {demande.nom}
                             </h3>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {demande.type}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
+                              {getTypeLabel(demande.type)}
                             </span>
                           </div>
                           <div className="text-sm text-gray-600 space-y-1">

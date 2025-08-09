@@ -18,7 +18,8 @@ import {
   CalendarIcon,
   ClipboardDocumentListIcon,
   PlusIcon,
-  CheckIcon
+  CheckIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -365,8 +366,8 @@ const DossierDetail: React.FC = () => {
                   Demandes ({dossier.demandes.length})
                 </h2>
                 <button className="btn-primary-outline flex items-center text-sm">
-                  <PlusIcon className="h-4 w-4 mr-1" />
-                  Nouvelle demande
+                  <LinkIcon className="h-4 w-4 mr-1" />
+                  Lier des demandes
                 </button>
               </div>
             </div>

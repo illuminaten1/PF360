@@ -24,6 +24,7 @@ import {
 import { Dossier } from '@/types'
 import api from '@/utils/api'
 import DossierModal from '@/components/forms/DossierModal'
+import LierDemandesModal from '@/components/forms/LierDemandesModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 dayjs.extend(relativeTime)
@@ -35,6 +36,7 @@ const DossierDetail: React.FC = () => {
   const queryClient = useQueryClient()
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
@@ -365,7 +367,10 @@ const DossierDetail: React.FC = () => {
                   <FolderIcon className="h-5 w-5 mr-2" />
                   Demandes ({dossier.demandes.length})
                 </h2>
-                <button className="btn-primary-outline flex items-center text-sm">
+                <button 
+                  onClick={() => setIsLierDemandesModalOpen(true)}
+                  className="btn-primary-outline flex items-center text-sm"
+                >
                   <LinkIcon className="h-4 w-4 mr-1" />
                   Lier des demandes
                 </button>
@@ -627,6 +632,16 @@ const DossierDetail: React.FC = () => {
         dossier={dossier}
         title="Modifier le dossier"
       />
+
+      {/* Lier Demandes Modal */}
+      {id && (
+        <LierDemandesModal
+          isOpen={isLierDemandesModalOpen}
+          onClose={() => setIsLierDemandesModalOpen(false)}
+          dossierId={id}
+          dossierNumero={dossier?.numero || ''}
+        />
+      )}
     </div>
   )
 }

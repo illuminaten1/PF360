@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon, UserIcon, MapPinIcon, PhoneIcon, BanknotesIcon, DocumentTextIcon, IdentificationIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, UserIcon, MapPinIcon, PhoneIcon, BanknotesIcon, DocumentTextIcon, IdentificationIcon, ClipboardDocumentIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { Avocat } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -17,7 +17,24 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
   avocat,
   onEdit
 }) => {
+  const [showFullRIB, setShowFullRIB] = useState(false)
+  
   if (!avocat) return null
+
+  const formatRIB = () => {
+    const codeEtablissement = avocat.codeEtablissement || '-----'
+    const codeGuichet = avocat.codeGuichet || '-----'
+    const numeroDeCompte = avocat.numeroDeCompte || '-----------'
+    const cle = avocat.cle || '--'
+    
+    if (showFullRIB) {
+      return `${codeEtablissement} ${codeGuichet} ${numeroDeCompte} ${cle}`
+    } else {
+      // Flouter le milieu du RIB (numéro de compte) et garder le code banque (établissement + guichet) et la clé
+      const floutedNumeroDeCompte = numeroDeCompte.replace(/./g, '●')
+      return `${codeEtablissement} ${codeGuichet} ${floutedNumeroDeCompte} ${cle}`
+    }
+  }
 
   const copyCoordinates = async () => {
     try {
@@ -263,10 +280,23 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
 
                           {(avocat.codeEtablissement || avocat.codeGuichet || avocat.numeroDeCompte || avocat.cle) && (
                             <div>
-                              <span className="block text-sm font-medium text-gray-600 mb-1">Coordonnées bancaires (RIB)</span>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="block text-sm font-medium text-gray-600">Coordonnées bancaires (RIB)</span>
+                                <button
+                                  onClick={() => setShowFullRIB(!showFullRIB)}
+                                  className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                  title={showFullRIB ? "Masquer le RIB" : "Révéler le RIB complet"}
+                                >
+                                  {showFullRIB ? (
+                                    <EyeSlashIcon className="h-4 w-4" />
+                                  ) : (
+                                    <EyeIcon className="h-4 w-4" />
+                                  )}
+                                </button>
+                              </div>
                               <div className="bg-white p-4 rounded-lg border border-purple-200">
                                 <p className="text-gray-900 font-mono text-lg">
-                                  {avocat.codeEtablissement || '-----'} {avocat.codeGuichet || '-----'} {avocat.numeroDeCompte || '-----------'} {avocat.cle || '--'}
+                                  {formatRIB()}
                                 </p>
                               </div>
                             </div>

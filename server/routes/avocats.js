@@ -273,6 +273,37 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id/activate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const avocatExistant = await prisma.avocat.findUnique({
+      where: { id }
+    });
+
+    if (!avocatExistant) {
+      return res.status(404).json({ error: 'Avocat non trouvé' });
+    }
+
+    if (avocatExistant.active) {
+      return res.status(400).json({ error: 'Avocat déjà actif' });
+    }
+
+    await prisma.avocat.update({
+      where: { id },
+      data: { 
+        active: true,
+        modifieParId: req.user.id
+      }
+    });
+
+    res.json({ message: 'Avocat réactivé avec succès' });
+  } catch (error) {
+    console.error('Activate avocat error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 router.get('/suggestions/villes', async (_req, res) => {
   try {
     const avocats = await prisma.avocat.findMany({

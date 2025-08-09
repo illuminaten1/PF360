@@ -18,6 +18,8 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
+  XMarkIcon,
+  CheckIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -33,6 +35,7 @@ interface AvocatsTableProps {
   onView: (avocat: Avocat) => void
   onEdit: (avocat: Avocat) => void
   onDelete: (avocat: Avocat) => void
+  onToggleActive?: (avocat: Avocat) => void
 }
 
 function Filter({ column }: { column: any }) {
@@ -92,7 +95,8 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
   loading = false,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  onToggleActive
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'nom', desc: false }
@@ -106,11 +110,18 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         accessorKey: 'nom',
         header: 'Nom',
         cell: ({ getValue, row }) => (
-          <div 
-            className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-            onClick={() => onView(row.original)}
-          >
-            {getValue<string>()}
+          <div className="flex items-center space-x-2">
+            <div 
+              className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+              onClick={() => onView(row.original)}
+            >
+              {getValue<string>()}
+            </div>
+            {row.original.active === false && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                Inactif
+              </span>
+            )}
           </div>
         ),
         enableColumnFilter: true,
@@ -263,20 +274,32 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
             >
               <PencilIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={() => onDelete(row.original)}
-              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
-              title="Supprimer"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
+            {row.original.active !== false ? (
+              <button
+                onClick={() => onDelete(row.original)}
+                className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
+                title="Désactiver"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            ) : (
+              onToggleActive && (
+                <button
+                  onClick={() => onToggleActive(row.original)}
+                  className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
+                  title="Réactiver"
+                >
+                  <CheckIcon className="h-5 w-5" />
+                </button>
+              )
+            )}
           </div>
         ),
         enableColumnFilter: false,
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete]
+    [onView, onEdit, onDelete, onToggleActive]
   )
 
   const table = useReactTable({

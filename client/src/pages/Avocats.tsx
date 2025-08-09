@@ -19,14 +19,15 @@ const Avocats: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [selectedAvocat, setSelectedAvocat] = useState<Avocat | null>(null)
+  const [showInactive, setShowInactive] = useState(false)
 
   const queryClient = useQueryClient()
 
   // Fetch all avocats
   const { data: avocats = [], isLoading } = useQuery({
-    queryKey: ['avocats'],
+    queryKey: ['avocats', showInactive],
     queryFn: async () => {
-      const response = await api.get('/avocats')
+      const response = await api.get(`/avocats${showInactive ? '?includeInactive=true' : ''}`)
       return response.data
     }
   })
@@ -90,7 +91,7 @@ const Avocats: React.FC = () => {
     }
   })
 
-  // Delete avocat mutation
+  // Delete/Activate avocat mutation
   const deleteAvocatMutation = useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/avocats/${id}`)
@@ -98,10 +99,25 @@ const Avocats: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['avocats'] })
       queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
-      toast.success('Avocat supprimé avec succès')
+      toast.success('Avocat désactivé avec succès')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la suppression')
+      toast.error(error.response?.data?.error || 'Erreur lors de la désactivation')
+    }
+  })
+
+  // Reactivate avocat mutation
+  const reactivateAvocatMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.put(`/avocats/${id}/activate`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['avocats'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
+      toast.success('Avocat réactivé avec succès')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la réactivation')
     }
   })
 
@@ -121,8 +137,16 @@ const Avocats: React.FC = () => {
   }
 
   const handleDeleteAvocat = (avocat: Avocat) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'avocat ${avocat.prenom} ${avocat.nom} ?`)) {
+    if (window.confirm(`Êtes-vous sûr de vouloir désactiver l'avocat ${avocat.prenom} ${avocat.nom} ?`)) {
       deleteAvocatMutation.mutate(avocat.id)
+    }
+  }
+
+  const handleToggleActive = (avocat: Avocat) => {
+    if (avocat.active === false) {
+      if (window.confirm(`Êtes-vous sûr de vouloir réactiver l'avocat ${avocat.prenom} ${avocat.nom} ?`)) {
+        reactivateAvocatMutation.mutate(avocat.id)
+      }
     }
   }
 
@@ -150,13 +174,24 @@ const Avocats: React.FC = () => {
               Gestion de l'annuaire des avocats partenaires
             </p>
           </div>
-          <button
-            onClick={handleCreateAvocat}
-            className="btn-primary flex items-center"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Ajouter un avocat
-          </button>
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700">Voir les avocats inactifs</span>
+            </label>
+            <button
+              onClick={handleCreateAvocat}
+              className="btn-primary flex items-center"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Ajouter un avocat
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -192,6 +227,7 @@ const Avocats: React.FC = () => {
         onView={handleViewAvocat}
         onEdit={handleEditAvocat}
         onDelete={handleDeleteAvocat}
+        onToggleActive={handleToggleActive}
       />
 
       <AvocatModal

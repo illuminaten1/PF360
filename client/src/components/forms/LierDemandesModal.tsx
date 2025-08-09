@@ -206,7 +206,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                           type="text"
                           value={searchTerm}
                           onChange={(e) => handleSearchChange(e.target.value)}
-                          placeholder="Rechercher par nom, prénom, N° DS, commune..."
+                          placeholder="Rechercher: nom, prénom, 'Michel DUPONT', N° DS, NIGEND, commune..."
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -312,6 +312,9 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                                     <CalendarIcon className="h-3 w-3 mr-1" />
                                     Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
                                   </div>
+                                  {demande.nigend && (
+                                    <div className="font-medium">NIGEND: {demande.nigend}</div>
+                                  )}
                                   {demande.unite && (
                                     <div>{demande.unite}</div>
                                   )}

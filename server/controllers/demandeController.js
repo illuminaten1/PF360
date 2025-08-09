@@ -77,14 +77,53 @@ const getAllDemandes = async (req, res) => {
     const where = {};
     
     if (search) {
-      where.OR = [
-        { numeroDS: { contains: search } },
-        { nom: { contains: search } },
-        { prenom: { contains: search } },
-        { nigend: { contains: search } },
-        { commune: { contains: search } },
-        { unite: { contains: search } }
-      ];
+      const searchTerms = search.trim().split(/\s+/);
+      
+      if (searchTerms.length === 1) {
+        // Recherche simple sur un seul terme
+        const term = searchTerms[0];
+        where.OR = [
+          { numeroDS: { contains: term } },
+          { nom: { contains: term } },
+          { prenom: { contains: term } },
+          { nigend: { contains: term } },
+          { commune: { contains: term } },
+          { unite: { contains: term } }
+        ];
+      } else if (searchTerms.length === 2) {
+        // Recherche sur deux termes : supporter "Michel DUPONT" et "DUPONT Michel"
+        const [term1, term2] = searchTerms;
+        where.OR = [
+          // Recherche simple sur chaque terme individuellement
+          { numeroDS: { contains: search } },
+          { nigend: { contains: search } },
+          { commune: { contains: search } },
+          { unite: { contains: search } },
+          // Combinaisons nom/prénom dans les deux sens
+          {
+            AND: [
+              { prenom: { contains: term1 } },
+              { nom: { contains: term2 } }
+            ]
+          },
+          {
+            AND: [
+              { nom: { contains: term1 } },
+              { prenom: { contains: term2 } }
+            ]
+          }
+        ];
+      } else {
+        // Plus de 2 termes : recherche sur tous les champs individuellement
+        where.OR = [
+          { numeroDS: { contains: search } },
+          { nom: { contains: search } },
+          { prenom: { contains: search } },
+          { nigend: { contains: search } },
+          { commune: { contains: search } },
+          { unite: { contains: search } }
+        ];
+      }
     }
     
     if (type) where.type = type;

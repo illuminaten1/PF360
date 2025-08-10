@@ -66,6 +66,13 @@ export interface Demande {
       nom: string
     }
   }
+  badges?: Array<{
+    badge: {
+      id: string
+      nom: string
+      couleur?: string
+    }
+  }>
   assigneA?: {
     id: string
     nom: string

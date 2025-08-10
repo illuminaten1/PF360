@@ -108,10 +108,26 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                         <Dialog.Title as="h3" className="text-xl font-semibold text-white">
                           Demande {demande.numeroDS}
                         </Dialog.Title>
-                        <div className="flex items-center space-x-3 mt-1">
+                        <div className="flex items-center space-x-3 mt-1 flex-wrap">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTypeColor(demande.type)}`}>
                             {getTypeLabel(demande.type)}
                           </span>
+                          {demande.badges && demande.badges.length > 0 && (
+                            <>
+                              {demande.badges.map((badgeRel) => (
+                                <span
+                                  key={badgeRel.badge.id}
+                                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-gray-900 shadow-md"
+                                  style={badgeRel.badge.couleur ? {
+                                    backgroundColor: badgeRel.badge.couleur,
+                                    color: 'white'
+                                  } : {}}
+                                >
+                                  {badgeRel.badge.nom}
+                                </span>
+                              ))}
+                            </>
+                          )}
                           <span className="text-blue-100 text-sm">
                             Reçue le {formatDate(demande.dateReception)}
                           </span>

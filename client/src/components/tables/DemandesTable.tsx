@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   useReactTable,
   getCoreRowModel,
@@ -119,6 +120,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onDelete,
   onAddToDossier
 }) => {
+  const navigate = useNavigate()
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'dateReception', desc: true }
   ])
@@ -131,6 +133,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 
   const getTypeLabel = (type: string) => {
     return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
+  }
+
+  const handleViewDossier = (dossierId: string) => {
+    navigate(`/dossiers/${dossierId}`)
   }
 
   const getAudienceUrgency = (dateAudience?: string) => {
@@ -333,7 +339,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           const demande = row.original
           return demande.dossier ? (
             <div className="text-sm">
-              <div className="font-medium text-blue-600">
+              <div 
+                className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+                onClick={() => handleViewDossier(demande.dossier!.id)}
+              >
                 {demande.dossier.numero}
               </div>
             </div>
@@ -444,7 +453,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete, onAddToDossier]
+    [onView, onEdit, onDelete, onAddToDossier, handleViewDossier]
   )
 
   const table = useReactTable({

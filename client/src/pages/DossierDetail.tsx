@@ -209,10 +209,10 @@ const DossierDetail: React.FC = () => {
             Erreur lors du chargement du dossier. {error?.message || 'Dossier non trouvé.'}
           </p>
           <button
-            onClick={() => navigate('/dossiers')}
+            onClick={() => navigate(-1)}
             className="mt-2 text-red-600 hover:text-red-800 underline"
           >
-            Retour à la liste des dossiers
+            Retour à la page précédente
           </button>
         </div>
       </div>
@@ -240,7 +240,7 @@ const DossierDetail: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => navigate('/dossiers')}
+            onClick={() => navigate(-1)}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
           >
             <ArrowLeftIcon className="h-5 w-5" />

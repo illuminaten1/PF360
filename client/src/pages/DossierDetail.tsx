@@ -19,7 +19,8 @@ import {
   ClipboardDocumentListIcon,
   PlusIcon,
   CheckIcon,
-  LinkIcon
+  LinkIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -106,6 +107,23 @@ const DossierDetail: React.FC = () => {
     }
   })
 
+  // Unlink demande mutation
+  const unlinkDemandeMutation = useMutation({
+    mutationFn: async (demandeId: string) => {
+      const response = await api.put(`/demandes/${demandeId}`, { dossierId: null })
+      return response.data
+    },
+    onSuccess: (updatedDemande) => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      toast.success(`Demande ${updatedDemande?.numeroDS || 'inconnue'} déliée du dossier`)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la déliaison')
+    }
+  })
+
   const handleEditDossier = () => {
     setIsEditModalOpen(true)
   }
@@ -118,6 +136,12 @@ const DossierDetail: React.FC = () => {
 
   const handleSubmitDossier = async (data: any) => {
     await updateDossierMutation.mutateAsync(data)
+  }
+
+  const handleUnlinkDemande = (demande: any) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir délier la demande ${demande.numeroDS} (${demande.prenom} ${demande.nom}) de ce dossier ?`)) {
+      unlinkDemandeMutation.mutate(demande.id)
+    }
   }
 
   // Initialize notes when dossier loads
@@ -402,9 +426,19 @@ const DossierDetail: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">
-                          Voir détails
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button className="text-blue-600 hover:text-blue-800 text-sm">
+                            Voir détails
+                          </button>
+                          <button
+                            onClick={() => handleUnlinkDemande(demande)}
+                            disabled={unlinkDemandeMutation.isPending}
+                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                            title="Délier du dossier"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

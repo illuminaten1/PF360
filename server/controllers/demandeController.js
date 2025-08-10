@@ -63,7 +63,7 @@ const demandeSchema = z.object({
   dateReception: z.string().optional(),
   
   // Association au dossier
-  dossierId: z.string().optional(),
+  dossierId: z.union([z.string(), z.null()]).optional(),
   
   // Affectation utilisateur
   assigneAId: z.string().optional()

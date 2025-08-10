@@ -681,6 +681,11 @@ const updateDemande = async (req, res) => {
 
 const deleteDemande = async (req, res) => {
   try {
+    // Vérifier que l'utilisateur a les permissions pour supprimer
+    if (!['ADMIN', 'GREFFIER'].includes(req.user.role)) {
+      return res.status(403).json({ error: 'Seuls les administrateurs et les greffiers peuvent supprimer des demandes' });
+    }
+
     const demande = await prisma.demande.findUnique({
       where: { id: req.params.id },
       select: { 

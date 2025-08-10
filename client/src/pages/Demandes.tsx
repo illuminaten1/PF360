@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
 import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
 import DemandeModal from '@/components/forms/DemandeModal'
@@ -20,6 +21,7 @@ const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
+  const { user } = useAuth()
 
   const queryClient = useQueryClient()
 
@@ -107,6 +109,12 @@ const Demandes: React.FC = () => {
   }
 
   const handleDeleteDemande = (demande: Demande) => {
+    // Vérifier les permissions avant de permettre la suppression
+    if (!user || !['ADMIN', 'GREFFIER'].includes(user.role)) {
+      toast.error('Vous n\'avez pas les permissions pour supprimer des demandes')
+      return
+    }
+    
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la demande ${demande.numeroDS} ?`)) {
       deleteDemandeMutation.mutate(demande.id)
     }
@@ -191,6 +199,7 @@ const Demandes: React.FC = () => {
         onEdit={handleEditDemande}
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
+        canDelete={user ? ['ADMIN', 'GREFFIER'].includes(user.role) : false}
       />
 
       <DemandeModal

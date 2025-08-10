@@ -42,6 +42,7 @@ interface DemandesTableProps {
   onEdit: (demande: Demande) => void
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
+  canDelete?: boolean
 }
 
 function Filter({ column }: { column: any }) {
@@ -118,7 +119,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onView,
   onEdit,
   onDelete,
-  onAddToDossier
+  onAddToDossier,
+  canDelete = true
 }) => {
   const navigate = useNavigate()
   const [sorting, setSorting] = React.useState<SortingState>([
@@ -440,13 +442,15 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             >
               <PencilIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={() => onDelete(row.original)}
-              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
-              title="Supprimer"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
+            {canDelete && (
+              <button
+                onClick={() => onDelete(row.original)}
+                className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
+                title="Supprimer"
+              >
+                <TrashIcon className="h-5 w-5" />
+              </button>
+            )}
           </div>
         ),
         enableColumnFilter: false,

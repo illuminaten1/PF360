@@ -26,6 +26,7 @@ import { Dossier } from '@/types'
 import api from '@/utils/api'
 import DossierModal from '@/components/forms/DossierModal'
 import LierDemandesModal from '@/components/forms/LierDemandesModal'
+import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 dayjs.extend(relativeTime)
@@ -38,6 +39,8 @@ const DossierDetail: React.FC = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
+  const [isDemandeViewModalOpen, setIsDemandeViewModalOpen] = useState(false)
+  const [selectedDemande, setSelectedDemande] = useState<any>(null)
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
@@ -142,6 +145,16 @@ const DossierDetail: React.FC = () => {
     if (window.confirm(`Êtes-vous sûr de vouloir délier la demande ${demande.numeroDS} (${demande.prenom} ${demande.nom}) de ce dossier ?`)) {
       unlinkDemandeMutation.mutate(demande.id)
     }
+  }
+
+  const handleViewDemande = (demande: any) => {
+    setSelectedDemande(demande)
+    setIsDemandeViewModalOpen(true)
+  }
+
+  const handleCloseDemandeModal = () => {
+    setIsDemandeViewModalOpen(false)
+    setSelectedDemande(null)
   }
 
   // Initialize notes when dossier loads
@@ -427,7 +440,10 @@ const DossierDetail: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button className="text-blue-600 hover:text-blue-800 text-sm">
+                          <button 
+                            onClick={() => handleViewDemande(demande)}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
                             Voir détails
                           </button>
                           <button
@@ -676,6 +692,13 @@ const DossierDetail: React.FC = () => {
           dossierNumero={dossier?.numero || ''}
         />
       )}
+
+      {/* Demande View Modal */}
+      <DemandeViewModal
+        isOpen={isDemandeViewModalOpen}
+        onClose={handleCloseDemandeModal}
+        demande={selectedDemande}
+      />
     </div>
   )
 }

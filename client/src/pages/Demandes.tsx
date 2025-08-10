@@ -8,6 +8,7 @@ import api from '@/utils/api'
 import DemandesTable from '@/components/tables/DemandesTable'
 import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
 
 interface DemandesStats {
   totalDemandes: number
@@ -20,6 +21,7 @@ interface DemandesStats {
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const { user } = useAuth()
 
@@ -115,8 +117,22 @@ const Demandes: React.FC = () => {
       return
     }
     
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la demande ${demande.numeroDS} ?`)) {
-      deleteDemandeMutation.mutate(demande.id)
+    setSelectedDemande(demande)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (selectedDemande) {
+      deleteDemandeMutation.mutate(selectedDemande.id)
+      setIsDeleteModalOpen(false)
+      setSelectedDemande(null)
+    }
+  }
+
+  const handleCloseDeleteModal = () => {
+    if (!deleteDemandeMutation.isPending) {
+      setIsDeleteModalOpen(false)
+      setSelectedDemande(null)
     }
   }
 
@@ -220,6 +236,19 @@ const Demandes: React.FC = () => {
           setSelectedDemande(null)
         }}
         demande={selectedDemande}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        itemName={selectedDemande ? `${selectedDemande.grade ? `${selectedDemande.grade} ` : ''}${selectedDemande.prenom} ${selectedDemande.nom}` : ''}
+        itemIdentifier={selectedDemande?.numeroDS || ''}
+        itemType="la demande"
+        title="Supprimer la demande"
+        message={selectedDemande ? `Cette action supprimera définitivement la demande effectuée par ${selectedDemande.prenom} ${selectedDemande.nom}. Cette action ne peut pas être annulée.` : ''}
+        confirmButtonText="Supprimer la demande"
+        isLoading={deleteDemandeMutation.isPending}
       />
     </div>
   )

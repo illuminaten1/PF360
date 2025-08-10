@@ -3,6 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
+const { syncDemandeBadgesFromDossier } = require('../controllers/demandeController');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -178,6 +179,11 @@ router.post('/', async (req, res) => {
       });
     });
 
+    // Sync badges to linked demandes if any badges were added
+    if (badges.length > 0) {
+      await syncDemandeBadgesFromDossier(dossier.id);
+    }
+
     await logAction(req.user.id, 'CREATE_DOSSIER', `Création du dossier ${dossier.numero}`, 'Dossier', dossier.id);
 
     res.status(201).json(dossier);
@@ -205,6 +211,11 @@ router.get('/:id', async (req, res) => {
             conventions: {
               include: {
                 convention: true
+              }
+            },
+            badges: {
+              include: {
+                badge: true
               }
             }
           }
@@ -426,6 +437,9 @@ router.put('/:id', async (req, res) => {
         nombreDecisions: dossier.decisions.length
       }
     };
+
+    // Sync badges to all linked demandes after badge changes
+    await syncDemandeBadgesFromDossier(req.params.id);
 
     await logAction(req.user.id, 'UPDATE_DOSSIER', `Modification du dossier ${dossier.numero}`, 'Dossier', dossier.id);
 

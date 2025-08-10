@@ -430,6 +430,27 @@ const DossierDetail: React.FC = () => {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
                               {getTypeLabel(demande.type)}
                             </span>
+                            {(demande as any).badges && (demande as any).badges.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {(demande as any).badges.slice(0, 2).map((badgeRel: any) => (
+                                  <span
+                                    key={badgeRel.badge.id}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                                    style={badgeRel.badge.couleur ? {
+                                      backgroundColor: `${badgeRel.badge.couleur}20`,
+                                      color: badgeRel.badge.couleur
+                                    } : {}}
+                                  >
+                                    {badgeRel.badge.nom}
+                                  </span>
+                                ))}
+                                {(demande as any).badges.length > 2 && (
+                                  <span className="text-xs text-gray-500">
+                                    +{(demande as any).badges.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <div className="text-sm text-gray-600 space-y-1">
                             <div>N° DS: {demande.numeroDS}</div>

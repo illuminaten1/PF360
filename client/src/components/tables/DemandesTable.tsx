@@ -198,6 +198,41 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         filterFn: 'equals'
       },
       {
+        id: 'badges',
+        header: 'Badges',
+        cell: ({ row }) => {
+          const demande = row.original as any
+          const badges = demande.badges || []
+          
+          if (badges.length === 0) {
+            return <span className="text-gray-400 text-xs">-</span>
+          }
+          
+          return (
+            <div className="flex flex-wrap gap-1">
+              {badges.slice(0, 2).map((badgeRel: any) => (
+                <span
+                  key={badgeRel.badge.id}
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                  style={badgeRel.badge.couleur ? {
+                    backgroundColor: `${badgeRel.badge.couleur}20`,
+                    color: badgeRel.badge.couleur
+                  } : {}}
+                >
+                  {badgeRel.badge.nom}
+                </span>
+              ))}
+              {badges.length > 2 && (
+                <span className="text-xs text-gray-500">
+                  +{badges.length - 2}
+                </span>
+              )}
+            </div>
+          )
+        },
+        enableColumnFilter: false
+      },
+      {
         accessorKey: 'dateReception',
         header: 'Date réception',
         cell: ({ getValue }) => (

@@ -4,6 +4,88 @@ const { logAction } = require('../utils/logger');
 
 const prisma = new PrismaClient();
 
+// Utility function to sync badges from dossier to its demandes
+const syncDemandeBadgesFromDossier = async (dossierId) => {
+  try {
+    // Get all badges of the dossier
+    const dossierBadges = await prisma.dossierBadge.findMany({
+      where: { dossierId },
+      select: { badgeId: true }
+    });
+    
+    // Get all demandes linked to this dossier
+    const demandes = await prisma.demande.findMany({
+      where: { dossierId },
+      select: { id: true }
+    });
+    
+    // For each demande, sync badges
+    for (const demande of demandes) {
+      // Remove all current badges
+      await prisma.demandeBadge.deleteMany({
+        where: { demandeId: demande.id }
+      });
+      
+      // Add dossier badges
+      if (dossierBadges.length > 0) {
+        await prisma.demandeBadge.createMany({
+          data: dossierBadges.map(badge => ({
+            demandeId: demande.id,
+            badgeId: badge.badgeId
+          }))
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing demande badges:', error);
+  }
+};
+
+// Utility function to remove all badges from a demande
+const clearDemandeBadges = async (demandeId) => {
+  try {
+    await prisma.demandeBadge.deleteMany({
+      where: { demandeId }
+    });
+  } catch (error) {
+    console.error('Error clearing demande badges:', error);
+  }
+};
+
+// Utility function to sync badges for a specific demande based on its dossier
+const syncSingleDemandeBadges = async (demandeId) => {
+  try {
+    const demande = await prisma.demande.findUnique({
+      where: { id: demandeId },
+      select: { dossierId: true }
+    });
+    
+    if (!demande) return;
+    
+    // Clear existing badges
+    await clearDemandeBadges(demandeId);
+    
+    // If linked to a dossier, inherit its badges
+    if (demande.dossierId) {
+      const dossierBadges = await prisma.dossierBadge.findMany({
+        where: { dossierId: demande.dossierId },
+        select: { badgeId: true }
+      });
+      
+      if (dossierBadges.length > 0) {
+        await prisma.demandeBadge.createMany({
+          data: dossierBadges.map(badge => ({
+            demandeId,
+            badgeId: badge.badgeId
+          }))
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing single demande badges:', error);
+  }
+};
+
 // Utility function to clean empty strings from data
 const cleanEmptyStrings = (data) => {
   const cleaned = { ...data };
@@ -240,6 +322,11 @@ const getAllDemandes = async (req, res) => {
                 }
               }
             }
+          },
+          badges: {
+            include: {
+              badge: true
+            }
           }
         },
         orderBy,
@@ -335,6 +422,11 @@ const getDemandeById = async (req, res) => {
                 }
               }
             }
+          }
+        },
+        badges: {
+          include: {
+            badge: true
           }
         }
       }
@@ -570,6 +662,11 @@ const updateDemande = async (req, res) => {
       }
     });
 
+    // Sync badges if dossierId changed
+    if (dataToUpdate.hasOwnProperty('dossierId')) {
+      await syncSingleDemandeBadges(req.params.id);
+    }
+
     await logAction(req.user.id, 'UPDATE_DEMANDE', `Modification demande ${demande.numeroDS}`, 'Demande', demande.id);
 
     res.json(demande);
@@ -741,5 +838,7 @@ module.exports = {
   updateDemande,
   deleteDemande,
   getUsers,
-  getStats
+  getStats,
+  syncDemandeBadgesFromDossier,
+  syncSingleDemandeBadges
 };

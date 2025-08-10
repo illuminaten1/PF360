@@ -98,6 +98,7 @@ model Demande {
   modifieParId           String?
   decisions              DecisionDemande[]
   conventions            ConventionDemande[]
+  badges                 DemandeBadge[]
   
   @@map("demandes")
 }
@@ -267,6 +268,7 @@ model Badge {
   
   // Relations
   dossiers DossierBadge[]
+  demandes DemandeBadge[]
   
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
@@ -298,6 +300,16 @@ model DossierBadge {
   
   @@id([dossierId, badgeId])
   @@map("dossiers_badges")
+}
+
+model DemandeBadge {
+  demande   Demande @relation(fields: [demandeId], references: [id])
+  demandeId String
+  badge     Badge   @relation(fields: [badgeId], references: [id])
+  badgeId   String
+  
+  @@id([demandeId, badgeId])
+  @@map("demandes_badges")
 }
 
 model DecisionDemande {

@@ -285,13 +285,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                             }`}
                             onClick={() => handleSelectDemande(demande.id)}
                           >
-                            <div className="flex items-start space-x-3">
-                              <input
-                                type="checkbox"
-                                checked={selectedDemandes.has(demande.id)}
-                                onChange={() => handleSelectDemande(demande.id)}
-                                className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                              />
+                            <div className="flex items-start">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-3">

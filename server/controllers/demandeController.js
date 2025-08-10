@@ -586,11 +586,24 @@ const deleteDemande = async (req, res) => {
   try {
     const demande = await prisma.demande.findUnique({
       where: { id: req.params.id },
-      select: { numeroDS: true }
+      select: { 
+        numeroDS: true, 
+        dossierId: true,
+        dossier: {
+          select: { numero: true }
+        }
+      }
     });
 
     if (!demande) {
       return res.status(404).json({ error: 'Demande non trouvée' });
+    }
+
+    // Vérifier si la demande est liée à un dossier
+    if (demande.dossierId) {
+      return res.status(400).json({ 
+        error: `Impossible de supprimer cette demande car elle est liée au dossier ${demande.dossier?.numero || demande.dossierId}. Veuillez d'abord la délier du dossier.` 
+      });
     }
 
     await prisma.demande.delete({

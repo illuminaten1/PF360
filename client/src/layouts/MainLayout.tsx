@@ -150,7 +150,7 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-56 lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-48 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
           <div className="flex items-center h-16 px-4 border-b border-gray-200">
             <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
@@ -209,7 +209,7 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-56">
+      <div className="lg:pl-48">
         {/* Top bar */}
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">

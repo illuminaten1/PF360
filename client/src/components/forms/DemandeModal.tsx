@@ -717,6 +717,11 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           className="input w-full"
                           placeholder="Nom de famille"
                           disabled={isSubmitting}
+                          onChange={(e) => {
+                            const upperValue = e.target.value.toUpperCase();
+                            e.target.value = upperValue;
+                            setValue('nom', upperValue);
+                          }}
                         />
                         {errors.nom && (
                           <p className="mt-1 text-sm text-red-600">{errors.nom.message}</p>

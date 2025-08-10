@@ -369,6 +369,11 @@ const createDemande = async (req, res) => {
     // Clean empty strings and convert dates
     const dataToCreate = cleanEmptyStrings(validatedData);
     
+    // Force nom to uppercase
+    if (dataToCreate.nom) {
+      dataToCreate.nom = dataToCreate.nom.toUpperCase();
+    }
+    
     // Validate position if provided
     if (dataToCreate.position && !['EN_SERVICE', 'HORS_SERVICE'].includes(dataToCreate.position)) {
       return res.status(400).json({ error: 'Position invalide' });
@@ -476,6 +481,11 @@ const updateDemande = async (req, res) => {
 
     // Clean empty strings and convert dates
     const dataToUpdate = cleanEmptyStrings(validatedData);
+    
+    // Force nom to uppercase
+    if (dataToUpdate.nom) {
+      dataToUpdate.nom = dataToUpdate.nom.toUpperCase();
+    }
     
     // Validate position if provided
     if (dataToUpdate.position && !['EN_SERVICE', 'HORS_SERVICE'].includes(dataToUpdate.position)) {

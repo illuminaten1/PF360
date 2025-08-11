@@ -61,7 +61,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
   onDelete
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
-    { id: 'dateReceptionGlobale', desc: true }
+    { id: 'createdAt', desc: true }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
@@ -320,8 +320,8 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         enableSorting: true
       },
       {
-        accessorKey: 'dateReceptionGlobale',
-        header: 'Date réception',
+        accessorKey: 'createdAt',
+        header: 'Date création',
         cell: ({ getValue }) => (
           <div className="text-sm text-gray-900">
             {dayjs(getValue<string>()).format('DD/MM/YYYY')}

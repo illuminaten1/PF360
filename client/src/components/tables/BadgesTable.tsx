@@ -112,10 +112,41 @@ const BadgesTable: React.FC<BadgesTableProps> = ({
         filterFn: 'includesString'
       },
       {
+        accessorKey: 'totalUsage',
+        header: 'Utilisation',
+        cell: ({ row }) => {
+          const badge = row.original
+          const totalUsage = badge.totalUsage || 0
+          const dossiersCount = badge.dossiersCount || 0
+          const demandesCount = badge.demandesCount || 0
+          
+          if (totalUsage === 0) {
+            return (
+              <span className="text-sm text-gray-400">Non utilisé</span>
+            )
+          }
+          
+          return (
+            <div className="text-sm">
+              <div className="font-medium text-gray-900">{totalUsage} utilisations</div>
+              <div className="text-xs text-gray-500">
+                {dossiersCount > 0 && `${dossiersCount} dossier${dossiersCount > 1 ? 's' : ''}`}
+                {dossiersCount > 0 && demandesCount > 0 && ' • '}
+                {demandesCount > 0 && `${demandesCount} demande${demandesCount > 1 ? 's' : ''}`}
+              </div>
+            </div>
+          )
+        },
+        enableColumnFilter: false,
+        sortingFn: 'basic'
+      },
+      {
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
           const badge = row.original
+          const isUsed = (badge.totalUsage || 0) > 0
+          
           return (
             <div className="flex items-center space-x-2">
               <button
@@ -127,8 +158,13 @@ const BadgesTable: React.FC<BadgesTableProps> = ({
               </button>
               <button
                 onClick={() => onDelete(badge.id)}
-                className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
-                title="Supprimer"
+                disabled={isUsed}
+                className={`p-1 rounded-full ${
+                  isUsed 
+                    ? 'text-gray-300 cursor-not-allowed' 
+                    : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                }`}
+                title={isUsed ? 'Impossible de supprimer un badge utilisé' : 'Supprimer'}
               >
                 <TrashIcon className="h-4 w-4" />
               </button>

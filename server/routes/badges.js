@@ -12,14 +12,30 @@ router.use(authMiddleware);
 router.get('/', adminMiddleware, async (req, res) => {
   try {
     const badges = await prisma.badge.findMany({
+      include: {
+        _count: {
+          select: {
+            dossiers: true,
+            demandes: true
+          }
+        }
+      },
       orderBy: {
         nom: 'asc'
       }
     });
+
+    // Transformer les données pour inclure le nombre total d'utilisations
+    const badgesWithUsage = badges.map(badge => ({
+      ...badge,
+      totalUsage: badge._count.dossiers + badge._count.demandes,
+      dossiersCount: badge._count.dossiers,
+      demandesCount: badge._count.demandes
+    }));
     
     await logAction(req.user.id, 'VIEW_BADGES', 'BADGE', null, 'Consulté la liste des badges');
     
-    res.json({ badges });
+    res.json({ badges: badgesWithUsage });
   } catch (error) {
     console.error('Get badges error:', error);
     res.status(500).json({ error: 'Erreur serveur' });

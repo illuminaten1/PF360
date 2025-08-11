@@ -218,6 +218,9 @@ export interface Badge {
   id: string
   nom: string
   couleur?: string
+  totalUsage?: number
+  dossiersCount?: number
+  demandesCount?: number
 }
 
 export interface Sgami {

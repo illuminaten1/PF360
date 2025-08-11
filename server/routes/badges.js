@@ -59,8 +59,8 @@ router.get('/stats', adminMiddleware, async (req, res) => {
     
     const stats = {
       totalBadges,
-      activeBadges: totalBadges, // Tous les badges sont considérés comme actifs
-      usedBadges: usedBadgesCount
+      usedBadges: usedBadgesCount,
+      unusedBadges: totalBadges - usedBadgesCount
     };
 
     await logAction(req.user.id, 'VIEW_BADGES_STATS', 'BADGE', null, 'Consulté les statistiques des badges');

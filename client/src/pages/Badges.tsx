@@ -9,8 +9,8 @@ import BadgeModal from '@/components/forms/BadgeModal'
 
 interface BadgesStats {
   totalBadges: number
-  activeBadges: number
   usedBadges: number
+  unusedBadges: number
 }
 
 const Badges: React.FC = () => {
@@ -147,24 +147,24 @@ const Badges: React.FC = () => {
           
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100">
-                <TagIcon className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Badges actifs</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.activeBadges}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="flex items-center">
               <div className="p-3 rounded-full bg-purple-100">
                 <TagIcon className="w-6 h-6 text-purple-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Badges utilisés</p>
                 <p className="text-2xl font-semibold text-gray-900">{stats.usedBadges}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-gray-100">
+                <TagIcon className="w-6 h-6 text-gray-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Badges non utilisés</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.unusedBadges}</p>
               </div>
             </div>
           </div>

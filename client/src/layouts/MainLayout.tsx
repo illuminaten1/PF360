@@ -16,7 +16,8 @@ import {
   XMarkIcon,
   GlobeAltIcon,
   ShieldCheckIcon,
-  UserIcon
+  UserIcon,
+  TagIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -33,7 +34,7 @@ const navigation = [
 const adminNavigation = [
   { name: 'Utilisateurs', href: '/utilisateurs', icon: UserCircleIcon },
   { name: 'SGAMI', href: '/sgami', icon: CogIcon },
-  { name: 'Badges', href: '/badges', icon: CogIcon },
+  { name: 'Badges', href: '/badges', icon: TagIcon },
   { name: 'Paramètres', href: '/parametres', icon: CogIcon },
 ]
 

@@ -10,6 +10,7 @@ import DossierDetail from '@/pages/DossierDetail'
 import Demandes from '@/pages/Demandes'
 import Avocats from '@/pages/Avocats'
 import Users from '@/pages/Users'
+import Badges from '@/pages/Badges'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -68,7 +69,7 @@ function App() {
             path="badges"
             element={
               <ProtectedRoute adminOnly>
-                <PlaceholderPage title="Badges" />
+                <Badges />
               </ProtectedRoute>
             }
           />

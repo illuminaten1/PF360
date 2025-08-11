@@ -50,7 +50,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryKey: ['badges'],
     queryFn: async () => {
       const response = await api.get('/badges')
-      return response.data
+      return response.data.badges || response.data
     }
   })
 

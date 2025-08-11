@@ -17,7 +17,8 @@ import {
   GlobeAltIcon,
   ShieldCheckIcon,
   UserIcon,
-  TagIcon
+  TagIcon,
+  CurrencyEuroIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -33,7 +34,7 @@ const navigation = [
 
 const adminNavigation = [
   { name: 'Utilisateurs', href: '/utilisateurs', icon: UserCircleIcon },
-  { name: 'SGAMI', href: '/sgami', icon: CogIcon },
+  { name: 'SGAMI', href: '/sgami', icon: CurrencyEuroIcon },
   { name: 'Badges', href: '/badges', icon: TagIcon },
   { name: 'Paramètres', href: '/parametres', icon: CogIcon },
 ]

@@ -117,7 +117,7 @@ const SGAMIPage: React.FC = () => {
             <BuildingOfficeIcon className="w-7 h-7 mr-3 text-blue-600" />
             Gestion des SGAMI
           </h1>
-          <p className="text-gray-600 mt-1">Gérez les Services de Greffe et d'Appui aux Magistrats et à l'Institution</p>
+          <p className="text-gray-600 mt-1">Gérez les organismes payeurs</p>
         </div>
         <button
           onClick={handleCreateSGAMI}

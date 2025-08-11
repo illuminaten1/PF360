@@ -292,36 +292,39 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                                     <h4 className="text-sm font-medium text-gray-900">
                                       {demande.grade && `${demande.grade} `}
                                       {demande.prenom} {demande.nom}
+                                      {demande.nigend && (
+                                        <span className="ml-2 font-normal text-gray-600">NIGEND: {demande.nigend}</span>
+                                      )}
                                     </h4>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
-                                      {getTypeLabel(demande.type)}
-                                    </span>
                                   </div>
-                                  <span className="text-xs text-gray-500">
-                                    N° DS: {demande.numeroDS}
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
+                                    {getTypeLabel(demande.type)}
                                   </span>
                                 </div>
-                                <div className="mt-1 flex items-center space-x-4 text-xs text-gray-600">
-                                  <div className="flex items-center">
-                                    <CalendarIcon className="h-3 w-3 mr-1" />
-                                    Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
-                                  </div>
-                                  {demande.nigend && (
-                                    <div className="font-medium">NIGEND: {demande.nigend}</div>
-                                  )}
-                                  {demande.unite && (
-                                    <div>{demande.unite}</div>
-                                  )}
-                                  {demande.commune && (
-                                    <div>{demande.commune}</div>
-                                  )}
-                                  {demande.assigneA && (
+                                <div className="mt-1 flex items-center justify-between text-xs text-gray-600">
+                                  <div className="flex items-center space-x-4">
                                     <div className="flex items-center">
-                                      <UserIcon className="h-3 w-3 mr-1" />
-                                      {demande.assigneA.grade && `${demande.assigneA.grade} `}
-                                      {demande.assigneA.prenom} {demande.assigneA.nom}
+                                      <CalendarIcon className="h-3 w-3 mr-1" />
+                                      Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
                                     </div>
-                                  )}
+                                    {demande.unite && (
+                                      <div>{demande.unite}</div>
+                                    )}
+                                    {demande.dateFaits && (
+                                      <div>
+                                        Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
+                                        {demande.commune && ` - ${demande.commune}`}
+                                      </div>
+                                    )}
+                                    {demande.assigneA && (
+                                      <div className="flex items-center">
+                                        <UserIcon className="h-3 w-3 mr-1" />
+                                        {demande.assigneA.grade && `${demande.assigneA.grade} `}
+                                        {demande.assigneA.prenom} {demande.assigneA.nom}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div>N° DS: {demande.numeroDS}</div>
                                 </div>
                               </div>
                             </div>

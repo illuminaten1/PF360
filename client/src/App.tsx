@@ -11,6 +11,7 @@ import Demandes from '@/pages/Demandes'
 import Avocats from '@/pages/Avocats'
 import Users from '@/pages/Users'
 import Badges from '@/pages/Badges'
+import SGAMIPage from '@/pages/SGAMI'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -61,7 +62,7 @@ function App() {
             path="sgami"
             element={
               <ProtectedRoute adminOnly>
-                <PlaceholderPage title="SGAMI" />
+                <SGAMIPage />
               </ProtectedRoute>
             }
           />

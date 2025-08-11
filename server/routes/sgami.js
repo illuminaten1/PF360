@@ -21,6 +21,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Récupérer les statistiques des SGAMI
+router.get('/stats', async (req, res) => {
+  try {
+    const totalSGAMI = await prisma.sgami.count();
+    
+    // Pour l'instant, nous n'avons pas de champ "active" dans le modèle SGAMI
+    // donc nous comptons tous comme actifs
+    const activeSGAMI = totalSGAMI;
+    const inactiveSGAMI = 0;
+    
+    const stats = {
+      totalSGAMI,
+      activeSGAMI,
+      inactiveSGAMI
+    };
+    
+    res.json(stats);
+  } catch (error) {
+    console.error('Get SGAMI stats error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
     const { nom } = req.body;
@@ -57,7 +80,7 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Le nom est requis' });
     }
 
-    const existingSgami = await prisma.sgami.findUnique({
+    const existingSgami = await prisma.sgami.findFirst({
       where: { nom, NOT: { id } }
     });
 

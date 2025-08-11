@@ -228,6 +228,28 @@ export interface Sgami {
   nom: string
 }
 
+export interface SGAMI {
+  id: string
+  nom: string
+  description?: string
+  region?: string
+  active?: boolean
+  createdAt?: string
+  updatedAt?: string
+  creePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+}
+
 export interface Avocat {
   id: string
   nom: string

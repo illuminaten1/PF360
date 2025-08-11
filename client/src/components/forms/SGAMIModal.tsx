@@ -12,7 +12,8 @@ interface SGAMIModalProps {
 
 const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmit, isSubmitting }) => {
   const [formData, setFormData] = useState({
-    nom: ''
+    nom: '',
+    formatCourtNommage: ''
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -20,11 +21,13 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
   useEffect(() => {
     if (sgami) {
       setFormData({
-        nom: sgami.nom || ''
+        nom: sgami.nom || '',
+        formatCourtNommage: sgami.formatCourtNommage || ''
       })
     } else {
       setFormData({
-        nom: ''
+        nom: '',
+        formatCourtNommage: ''
       })
     }
     setErrors({})
@@ -55,7 +58,8 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
     if (!validateForm()) return
 
     const submitData: Partial<SGAMI> = {
-      nom: formData.nom.trim()
+      nom: formData.nom.trim(),
+      formatCourtNommage: formData.formatCourtNommage.trim() || undefined
     }
 
     onSubmit(submitData)
@@ -98,6 +102,22 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
             {errors.nom && (
               <p className="text-red-500 text-sm mt-1">{errors.nom}</p>
             )}
+          </div>
+
+          {/* Format court nommage */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Format court nommage
+            </label>
+            <input
+              type="text"
+              name="formatCourtNommage"
+              value={formData.formatCourtNommage}
+              onChange={handleInputChange}
+              placeholder="Ex: PARIS"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+            />
           </div>
 
 

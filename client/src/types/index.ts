@@ -226,11 +226,13 @@ export interface Badge {
 export interface Sgami {
   id: string
   nom: string
+  formatCourtNommage?: string
 }
 
 export interface SGAMI {
   id: string
   nom: string
+  formatCourtNommage?: string
   description?: string
   region?: string
   active?: boolean

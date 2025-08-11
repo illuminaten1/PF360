@@ -27,20 +27,29 @@ async function main() {
 
   // Create SGAMI entries
   const sgamiData = [
-    'SGAMI Ouest',
-    'SGAMI Est',
-    'SGAMI Nord',
-    'SGAMI Sud',
-    'SGAMI Centre',
-    'SGAMI Île-de-France',
-    'SGAMI Outre-mer'
+    { nom: 'SGAMI OUEST', formatCourtNommage: 'OUEST' },
+    { nom: 'SGAMI NORD', formatCourtNommage: 'NORD' },
+    { nom: 'SGAMI SUD-OUEST', formatCourtNommage: 'SO' },
+    { nom: 'SGAMI SUD-EST', formatCourtNommage: 'SE' },
+    { nom: 'SGAMI ILE-DE-FRANCE', formatCourtNommage: 'IDF' },
+    { nom: 'SGAMI EST', formatCourtNommage: 'EST-CONSIGNATION' },
+    { nom: 'SGAMI EST', formatCourtNommage: 'EST' },
+    { nom: 'SGAMI SUD', formatCourtNommage: 'SUD' },
+    { nom: 'SATPN NOUVELLE-CALEDONIE', formatCourtNommage: 'NC' },
+    { nom: 'SATPN LA REUNION', formatCourtNommage: 'REUNION' },
+    { nom: 'SATPN GUYANE', formatCourtNommage: 'GUYANE' },
+    { nom: 'SATPN MARTINIQUE', formatCourtNommage: 'MARTINIQUE' },
+    { nom: 'SATPN GUADELOUPE', formatCourtNommage: 'GUADELOUPE' },
+    { nom: 'SATPN MAYOTTE', formatCourtNommage: 'MAYOTTE' },
+    { nom: 'SGAP POLYNESIE FRANCAISE', formatCourtNommage: 'POLYNESIE' },
+    { nom: 'CPFI', formatCourtNommage: 'CPFI' }
   ]
 
-  for (const nom of sgamiData) {
+  for (const sgami of sgamiData) {
     await prisma.sgami.upsert({
-      where: { nom },
-      update: {},
-      create: { nom }
+      where: { nom: sgami.nom },
+      update: { formatCourtNommage: sgami.formatCourtNommage },
+      create: { nom: sgami.nom, formatCourtNommage: sgami.formatCourtNommage }
     })
   }
 

@@ -88,6 +88,20 @@ const SGAMITable: React.FC<SGAMITableProps> = ({
         filterFn: 'includesString'
       },
       {
+        accessorKey: 'formatCourtNommage',
+        header: 'Format court',
+        cell: ({ getValue }) => {
+          const formatCourt = getValue<string>()
+          return (
+            <span className="text-sm text-gray-900">
+              {formatCourt || '-'}
+            </span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
         accessorKey: 'dossiersCount',
         header: 'Dossiers',
         cell: ({ getValue }) => {

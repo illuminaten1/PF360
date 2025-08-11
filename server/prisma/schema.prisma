@@ -249,8 +249,9 @@ model Log {
 }
 
 model Sgami {
-  id       String    @id @default(cuid())
-  nom      String    @unique
+  id                  String    @id @default(cuid())
+  nom                 String    @unique
+  formatCourtNommage  String?
   
   // Relations
   dossiers Dossier[]

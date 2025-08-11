@@ -60,7 +60,7 @@ router.get('/stats', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { nom } = req.body;
+    const { nom, formatCourtNommage } = req.body;
     
     if (!nom) {
       return res.status(400).json({ error: 'Le nom est requis' });
@@ -75,7 +75,10 @@ router.post('/', async (req, res) => {
     }
 
     const sgami = await prisma.sgami.create({
-      data: { nom }
+      data: { 
+        nom,
+        formatCourtNommage: formatCourtNommage || null
+      }
     });
 
     res.status(201).json(sgami);
@@ -88,7 +91,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nom } = req.body;
+    const { nom, formatCourtNommage } = req.body;
     
     if (!nom) {
       return res.status(400).json({ error: 'Le nom est requis' });
@@ -104,7 +107,10 @@ router.put('/:id', async (req, res) => {
 
     const sgami = await prisma.sgami.update({
       where: { id },
-      data: { nom }
+      data: { 
+        nom,
+        formatCourtNommage: formatCourtNommage || null
+      }
     });
 
     res.json(sgami);

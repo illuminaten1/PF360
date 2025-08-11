@@ -313,6 +313,43 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      if (!filterValue) return true
+      
+      const searchTerm = filterValue.toLowerCase().trim()
+      const avocat = row.original
+      
+      // Recherche dans nom et prénom (dans les deux sens)
+      const nomComplet1 = `${avocat.prenom || ''} ${avocat.nom || ''}`.toLowerCase()
+      const nomComplet2 = `${avocat.nom || ''} ${avocat.prenom || ''}`.toLowerCase()
+      
+      if (nomComplet1.includes(searchTerm) || nomComplet2.includes(searchTerm)) {
+        return true
+      }
+      
+      // Recherche dans les champs individuels
+      if (avocat.nom?.toLowerCase().includes(searchTerm) ||
+          avocat.prenom?.toLowerCase().includes(searchTerm) ||
+          avocat.specialisation?.toLowerCase().includes(searchTerm) ||
+          avocat.region?.toLowerCase().includes(searchTerm) ||
+          avocat.email?.toLowerCase().includes(searchTerm) ||
+          avocat.telephonePublic1?.includes(searchTerm) ||
+          avocat.telephonePublic2?.includes(searchTerm) ||
+          avocat.notes?.toLowerCase().includes(searchTerm)) {
+        return true
+      }
+      
+      // Recherche dans les villes d'intervention
+      if (avocat.villesIntervention && Array.isArray(avocat.villesIntervention)) {
+        if (avocat.villesIntervention.some(ville => 
+          ville.toLowerCase().includes(searchTerm)
+        )) {
+          return true
+        }
+      }
+      
+      return false
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -346,6 +383,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         filteredRowsCount={table.getFilteredRowModel().rows.length}
+        placeholder="Rechercher par nom, prénom, ville d'intervention ou spécialité..."
       />
 
       {/* Table */}

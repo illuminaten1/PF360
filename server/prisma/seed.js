@@ -66,34 +66,43 @@ async function main() {
   // Create sample lawyers
   const avocatsData = [
     {
-      nom: 'Dupont',
+      nom: 'DUPONT',
       prenom: 'Jean',
-      cabinet: 'Cabinet Dupont & Associés',
-      adresse: '15 rue de la Justice, 75001 Paris',
-      telephone: '01.23.45.67.89',
-      mail: 'j.dupont@avocats.fr'
+      region: 'Île-de-France',
+      adressePostale: '15 rue de la Justice, 75001 Paris',
+      telephonePublic1: '01.23.45.67.89',
+      email: 'j.dupont@avocats.fr',
+      villesIntervention: JSON.stringify(['Paris', 'Versailles', 'Créteil', 'Bobigny', 'Pontoise']),
+      notes: 'Très expérimenté en droit pénal. Disponible pour interventions urgentes. Excellentes relations avec les tribunaux parisiens.',
+      specialisation: 'Droit pénal'
     },
     {
-      nom: 'Martin',
+      nom: 'MARTIN',
       prenom: 'Marie',
-      cabinet: 'SCP Martin-Durand',
-      adresse: '32 avenue des Droits, 69001 Lyon',
-      telephone: '04.56.78.90.12',
-      mail: 'm.martin@avocats.fr'
+      region: 'Auvergne-Rhône-Alpes',
+      adressePostale: '32 avenue des Droits, 69001 Lyon',
+      telephonePublic1: '04.56.78.90.12',
+      email: 'm.martin@avocats.fr',
+      villesIntervention: JSON.stringify(['Lyon', 'Villeurbanne', 'Saint-Étienne', 'Grenoble', 'Chambéry']),
+      notes: 'Spécialisée dans les affaires familiales et successions. Très pédagogue avec les clients. Maîtrise parfaitement les procédures d\'urgence.',
+      specialisation: 'Droit civil'
     },
     {
-      nom: 'Leroy',
+      nom: 'LEROY',
       prenom: 'Pierre',
-      cabinet: 'Cabinet Leroy',
-      adresse: '8 place du Palais, 13001 Marseille',
-      telephone: '04.91.23.45.67',
-      mail: 'p.leroy@avocats.fr'
+      region: 'Provence-Alpes-Côte d\'Azur',
+      adressePostale: '8 place du Palais, 13001 Marseille',
+      telephonePublic1: '04.91.23.45.67',
+      email: 'p.leroy@avocats.fr',
+      villesIntervention: JSON.stringify(['Marseille', 'Aix-en-Provence', 'Toulon', 'Nice', 'Avignon']),
+      notes: 'Expert en contentieux administratif et marchés publics. Ancien magistrat administratif. Très rigoureux dans le suivi des dossiers.',
+      specialisation: 'Droit administratif'
     }
   ]
 
   for (const avocat of avocatsData) {
     const existing = await prisma.avocat.findFirst({
-      where: { mail: avocat.mail }
+      where: { email: avocat.email }
     })
     
     if (!existing) {

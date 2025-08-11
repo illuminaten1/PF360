@@ -7,7 +7,8 @@ import {
   DocumentTextIcon,
   ScaleIcon,
   CreditCardIcon,
-  ClockIcon,
+  EyeIcon,
+  PresentationChartLineIcon,
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline'
 
@@ -81,12 +82,20 @@ const Dashboard: React.FC = () => {
       href: '/paiements'
     },
     {
-      name: 'Suivi 2 mois',
+      name: 'Revue',
       value: stats?.demandesSans2Mois || 0,
-      icon: ClockIcon,
+      icon: EyeIcon,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      href: '/suivi-2-mois'
+      href: '/revue'
+    },
+    {
+      name: 'Statistiques',
+      value: 'Voir',
+      icon: PresentationChartLineIcon,
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+      href: '/statistiques'
     },
     {
       name: 'Montant conventions',

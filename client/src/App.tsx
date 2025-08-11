@@ -47,7 +47,8 @@ function App() {
           <Route path="conventions" element={<PlaceholderPage title="Conventions" />} />
           <Route path="paiements" element={<PlaceholderPage title="Paiements" />} />
           <Route path="avocats" element={<Avocats />} />
-          <Route path="suivi-2-mois" element={<PlaceholderPage title="Suivi 2 mois" />} />
+          <Route path="revue" element={<PlaceholderPage title="Revue" />} />
+          <Route path="statistiques" element={<PlaceholderPage title="Statistiques" />} />
           
           {/* Admin routes */}
           <Route

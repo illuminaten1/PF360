@@ -11,7 +11,8 @@ import {
   UsersIcon,
   CogIcon,
   UserCircleIcon,
-  ClockIcon,
+  EyeIcon,
+  PresentationChartLineIcon,
   Bars3Icon,
   XMarkIcon,
   GlobeAltIcon,
@@ -29,7 +30,8 @@ const navigation = [
   { name: 'Conventions', href: '/conventions', icon: DocumentIcon },
   { name: 'Paiements', href: '/paiements', icon: CreditCardIcon },
   { name: 'Avocats', href: '/avocats', icon: UsersIcon },
-  { name: 'Suivi 2 mois', href: '/suivi-2-mois', icon: ClockIcon },
+  { name: 'Revue', href: '/revue', icon: EyeIcon },
+  { name: 'Statistiques', href: '/statistiques', icon: PresentationChartLineIcon },
 ]
 
 const adminNavigation = [

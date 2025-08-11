@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -27,6 +27,7 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
+import LierDemandesModal from '../forms/LierDemandesModal'
 
 dayjs.locale('fr')
 
@@ -64,6 +65,9 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+  const [showLierDemandesModal, setShowLierDemandesModal] = useState(false)
+  const [selectedDossierId, setSelectedDossierId] = useState<string>('')
+  const [selectedDossierNumero, setSelectedDossierNumero] = useState<string>('')
 
   const columns = useMemo<ColumnDef<Dossier>[]>(
     () => [
@@ -120,7 +124,19 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         cell: ({ row }) => {
           const dossier = row.original
           if (dossier.demandes.length === 0) {
-            return <span className="text-gray-400">Aucun demandeur</span>
+            return (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedDossierId(dossier.id)
+                  setSelectedDossierNumero(dossier.numero)
+                  setShowLierDemandesModal(true)
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                Lier des demandes
+              </button>
+            )
           }
 
           const [showAll, setShowAll] = React.useState(false)
@@ -535,6 +551,14 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* Modal pour lier des demandes */}
+      <LierDemandesModal
+        isOpen={showLierDemandesModal}
+        onClose={() => setShowLierDemandesModal(false)}
+        dossierId={selectedDossierId}
+        dossierNumero={selectedDossierNumero}
+      />
     </div>
   )
 }

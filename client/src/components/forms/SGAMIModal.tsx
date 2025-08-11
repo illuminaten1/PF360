@@ -13,7 +13,8 @@ interface SGAMIModalProps {
 const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmit, isSubmitting }) => {
   const [formData, setFormData] = useState({
     nom: '',
-    formatCourtNommage: ''
+    formatCourtNommage: '',
+    texteConvention: ''
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -22,12 +23,14 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
     if (sgami) {
       setFormData({
         nom: sgami.nom || '',
-        formatCourtNommage: sgami.formatCourtNommage || ''
+        formatCourtNommage: sgami.formatCourtNommage || '',
+        texteConvention: (sgami as any).texteConvention || ''
       })
     } else {
       setFormData({
         nom: '',
-        formatCourtNommage: ''
+        formatCourtNommage: '',
+        texteConvention: ''
       })
     }
     setErrors({})
@@ -59,7 +62,8 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
 
     const submitData: Partial<SGAMI> = {
       nom: formData.nom.trim(),
-      formatCourtNommage: formData.formatCourtNommage.trim() || undefined
+      formatCourtNommage: formData.formatCourtNommage.trim() || undefined,
+      texteConvention: formData.texteConvention.trim() || undefined
     }
 
     onSubmit(submitData)
@@ -93,7 +97,7 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
               name="nom"
               value={formData.nom}
               onChange={handleInputChange}
-              placeholder="Ex: SGAMI de Paris"
+              placeholder="Ex: SGAMI SUD-EST"
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.nom ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -114,8 +118,24 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
               name="formatCourtNommage"
               value={formData.formatCourtNommage}
               onChange={handleInputChange}
-              placeholder="Ex: PARIS"
+              placeholder="Ex: SUD-EST"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Texte Convention */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Texte Convention
+            </label>
+            <textarea
+              name="texteConvention"
+              value={formData.texteConvention}
+              onChange={handleInputChange}
+              placeholder="Ex: La demande de règlement est constituée par la DGGN et envoyée pour mise en paiement au SGAMI SUD-EST."
+              rows={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
               disabled={isSubmitting}
             />
           </div>

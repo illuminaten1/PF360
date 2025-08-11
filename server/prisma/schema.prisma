@@ -252,6 +252,7 @@ model Sgami {
   id                  String    @id @default(cuid())
   nom                 String    @unique
   formatCourtNommage  String?
+  texteConvention     String?
   
   // Relations
   dossiers Dossier[]

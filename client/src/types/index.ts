@@ -233,6 +233,7 @@ export interface SGAMI {
   id: string
   nom: string
   formatCourtNommage?: string
+  texteConvention?: string
   description?: string
   region?: string
   active?: boolean

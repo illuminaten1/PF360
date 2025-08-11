@@ -133,14 +133,14 @@ function TypeMultiSelectFilter({ column }: { column: any }) {
           
           <div className="p-1">
             {uniqueTypes.map(type => (
-              <label key={type} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+              <label key={String(type)} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={columnFilterValue.includes(type)}
-                  onChange={() => handleToggleType(type)}
+                  checked={columnFilterValue.includes(String(type))}
+                  onChange={() => handleToggleType(String(type))}
                   className="mr-2 text-blue-600"
                 />
-                <span className="text-xs">{getTypeLabel(type)}</span>
+                <span className="text-xs">{getTypeLabel(String(type))}</span>
               </label>
             ))}
           </div>
@@ -447,6 +447,117 @@ function BadgesMultiSelectFilter({ column }: { column: any }) {
   )
 }
 
+function DateRangeFilter({ column }: { column: any }) {
+  const columnFilterValue = column.getFilterValue() as { from?: string; to?: string } | undefined
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [fromDate, setFromDate] = React.useState(columnFilterValue?.from || '')
+  const [toDate, setToDate] = React.useState(columnFilterValue?.to || '')
+  
+  const applyFilter = () => {
+    const filter = {
+      ...(fromDate && { from: fromDate }),
+      ...(toDate && { to: toDate })
+    }
+    
+    if (Object.keys(filter).length === 0) {
+      column.setFilterValue(undefined)
+    } else {
+      column.setFilterValue(filter)
+    }
+    setIsOpen(false)
+  }
+  
+  const clearFilter = () => {
+    setFromDate('')
+    setToDate('')
+    column.setFilterValue(undefined)
+    setIsOpen(false)
+  }
+  
+  const getDisplayText = () => {
+    if (!columnFilterValue) return 'Toutes dates'
+    
+    const { from, to } = columnFilterValue
+    if (from && to) {
+      return `${dayjs(from).format('DD/MM')} - ${dayjs(to).format('DD/MM')}`
+    } else if (from) {
+      return `Depuis ${dayjs(from).format('DD/MM')}`
+    } else if (to) {
+      return `Jusqu'à ${dayjs(to).format('DD/MM')}`
+    }
+    return 'Toutes dates'
+  }
+  
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {getDisplayText()}
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+          <div className="p-3">
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Date de début
+                </label>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Date de fin
+                </label>
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-2 border-t border-gray-200">
+                <button
+                  onClick={applyFilter}
+                  className="flex-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                >
+                  Appliquer
+                </button>
+                <button
+                  onClick={clearFilter}
+                  className="flex-1 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                >
+                  Effacer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Overlay pour fermer le dropdown */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 const DemandesTable: React.FC<DemandesTableProps> = ({
   data,
   loading = false,
@@ -594,14 +705,34 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       },
       {
         accessorKey: 'dateReception',
-        header: 'Date réception',
+        header: 'Réception',
         cell: ({ getValue }) => (
           <div className="text-sm text-gray-900">
             {dayjs(getValue<string>()).format('DD/MM/YYYY')}
           </div>
         ),
-        enableColumnFilter: false,
-        sortingFn: 'datetime'
+        enableColumnFilter: true,
+        sortingFn: 'datetime',
+        filterFn: (row, _columnId, filterValue: { from?: string; to?: string }) => {
+          if (!filterValue) return true
+          
+          const date = row.getValue('dateReception') as string
+          const rowDate = dayjs(date).startOf('day')
+          
+          const fromDate = filterValue.from ? dayjs(filterValue.from).startOf('day') : null
+          const toDate = filterValue.to ? dayjs(filterValue.to).startOf('day') : null
+          
+          if (fromDate && toDate) {
+            return (rowDate.isAfter(fromDate) || rowDate.isSame(fromDate)) && 
+                   (rowDate.isBefore(toDate) || rowDate.isSame(toDate))
+          } else if (fromDate) {
+            return rowDate.isAfter(fromDate) || rowDate.isSame(fromDate)
+          } else if (toDate) {
+            return rowDate.isBefore(toDate) || rowDate.isSame(toDate)
+          }
+          
+          return true
+        }
       },
       {
         accessorKey: 'nom',
@@ -921,6 +1052,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                             <GradeMultiSelectFilter column={header.column} />
                           ) : header.column.id === 'assigneA' ? (
                             <AssigneAMultiSelectFilter column={header.column} />
+                          ) : header.column.id === 'dateReception' ? (
+                            <DateRangeFilter column={header.column} />
                           ) : (
                             <Filter column={header.column} />
                           )}

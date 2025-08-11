@@ -234,6 +234,7 @@ export interface SGAMI {
   description?: string
   region?: string
   active?: boolean
+  dossiersCount?: number
   createdAt?: string
   updatedAt?: string
   creePar?: {

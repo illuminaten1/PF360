@@ -17,6 +17,7 @@ import {
 import { 
   PencilIcon, 
   BuildingOfficeIcon,
+  TrashIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -69,8 +70,7 @@ const SGAMITable: React.FC<SGAMITableProps> = ({
       {
         accessorKey: 'nom',
         header: 'Nom',
-        cell: ({ getValue, row }) => {
-          const sgami = row.original
+        cell: ({ getValue }) => {
           return (
             <div className="flex items-center">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -88,6 +88,27 @@ const SGAMITable: React.FC<SGAMITableProps> = ({
         filterFn: 'includesString'
       },
       {
+        accessorKey: 'dossiersCount',
+        header: 'Dossiers',
+        cell: ({ getValue }) => {
+          const dossiersCount = getValue<number>() || 0
+          
+          if (dossiersCount === 0) {
+            return (
+              <span className="text-sm text-gray-400">Aucun dossier</span>
+            )
+          }
+          
+          return (
+            <div className="text-sm">
+              <div className="font-medium text-gray-900">{dossiersCount} dossier{dossiersCount > 1 ? 's' : ''}</div>
+            </div>
+          )
+        },
+        enableColumnFilter: false,
+        sortingFn: 'basic'
+      },
+      {
         accessorKey: 'createdAt',
         header: 'Créé le',
         cell: ({ getValue }) => (
@@ -103,6 +124,8 @@ const SGAMITable: React.FC<SGAMITableProps> = ({
         header: 'Actions',
         cell: ({ row }) => {
           const sgami = row.original
+          const isUsed = (sgami.dossiersCount || 0) > 0
+          
           return (
             <div className="flex items-center space-x-2">
               <button
@@ -114,10 +137,15 @@ const SGAMITable: React.FC<SGAMITableProps> = ({
               </button>
               <button
                 onClick={() => onDelete(sgami.id)}
-                className="px-2 py-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded text-xs"
-                title="Supprimer"
+                disabled={isUsed}
+                className={`p-1 rounded-full ${
+                  isUsed 
+                    ? 'text-gray-300 cursor-not-allowed' 
+                    : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                }`}
+                title={isUsed ? `Impossible de supprimer un SGAMI affecté à ${sgami.dossiersCount} dossier${sgami.dossiersCount! > 1 ? 's' : ''}` : 'Supprimer'}
               >
-                Supprimer
+                <TrashIcon className="h-4 w-4" />
               </button>
             </div>
           )

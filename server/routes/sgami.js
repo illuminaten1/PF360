@@ -10,11 +10,25 @@ router.use(authMiddleware);
 router.get('/', async (req, res) => {
   try {
     const sgami = await prisma.sgami.findMany({
+      include: {
+        _count: {
+          select: {
+            dossiers: true
+          }
+        }
+      },
       orderBy: {
         nom: 'asc'
       }
     });
-    res.json(sgami);
+
+    // Transformer les données pour inclure le nombre de dossiers
+    const sgamiWithUsage = sgami.map(item => ({
+      ...item,
+      dossiersCount: item._count.dossiers
+    }));
+
+    res.json(sgamiWithUsage);
   } catch (error) {
     console.error('Get SGAMI error:', error);
     res.status(500).json({ error: 'Erreur serveur' });

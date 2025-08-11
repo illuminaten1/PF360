@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   useReactTable,
@@ -32,6 +32,7 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
+import AssignerDemandeModal from '../forms/AssignerDemandeModal'
 
 dayjs.locale('fr')
 
@@ -573,6 +574,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+  const [showAssignerModal, setShowAssignerModal] = useState(false)
+  const [selectedDemandeId, setSelectedDemandeId] = useState<string>('')
+  const [selectedDemandeNumeroDS, setSelectedDemandeNumeroDS] = useState<string>('')
+  const [currentAssignee, setCurrentAssignee] = useState<any>(null)
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
@@ -877,17 +882,43 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         header: 'Assigné à',
         accessorFn: (row) => row.assigneA ? `${row.assigneA.grade || ''} ${row.assigneA.prenom} ${row.assigneA.nom}`.trim() : 'Non assigné',
         cell: ({ row }) => {
-          const assigneA = row.original.assigneA
+          const demande = row.original
+          const assigneA = demande.assigneA
           return (
             <div className="text-sm">
               {assigneA ? (
-                <div className="text-gray-900">
-                  <div className="font-medium">
-                    {assigneA.grade && `${assigneA.grade} `}{assigneA.prenom} {assigneA.nom}
+                <div className="flex items-center space-x-2">
+                  <div className="text-gray-900">
+                    <div className="font-medium">
+                      {assigneA.grade && `${assigneA.grade} `}{assigneA.prenom} {assigneA.nom}
+                    </div>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedDemandeId(demande.id)
+                      setSelectedDemandeNumeroDS(demande.numeroDS)
+                      setCurrentAssignee(assigneA)
+                      setShowAssignerModal(true)
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Modifier
+                  </button>
                 </div>
               ) : (
-                <span className="text-gray-500 italic">Non assigné</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedDemandeId(demande.id)
+                    setSelectedDemandeNumeroDS(demande.numeroDS)
+                    setCurrentAssignee(null)
+                    setShowAssignerModal(true)
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  Assigner
+                </button>
               )}
             </div>
           )
@@ -1181,6 +1212,15 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* Modal pour assigner une demande */}
+      <AssignerDemandeModal
+        isOpen={showAssignerModal}
+        onClose={() => setShowAssignerModal(false)}
+        demandeId={selectedDemandeId}
+        demandeNumeroDS={selectedDemandeNumeroDS}
+        currentAssignee={currentAssignee}
+      />
     </div>
   )
 }

@@ -84,11 +84,11 @@ const BadgesTable: React.FC<BadgesTableProps> = ({
           const badge = row.original
           return (
             <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full" 
+              <div className="flex items-center justify-center w-10 h-10 rounded-full" 
                    style={{ backgroundColor: badge.couleur || '#e5e7eb' }}>
-                <TagIcon className="w-4 h-4 text-white" />
+                <TagIcon className="w-5 h-5 text-white" />
               </div>
-              <div className="ml-3">
+              <div className="ml-4">
                 <div className="text-sm font-medium text-gray-900">
                   {getValue<string>()}
                 </div>

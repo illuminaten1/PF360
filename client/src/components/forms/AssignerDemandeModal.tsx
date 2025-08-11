@@ -9,7 +9,7 @@ import {
   CheckIcon,
   UserPlusIcon
 } from '@heroicons/react/24/outline'
-import { Utilisateur } from '@/types'
+import { User } from '@/types'
 import api from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
@@ -18,7 +18,7 @@ interface AssignerDemandeModalProps {
   onClose: () => void
   demandeId: string
   demandeNumeroDS: string
-  currentAssignee?: Utilisateur | null
+  currentAssignee?: User | null
 }
 
 const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
@@ -35,14 +35,14 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
 
   // Fetch utilisateurs
   const { data: utilisateurs = [], isLoading, error } = useQuery({
-    queryKey: ['utilisateurs', searchTerm],
+    queryKey: ['users', searchTerm],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (searchTerm) {
         params.append('search', searchTerm)
       }
       
-      const response = await api.get(`/utilisateurs?${params}`)
+      const response = await api.get(`/demandes/users`)
       return response.data
     },
     enabled: isOpen,
@@ -50,7 +50,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
   })
 
   // Filtrer les utilisateurs basé sur la recherche
-  const filteredUtilisateurs = utilisateurs.filter((user: Utilisateur) => {
+  const filteredUtilisateurs = utilisateurs.filter((user: User) => {
     if (!searchTerm) return true
     const fullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.toLowerCase()
     return fullName.includes(searchTerm.toLowerCase())
@@ -75,7 +75,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
       
       if (selectedUserId) {
-        const assignedUser = utilisateurs.find((u: Utilisateur) => u.id === selectedUserId)
+        const assignedUser = utilisateurs.find((u: User) => u.id === selectedUserId)
         const userName = assignedUser ? `${assignedUser.grade ? `${assignedUser.grade} ` : ''}${assignedUser.prenom} ${assignedUser.nom}` : 'utilisateur'
         toast.success(`Demande ${demandeNumeroDS} assignée à ${userName}`)
       } else {
@@ -222,7 +222,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
 
                       {/* Liste des utilisateurs */}
                       <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {filteredUtilisateurs.map((utilisateur: Utilisateur) => (
+                        {filteredUtilisateurs.map((utilisateur: User) => (
                           <div
                             key={utilisateur.id}
                             className={`p-4 border rounded-lg cursor-pointer transition-colors ${
@@ -248,11 +248,11 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                                 <div className="mt-1 flex items-center space-x-4 text-xs text-gray-600">
                                   <div className="flex items-center">
                                     <UserIcon className="h-3 w-3 mr-1" />
-                                    {utilisateur.email}
+                                    {utilisateur.mail}
                                   </div>
-                                  {utilisateur.unite && (
-                                    <div>{utilisateur.unite}</div>
-                                  )}
+                                  <div className="text-gray-500">
+                                    {utilisateur.role}
+                                  </div>
                                 </div>
                               </div>
                             </div>

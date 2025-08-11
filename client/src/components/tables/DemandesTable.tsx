@@ -29,7 +29,8 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
 import AssignerDemandeModal from '../forms/AssignerDemandeModal'
@@ -901,8 +902,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                       setCurrentAssignee(assigneA)
                       setShowAssignerModal(true)
                     }}
-                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                    className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
                   >
+                    <PencilIcon className="h-3 w-3 mr-1" />
                     Modifier
                   </button>
                 </div>
@@ -915,8 +917,9 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
                     setCurrentAssignee(null)
                     setShowAssignerModal(true)
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
                 >
+                  <UserPlusIcon className="h-4 w-4 mr-1" />
                   Assigner
                 </button>
               )}

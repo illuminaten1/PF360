@@ -200,62 +200,39 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                     </div>
                   ) : (
                     <>
-                      {/* Option pour ne pas assigner */}
-                      <div className="mb-4">
-                        <div
-                          className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                            selectedUserId === ''
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
-                          onClick={() => handleSelectUser('')}
-                        >
-                          <div className="flex items-center">
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium text-gray-600 italic">
-                                Non assigné
-                              </h4>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Supprimer l'assignation actuelle
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Liste des utilisateurs */}
                       <div className="space-y-2 max-h-96 overflow-y-auto">
                         {filteredUtilisateurs.map((utilisateur: User) => (
                           <div
                             key={utilisateur.id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                              selectedUserId === utilisateur.id
+                            className={`px-4 py-3 border rounded-lg cursor-pointer transition-colors ${
+                              currentAssignee?.id === utilisateur.id
+                                ? 'border-green-500 bg-green-50'
+                                : selectedUserId === utilisateur.id
                                 ? 'border-blue-500 bg-blue-50'
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                             }`}
                             onClick={() => handleSelectUser(utilisateur.id)}
                           >
-                            <div className="flex items-start">
+                            <div className="flex items-center">
+                              <UserIcon className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
-                                  <h4 className="text-sm font-medium text-gray-900">
-                                    {utilisateur.grade && `${utilisateur.grade} `}
-                                    {utilisateur.prenom} {utilisateur.nom}
-                                  </h4>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-900">
+                                      {utilisateur.grade && `${utilisateur.grade} `}
+                                      {utilisateur.prenom} {utilisateur.nom}
+                                    </h4>
+                                    <div className="flex items-center space-x-3 text-xs text-gray-600 mt-0.5">
+                                      <span>{utilisateur.mail}</span>
+                                      <span className="text-gray-500">{utilisateur.role}</span>
+                                    </div>
+                                  </div>
                                   {currentAssignee?.id === utilisateur.id && (
                                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                                       Assigné actuellement
                                     </span>
                                   )}
-                                </div>
-                                <div className="mt-1 flex items-center space-x-4 text-xs text-gray-600">
-                                  <div className="flex items-center">
-                                    <UserIcon className="h-3 w-3 mr-1" />
-                                    {utilisateur.mail}
-                                  </div>
-                                  <div className="text-gray-500">
-                                    {utilisateur.role}
-                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -294,7 +271,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                       type="button"
                       onClick={handleAssignerDemande}
                       className="btn-primary flex items-center"
-                      disabled={isAssigning}
+                      disabled={selectedUserId === '' || isAssigning}
                     >
                       {isAssigning ? (
                         <>
@@ -304,7 +281,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                       ) : (
                         <>
                           <CheckIcon className="h-4 w-4 mr-2" />
-                          {selectedUserId === '' ? 'Supprimer' : 'Assigner'}
+                          Assigner
                         </>
                       )}
                     </button>

@@ -68,11 +68,14 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
   // Mutation pour assigner la demande
   const assignerDemandeMutation = useMutation({
     mutationFn: async (assigneAId: string | null) => {
-      return api.put(`/demandes/${demandeId}`, { assigneAId })
+      // Pour désassigner, l'API attend une chaîne vide, pas null
+      const assigneAIdValue = assigneAId === null ? '' : assigneAId
+      return api.put(`/demandes/${demandeId}`, { assigneAId: assigneAIdValue })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       
       if (selectedUserId) {
         const assignedUser = utilisateurs.find((u: User) => u.id === selectedUserId)
@@ -93,7 +96,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
   const handleAssignerDemande = async () => {
     setIsAssigning(true)
     try {
-      await assignerDemandeMutation.mutateAsync(selectedUserId || null)
+      await assignerDemandeMutation.mutateAsync(selectedUserId === '' ? null : selectedUserId)
     } finally {
       setIsAssigning(false)
     }

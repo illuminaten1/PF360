@@ -54,7 +54,7 @@ const PCETable: React.FC<PCETableProps> = ({
   onDelete
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
-    { id: 'pceDetaille', desc: false }
+    { id: 'ordre', desc: false }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
@@ -67,6 +67,20 @@ const PCETable: React.FC<PCETableProps> = ({
 
   const columns = useMemo<ColumnDef<PCE>[]>(
     () => [
+      {
+        accessorKey: 'ordre',
+        header: 'Ordre',
+        cell: ({ getValue }) => {
+          const ordre = getValue<number>()
+          return (
+            <span className="text-sm font-medium text-gray-900 bg-blue-100 px-2 py-1 rounded">
+              {ordre}
+            </span>
+          )
+        },
+        enableColumnFilter: false,
+        sortingFn: 'basic'
+      },
       {
         accessorKey: 'pceDetaille',
         header: 'PCE détaillé',

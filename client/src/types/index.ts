@@ -311,6 +311,13 @@ export interface Paiement {
     nom: string
     prenom?: string
   }
+  pce?: {
+    id: string
+    ordre: number
+    pceDetaille: string
+    pceNumerique: string
+    codeMarchandise: string
+  }
   creePar?: {
     id: string
     nom: string
@@ -323,6 +330,7 @@ export interface Paiement {
 
 export interface PCE {
   id: string
+  ordre: number
   pceDetaille: string
   pceNumerique: string
   codeMarchandise: string

@@ -11,13 +11,36 @@ router.get('/', async (req, res) => {
   try {
     const pce = await prisma.pce.findMany({
       orderBy: [
-        { pceDetaille: 'asc' }
+        { ordre: 'asc' }
       ]
     });
 
     res.json(pce);
   } catch (error) {
     console.error('Get PCE error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Récupérer les PCE pour les sélecteurs (format simplifié)
+router.get('/options', async (req, res) => {
+  try {
+    const pce = await prisma.pce.findMany({
+      select: {
+        id: true,
+        ordre: true,
+        pceDetaille: true,
+        pceNumerique: true,
+        codeMarchandise: true
+      },
+      orderBy: [
+        { ordre: 'asc' }
+      ]
+    });
+
+    res.json(pce);
+  } catch (error) {
+    console.error('Get PCE options error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
@@ -40,9 +63,9 @@ router.get('/stats', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { pceDetaille, pceNumerique, codeMarchandise } = req.body;
+    const { ordre, pceDetaille, pceNumerique, codeMarchandise } = req.body;
     
-    if (!pceDetaille || !pceNumerique || !codeMarchandise) {
+    if (!ordre || !pceDetaille || !pceNumerique || !codeMarchandise) {
       return res.status(400).json({ error: 'Tous les champs sont requis' });
     }
 
@@ -54,8 +77,17 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Un PCE avec cette description existe déjà' });
     }
 
+    const existingOrdre = await prisma.pce.findUnique({
+      where: { ordre: parseInt(ordre) }
+    });
+
+    if (existingOrdre) {
+      return res.status(400).json({ error: 'Un PCE avec cet ordre existe déjà' });
+    }
+
     const pce = await prisma.pce.create({
       data: { 
+        ordre: parseInt(ordre),
         pceDetaille,
         pceNumerique,
         codeMarchandise
@@ -72,9 +104,9 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { pceDetaille, pceNumerique, codeMarchandise } = req.body;
+    const { ordre, pceDetaille, pceNumerique, codeMarchandise } = req.body;
     
-    if (!pceDetaille || !pceNumerique || !codeMarchandise) {
+    if (!ordre || !pceDetaille || !pceNumerique || !codeMarchandise) {
       return res.status(400).json({ error: 'Tous les champs sont requis' });
     }
 
@@ -86,9 +118,18 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Un PCE avec cette description existe déjà' });
     }
 
+    const existingOrdre = await prisma.pce.findFirst({
+      where: { ordre: parseInt(ordre), NOT: { id } }
+    });
+
+    if (existingOrdre) {
+      return res.status(400).json({ error: 'Un PCE avec cet ordre existe déjà' });
+    }
+
     const pce = await prisma.pce.update({
       where: { id },
       data: { 
+        ordre: parseInt(ordre),
         pceDetaille,
         pceNumerique,
         codeMarchandise

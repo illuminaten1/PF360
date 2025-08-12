@@ -28,6 +28,9 @@ router.get('/', async (req, res) => {
         avocat: {
           select: { id: true, nom: true, prenom: true }
         },
+        pce: {
+          select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
+        },
         creePar: {
           select: { id: true, nom: true, prenom: true, grade: true }
         }
@@ -54,7 +57,8 @@ router.post('/', async (req, res) => {
       ficheReglement,
       dossierId,
       conventionId,
-      avocatId
+      avocatId,
+      pceId
     } = req.body;
 
     if (!montantHT || !montantTTC || !nature || !dossierId) {
@@ -100,6 +104,17 @@ router.post('/', async (req, res) => {
       }
     }
 
+    // Si un PCE est spécifié, vérifier qu'il existe
+    if (pceId) {
+      const pceExistant = await prisma.pce.findUnique({
+        where: { id: pceId }
+      });
+
+      if (!pceExistant) {
+        return res.status(404).json({ error: 'PCE non trouvé' });
+      }
+    }
+
     const paiement = await prisma.paiement.create({
       data: {
         facture,
@@ -110,6 +125,7 @@ router.post('/', async (req, res) => {
         dossierId,
         conventionId,
         avocatId,
+        pceId,
         creeParId: req.user.id
       },
       include: {
@@ -121,6 +137,9 @@ router.post('/', async (req, res) => {
         },
         avocat: {
           select: { id: true, nom: true, prenom: true }
+        },
+        pce: {
+          select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
         },
         creePar: {
           select: { id: true, nom: true, prenom: true, grade: true }
@@ -151,6 +170,9 @@ router.get('/:id', async (req, res) => {
         avocat: {
           select: { id: true, nom: true, prenom: true }
         },
+        pce: {
+          select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
+        },
         creePar: {
           select: { id: true, nom: true, prenom: true, grade: true }
         }
@@ -178,7 +200,8 @@ router.put('/:id', async (req, res) => {
       nature,
       ficheReglement,
       conventionId,
-      avocatId
+      avocatId,
+      pceId
     } = req.body;
 
     const paiementExistant = await prisma.paiement.findUnique({
@@ -232,7 +255,8 @@ router.put('/:id', async (req, res) => {
         nature,
         ficheReglement,
         conventionId,
-        avocatId
+        avocatId,
+        pceId
       },
       include: {
         dossier: {
@@ -243,6 +267,9 @@ router.put('/:id', async (req, res) => {
         },
         avocat: {
           select: { id: true, nom: true, prenom: true }
+        },
+        pce: {
+          select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
         },
         creePar: {
           select: { id: true, nom: true, prenom: true, grade: true }

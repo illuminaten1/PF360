@@ -346,3 +346,38 @@ export interface Visa {
   createdAt?: string
   updatedAt?: string
 }
+
+export interface Decision {
+  id: string
+  type: 'AJ' | 'AJE' | 'PJ' | 'REJET'
+  dateSignature?: string
+  dateEnvoi?: string
+  documentGenere?: string
+  dossier: {
+    id: string
+    numero: string
+    nomDossier?: string
+  }
+  creePar: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  demandes: Array<{
+    demande: {
+      id: string
+      nom: string
+      prenom: string
+      numeroDS: string
+    }
+  }>
+  createdAt: string
+  updatedAt: string
+}

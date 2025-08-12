@@ -14,6 +14,7 @@ import Badges from '@/pages/Badges'
 import SGAMIPage from '@/pages/SGAMI'
 import PCEPage from '@/pages/PCE'
 import VisaPage from '@/pages/Visa'
+import Decisions from '@/pages/Decisions'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -45,7 +46,7 @@ function App() {
           <Route path="demandes" element={<Demandes />} />
           <Route path="dossiers" element={<Dossiers />} />
           <Route path="dossiers/:id" element={<DossierDetail />} />
-          <Route path="decisions" element={<PlaceholderPage title="Décisions" />} />
+          <Route path="decisions" element={<Decisions />} />
           <Route path="conventions" element={<PlaceholderPage title="Conventions" />} />
           <Route path="paiements" element={<PlaceholderPage title="Paiements" />} />
           <Route path="avocats" element={<Avocats />} />

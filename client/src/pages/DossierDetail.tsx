@@ -178,7 +178,7 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleGenerateDecision = () => {
-    if (dossier.demandes.length === 0) {
+    if (!dossier || dossier.demandes.length === 0) {
       toast.error('Aucune demande disponible pour générer une décision')
       return
     }
@@ -477,7 +477,7 @@ const DossierDetail: React.FC = () => {
                                   </span>
                                 ))}
                                 {(demande as any).badges.length > 2 && (
-                                  <span className="text-xs text-gray-500">
+                                  <span key={`more-badges-${demande.id}`} className="text-xs text-gray-500">
                                     +{(demande as any).badges.length - 2}
                                   </span>
                                 )}
@@ -617,13 +617,13 @@ const DossierDetail: React.FC = () => {
                           <div className="mb-3">
                             <p className="text-xs font-medium text-gray-700 mb-1">Demandes concernées:</p>
                             <div className="flex flex-wrap gap-1">
-                              {decision.demandes.slice(0, 2).map((d) => (
-                                <span key={d.demande.id} className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                              {decision.demandes.slice(0, 2).map((d, index) => (
+                                <span key={`demande-${decision.id}-${index}`} className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
                                   {d.demande.prenom} {d.demande.nom} ({d.demande.numeroDS})
                                 </span>
                               ))}
                               {decision.demandes.length > 2 && (
-                                <span className="text-xs text-gray-500">
+                                <span key={`more-demandes-${decision.id}`} className="text-xs text-gray-500">
                                   +{decision.demandes.length - 2} autre(s)
                                 </span>
                               )}

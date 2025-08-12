@@ -182,7 +182,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       Type de décision *
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {['AJ', 'AJE', 'PJ', 'REJET'].map((type) => (
+                      {(['AJ', 'AJE', 'PJ', 'REJET'] as const).map((type) => (
                         <label key={type} className="relative">
                           <input
                             type="radio"

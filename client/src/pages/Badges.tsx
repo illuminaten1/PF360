@@ -120,7 +120,7 @@ const Badges: React.FC = () => {
             <TagIcon className="w-7 h-7 mr-3 text-blue-600" />
             Gestion des badges
           </h1>
-          <p className="text-gray-600 mt-1">Gérez les badges et leurs couleurs pour organiser vos dossiers et demandes</p>
+          <p className="text-gray-600 mt-1">Gérez les badges et leurs couleurs</p>
         </div>
         <button
           onClick={handleCreateBadge}

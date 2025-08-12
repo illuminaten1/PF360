@@ -142,6 +142,30 @@ async function main() {
 
   console.log('✅ Test user created:', testUser.identifiant)
 
+  // Create default visas
+  const visasData = [
+    {
+      typeVisa: 'MILITAIRE',
+      texteVisa: 'Vu le code de la défense, notamment son article L. 4123-10 ;\nVu le code de la sécurité intérieure, notamment son article L. 113-1;\nVu la fiche Astrée 5.7.1.1 relative à la protection fonctionnelle;',
+      active: true
+    },
+    {
+      typeVisa: 'CIVIL',
+      texteVisa: 'Vu le code général de la fonction publique, notamment ses articles L. 134-1 et suivants;\nVu le décret n° 2017-97 du 26 janvier 2017;',
+      active: true
+    }
+  ]
+
+  for (const visa of visasData) {
+    await prisma.visa.upsert({
+      where: { typeVisa: visa.typeVisa },
+      update: {},
+      create: visa
+    })
+  }
+
+  console.log('✅ Default visas created')
+
   console.log('🎉 Database seeding completed!')
   console.log('')
   console.log('Login credentials:')

@@ -337,3 +337,12 @@ export interface PCE {
   createdAt?: string
   updatedAt?: string
 }
+
+export interface Visa {
+  id: string
+  typeVisa: string
+  texteVisa: string
+  active?: boolean
+  createdAt?: string
+  updatedAt?: string
+}

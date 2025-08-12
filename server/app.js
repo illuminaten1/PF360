@@ -17,6 +17,7 @@ const avocatRoutes = require('./routes/avocats');
 const sgamiRoutes = require('./routes/sgami');
 const badgeRoutes = require('./routes/badges');
 const pceRoutes = require('./routes/pce');
+const visaRoutes = require('./routes/visa');
 const logRoutes = require('./routes/logs');
 
 const app = express();
@@ -64,6 +65,7 @@ app.use('/api/avocats', avocatRoutes);
 app.use('/api/sgami', sgamiRoutes);
 app.use('/api/badges', badgeRoutes);
 app.use('/api/pce', pceRoutes);
+app.use('/api/visa', visaRoutes);
 app.use('/api/logs', logRoutes);
 
 // Health check

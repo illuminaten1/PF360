@@ -74,7 +74,8 @@ router.get('/', async (req, res) => {
           select: {
             id: true,
             type: true,
-            date: true
+            dateSignature: true,
+            dateEnvoi: true
           }
         },
         conventions: {
@@ -409,7 +410,8 @@ router.put('/:id', async (req, res) => {
           select: {
             id: true,
             type: true,
-            date: true
+            dateSignature: true,
+            dateEnvoi: true
           }
         },
         conventions: {

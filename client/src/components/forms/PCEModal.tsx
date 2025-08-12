@@ -12,7 +12,6 @@ interface PCEModalProps {
 
 const PCEModal: React.FC<PCEModalProps> = ({ pce, isOpen, onClose, onSubmit, isSubmitting }) => {
   const [formData, setFormData] = useState({
-    ordre: '',
     pceDetaille: '',
     pceNumerique: '',
     codeMarchandise: ''
@@ -23,14 +22,12 @@ const PCEModal: React.FC<PCEModalProps> = ({ pce, isOpen, onClose, onSubmit, isS
   useEffect(() => {
     if (pce) {
       setFormData({
-        ordre: pce.ordre?.toString() || '',
         pceDetaille: pce.pceDetaille || '',
         pceNumerique: pce.pceNumerique || '',
         codeMarchandise: pce.codeMarchandise || ''
       })
     } else {
       setFormData({
-        ordre: '',
         pceDetaille: '',
         pceNumerique: '',
         codeMarchandise: ''
@@ -49,12 +46,6 @@ const PCEModal: React.FC<PCEModalProps> = ({ pce, isOpen, onClose, onSubmit, isS
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-
-    if (!formData.ordre.trim()) {
-      newErrors.ordre = 'L\'ordre est requis'
-    } else if (isNaN(parseInt(formData.ordre)) || parseInt(formData.ordre) <= 0) {
-      newErrors.ordre = 'L\'ordre doit être un nombre positif'
-    }
 
     if (!formData.pceDetaille.trim()) {
       newErrors.pceDetaille = 'Le PCE détaillé est requis'
@@ -78,7 +69,6 @@ const PCEModal: React.FC<PCEModalProps> = ({ pce, isOpen, onClose, onSubmit, isS
     if (!validateForm()) return
 
     const submitData: Partial<PCE> = {
-      ordre: parseInt(formData.ordre.trim()),
       pceDetaille: formData.pceDetaille.trim(),
       pceNumerique: formData.pceNumerique.trim(),
       codeMarchandise: formData.codeMarchandise.trim()
@@ -105,27 +95,14 @@ const PCEModal: React.FC<PCEModalProps> = ({ pce, isOpen, onClose, onSubmit, isS
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Ordre */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ordre *
-            </label>
-            <input
-              type="number"
-              name="ordre"
-              value={formData.ordre}
-              onChange={handleInputChange}
-              placeholder="Ex: 1"
-              min="1"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.ordre ? 'border-red-500' : 'border-gray-300'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.ordre && (
-              <p className="text-red-500 text-sm mt-1">{errors.ordre}</p>
-            )}
-          </div>
+          {!pce && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+              <p className="text-sm text-blue-700">
+                <span className="font-medium">Info :</span> L'ordre sera automatiquement défini lors de la création. 
+                Vous pourrez réorganiser les PCE via glisser-déposer sur la liste principale.
+              </p>
+            </div>
+          )}
 
           {/* PCE détaillé */}
           <div>

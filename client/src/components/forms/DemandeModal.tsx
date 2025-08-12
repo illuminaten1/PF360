@@ -60,8 +60,6 @@ const demandeSchema = z.object({
   // Association dossier (uniquement pour modification)
   dossierId: z.string().optional(),
   
-  // Affectation utilisateur
-  assigneAId: z.string().optional()
 }).refine(
   (data) => {
     // Si partieCivile est false, on ignore le montant
@@ -135,8 +133,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       soutienSocial: false,
       soutienMedical: false,
       dateReception: new Date().toISOString().split('T')[0],
-      dossierId: '',
-      assigneAId: ''
+      dossierId: ''
     }
   })
 
@@ -159,14 +156,6 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
     enabled: !!demande // Only fetch when editing an existing demande
   })
 
-  // Fetch users for assignment
-  const { data: users = [] } = useQuery({
-    queryKey: ['demande-modal-users'],
-    queryFn: async () => {
-      const response = await api.get('/demandes/users')
-      return response.data
-    }
-  })
 
   useEffect(() => {
     if (isOpen) {
@@ -206,8 +195,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           soutienSocial: demande.soutienSocial,
           soutienMedical: demande.soutienMedical,
           dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : '',
-          dossierId: demande.dossier?.id || '',
-          assigneAId: demande.assigneA?.id || ''
+          dossierId: demande.dossier?.id || ''
         })
       } else {
         // Mode création : réinitialiser complètement le formulaire
@@ -245,8 +233,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           soutienSocial: false,
           soutienMedical: false,
           dateReception: new Date().toISOString().split('T')[0], // Date actuelle par défaut
-          dossierId: '',
-          assigneAId: ''
+          dossierId: ''
         })
       }
     }
@@ -392,24 +379,6 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                       </div>
                     )}
 
-                    {/* Affectation utilisateur */}
-                    <div className="mt-4">
-                      <label className="label block text-gray-700 mb-2">
-                        Affecter à un utilisateur
-                      </label>
-                      <select
-                        {...register('assigneAId')}
-                        className="input w-full"
-                        disabled={isSubmitting}
-                      >
-                        <option value="">Aucun utilisateur</option>
-                        {users?.map((user: any) => (
-                          <option key={user.id} value={user.id}>
-                            {user.grade && `${user.grade} `}{user.prenom} {user.nom}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
                   </div>
 
                   {/* Informations militaires */}
@@ -750,7 +719,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('unite')}
                           className="input w-full"
-                          placeholder="Ex: COB MURET"
+                          placeholder="Ex: COB MURET (31)"
                           disabled={isSubmitting}
                         />
                       </div>
@@ -959,7 +928,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div className="md:col-span-2">
                         <label className="label block text-gray-700 mb-2">
-                          Blessures
+                          Blessures (nombre de jours d'ITT et détail)
                         </label>
                         <textarea
                           {...register('blessures')}
@@ -970,7 +939,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div className="md:col-span-2">
                         <label className="label block text-gray-700 mb-2">
-                          Qualifications pénales
+                          Qualifications pénales susceptibles d'être retenues
                         </label>
                         <input
                           {...register('qualificationsPenales')}

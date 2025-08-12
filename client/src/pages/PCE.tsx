@@ -5,6 +5,7 @@ import { PlusIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { PCE } from '@/types'
 import api from '@/utils/api'
 import PCETable from '@/components/tables/PCETable'
+import DraggablePCETable from '@/components/tables/DraggablePCETable'
 import PCEModal from '@/components/forms/PCEModal'
 
 interface PCEStats {
@@ -14,6 +15,7 @@ interface PCEStats {
 const PCEPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPCE, setSelectedPCE] = useState<PCE | null>(null)
+  const [useDraggableTable, setUseDraggableTable] = useState(true)
 
   const queryClient = useQueryClient()
 
@@ -81,6 +83,20 @@ const PCEPage: React.FC = () => {
     }
   })
 
+  const reorderPCEMutation = useMutation({
+    mutationFn: async (pceList: PCE[]) => {
+      const response = await api.put('/pce/reorder', { pceList })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pce-all'] })
+      toast.success('Ordre des PCE mis à jour')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la réorganisation')
+    }
+  })
+
   const handleCreatePCE = () => {
     setSelectedPCE(null)
     setIsModalOpen(true)
@@ -105,6 +121,10 @@ const PCEPage: React.FC = () => {
     }
   }
 
+  const handleReorder = (newOrder: PCE[]) => {
+    reorderPCEMutation.mutate(newOrder)
+  }
+
   const pceList = pceData || []
 
   return (
@@ -117,13 +137,24 @@ const PCEPage: React.FC = () => {
           </h1>
           <p className="text-gray-600 mt-1">Gérez les Plans Comptables de l'État</p>
         </div>
-        <button
-          onClick={handleCreatePCE}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          <span>Nouveau PCE</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={useDraggableTable}
+              onChange={(e) => setUseDraggableTable(e.target.checked)}
+              className="mr-2"
+            />
+            <span className="text-sm text-gray-600">Mode réorganisation</span>
+          </label>
+          <button
+            onClick={handleCreatePCE}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <PlusIcon className="w-5 h-5" />
+            <span>Nouveau PCE</span>
+          </button>
+        </div>
       </div>
 
       {stats && (
@@ -142,12 +173,22 @@ const PCEPage: React.FC = () => {
         </div>
       )}
 
-      <PCETable
-        data={pceList}
-        loading={isLoading}
-        onEdit={handleEditPCE}
-        onDelete={handleDeletePCE}
-      />
+      {useDraggableTable ? (
+        <DraggablePCETable
+          data={pceList}
+          loading={isLoading}
+          onEdit={handleEditPCE}
+          onDelete={handleDeletePCE}
+          onReorder={handleReorder}
+        />
+      ) : (
+        <PCETable
+          data={pceList}
+          loading={isLoading}
+          onEdit={handleEditPCE}
+          onDelete={handleDeletePCE}
+        />
+      )}
 
       {isModalOpen && (
         <PCEModal

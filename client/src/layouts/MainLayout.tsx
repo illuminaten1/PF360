@@ -38,6 +38,7 @@ const adminNavigation = [
   { name: 'Utilisateurs', href: '/utilisateurs', icon: UserCircleIcon },
   { name: 'SGAMI', href: '/sgami', icon: CurrencyEuroIcon },
   { name: 'Badges', href: '/badges', icon: TagIcon },
+  { name: 'PCE', href: '/pce', icon: DocumentTextIcon },
   { name: 'Paramètres', href: '/parametres', icon: CogIcon },
 ]
 

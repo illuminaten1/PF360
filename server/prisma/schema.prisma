@@ -334,6 +334,18 @@ model ConventionDemande {
   @@map("conventions_demandes")
 }
 
+model Pce {
+  id                String   @id @default(cuid())
+  pceDetaille       String   @unique
+  pceNumerique      String
+  codeMarchandise   String
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("pce")
+}
+
 // Note: Using strings instead of enums for SQLite compatibility
 // Valid values:
 // - Role: "ADMIN" | "REDACTEUR" | "GREFFIER"

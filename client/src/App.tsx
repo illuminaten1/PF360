@@ -12,6 +12,7 @@ import Avocats from '@/pages/Avocats'
 import Users from '@/pages/Users'
 import Badges from '@/pages/Badges'
 import SGAMIPage from '@/pages/SGAMI'
+import PCEPage from '@/pages/PCE'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -72,6 +73,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <Badges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="pce"
+            element={
+              <ProtectedRoute adminOnly>
+                <PCEPage />
               </ProtectedRoute>
             }
           />

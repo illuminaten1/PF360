@@ -320,3 +320,12 @@ export interface Paiement {
   createdAt: string
   updatedAt: string
 }
+
+export interface PCE {
+  id: string
+  pceDetaille: string
+  pceNumerique: string
+  codeMarchandise: string
+  createdAt?: string
+  updatedAt?: string
+}

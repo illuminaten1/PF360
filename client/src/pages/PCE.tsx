@@ -15,7 +15,7 @@ interface PCEStats {
 const PCEPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPCE, setSelectedPCE] = useState<PCE | null>(null)
-  const [useDraggableTable, setUseDraggableTable] = useState(true)
+  const [useDraggableTable, setUseDraggableTable] = useState(false)
 
   const queryClient = useQueryClient()
 

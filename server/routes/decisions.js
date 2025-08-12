@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 router.use(authMiddleware);
 
 const createDecisionSchema = z.object({
-  type: z.enum(['OCTROI', 'OCTROI_PARTIEL', 'REJET'], { 
+  type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], { 
     required_error: "Le type de décision est requis" 
   }),
   dateSignature: z.string().datetime().optional(),
@@ -20,7 +20,7 @@ const createDecisionSchema = z.object({
 });
 
 const updateDecisionSchema = z.object({
-  type: z.enum(['OCTROI', 'OCTROI_PARTIEL', 'REJET']).optional(),
+  type: z.enum(['AJ', 'AJE', 'PJ', 'REJET']).optional(),
   dateSignature: z.string().datetime().optional().nullable(),
   dateEnvoi: z.string().datetime().optional().nullable(),
   demandeIds: z.array(z.string()).optional()

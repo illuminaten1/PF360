@@ -134,7 +134,7 @@ model Dossier {
 
 model Decision {
   id              String       @id @default(cuid())
-  type            String // OCTROI | OCTROI_PARTIEL | REJET
+  type            String // AJ | AJE | PJ | REJET
   dateSignature   DateTime?    // Date de signature de la décision
   dateEnvoi       DateTime?    // Date d'envoi de la décision
   documentGenere  String?      // Path vers le document généré
@@ -373,7 +373,7 @@ model Visa {
 // - Role: "ADMIN" | "REDACTEUR" | "GREFFIER"
 // - TypeDemande: "VICTIME" | "MIS_EN_CAUSE"  
 // - Position: "EN_SERVICE" | "HORS_SERVICE"
-// - TypeDecision: "OCTROI" | "OCTROI_PARTIEL" | "REJET"
+// - TypeDecision: "AJ" | "AJE" | "PJ" | "REJET"
 // - NaturePaiement: "AVOCAT" | "AUTRES_INTERVENANTS"
 // - StatutDemandeur: "OG" | "OCTA" | "SOG" | "CSTAGN" | "GAV" | "Civil" | "Réserviste" | "Retraité" | "Ayant-droit"
 // - Grade: "Général" | "Colonel" | "Lieutenant-colonel" | "Chef d'escadron" | "Commandant" | "Capitaine" | "Lieutenant" | "Sous-lieutenant" | "Aspirant" | "Major" | "Adjudant-chef" | "Adjudant" | "Maréchal des logis-chef" | "Gendarme" | "Élève gendarme" | "Maréchal des logis" | "Brigadier-chef" | "Brigadier" | "Gendarme adjoint volontaire" | "Gendarme adjoint de 2ème classe" | "Madame" | "Monsieur"

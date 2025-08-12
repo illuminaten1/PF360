@@ -1,0 +1,387 @@
+import React, { useEffect } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { useQuery } from '@tanstack/react-query'
+import { XMarkIcon, DocumentIcon, ScaleIcon } from '@heroicons/react/24/outline'
+import { Dossier, Visa } from '@/types'
+import api from '@/utils/api'
+
+const generateDecisionSchema = z.object({
+  type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], {
+    required_error: "Le type de décision est requis"
+  }),
+  visaId: z.string().min(1, "Le visa est requis"),
+  dateSignature: z.string().optional(),
+  dateEnvoi: z.string().optional(),
+  demandeIds: z.array(z.string()).min(1, "Au moins une demande doit être sélectionnée")
+})
+
+type GenerateDecisionFormData = z.infer<typeof generateDecisionSchema>
+
+interface GenerateDecisionModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (data: any) => Promise<void>
+  dossier: Dossier
+}
+
+const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  dossier
+}) => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch
+  } = useForm<GenerateDecisionFormData>({
+    resolver: zodResolver(generateDecisionSchema)
+  })
+
+  const selectedType = watch('type')
+  const selectedDemandeIds = watch('demandeIds') || []
+
+  // Fetch visas
+  const { data: visas = [] } = useQuery<Visa[]>({
+    queryKey: ['visas-active'],
+    queryFn: async () => {
+      const response = await api.get('/visa')
+      return response.data.filter((visa: Visa) => visa.active)
+    }
+  })
+
+  useEffect(() => {
+    if (isOpen && dossier) {
+      // Initialize form with default values
+      reset({
+        type: 'AJ',
+        visaId: '',
+        dateSignature: '',
+        dateEnvoi: '',
+        demandeIds: []
+      })
+    }
+  }, [isOpen, dossier, reset])
+
+  const handleFormSubmit = async (data: GenerateDecisionFormData) => {
+    try {
+      const cleanedData = {
+        type: data.type,
+        visaId: data.visaId,
+        dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : undefined,
+        dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : undefined,
+        dossierId: dossier.id,
+        demandeIds: data.demandeIds
+      }
+
+      await onSubmit(cleanedData)
+      onClose()
+    } catch (error) {
+      console.error('Erreur lors de la génération:', error)
+    }
+  }
+
+  const handleDemandeToggle = (demandeId: string) => {
+    const currentIds = selectedDemandeIds || []
+    const newIds = currentIds.includes(demandeId)
+      ? currentIds.filter(id => id !== demandeId)
+      : [...currentIds, demandeId]
+    setValue('demandeIds', newIds)
+  }
+
+  const handleSelectAllDemandes = () => {
+    const allDemandeIds = dossier.demandes.map(d => d.id)
+    setValue('demandeIds', allDemandeIds)
+  }
+
+  const handleDeselectAllDemandes = () => {
+    setValue('demandeIds', [])
+  }
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'AJ':
+        return 'Aide Juridique'
+      case 'AJE':
+        return 'Aide Juridique Évolutive'
+      case 'PJ':
+        return 'Protection Juridictionnelle'
+      case 'REJET':
+        return 'Rejet'
+      default:
+        return type
+    }
+  }
+
+  const getTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case 'AJ':
+        return 'bg-green-100 text-green-800'
+      case 'AJE':
+        return 'bg-blue-100 text-blue-800'
+      case 'PJ':
+        return 'bg-purple-100 text-purple-800'
+      case 'REJET':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  return (
+    <Transition appear show={isOpen} as={React.Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={React.Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
+                    <ScaleIcon className="h-6 w-6 mr-2 text-blue-600" />
+                    Générer une décision - Dossier {dossier.numero}
+                  </Dialog.Title>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-md text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    <XMarkIcon className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+                  {/* Type de décision */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Type de décision *
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {['AJ', 'AJE', 'PJ', 'REJET'].map((type) => (
+                        <label key={type} className="relative">
+                          <input
+                            type="radio"
+                            value={type}
+                            {...register('type')}
+                            className="sr-only"
+                          />
+                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all ${
+                            selectedType === type
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
+                              {getTypeLabel(type)}
+                            </span>
+                            <div className="mt-2 text-sm text-gray-600">
+                              {type === 'AJ' && 'Aide juridique complète'}
+                              {type === 'AJE' && 'Aide juridique évolutive'}
+                              {type === 'PJ' && 'Protection juridictionnelle'}
+                              {type === 'REJET' && 'Refus de prise en charge'}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    {errors.type && (
+                      <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+                    )}
+                  </div>
+
+                  {/* Visa */}
+                  <div>
+                    <label htmlFor="visaId" className="block text-sm font-medium text-gray-700 mb-2">
+                      Visa à utiliser *
+                    </label>
+                    <select
+                      {...register('visaId')}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    >
+                      <option value="">Sélectionner un visa</option>
+                      {visas.map((visa) => (
+                        <option key={visa.id} value={visa.id}>
+                          {visa.typeVisa} - {visa.texteVisa.substring(0, 100)}...
+                        </option>
+                      ))}
+                    </select>
+                    {errors.visaId && (
+                      <p className="mt-1 text-sm text-red-600">{errors.visaId.message}</p>
+                    )}
+                  </div>
+
+                  {/* Demandes à inclure */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Demandes à inclure dans la décision *
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSelectAllDemandes}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          Tout sélectionner
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDeselectAllDemandes}
+                          className="text-xs text-gray-600 hover:text-gray-800 underline"
+                        >
+                          Tout désélectionner
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="border border-gray-300 rounded-md p-4 max-h-64 overflow-y-auto bg-gray-50">
+                      {dossier.demandes.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-4">
+                          Aucune demande disponible dans ce dossier
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {dossier.demandes.map((demande) => (
+                            <label key={demande.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition-colors cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedDemandeIds.includes(demande.id)}
+                                onChange={() => handleDemandeToggle(demande.id)}
+                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 mt-1"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-gray-900">
+                                    {demande.grade && `${demande.grade} `}{demande.prenom} {demande.nom}
+                                  </span>
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    demande.type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+                                  }`}>
+                                    {demande.type.replace(/_/g, ' ')}
+                                  </span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <div>N° DS: {demande.numeroDS}</div>
+                                  <div>Reçu le: {new Date(demande.dateReception).toLocaleDateString('fr-FR')}</div>
+                                  {demande.dateFaits && (
+                                    <div>Faits du: {new Date(demande.dateFaits).toLocaleDateString('fr-FR')}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {errors.demandeIds && (
+                      <p className="mt-1 text-sm text-red-600">{errors.demandeIds.message}</p>
+                    )}
+                    {selectedDemandeIds.length > 0 && (
+                      <p className="mt-2 text-sm text-blue-600">
+                        {selectedDemandeIds.length} demande(s) sélectionnée(s)
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Dates */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="dateSignature" className="block text-sm font-medium text-gray-700 mb-2">
+                        Date de signature
+                      </label>
+                      <input
+                        type="date"
+                        {...register('dateSignature')}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Laissez vide pour remplir plus tard
+                      </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="dateEnvoi" className="block text-sm font-medium text-gray-700 mb-2">
+                        Date d'envoi
+                      </label>
+                      <input
+                        type="date"
+                        {...register('dateEnvoi')}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Laissez vide pour remplir plus tard
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Informations sur la génération */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <div className="flex items-start">
+                      <DocumentIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3" />
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-900 mb-1">
+                          À propos de la génération
+                        </h4>
+                        <div className="text-sm text-blue-800 space-y-1">
+                          <p>• La décision sera générée avec le visa sélectionné</p>
+                          <p>• Les demandes sélectionnées seront incluses dans le document</p>
+                          <p>• Le document pourra être généré une fois la décision créée</p>
+                          <p>• Les dates peuvent être modifiées ultérieurement</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-end space-x-3 pt-6 border-t">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="btn-secondary"
+                      disabled={isSubmitting}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-primary"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Génération...' : 'Générer la décision'}
+                    </button>
+                  </div>
+                </form>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  )
+}
+
+export default GenerateDecisionModal

@@ -27,6 +27,7 @@ import api from '@/utils/api'
 import DossierModal from '@/components/forms/DossierModal'
 import LierDemandesModal from '@/components/forms/LierDemandesModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
+import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 dayjs.extend(relativeTime)
@@ -40,6 +41,7 @@ const DossierDetail: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
   const [isDemandeViewModalOpen, setIsDemandeViewModalOpen] = useState(false)
+  const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<any>(null)
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
@@ -127,6 +129,24 @@ const DossierDetail: React.FC = () => {
     }
   })
 
+  // Create decision mutation
+  const createDecisionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.post('/decisions', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['decisions-all'] })
+      toast.success('Décision générée avec succès')
+      setIsGenerateDecisionModalOpen(false)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la génération de la décision')
+    }
+  })
+
   const handleEditDossier = () => {
     setIsEditModalOpen(true)
   }
@@ -155,6 +175,18 @@ const DossierDetail: React.FC = () => {
   const handleCloseDemandeModal = () => {
     setIsDemandeViewModalOpen(false)
     setSelectedDemande(null)
+  }
+
+  const handleGenerateDecision = () => {
+    if (dossier.demandes.length === 0) {
+      toast.error('Aucune demande disponible pour générer une décision')
+      return
+    }
+    setIsGenerateDecisionModalOpen(true)
+  }
+
+  const handleSubmitDecision = async (data: any) => {
+    await createDecisionMutation.mutateAsync(data)
   }
 
   // Initialize notes when dossier loads
@@ -492,38 +524,138 @@ const DossierDetail: React.FC = () => {
                   <ScaleIcon className="h-5 w-5 mr-2" />
                   Décisions ({dossier.decisions.length})
                 </h2>
-                <button className="btn-primary-outline flex items-center text-sm">
+                <button 
+                  onClick={handleGenerateDecision}
+                  disabled={dossier.demandes.length === 0}
+                  className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={dossier.demandes.length === 0 ? "Aucune demande disponible" : "Générer une nouvelle décision"}
+                >
                   <PlusIcon className="h-4 w-4 mr-1" />
-                  Nouvelle décision
+                  Générer décision
                 </button>
               </div>
             </div>
             <div className="p-6">
               {dossier.decisions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune décision prise</p>
+                <div className="text-center py-8">
+                  <ScaleIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 mb-4">Aucune décision prise pour ce dossier</p>
+                  {dossier.demandes.length > 0 ? (
+                    <button 
+                      onClick={handleGenerateDecision}
+                      className="btn-primary text-sm"
+                    >
+                      Générer la première décision
+                    </button>
+                  ) : (
+                    <p className="text-gray-400 text-sm">
+                      Vous devez d'abord lier des demandes à ce dossier
+                    </p>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {dossier.decisions.map((decision) => (
-                    <div key={decision.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          decision.type === 'OCTROI' ? 'bg-green-100 text-green-800' :
-                          decision.type === 'OCTROI_PARTIEL' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {decision.type}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {dayjs(decision.date).format('DD/MM/YYYY')}
-                        </span>
+                  {dossier.decisions.map((decision) => {
+                    const getTypeLabel = (type: string) => {
+                      switch (type) {
+                        case 'AJ': return 'Aide Juridique'
+                        case 'AJE': return 'Aide Juridique Évolutive'
+                        case 'PJ': return 'Protection Juridictionnelle'
+                        case 'REJET': return 'Rejet'
+                        // Support des anciens types pour compatibilité
+                        case 'OCTROI': return 'Aide Juridique'
+                        case 'OCTROI_PARTIEL': return 'Aide Juridique Partielle'
+                        default: return type
+                      }
+                    }
+
+                    const getTypeBadgeColor = (type: string) => {
+                      switch (type) {
+                        case 'AJ': 
+                        case 'OCTROI': 
+                          return 'bg-green-100 text-green-800'
+                        case 'AJE': 
+                          return 'bg-blue-100 text-blue-800'
+                        case 'PJ': 
+                          return 'bg-purple-100 text-purple-800'
+                        case 'REJET': 
+                          return 'bg-red-100 text-red-800'
+                        case 'OCTROI_PARTIEL': 
+                          return 'bg-yellow-100 text-yellow-800'
+                        default: 
+                          return 'bg-gray-100 text-gray-800'
+                      }
+                    }
+
+                    return (
+                      <div key={decision.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-start justify-between mb-3">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(decision.type)}`}>
+                            {getTypeLabel(decision.type)}
+                          </span>
+                          <div className="text-right">
+                            {(decision as any).dateSignature && (
+                              <div className="text-sm text-gray-600 mb-1">
+                                Signée le: {dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}
+                              </div>
+                            )}
+                            {(decision as any).dateEnvoi && (
+                              <div className="text-sm text-gray-600 mb-1">
+                                Envoyée le: {dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}
+                              </div>
+                            )}
+                            {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
+                              <div className="text-sm text-gray-600">
+                                {dayjs((decision as any).date).format('DD/MM/YYYY')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Demandes concernées */}
+                        {decision.demandes && decision.demandes.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-gray-700 mb-1">Demandes concernées:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {decision.demandes.slice(0, 2).map((d) => (
+                                <span key={d.demande.id} className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                  {d.demande.prenom} {d.demande.nom} ({d.demande.numeroDS})
+                                </span>
+                              ))}
+                              {decision.demandes.length > 2 && (
+                                <span className="text-xs text-gray-500">
+                                  +{decision.demandes.length - 2} autre(s)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <div>
+                            {decision.creePar && (
+                              <p className="text-sm text-gray-600">
+                                Créée par: {decision.creePar.prenom} {decision.creePar.nom}
+                              </p>
+                            )}
+                            {(decision as any).modifiePar && (
+                              <p className="text-xs text-gray-500">
+                                Modifiée par: {(decision as any).modifiePar.prenom} {(decision as any).modifiePar.nom}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button className="text-blue-600 hover:text-blue-800 text-sm">
+                              Modifier
+                            </button>
+                            <button className="text-green-600 hover:text-green-800 text-sm">
+                              Générer document
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      {decision.creePar && (
-                        <p className="text-sm text-gray-600">
-                          Créée par: {decision.creePar.prenom} {decision.creePar.nom}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -720,6 +852,16 @@ const DossierDetail: React.FC = () => {
         onClose={handleCloseDemandeModal}
         demande={selectedDemande}
       />
+
+      {/* Generate Decision Modal */}
+      {dossier && (
+        <GenerateDecisionModal
+          isOpen={isGenerateDecisionModalOpen}
+          onClose={() => setIsGenerateDecisionModalOpen(false)}
+          onSubmit={handleSubmitDecision}
+          dossier={dossier}
+        />
+      )}
     </div>
   )
 }

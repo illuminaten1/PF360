@@ -301,7 +301,8 @@ const getAllDemandes = async (req, res) => {
                 select: {
                   id: true,
                   type: true,
-                  date: true
+                  dateSignature: true,
+                  dateEnvoi: true
                 }
               }
             }

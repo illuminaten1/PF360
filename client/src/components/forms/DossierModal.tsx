@@ -391,67 +391,32 @@ const DossierModal: React.FC<DossierModalProps> = ({
                           Aucun badge disponible
                         </p>
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="flex flex-wrap gap-2">
                           {badges.map((badge) => {
                             const isSelected = selectedBadges.includes(badge.id)
-                            
-                            // Mapping des couleurs pour assurer que les classes CSS existent
-                            const getBadgeColorClass = (couleur?: string) => {
-                              switch (couleur?.toLowerCase()) {
-                                case 'red':
-                                case 'rouge':
-                                  return 'bg-red-100 text-red-800 border-red-200'
-                                case 'blue':
-                                case 'bleu':
-                                  return 'bg-blue-100 text-blue-800 border-blue-200'
-                                case 'green':
-                                case 'vert':
-                                  return 'bg-green-100 text-green-800 border-green-200'
-                                case 'yellow':
-                                case 'jaune':
-                                  return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                                case 'purple':
-                                case 'violet':
-                                  return 'bg-purple-100 text-purple-800 border-purple-200'
-                                case 'pink':
-                                case 'rose':
-                                  return 'bg-pink-100 text-pink-800 border-pink-200'
-                                case 'indigo':
-                                  return 'bg-indigo-100 text-indigo-800 border-indigo-200'
-                                case 'orange':
-                                  return 'bg-orange-100 text-orange-800 border-orange-200'
-                                case 'teal':
-                                  return 'bg-teal-100 text-teal-800 border-teal-200'
-                                default:
-                                  return 'bg-gray-100 text-gray-800 border-gray-200'
-                              }
-                            }
-                            
-                            const badgeColorClass = getBadgeColorClass(badge.couleur)
                             
                             return (
                               <div
                                 key={badge.id}
                                 onClick={() => toggleBadge(badge.id)}
-                                className={`relative cursor-pointer rounded-lg p-3 border-2 transition-all duration-200 hover:shadow-md ${
+                                className={`relative cursor-pointer rounded-lg p-2 border-2 transition-all duration-200 hover:shadow-md ${
                                   isSelected
-                                    ? 'border-blue-500 bg-blue-50 shadow-sm'
+                                    ? 'border-blue-500 shadow-sm'
                                     : 'border-gray-200 hover:border-gray-300'
                                 }`}
                               >
-                                <div className="flex items-center justify-between">
-                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${badgeColorClass}`}>
-                                    {badge.nom}
-                                  </span>
+                                <span 
+                                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                                  style={badge.couleur ? { 
+                                    backgroundColor: `${badge.couleur}20`, 
+                                    color: badge.couleur 
+                                  } : {}}
+                                >
+                                  {badge.nom}
                                   {isSelected && (
-                                    <div className="flex-shrink-0">
-                                      <CheckIcon className="w-4 h-4 text-blue-600" />
-                                    </div>
+                                    <CheckIcon className="w-3 h-3 ml-1 flex-shrink-0" />
                                   )}
-                                </div>
-                                {isSelected && (
-                                  <div className="absolute inset-0 bg-blue-500 bg-opacity-10 rounded-lg pointer-events-none"></div>
-                                )}
+                                </span>
                               </div>
                             )
                           })}

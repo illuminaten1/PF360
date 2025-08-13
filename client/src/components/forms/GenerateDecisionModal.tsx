@@ -190,7 +190,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                             {...register('type')}
                             className="sr-only"
                           />
-                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all ${
+                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
                             selectedType === type
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:border-gray-300'
@@ -198,12 +198,6 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
                               {getTypeLabel(type)}
                             </span>
-                            <div className="mt-2 text-sm text-gray-600">
-                              {type === 'AJ' && 'Aide juridique complète'}
-                              {type === 'AJE' && 'Aide juridique évolutive'}
-                              {type === 'PJ' && 'Protection juridictionnelle'}
-                              {type === 'REJET' && 'Refus de prise en charge'}
-                            </div>
                           </div>
                         </label>
                       ))}
@@ -215,20 +209,50 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
 
                   {/* Visa */}
                   <div>
-                    <label htmlFor="visaId" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
                       Visa à utiliser *
                     </label>
-                    <select
-                      {...register('visaId')}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    >
-                      <option value="">Sélectionner un visa</option>
-                      {visas.map((visa) => (
-                        <option key={visa.id} value={visa.id}>
-                          {visa.typeVisa} - {visa.texteVisa.substring(0, 100)}...
-                        </option>
-                      ))}
-                    </select>
+                    <div className="grid grid-cols-2 gap-3">
+                      {visas.length === 0 ? (
+                        <div className="col-span-2 bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-gray-500">
+                          Aucun visa disponible
+                        </div>
+                      ) : (
+                        ['CIVIL', 'MILITAIRE'].map((typeVisa) => {
+                          const visaOfType = visas.find(v => v.typeVisa === typeVisa)
+                          const isSelected = visaOfType && watch('visaId') === visaOfType.id
+                          
+                          return (
+                            <label key={typeVisa} className={`relative ${
+                              !visaOfType ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                            }`}>
+                              <input
+                                type="radio"
+                                value={visaOfType?.id || ''}
+                                {...register('visaId')}
+                                disabled={!visaOfType}
+                                className="sr-only"
+                              />
+                              <div className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                                isSelected
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : visaOfType 
+                                    ? 'border-gray-200 hover:border-gray-300'
+                                    : 'border-gray-100 bg-gray-50'
+                              }`}>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  typeVisa === 'CIVIL' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-orange-100 text-orange-800'
+                                }`}>
+                                  {typeVisa}
+                                </span>
+                              </div>
+                            </label>
+                          )
+                        })
+                      )}
+                    </div>
                     {errors.visaId && (
                       <p className="mt-1 text-sm text-red-600">{errors.visaId.message}</p>
                     )}
@@ -302,7 +326,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                     )}
                     {selectedDemandeIds.length > 0 && (
                       <p className="mt-2 text-sm text-blue-600">
-                        {selectedDemandeIds.length} demande(s) sélectionnée(s)
+                        {selectedDemandeIds.length} demande(s) sélectionnée(s) sur {dossier.demandes.length} dans le dossier
                       </p>
                     )}
                   </div>

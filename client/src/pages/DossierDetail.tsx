@@ -27,6 +27,7 @@ import api from '@/utils/api'
 import DossierModal from '@/components/forms/DossierModal'
 import LierDemandesModal from '@/components/forms/LierDemandesModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
+import DecisionViewModal from '@/components/forms/DecisionViewModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
@@ -41,8 +42,10 @@ const DossierDetail: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
   const [isDemandeViewModalOpen, setIsDemandeViewModalOpen] = useState(false)
+  const [isDecisionViewModalOpen, setIsDecisionViewModalOpen] = useState(false)
   const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<any>(null)
+  const [selectedDecision, setSelectedDecision] = useState<any>(null)
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
@@ -175,6 +178,16 @@ const DossierDetail: React.FC = () => {
   const handleCloseDemandeModal = () => {
     setIsDemandeViewModalOpen(false)
     setSelectedDemande(null)
+  }
+
+  const handleViewDecision = (decision: any) => {
+    setSelectedDecision(decision)
+    setIsDecisionViewModalOpen(true)
+  }
+
+  const handleCloseDecisionModal = () => {
+    setIsDecisionViewModalOpen(false)
+    setSelectedDecision(null)
   }
 
   const handleGenerateDecision = () => {
@@ -617,7 +630,10 @@ const DossierDetail: React.FC = () => {
                             <button className="text-blue-600 hover:text-blue-800 text-sm">
                               Modifier
                             </button>
-                            <button className="text-green-600 hover:text-green-800 text-sm">
+                            <button 
+                              onClick={() => handleViewDecision(decision)}
+                              className="text-green-600 hover:text-green-800 text-sm"
+                            >
                               Voir détails
                             </button>
                           </div>
@@ -820,6 +836,13 @@ const DossierDetail: React.FC = () => {
         isOpen={isDemandeViewModalOpen}
         onClose={handleCloseDemandeModal}
         demande={selectedDemande}
+      />
+
+      {/* Decision View Modal */}
+      <DecisionViewModal
+        isOpen={isDecisionViewModalOpen}
+        onClose={handleCloseDecisionModal}
+        decision={selectedDecision}
       />
 
       {/* Generate Decision Modal */}

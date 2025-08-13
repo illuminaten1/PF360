@@ -201,53 +201,61 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-                  {/* Numéro de décision */}
-                  <div>
-                    <label htmlFor="numero" className="block text-sm font-medium text-gray-700 mb-2">
-                      Numéro de décision *
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      {...register('numero')}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Ex: 123"
-                    />
-                    {errors.numero && (
-                      <p className="mt-1 text-sm text-red-600">{errors.numero.message}</p>
-                    )}
+                  {/* Numéro de décision et Type */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Numéro de décision */}
+                    <div>
+                      <label htmlFor="numero" className="block text-sm font-medium text-gray-700 mb-2">
+                        Numéro de décision *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          {...register('numero')}
+                          className="block w-full h-16 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-lg font-semibold text-center text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="123"
+                        />
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <span className="text-gray-400 text-sm font-medium">N°</span>
+                        </div>
+                      </div>
+                      {errors.numero && (
+                        <p className="mt-1 text-sm text-red-600">{errors.numero.message}</p>
+                      )}
+                    </div>
+
+                    {/* Type de décision */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Type de décision *
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['AJ', 'AJE', 'PJ', 'REJET'] as const).map((type) => (
+                          <label key={type} className="relative">
+                            <input
+                              type="radio"
+                              value={type}
+                              {...register('type')}
+                              className="sr-only"
+                            />
+                            <div className={`cursor-pointer rounded-lg border-2 p-2 text-center transition-all h-12 flex items-center justify-center ${
+                              selectedType === type
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
+                                {getTypeLabel(type)}
+                              </span>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                      {errors.type && (
+                        <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Type de décision */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Type de décision *
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {(['AJ', 'AJE', 'PJ', 'REJET'] as const).map((type) => (
-                        <label key={type} className="relative">
-                          <input
-                            type="radio"
-                            value={type}
-                            {...register('type')}
-                            className="sr-only"
-                          />
-                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
-                            selectedType === type
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
-                              {getTypeLabel(type)}
-                            </span>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                    {errors.type && (
-                      <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-                    )}
-                  </div>
 
                   {/* Demandes concernées (read-only) */}
                   {decision.demandes && decision.demandes.length > 0 && (
@@ -255,21 +263,14 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         Demandes concernées
                       </label>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto">
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto">
                         <div className="space-y-2">
                           {decision.demandes.map((demandeRel, index) => (
-                            <div key={index} className="bg-white p-3 rounded-lg border border-gray-200">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="font-medium text-gray-900">
-                                    {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
-                                    {demandeRel.demande.prenom} {demandeRel.demande.nom}
-                                  </span>
-                                  <div className="text-sm text-gray-600">
-                                    N° DS: {demandeRel.demande.numeroDS}
-                                  </div>
-                                </div>
-                              </div>
+                            <div key={index} className="bg-white p-2 rounded-lg border border-gray-200 flex items-center">
+                              <span className="font-medium text-gray-900">
+                                {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
+                                {demandeRel.demande.prenom} {demandeRel.demande.nom}
+                              </span>
                             </div>
                           ))}
                         </div>

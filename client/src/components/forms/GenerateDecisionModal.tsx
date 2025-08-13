@@ -12,6 +12,7 @@ const generateDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], {
     required_error: "Le type de décision est requis"
   }),
+  numero: z.string().min(1, "Le numéro de décision est requis"),
   visaId: z.string().min(1, "Le visa est requis"),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional(),
@@ -61,6 +62,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
       // Initialize form with default values
       reset({
         type: 'AJ',
+        numero: '',
         visaId: '',
         dateSignature: '',
         dateEnvoi: '',
@@ -73,6 +75,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
     try {
       const cleanedData = {
         type: data.type,
+        numero: data.numero,
         visaId: data.visaId,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : undefined,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : undefined,
@@ -176,6 +179,22 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+                  {/* Numéro de décision */}
+                  <div>
+                    <label htmlFor="numero" className="block text-sm font-medium text-gray-700 mb-2">
+                      Numéro de décision *
+                    </label>
+                    <input
+                      type="text"
+                      {...register('numero')}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      placeholder="Ex: 2024-AJ-001"
+                    />
+                    {errors.numero && (
+                      <p className="mt-1 text-sm text-red-600">{errors.numero.message}</p>
+                    )}
+                  </div>
+
                   {/* Type de décision */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">

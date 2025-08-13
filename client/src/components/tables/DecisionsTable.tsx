@@ -136,6 +136,20 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
   const columns = useMemo<ColumnDef<Decision>[]>(
     () => [
       {
+        accessorKey: 'numero',
+        header: 'N° Décision',
+        cell: ({ getValue }) => {
+          const numero = getValue<string>()
+          return (
+            <span className="font-mono text-sm font-medium text-gray-900">
+              {numero || 'Non défini'}
+            </span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
         id: 'dossier',
         header: 'Dossier',
         accessorFn: (row) => row.dossier.numero,

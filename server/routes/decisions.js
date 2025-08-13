@@ -13,6 +13,7 @@ const createDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], { 
     required_error: "Le type de décision est requis" 
   }),
+  numero: z.string().min(1, "Le numéro de décision est requis"),
   dateSignature: z.string().datetime().optional(),
   dateEnvoi: z.string().datetime().optional(),
   dossierId: z.string().min(1, "Le dossier est requis"),
@@ -21,6 +22,7 @@ const createDecisionSchema = z.object({
 
 const updateDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET']).optional(),
+  numero: z.string().min(1, "Le numéro de décision est requis").optional(),
   dateSignature: z.string().datetime().optional().nullable(),
   dateEnvoi: z.string().datetime().optional().nullable(),
   demandeIds: z.array(z.string()).optional()
@@ -78,13 +80,14 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const validatedData = createDecisionSchema.parse(req.body);
-    const { type, dateSignature, dateEnvoi, dossierId, demandeIds } = validatedData;
+    const { type, numero, dateSignature, dateEnvoi, dossierId, demandeIds } = validatedData;
 
     const decision = await prisma.$transaction(async (tx) => {
       // Créer la décision
       const newDecision = await tx.decision.create({
         data: {
           type,
+          numero,
           dateSignature: dateSignature ? new Date(dateSignature) : null,
           dateEnvoi: dateEnvoi ? new Date(dateEnvoi) : null,
           dossierId,
@@ -201,7 +204,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const validatedData = updateDecisionSchema.parse(req.body);
-    const { type, dateSignature, dateEnvoi, demandeIds } = validatedData;
+    const { type, numero, dateSignature, dateEnvoi, demandeIds } = validatedData;
 
     const existingDecision = await prisma.decision.findUnique({
       where: { id: req.params.id }
@@ -218,6 +221,7 @@ router.put('/:id', async (req, res) => {
       };
 
       if (type !== undefined) updateData.type = type;
+      if (numero !== undefined) updateData.numero = numero;
       if (dateSignature !== undefined) {
         updateData.dateSignature = dateSignature ? new Date(dateSignature) : null;
       }

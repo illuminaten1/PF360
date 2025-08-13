@@ -13,6 +13,7 @@ const decisionEditSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], {
     required_error: "Le type de décision est requis"
   }),
+  numero: z.string().min(1, "Le numéro de décision est requis"),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional()
 })
@@ -22,6 +23,7 @@ type DecisionEditFormData = z.infer<typeof decisionEditSchema>
 interface Decision {
   id: string
   type: string
+  numero?: string
   date?: string
   dateSignature?: string
   dateEnvoi?: string
@@ -80,6 +82,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
       // Initialize form with decision values
       reset({
         type: decision.type as 'AJ' | 'AJE' | 'PJ' | 'REJET',
+        numero: decision.numero || '',
         dateSignature: decision.dateSignature ? dayjs(decision.dateSignature).format('YYYY-MM-DD') : '',
         dateEnvoi: decision.dateEnvoi ? dayjs(decision.dateEnvoi).format('YYYY-MM-DD') : ''
       })
@@ -91,6 +94,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
       const cleanedData = {
         id: decision?.id,
         type: data.type,
+        numero: data.numero,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : null,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : null
       }
@@ -197,6 +201,22 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+                  {/* Numéro de décision */}
+                  <div>
+                    <label htmlFor="numero" className="block text-sm font-medium text-gray-700 mb-2">
+                      Numéro de décision *
+                    </label>
+                    <input
+                      type="text"
+                      {...register('numero')}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      placeholder="Ex: 2024-AJ-001"
+                    />
+                    {errors.numero && (
+                      <p className="mt-1 text-sm text-red-600">{errors.numero.message}</p>
+                    )}
+                  </div>
+
                   {/* Type de décision */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">

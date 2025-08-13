@@ -9,6 +9,7 @@ dayjs.locale('fr')
 interface Decision {
   id: string
   type: string
+  numero?: string
   date?: string
   dateSignature?: string
   dateEnvoi?: string
@@ -155,7 +156,7 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                       </div>
                       <div>
                         <Dialog.Title as="h3" className="text-xl font-semibold text-white">
-                          {getTypeLabel(decision.type)}
+                          {decision.numero ? `Décision ${decision.numero}` : getTypeLabel(decision.type)}
                         </Dialog.Title>
                         <div className="flex items-center space-x-3 mt-1 flex-wrap">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-white ${getTypeBadgeColor(decision.type)}`}>
@@ -191,7 +192,14 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                         <h4 className="text-lg font-semibold text-gray-900">Informations générales</h4>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <span className="block text-sm font-medium text-gray-600 mb-1">Numéro</span>
+                          <p className="text-lg font-semibold text-gray-900 font-mono">
+                            {decision.numero || 'Non défini'}
+                          </p>
+                        </div>
+
                         <div>
                           <span className="block text-sm font-medium text-gray-600 mb-1">Type de décision</span>
                           <p className="text-lg font-semibold text-gray-900">

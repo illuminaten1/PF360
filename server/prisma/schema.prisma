@@ -135,6 +135,7 @@ model Dossier {
 model Decision {
   id              String       @id @default(cuid())
   type            String // AJ | AJE | PJ | REJET
+  numero          String? // Numéro de la décision (ex: 2024-AJ-001)
   dateSignature   DateTime?    // Date de signature de la décision
   dateEnvoi       DateTime?    // Date d'envoi de la décision
   documentGenere  String?      // Path vers le document généré

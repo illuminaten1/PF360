@@ -93,6 +93,9 @@ const cleanEmptyStrings = (data) => {
     if (cleaned[key] === '') {
       if (key === 'position') {
         delete cleaned[key];
+      } else if (key === 'dossierId') {
+        // Ne pas modifier dossierId automatiquement - seulement si explicitement demandé
+        delete cleaned[key];
       } else {
         cleaned[key] = null;
       }
@@ -596,16 +599,18 @@ const updateDemande = async (req, res) => {
       dataToUpdate.dateReception = new Date(dataToUpdate.dateReception);
     }
     
-    // Handle dossier association
-    if (!dataToUpdate.dossierId) {
-      dataToUpdate.dossierId = null; // For updates, we use null to disconnect
-    } else {
-      // Vérifier que le dossier existe
-      const dossierExists = await prisma.dossier.findUnique({
-        where: { id: dataToUpdate.dossierId }
-      });
-      if (!dossierExists) {
-        return res.status(400).json({ error: 'Le dossier sélectionné n\'existe pas' });
+    // Handle dossier association - seulement si dossierId est explicitement fourni
+    if ('dossierId' in validatedData) {
+      if (!dataToUpdate.dossierId) {
+        dataToUpdate.dossierId = null; // For updates, we use null to disconnect
+      } else {
+        // Vérifier que le dossier existe
+        const dossierExists = await prisma.dossier.findUnique({
+          where: { id: dataToUpdate.dossierId }
+        });
+        if (!dossierExists) {
+          return res.status(400).json({ error: 'Le dossier sélectionné n\'existe pas' });
+        }
       }
     }
     

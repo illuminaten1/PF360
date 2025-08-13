@@ -166,6 +166,128 @@ async function main() {
 
   console.log('✅ Default visas created')
 
+  // Seed PCE data
+  console.log('🌱 Starting PCE seeding...')
+  
+  const pceData = [
+    {
+      ordre: 1,
+      pceDetaille: 'Règlement des frais et honoraires d\'avocat (PCE 6131.000.000)',
+      pceNumerique: 'PCE 6131.000.000',
+      codeMarchandise: '40.03.02'
+    },
+    {
+      ordre: 2,
+      pceDetaille: 'Remboursement des frais et honoraires d\'avocat (PCE 6131.000.000)',
+      pceNumerique: 'PCE 6131.000.000',
+      codeMarchandise: '40.03.02'
+    },
+    {
+      ordre: 3,
+      pceDetaille: 'Règlement des frais de consignation d\'expertise (PCE 6135.000.000)',
+      pceNumerique: 'PCE 6135.000.000',
+      codeMarchandise: '43.01.01'
+    },
+    {
+      ordre: 4,
+      pceDetaille: 'Remboursement des frais de consignation d\'expertise (PCE 6135.000.000)',
+      pceNumerique: 'PCE 6135.000.000',
+      codeMarchandise: '43.01.01'
+    },
+    {
+      ordre: 5,
+      pceDetaille: 'Règlement des frais et honoraires d\'huissier (PCE 6134.000.000)',
+      pceNumerique: 'PCE 6134.000.000',
+      codeMarchandise: '40.03.03'
+    },
+    {
+      ordre: 6,
+      pceDetaille: 'Remboursement des honoraires d\'huissier (PCE 6134.000.000)',
+      pceNumerique: 'PCE 6134.000.000',
+      codeMarchandise: '40.03.03'
+    },
+    {
+      ordre: 7,
+      pceDetaille: 'Règlement des frais et honoraires d\'un médecin conseil (PCE 6135.000.000)',
+      pceNumerique: 'PCE 6135.000.000',
+      codeMarchandise: '43.01.01'
+    },
+    {
+      ordre: 8,
+      pceDetaille: 'Remboursement des frais et honoraires d\'un médecin conseil (PCE 6135.000.000)',
+      pceNumerique: 'PCE 6135.000.000',
+      codeMarchandise: '43.01.01'
+    },
+    {
+      ordre: 9,
+      pceDetaille: 'Réparation directe du préjudice (PCE 6222.000.000)',
+      pceNumerique: 'PCE 6222.000.000',
+      codeMarchandise: '46.01.02'
+    },
+    {
+      ordre: 10,
+      pceDetaille: 'Règlement des frais de mission, déplacement et repas (PCE 6153.110.000)',
+      pceNumerique: 'PCE 6135.110.000',
+      codeMarchandise: '25.01.01'
+    },
+    {
+      ordre: 11,
+      pceDetaille: 'Remboursement des frais de mission, déplacement et repas (PCE 6153.110.000)',
+      pceNumerique: 'PCE 6135.110.000',
+      codeMarchandise: '25.01.01'
+    },
+    {
+      ordre: 12,
+      pceDetaille: 'Remboursement FGTI des sommes versées (PCE 6222.000.000) au profit',
+      pceNumerique: 'PCE 6222.000.000',
+      codeMarchandise: '46.01.02'
+    },
+    {
+      ordre: 13,
+      pceDetaille: 'Règlement des frais d\'actes et de procédure (PCE 6137.000.000)',
+      pceNumerique: 'PCE 6137.000.000',
+      codeMarchandise: '45.03.01'
+    },
+    {
+      ordre: 14,
+      pceDetaille: 'Remboursement des frais d\'actes et de procédure (PCE 6137.000.000)',
+      pceNumerique: 'PCE 6137.000.000',
+      codeMarchandise: '45.03.01'
+    },
+    {
+      ordre: 15,
+      pceDetaille: 'Règlement des autres pénalités et condamnations (PCE 6228.000.000)',
+      pceNumerique: 'PCE 6228.000.000',
+      codeMarchandise: '46.01.03'
+    },
+    {
+      ordre: 16,
+      pceDetaille: 'Remboursement des autres pénalités et condamnations (PCE 6228.000.000)',
+      pceNumerique: 'PCE 6228.000.000',
+      codeMarchandise: '46.01.03'
+    }
+  ]
+
+  console.log(`📊 ${pceData.length} PCE à insérer...`)
+
+  // Supprimer les PCE existants
+  await prisma.pce.deleteMany({})
+  console.log('🗑️  PCE existants supprimés')
+
+  // Insérer les nouveaux PCE
+  for (const pce of pceData) {
+    try {
+      await prisma.pce.create({
+        data: pce
+      })
+    } catch (error) {
+      console.error(`❌ Erreur lors de l'insertion du PCE: ${pce.pceDetaille}`, error.message)
+    }
+  }
+
+  const pceCount = await prisma.pce.count()
+  console.log(`✅ ${pceCount} PCE insérés avec succès!`)
+
   console.log('🎉 Database seeding completed!')
   console.log('')
   console.log('Login credentials:')

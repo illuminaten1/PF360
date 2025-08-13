@@ -132,10 +132,13 @@ const generateRandomDemande = (year = null, dossierParams = null) => {
     dateReception = dateFaits ? new Date(dateFaits.getTime() + Math.random() * (now.getTime() - dateFaits.getTime())) : (year ? randomDateInYear(year) : randomDate())
   }
   
-  // 3. Date d'audience (si elle existe, après la date des faits et potentiellement dans le futur)
+  // 3. Date d'audience (si elle existe, utiliser celle du dossier ou générer une nouvelle)
   let dateAudience = null
-  if (Math.random() > 0.6 && dateFaits) {
-    // L'audience peut être jusqu'à 6 mois après la date des faits
+  if (dossierParams?.dateAudience) {
+    // Utiliser la date d'audience commune du dossier
+    dateAudience = dossierParams.dateAudience
+  } else if (Math.random() > 0.6 && dateFaits) {
+    // Générer une nouvelle date d'audience (jusqu'à 6 mois après la date des faits)
     const maxAudienceDate = new Date(dateFaits.getTime() + 6 * 30 * 24 * 60 * 60 * 1000) // +6 mois
     dateAudience = new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime()))
   }
@@ -208,11 +211,20 @@ const generateDossier = (year = 2025, users = [], sgamis = []) => {
   // Date de réception de base pour le dossier
   const dateReceptionBase = new Date(dateFaits.getTime() + Math.random() * (now.getTime() - dateFaits.getTime()))
   
+  // Date d'audience commune pour toutes les demandes du dossier (si elle existe)
+  let dateAudienceCommune = null
+  if (Math.random() > 0.6) {
+    // L'audience peut être jusqu'à 6 mois après la date des faits
+    const maxAudienceDate = new Date(dateFaits.getTime() + 6 * 30 * 24 * 60 * 60 * 1000) // +6 mois
+    dateAudienceCommune = new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime()))
+  }
+  
   const dossierParams = {
     unite,
     commune,
     dateFaits,
-    dateReceptionBase
+    dateReceptionBase,
+    dateAudience: dateAudienceCommune
   }
   
   // Assigner aléatoirement un utilisateur et un SGAMI au dossier

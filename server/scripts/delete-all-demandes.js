@@ -9,14 +9,26 @@ async function main() {
     // Compter les éléments avant suppression
     const countDemandesBefore = await prisma.demande.count()
     const countDossiersBefore = await prisma.dossier.count()
+    const countDecisionDemandes = await prisma.decisionDemande.count()
+    const countConventionDemandes = await prisma.conventionDemande.count()
     const countBadgesDemandes = await prisma.demandeBadge.count()
     const countBadgesDossiers = await prisma.dossierBadge.count()
+    const countPaiements = await prisma.paiement.count()
+    const countConventions = await prisma.convention.count()
+    const countDecisions = await prisma.decision.count()
+    const countDossiersAttendus = await prisma.dossierAttendu.count()
     
     console.log(`📊 Éléments trouvés :`)
     console.log(`   - Demandes : ${countDemandesBefore}`)
     console.log(`   - Dossiers : ${countDossiersBefore}`)
+    console.log(`   - Liaisons décisions-demandes : ${countDecisionDemandes}`)
+    console.log(`   - Liaisons conventions-demandes : ${countConventionDemandes}`)
     console.log(`   - Badges demandes : ${countBadgesDemandes}`)
     console.log(`   - Badges dossiers : ${countBadgesDossiers}`)
+    console.log(`   - Paiements : ${countPaiements}`)
+    console.log(`   - Conventions : ${countConventions}`)
+    console.log(`   - Décisions : ${countDecisions}`)
+    console.log(`   - Dossiers attendus : ${countDossiersAttendus}`)
     
     if (countDemandesBefore === 0 && countDossiersBefore === 0) {
       console.log('✅ Aucun élément à supprimer.')
@@ -25,7 +37,15 @@ async function main() {
     
     console.log(`⚠️  Vous êtes sur le point de supprimer tous ces éléments.`)
     
-    // Supprimer dans l'ordre des dépendances
+    // Supprimer dans l'ordre des dépendances (foreign keys first)
+    console.log('🔄 Suppression des liaisons décisions-demandes...')
+    const decisionDemandesResult = await prisma.decisionDemande.deleteMany({})
+    console.log(`✅ ${decisionDemandesResult.count} liaisons décisions-demandes supprimées`)
+    
+    console.log('🔄 Suppression des liaisons conventions-demandes...')
+    const conventionDemandesResult = await prisma.conventionDemande.deleteMany({})
+    console.log(`✅ ${conventionDemandesResult.count} liaisons conventions-demandes supprimées`)
+    
     console.log('🔄 Suppression des badges de demandes...')
     const badgesDemandesResult = await prisma.demandeBadge.deleteMany({})
     console.log(`✅ ${badgesDemandesResult.count} badges de demandes supprimés`)
@@ -33,6 +53,22 @@ async function main() {
     console.log('🔄 Suppression des badges de dossiers...')
     const badgesDossiersResult = await prisma.dossierBadge.deleteMany({})
     console.log(`✅ ${badgesDossiersResult.count} badges de dossiers supprimés`)
+    
+    console.log('🔄 Suppression des paiements...')
+    const paiementsResult = await prisma.paiement.deleteMany({})
+    console.log(`✅ ${paiementsResult.count} paiements supprimés`)
+    
+    console.log('🔄 Suppression des conventions...')
+    const conventionsResult = await prisma.convention.deleteMany({})
+    console.log(`✅ ${conventionsResult.count} conventions supprimées`)
+    
+    console.log('🔄 Suppression des décisions...')
+    const decisionsResult = await prisma.decision.deleteMany({})
+    console.log(`✅ ${decisionsResult.count} décisions supprimées`)
+    
+    console.log('🔄 Suppression des dossiers attendus...')
+    const dossiersAttendusResult = await prisma.dossierAttendu.deleteMany({})
+    console.log(`✅ ${dossiersAttendusResult.count} dossiers attendus supprimés`)
     
     console.log('🔄 Suppression des demandes...')
     const demandesResult = await prisma.demande.deleteMany({})

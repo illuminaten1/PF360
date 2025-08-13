@@ -12,7 +12,8 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState
+  type ColumnFiltersState,
+  type VisibilityState
 } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
@@ -575,6 +576,25 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    // Colonnes visibles
+    numeroDS: true,
+    dateReception: true,
+    type: true,
+    grade: true,
+    nom: true,
+    dateFaits: true,
+    dossier: true,
+    assigneA: true,
+    dateAudience: true,
+    actions: true,
+    // Colonnes masquées mais searchables
+    badges: false,
+    prenom: false,
+    nigend: false,
+    unite: false,
+    commune: false
+  })
   const [showAssignerModal, setShowAssignerModal] = useState(false)
   const [selectedDemandeId, setSelectedDemandeId] = useState<string>('')
   const [selectedDemandeNumeroDS, setSelectedDemandeNumeroDS] = useState<string>('')
@@ -628,6 +648,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
 
   const columns = useMemo<ColumnDef<Demande>[]>(
     () => [
+      // 1. numeroDS
       {
         accessorKey: 'numeroDS',
         header: 'Numéro DS',
@@ -642,73 +663,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         enableColumnFilter: true,
         filterFn: 'includesString'
       },
-      {
-        accessorKey: 'type',
-        header: 'Type',
-        cell: ({ getValue }) => {
-          const type = getValue<string>()
-          return (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(type)}`}>
-              {getTypeLabel(type)}
-            </span>
-          )
-        },
-        enableColumnFilter: true,
-        filterFn: (row, _columnId, filterValue: string[]) => {
-          if (!filterValue || filterValue.length === 0) return true
-          
-          const type = row.getValue('type') as string
-          return filterValue.includes(type)
-        }
-      },
-      {
-        id: 'badges',
-        header: 'Badges',
-        accessorFn: (row) => {
-          const badges = row.badges || []
-          return badges.map((badgeRel: any) => badgeRel.badge?.nom).filter(Boolean).join(', ')
-        },
-        cell: ({ row }) => {
-          const demande = row.original
-          const badges = demande.badges || []
-          
-          if (badges.length === 0) {
-            return <span className="text-gray-400 text-xs">-</span>
-          }
-          
-          return (
-            <div className="flex flex-wrap gap-1">
-              {badges.slice(0, 2).map((badgeRel: any) => (
-                <span
-                  key={badgeRel.badge.id}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                  style={badgeRel.badge.couleur ? {
-                    backgroundColor: `${badgeRel.badge.couleur}20`,
-                    color: badgeRel.badge.couleur
-                  } : {}}
-                >
-                  {badgeRel.badge.nom}
-                </span>
-              ))}
-              {badges.length > 2 && (
-                <span className="text-xs text-gray-500">
-                  +{badges.length - 2}
-                </span>
-              )}
-            </div>
-          )
-        },
-        enableColumnFilter: true,
-        filterFn: (row, _columnId, filterValue: string[]) => {
-          if (!filterValue || filterValue.length === 0) return true
-          
-          const demande = row.original
-          const badges = demande.badges || []
-          const badgeNames = badges.map((badgeRel: any) => badgeRel.badge?.nom).filter(Boolean)
-          
-          return filterValue.some(selectedBadge => badgeNames.includes(selectedBadge))
-        }
-      },
+      // 2. dateReception
       {
         accessorKey: 'dateReception',
         header: 'Réception',
@@ -740,28 +695,27 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           return true
         }
       },
+      // 3. type
       {
-        accessorKey: 'nom',
-        header: 'Nom',
-        cell: ({ getValue }) => (
-          <div className="font-medium text-gray-900">
-            {getValue<string>()}
-          </div>
-        ),
+        accessorKey: 'type',
+        header: 'Type',
+        cell: ({ getValue }) => {
+          const type = getValue<string>()
+          return (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(type)}`}>
+              {getTypeLabel(type)}
+            </span>
+          )
+        },
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+          
+          const type = row.getValue('type') as string
+          return filterValue.includes(type)
+        }
       },
-      {
-        accessorKey: 'prenom',
-        header: 'Prénom',
-        cell: ({ getValue }) => (
-          <div className="text-gray-900">
-            {getValue<string>()}
-          </div>
-        ),
-        enableColumnFilter: true,
-        filterFn: 'includesString'
-      },
+      // 4. grade
       {
         accessorKey: 'grade',
         header: 'Grade',
@@ -778,28 +732,19 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           return filterValue.includes(grade || '')
         }
       },
+      // 5. nom
       {
-        accessorKey: 'nigend',
-        header: 'NIGEND',
+        accessorKey: 'nom',
+        header: 'Nom',
         cell: ({ getValue }) => (
-          <div className="text-sm text-gray-500">
-            {getValue<string>() || '-'}
+          <div className="font-medium text-gray-900">
+            {getValue<string>()}
           </div>
         ),
         enableColumnFilter: true,
         filterFn: 'includesString'
       },
-      {
-        accessorKey: 'unite',
-        header: 'Unité',
-        cell: ({ getValue }) => (
-          <span className="text-sm text-gray-900">
-            {getValue<string>() || '-'}
-          </span>
-        ),
-        enableColumnFilter: true,
-        filterFn: 'includesString'
-      },
+      // 6. dateFaits
       {
         accessorKey: 'dateFaits',
         header: 'Date faits',
@@ -838,17 +783,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           return true
         }
       },
-      {
-        accessorKey: 'commune',
-        header: 'Commune',
-        cell: ({ getValue }) => (
-          <div className="text-sm text-gray-900">
-            {getValue<string>() || '-'}
-          </div>
-        ),
-        enableColumnFilter: true,
-        filterFn: 'includesString'
-      },
+      // 7. dossier
       {
         id: 'dossier',
         header: 'Dossier',
@@ -878,6 +813,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         filterFn: 'includesString',
         enableSorting: false
       },
+      // 8. assigneA
       {
         id: 'assigneA',
         header: 'Assigné à',
@@ -935,6 +871,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           return filterValue.includes(assigneString)
         }
       },
+      // 9. dateAudience
       {
         accessorKey: 'dateAudience',
         header: 'Date audience',
@@ -973,6 +910,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         enableColumnFilter: false,
         sortingFn: 'datetime'
       },
+      // 10. actions
       {
         id: 'actions',
         header: 'Actions',
@@ -1005,6 +943,99 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         ),
         enableColumnFilter: false,
         enableSorting: false
+      },
+      // Colonnes masquées mais searchables
+      {
+        id: 'badges',
+        header: 'Badges',
+        accessorFn: (row) => {
+          const badges = row.badges || []
+          return badges.map((badgeRel: any) => badgeRel.badge?.nom).filter(Boolean).join(', ')
+        },
+        cell: ({ row }) => {
+          const demande = row.original
+          const badges = demande.badges || []
+          
+          if (badges.length === 0) {
+            return <span className="text-gray-400 text-xs">-</span>
+          }
+          
+          return (
+            <div className="flex flex-wrap gap-1">
+              {badges.slice(0, 2).map((badgeRel: any) => (
+                <span
+                  key={badgeRel.badge.id}
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                  style={badgeRel.badge.couleur ? {
+                    backgroundColor: `${badgeRel.badge.couleur}20`,
+                    color: badgeRel.badge.couleur
+                  } : {}}
+                >
+                  {badgeRel.badge.nom}
+                </span>
+              ))}
+              {badges.length > 2 && (
+                <span className="text-xs text-gray-500">
+                  +{badges.length - 2}
+                </span>
+              )}
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+          
+          const demande = row.original
+          const badges = demande.badges || []
+          const badgeNames = badges.map((badgeRel: any) => badgeRel.badge?.nom).filter(Boolean)
+          
+          return filterValue.some(selectedBadge => badgeNames.includes(selectedBadge))
+        }
+      },
+      {
+        accessorKey: 'prenom',
+        header: 'Prénom',
+        cell: ({ getValue }) => (
+          <div className="text-gray-900">
+            {getValue<string>()}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'nigend',
+        header: 'NIGEND',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-500">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'unite',
+        header: 'Unité',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </span>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'commune',
+        header: 'Commune',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-900">
+            {getValue<string>() || '-'}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
       }
     ],
     [onView, onEdit, onDelete, onAddToDossier, handleViewDossier]
@@ -1016,11 +1047,13 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     state: {
       sorting,
       columnFilters,
-      globalFilter
+      globalFilter,
+      columnVisibility
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),

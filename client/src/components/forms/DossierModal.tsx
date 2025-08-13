@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import React, { useEffect, useState } from 'react'
+import { Dialog, Transition, Listbox } from '@headlessui/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Dossier, Badge, Sgami, User } from '@/types'
 import api from '@/utils/api'
 
@@ -44,6 +44,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
   })
 
   const selectedBadges = watch('badges') || []
+  const [selectedSgami, setSelectedSgami] = useState<Sgami | null>(null)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   // Fetch options for selects
   const { data: badges = [] } = useQuery<Badge[]>({
@@ -80,6 +82,10 @@ const DossierModal: React.FC<DossierModalProps> = ({
           assigneAId: dossier.assigneA?.id || '',
           badges: dossier.badges.map(b => b.badge.id) || []
         })
+        setSelectedSgami(dossier.sgami || null)
+        // Trouver l'utilisateur complet dans la liste
+        const fullUser = users.find(user => user.id === dossier.assigneA?.id) || null
+        setSelectedUser(fullUser)
       } else {
         // Mode création : réinitialiser complètement le formulaire
         reset({
@@ -88,9 +94,11 @@ const DossierModal: React.FC<DossierModalProps> = ({
           assigneAId: '',
           badges: []
         })
+        setSelectedSgami(null)
+        setSelectedUser(null)
       }
     }
-  }, [isOpen, dossier, reset])
+  }, [isOpen, dossier, reset, sgamis, users])
 
   const handleFormSubmit = async (data: DossierFormData) => {
     try {
@@ -143,75 +151,223 @@ const DossierModal: React.FC<DossierModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                    {title}
-                  </Dialog.Title>
-                  <button
-                    onClick={onClose}
-                    className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
-                  >
-                    <XMarkIcon className="h-5 w-5" />
-                  </button>
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900 flex items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
+                      {title}
+                    </Dialog.Title>
+                    <button
+                      onClick={onClose}
+                      className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-white/50 transition-all duration-200"
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
+                
+                <div className="p-6">
 
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-                  <div>
-                    <label htmlFor="nomDossier" className="label block text-gray-700 mb-2">
-                      Nom du dossier (optionnel)
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+                  <div className="space-y-2">
+                    <label htmlFor="nomDossier" className="block text-sm font-medium text-gray-700">
+                      Nom du dossier
+                      <span className="text-gray-500 font-normal ml-1">(optionnel)</span>
                     </label>
-                    <input
-                      {...register('nomDossier')}
-                      type="text"
-                      className="input w-full"
-                      placeholder="Nom descriptif pour ce dossier important..."
-                      disabled={isSubmitting}
-                    />
+                    <div className="relative">
+                      <input
+                        {...register('nomDossier')}
+                        type="text"
+                        className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 placeholder-gray-500"
+                        placeholder="Nom descriptif si le dossier est important..."
+                        disabled={isSubmitting}
+                      />
+                      {watch('nomDossier') && (
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                          <CheckIcon className="h-4 w-4 text-green-500" />
+                        </div>
+                      )}
+                    </div>
                     {errors.nomDossier && (
-                      <p className="mt-1 text-sm text-red-600">{errors.nomDossier.message}</p>
+                      <p className="mt-1 text-sm text-red-600 flex items-center">
+                        <XMarkIcon className="h-4 w-4 mr-1" />
+                        {errors.nomDossier.message}
+                      </p>
                     )}
                   </div>
 
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="sgamiId" className="label block text-gray-700 mb-2">
+                      <label className="label block text-sm font-medium text-gray-700 mb-2">
                         SGAMI
                       </label>
-                      <select
-                        {...register('sgamiId')}
-                        className="input w-full"
+                      <Listbox 
+                        value={selectedSgami} 
+                        onChange={(sgami) => {
+                          setSelectedSgami(sgami)
+                          setValue('sgamiId', sgami?.id || '')
+                        }}
                         disabled={isSubmitting}
                       >
-                        <option value="">Sélectionner un SGAMI</option>
-                        {sgamis.map((sgami) => (
-                          <option key={sgami.id} value={sgami.id}>
-                            {sgami.nom}
-                          </option>
-                        ))}
-                      </select>
+                        <div className="relative">
+                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <span className="block truncate">
+                              {selectedSgami ? selectedSgami.nom : 'Sélectionner un SGAMI'}
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <ChevronUpDownIcon
+                                className="h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </Listbox.Button>
+                          <Transition
+                            as={React.Fragment}
+                            leave="transition ease-in duration-100"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                          >
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                              <Listbox.Option
+                                value={null}
+                                className={({ active }) =>
+                                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                    active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                  }`
+                                }
+                              >
+                                {({ selected }) => (
+                                  <>
+                                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                      Sélectionner un SGAMI
+                                    </span>
+                                    {selected ? (
+                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                              {sgamis.map((sgami) => (
+                                <Listbox.Option
+                                  key={sgami.id}
+                                  value={sgami}
+                                  className={({ active }) =>
+                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                      active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                    }`
+                                  }
+                                >
+                                  {({ selected }) => (
+                                    <>
+                                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                        {sgami.nom}
+                                      </span>
+                                      {selected ? (
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      </Listbox>
                       {errors.sgamiId && (
                         <p className="mt-1 text-sm text-red-600">{errors.sgamiId.message}</p>
                       )}
                     </div>
 
                     <div>
-                      <label htmlFor="assigneAId" className="label block text-gray-700 mb-2">
+                      <label className="label block text-sm font-medium text-gray-700 mb-2">
                         Assigné à
                       </label>
-                      <select
-                        {...register('assigneAId')}
-                        className="input w-full"
+                      <Listbox 
+                        value={selectedUser} 
+                        onChange={(user) => {
+                          setSelectedUser(user)
+                          setValue('assigneAId', user?.id || '')
+                        }}
                         disabled={isSubmitting}
                       >
-                        <option value="">Sélectionner un utilisateur</option>
-                        {users.map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.grade && `${user.grade} `}{user.prenom} {user.nom}
-                          </option>
-                        ))}
-                      </select>
+                        <div className="relative">
+                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <span className="block truncate">
+                              {selectedUser ? (
+                                `${selectedUser.grade ? `${selectedUser.grade} ` : ''}${selectedUser.prenom} ${selectedUser.nom}`
+                              ) : (
+                                'Sélectionner un utilisateur'
+                              )}
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <ChevronUpDownIcon
+                                className="h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </Listbox.Button>
+                          <Transition
+                            as={React.Fragment}
+                            leave="transition ease-in duration-100"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                          >
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                              <Listbox.Option
+                                value={null}
+                                className={({ active }) =>
+                                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                    active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                  }`
+                                }
+                              >
+                                {({ selected }) => (
+                                  <>
+                                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                      Sélectionner un utilisateur
+                                    </span>
+                                    {selected ? (
+                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                              {users.map((user) => (
+                                <Listbox.Option
+                                  key={user.id}
+                                  value={user}
+                                  className={({ active }) =>
+                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                      active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                    }`
+                                  }
+                                >
+                                  {({ selected }) => (
+                                    <>
+                                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                        {user.grade && `${user.grade} `}{user.prenom} {user.nom}
+                                      </span>
+                                      {selected ? (
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      </Listbox>
                       {errors.assigneAId && (
                         <p className="mt-1 text-sm text-red-600">{errors.assigneAId.message}</p>
                       )}
@@ -219,42 +375,79 @@ const DossierModal: React.FC<DossierModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="label block text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
                       Badges
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {badges.map((badge) => (
-                        <label key={badge.id} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedBadges.includes(badge.id)}
-                            onChange={() => toggleBadge(badge.id)}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <span className="ml-2 text-sm text-gray-700">{badge.nom}</span>
-                        </label>
-                      ))}
+                    <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                      {badges.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-4">
+                          Aucun badge disponible
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {badges.map((badge) => (
+                            <label 
+                              key={badge.id} 
+                              className="relative flex items-center p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition-all cursor-pointer group"
+                            >
+                              <div className="flex items-center h-5">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedBadges.includes(badge.id)}
+                                  onChange={() => toggleBadge(badge.id)}
+                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-colors"
+                                />
+                              </div>
+                              <div className="ml-3 flex-1">
+                                <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                  {badge.nom}
+                                </span>
+                              </div>
+                              {selectedBadges.includes(badge.id) && (
+                                <div className="ml-2">
+                                  <CheckIcon className="w-4 h-4 text-blue-600" />
+                                </div>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                    {selectedBadges.length > 0 && (
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="text-sm text-blue-600">
+                          {selectedBadges.length} badge(s) sélectionné(s)
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setValue('badges', [])}
+                          className="text-xs text-gray-500 hover:text-gray-700 underline"
+                        >
+                          Tout désélectionner
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                     <button
                       type="button"
                       onClick={onClose}
-                      className="btn-secondary"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
                       disabled={isSubmitting}
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
-                      className="btn-primary"
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? 'Enregistrement...' : dossier ? 'Modifier' : 'Créer'}
                     </button>
                   </div>
                 </form>
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

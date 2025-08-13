@@ -28,6 +28,7 @@ import DossierModal from '@/components/forms/DossierModal'
 import LierDemandesModal from '@/components/forms/LierDemandesModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DecisionViewModal from '@/components/forms/DecisionViewModal'
+import DecisionEditModal from '@/components/forms/DecisionEditModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
@@ -43,6 +44,7 @@ const DossierDetail: React.FC = () => {
   const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
   const [isDemandeViewModalOpen, setIsDemandeViewModalOpen] = useState(false)
   const [isDecisionViewModalOpen, setIsDecisionViewModalOpen] = useState(false)
+  const [isDecisionEditModalOpen, setIsDecisionEditModalOpen] = useState(false)
   const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<any>(null)
   const [selectedDecision, setSelectedDecision] = useState<any>(null)
@@ -150,6 +152,24 @@ const DossierDetail: React.FC = () => {
     }
   })
 
+  // Update decision mutation
+  const updateDecisionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.put(`/decisions/${data.id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['decisions-all'] })
+      toast.success('Décision modifiée avec succès')
+      setIsDecisionEditModalOpen(false)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la modification de la décision')
+    }
+  })
+
   const handleEditDossier = () => {
     setIsEditModalOpen(true)
   }
@@ -190,6 +210,16 @@ const DossierDetail: React.FC = () => {
     setSelectedDecision(null)
   }
 
+  const handleEditDecision = (decision: any) => {
+    setSelectedDecision(decision)
+    setIsDecisionEditModalOpen(true)
+  }
+
+  const handleCloseDecisionEditModal = () => {
+    setIsDecisionEditModalOpen(false)
+    setSelectedDecision(null)
+  }
+
   const handleGenerateDecision = () => {
     if (!dossier || dossier.demandes.length === 0) {
       toast.error('Aucune demande disponible pour générer une décision')
@@ -200,6 +230,10 @@ const DossierDetail: React.FC = () => {
 
   const handleSubmitDecision = async (data: any) => {
     await createDecisionMutation.mutateAsync(data)
+  }
+
+  const handleSubmitDecisionEdit = async (data: any) => {
+    await updateDecisionMutation.mutateAsync(data)
   }
 
   // Initialize notes when dossier loads
@@ -627,7 +661,10 @@ const DossierDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <button className="text-blue-600 hover:text-blue-800 text-sm">
+                            <button 
+                              onClick={() => handleEditDecision(decision)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
                               Modifier
                             </button>
                             <button 
@@ -842,6 +879,14 @@ const DossierDetail: React.FC = () => {
       <DecisionViewModal
         isOpen={isDecisionViewModalOpen}
         onClose={handleCloseDecisionModal}
+        decision={selectedDecision}
+      />
+
+      {/* Decision Edit Modal */}
+      <DecisionEditModal
+        isOpen={isDecisionEditModalOpen}
+        onClose={handleCloseDecisionEditModal}
+        onSubmit={handleSubmitDecisionEdit}
         decision={selectedDecision}
       />
 

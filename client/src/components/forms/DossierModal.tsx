@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Dossier, Badge, Sgami, User } from '@/types'
 import api from '@/utils/api'
+import { useAuth } from '@/contexts/AuthContext'
 
 const dossierSchema = z.object({
   nomDossier: z.string().optional(),
@@ -46,6 +47,9 @@ const DossierModal: React.FC<DossierModalProps> = ({
   const selectedBadges = watch('badges') || []
   const [selectedSgami, setSelectedSgami] = useState<Sgami | null>(null)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  
+  // Récupérer l'utilisateur connecté
+  const { user: currentUser } = useAuth()
 
   // Fetch options for selects
   const { data: badges = [] } = useQuery<Badge[]>({
@@ -87,18 +91,19 @@ const DossierModal: React.FC<DossierModalProps> = ({
         const fullUser = users.find(user => user.id === dossier.assigneA?.id) || null
         setSelectedUser(fullUser)
       } else {
-        // Mode création : réinitialiser complètement le formulaire
+        // Mode création : préremplir avec l'utilisateur connecté
+        const defaultAssigneeId = currentUser?.id || ''
         reset({
           nomDossier: '',
           sgamiId: '',
-          assigneAId: '',
+          assigneAId: defaultAssigneeId,
           badges: []
         })
         setSelectedSgami(null)
-        setSelectedUser(null)
+        setSelectedUser(currentUser || null)
       }
     }
-  }, [isOpen, dossier, reset, sgamis, users])
+  }, [isOpen, dossier, reset, sgamis, users, currentUser])
 
   const handleFormSubmit = async (data: DossierFormData) => {
     try {
@@ -212,7 +217,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
                         disabled={isSubmitting}
                       >
                         <div className="relative">
-                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            tabIndex={0}>
                             <span className="block truncate">
                               {selectedSgami ? selectedSgami.nom : 'Sélectionner un SGAMI'}
                             </span>
@@ -297,7 +303,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
                         disabled={isSubmitting}
                       >
                         <div className="relative">
-                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            tabIndex={0}>
                             <span className="block truncate">
                               {selectedUser ? (
                                 `${selectedUser.grade ? `${selectedUser.grade} ` : ''}${selectedUser.prenom} ${selectedUser.nom}`
@@ -378,50 +385,88 @@ const DossierModal: React.FC<DossierModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Badges
                     </label>
-                    <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                    <div className="bg-gray-50 rounded-lg p-4">
                       {badges.length === 0 ? (
-                        <p className="text-gray-500 text-sm text-center py-4">
+                        <p className="text-gray-500 text-sm text-center py-8">
                           Aucun badge disponible
                         </p>
                       ) : (
-                        <div className="space-y-3">
-                          {badges.map((badge) => (
-                            <label 
-                              key={badge.id} 
-                              className="relative flex items-center p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition-all cursor-pointer group"
-                            >
-                              <div className="flex items-center h-5">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedBadges.includes(badge.id)}
-                                  onChange={() => toggleBadge(badge.id)}
-                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-colors"
-                                />
-                              </div>
-                              <div className="ml-3 flex-1">
-                                <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                                  {badge.nom}
-                                </span>
-                              </div>
-                              {selectedBadges.includes(badge.id) && (
-                                <div className="ml-2">
-                                  <CheckIcon className="w-4 h-4 text-blue-600" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {badges.map((badge) => {
+                            const isSelected = selectedBadges.includes(badge.id)
+                            
+                            // Mapping des couleurs pour assurer que les classes CSS existent
+                            const getBadgeColorClass = (couleur?: string) => {
+                              switch (couleur?.toLowerCase()) {
+                                case 'red':
+                                case 'rouge':
+                                  return 'bg-red-100 text-red-800 border-red-200'
+                                case 'blue':
+                                case 'bleu':
+                                  return 'bg-blue-100 text-blue-800 border-blue-200'
+                                case 'green':
+                                case 'vert':
+                                  return 'bg-green-100 text-green-800 border-green-200'
+                                case 'yellow':
+                                case 'jaune':
+                                  return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                case 'purple':
+                                case 'violet':
+                                  return 'bg-purple-100 text-purple-800 border-purple-200'
+                                case 'pink':
+                                case 'rose':
+                                  return 'bg-pink-100 text-pink-800 border-pink-200'
+                                case 'indigo':
+                                  return 'bg-indigo-100 text-indigo-800 border-indigo-200'
+                                case 'orange':
+                                  return 'bg-orange-100 text-orange-800 border-orange-200'
+                                case 'teal':
+                                  return 'bg-teal-100 text-teal-800 border-teal-200'
+                                default:
+                                  return 'bg-gray-100 text-gray-800 border-gray-200'
+                              }
+                            }
+                            
+                            const badgeColorClass = getBadgeColorClass(badge.couleur)
+                            
+                            return (
+                              <div
+                                key={badge.id}
+                                onClick={() => toggleBadge(badge.id)}
+                                className={`relative cursor-pointer rounded-lg p-3 border-2 transition-all duration-200 hover:shadow-md ${
+                                  isSelected
+                                    ? 'border-blue-500 bg-blue-50 shadow-sm'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${badgeColorClass}`}>
+                                    {badge.nom}
+                                  </span>
+                                  {isSelected && (
+                                    <div className="flex-shrink-0">
+                                      <CheckIcon className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </label>
-                          ))}
+                                {isSelected && (
+                                  <div className="absolute inset-0 bg-blue-500 bg-opacity-10 rounded-lg pointer-events-none"></div>
+                                )}
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </div>
                     {selectedBadges.length > 0 && (
-                      <div className="mt-2 flex items-center justify-between">
-                        <p className="text-sm text-blue-600">
+                      <div className="mt-3 flex items-center justify-between">
+                        <p className="text-sm text-blue-600 font-medium">
                           {selectedBadges.length} badge(s) sélectionné(s)
                         </p>
                         <button
                           type="button"
                           onClick={() => setValue('badges', [])}
-                          className="text-xs text-gray-500 hover:text-gray-700 underline"
+                          className="text-xs text-gray-500 hover:text-red-600 underline transition-colors"
                         >
                           Tout désélectionner
                         </button>

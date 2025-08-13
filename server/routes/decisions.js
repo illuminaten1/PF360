@@ -13,7 +13,7 @@ const createDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], { 
     required_error: "Le type de décision est requis" 
   }),
-  numero: z.string().min(1, "Le numéro de décision est requis"),
+  numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   dateSignature: z.string().datetime().optional(),
   dateEnvoi: z.string().datetime().optional(),
   dossierId: z.string().min(1, "Le dossier est requis"),
@@ -22,7 +22,7 @@ const createDecisionSchema = z.object({
 
 const updateDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET']).optional(),
-  numero: z.string().min(1, "Le numéro de décision est requis").optional(),
+  numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis").optional(),
   dateSignature: z.string().datetime().optional().nullable(),
   dateEnvoi: z.string().datetime().optional().nullable(),
   demandeIds: z.array(z.string()).optional()

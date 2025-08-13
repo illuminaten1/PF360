@@ -141,7 +141,7 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
         cell: ({ getValue }) => {
           const numero = getValue<string>()
           return (
-            <span className="font-mono text-sm font-medium text-gray-900">
+            <span className="text-sm font-medium text-gray-900">
               {numero || 'Non défini'}
             </span>
           )

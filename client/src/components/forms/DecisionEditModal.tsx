@@ -13,7 +13,7 @@ const decisionEditSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], {
     required_error: "Le type de décision est requis"
   }),
-  numero: z.string().min(1, "Le numéro de décision est requis"),
+  numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional()
 })
@@ -207,10 +207,11 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                       Numéro de décision *
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      min="1"
                       {...register('numero')}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Ex: 2024-AJ-001"
+                      placeholder="Ex: 123"
                     />
                     {errors.numero && (
                       <p className="mt-1 text-sm text-red-600">{errors.numero.message}</p>

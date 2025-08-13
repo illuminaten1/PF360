@@ -135,7 +135,6 @@ Thumbs.db
 server/templates/generated/
 server/logs/
 server/uploads/
-server/scripts/
 
 # Testing
 coverage/

@@ -26,9 +26,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DocumentIcon,
-  PaperAirplaneIcon
+  PaperAirplaneIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
+import DatePickerModal from '../common/DatePickerModal'
 
 dayjs.locale('fr')
 
@@ -38,6 +40,7 @@ interface DecisionsTableProps {
   onView: (decision: Decision) => void
   onEdit: (decision: Decision) => void
   onDelete: (decision: Decision) => void
+  onDateChange?: (decisionId: string, field: 'dateSignature' | 'dateEnvoi', value: string | null) => void
 }
 
 function Filter({ column }: { column: any }) {
@@ -89,13 +92,46 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
   loading = false,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  onDateChange
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+  
+  // État pour le modal de date
+  const [dateModal, setDateModal] = React.useState<{
+    isOpen: boolean
+    decisionId: string
+    field: 'dateSignature' | 'dateEnvoi'
+    currentDate: string | null
+  }>({
+    isOpen: false,
+    decisionId: '',
+    field: 'dateSignature',
+    currentDate: null
+  })
+
+  const handleDateClick = (decision: Decision, field: 'dateSignature' | 'dateEnvoi') => {
+    setDateModal({
+      isOpen: true,
+      decisionId: decision.id,
+      field,
+      currentDate: decision[field] || null
+    })
+  }
+
+  const handleDateConfirm = (date: string | null) => {
+    if (onDateChange) {
+      onDateChange(dateModal.decisionId, dateModal.field, date)
+    }
+  }
+
+  const handleDateModalClose = () => {
+    setDateModal(prev => ({ ...prev, isOpen: false }))
+  }
 
   const columns = useMemo<ColumnDef<Decision>[]>(
     () => [
@@ -206,15 +242,20 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
       {
         accessorKey: 'dateSignature',
         header: 'Date signature',
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const date = getValue<string>()
-          return date ? (
-            <div className="flex items-center text-sm text-gray-900">
+          const decision = row.original
+          
+          return (
+            <div className="flex items-center text-sm">
               <DocumentIcon className="h-4 w-4 text-gray-400 mr-2" />
-              {dayjs(date).format('DD/MM/YYYY')}
+              <button
+                onClick={() => handleDateClick(decision, 'dateSignature')}
+                className="text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+              >
+                {date ? dayjs(date).format('DD/MM/YYYY') : 'Non définie'}
+              </button>
             </div>
-          ) : (
-            <span className="text-gray-400 text-sm">-</span>
           )
         },
         enableColumnFilter: false,
@@ -223,15 +264,20 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
       {
         accessorKey: 'dateEnvoi',
         header: 'Date envoi',
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const date = getValue<string>()
-          return date ? (
-            <div className="flex items-center text-sm text-gray-900">
+          const decision = row.original
+          
+          return (
+            <div className="flex items-center text-sm">
               <PaperAirplaneIcon className="h-4 w-4 text-gray-400 mr-2" />
-              {dayjs(date).format('DD/MM/YYYY')}
+              <button
+                onClick={() => handleDateClick(decision, 'dateEnvoi')}
+                className="text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+              >
+                {date ? dayjs(date).format('DD/MM/YYYY') : 'Non définie'}
+              </button>
             </div>
-          ) : (
-            <span className="text-gray-400 text-sm">-</span>
           )
         },
         enableColumnFilter: false,
@@ -506,6 +552,16 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        isOpen={dateModal.isOpen}
+        onClose={handleDateModalClose}
+        onConfirm={handleDateConfirm}
+        currentDate={dateModal.currentDate}
+        title={`Modifier la ${dateModal.field === 'dateSignature' ? 'date de signature' : 'date d\'envoi'}`}
+        field={dateModal.field === 'dateSignature' ? 'Date de signature' : 'Date d\'envoi'}
+      />
     </div>
   )
 }

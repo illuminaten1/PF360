@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -8,8 +8,8 @@ import DecisionsTable from '@/components/tables/DecisionsTable'
 
 const Decisions: React.FC = () => {
   const navigate = useNavigate()
-
   const queryClient = useQueryClient()
+  
 
   // Fetch all decisions
   const { data: decisions = [], isLoading } = useQuery<Decision[]>({
@@ -17,6 +17,20 @@ const Decisions: React.FC = () => {
     queryFn: async () => {
       const response = await api.get('/decisions')
       return response.data
+    }
+  })
+
+  // Update decision mutation
+  const updateDecisionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.put(`/decisions/${data.id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['decisions-all'] })
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la modification de la décision')
     }
   })
 
@@ -49,6 +63,20 @@ const Decisions: React.FC = () => {
       deleteDecisionMutation.mutate(decision.id)
     }
   }
+
+  // Fonction pour sauvegarder les dates
+  const handleDecisionDateChange = useCallback(async (decisionId: string, field: 'dateSignature' | 'dateEnvoi', value: string | null) => {
+    try {
+      const updateData = {
+        id: decisionId,
+        [field]: value ? new Date(value).toISOString() : null
+      }
+      await updateDecisionMutation.mutateAsync(updateData)
+      toast.success(`${field === 'dateSignature' ? 'Date de signature' : 'Date d\'envoi'} mise à jour`)
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la date:', error)
+    }
+  }, [updateDecisionMutation])
 
   const getStatsData = () => {
     const totalDecisions = decisions.length
@@ -110,6 +138,7 @@ const Decisions: React.FC = () => {
         onView={handleViewDecision}
         onEdit={handleEditDecision}
         onDelete={handleDeleteDecision}
+        onDateChange={handleDecisionDateChange}
         loading={isLoading}
       />
     </div>

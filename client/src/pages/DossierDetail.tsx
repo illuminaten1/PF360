@@ -537,22 +537,7 @@ const DossierDetail: React.FC = () => {
             </div>
             <div className="p-6">
               {dossier.decisions.length === 0 ? (
-                <div className="text-center py-8">
-                  <ScaleIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">Aucune décision prise pour ce dossier</p>
-                  {dossier.demandes.length > 0 ? (
-                    <button 
-                      onClick={handleGenerateDecision}
-                      className="btn-primary text-sm"
-                    >
-                      Générer la première décision
-                    </button>
-                  ) : (
-                    <p className="text-gray-400 text-sm">
-                      Vous devez d'abord lier des demandes à ce dossier
-                    </p>
-                  )}
-                </div>
+                <p className="text-gray-500 text-center py-4">Aucune décision prise pour ce dossier</p>
               ) : (
                 <div className="space-y-4">
                   {dossier.decisions.map((decision) => {
@@ -589,67 +574,51 @@ const DossierDetail: React.FC = () => {
 
                     return (
                       <div key={decision.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                        <div className="flex items-start justify-between mb-3">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(decision.type)}`}>
-                            {getTypeLabel(decision.type)}
-                          </span>
-                          <div className="text-right">
-                            {(decision as any).dateSignature && (
-                              <div className="text-sm text-gray-600 mb-1">
-                                Signée le: {dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}
-                              </div>
-                            )}
-                            {(decision as any).dateEnvoi && (
-                              <div className="text-sm text-gray-600 mb-1">
-                                Envoyée le: {dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}
-                              </div>
-                            )}
-                            {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
-                              <div className="text-sm text-gray-600">
-                                {dayjs((decision as any).date).format('DD/MM/YYYY')}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Demandes concernées */}
-                        {decision.demandes && decision.demandes.length > 0 && (
-                          <div className="mb-3">
-                            <p className="text-xs font-medium text-gray-700 mb-1">Demandes concernées:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {decision.demandes.slice(0, 2).map((d, index) => (
-                                <span key={`demande-${decision.id}-${index}`} className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                  {d.demande.prenom} {d.demande.nom} ({d.demande.numeroDS})
-                                </span>
-                              ))}
-                              {decision.demandes.length > 2 && (
-                                <span key={`more-demandes-${decision.id}`} className="text-xs text-gray-500">
-                                  +{decision.demandes.length - 2} autre(s)
-                                </span>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4 mb-2">
+                              <h3 className="font-semibold text-gray-900">
+                                {getTypeLabel(decision.type)}
+                              </h3>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(decision.type)}`}>
+                                {decision.type}
+                              </span>
+                              {decision.demandes && decision.demandes.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {decision.demandes.slice(0, 2).map((d, index) => (
+                                    <span key={`demande-${decision.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      {d.demande.prenom} {d.demande.nom}
+                                    </span>
+                                  ))}
+                                  {decision.demandes.length > 2 && (
+                                    <span key={`more-demandes-${decision.id}`} className="text-xs text-gray-500">
+                                      +{decision.demandes.length - 2}
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </div>
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            {decision.creePar && (
-                              <p className="text-sm text-gray-600">
-                                Créée par: {decision.creePar.prenom} {decision.creePar.nom}
-                              </p>
-                            )}
-                            {(decision as any).modifiePar && (
-                              <p className="text-xs text-gray-500">
-                                Modifiée par: {(decision as any).modifiePar.prenom} {(decision as any).modifiePar.nom}
-                              </p>
-                            )}
+                            <div className="text-sm text-gray-600 space-y-1">
+                              {(decision as any).dateSignature && (
+                                <div>Signée le: {dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}</div>
+                              )}
+                              {(decision as any).dateEnvoi && (
+                                <div>Envoyée le: {dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}</div>
+                              )}
+                              {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
+                                <div>Date: {dayjs((decision as any).date).format('DD/MM/YYYY')}</div>
+                              )}
+                              {decision.creePar && (
+                                <div>Créée par: {decision.creePar.prenom} {decision.creePar.nom}</div>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <button className="text-blue-600 hover:text-blue-800 text-sm">
                               Modifier
                             </button>
                             <button className="text-green-600 hover:text-green-800 text-sm">
-                              Générer document
+                              Voir détails
                             </button>
                           </div>
                         </div>

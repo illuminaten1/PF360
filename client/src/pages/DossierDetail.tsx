@@ -20,7 +20,11 @@ import {
   PlusIcon,
   CheckIcon,
   LinkIcon,
-  XMarkIcon
+  XMarkIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -313,6 +317,40 @@ const DossierDetail: React.FC = () => {
     return type.replace(/_/g, ' ')
   }
 
+  const getAudienceUrgency = (dateAudience?: string) => {
+    if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
+    
+    const today = dayjs()
+    const audienceDate = dayjs(dateAudience)
+    const daysDiff = audienceDate.diff(today, 'day')
+    
+    if (daysDiff < 0) {
+      return { 
+        type: 'passed', 
+        style: 'bg-gray-100 text-gray-800', 
+        icon: XCircleIcon 
+      }
+    } else if (daysDiff < 7) {
+      return { 
+        type: 'urgent', 
+        style: 'bg-red-100 text-red-800', 
+        icon: ExclamationTriangleIcon 
+      }
+    } else if (daysDiff < 14) {
+      return { 
+        type: 'soon', 
+        style: 'bg-orange-100 text-orange-800', 
+        icon: ClockIcon 
+      }
+    } else {
+      return { 
+        type: 'normal', 
+        style: 'bg-green-100 text-green-800', 
+        icon: CheckCircleIcon 
+      }
+    }
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -496,68 +534,100 @@ const DossierDetail: React.FC = () => {
               {dossier.demandes.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">Aucune demande dans ce dossier</p>
               ) : (
-                <div className="space-y-4">
-                  {dossier.demandes.map((demande) => (
-                    <div key={demande.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4 mb-2">
-                            <h3 className="font-semibold text-gray-900">
-                              {demande.grade && `${demande.grade} `}
-                              {demande.prenom} {demande.nom}
-                            </h3>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
-                              {getTypeLabel(demande.type)}
-                            </span>
-                            {(demande as any).badges && (demande as any).badges.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {(demande as any).badges.slice(0, 2).map((badgeRel: any) => (
-                                  <span
-                                    key={badgeRel.badge.id}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                                    style={badgeRel.badge.couleur ? {
-                                      backgroundColor: `${badgeRel.badge.couleur}20`,
-                                      color: badgeRel.badge.couleur
-                                    } : {}}
-                                  >
-                                    {badgeRel.badge.nom}
+                <div className="space-y-3">
+                  {dossier.demandes.map((demande) => {
+                    const dateAudience = (demande as any).dateAudience
+                    const urgency = getAudienceUrgency(dateAudience)
+                    const IconComponent = urgency.icon
+                    const today = dayjs().startOf('day')
+                    const audienceDate = dateAudience ? dayjs(dateAudience).startOf('day') : null
+                    const daysDiff = audienceDate ? audienceDate.diff(today, 'day') : null
+                    
+                    return (
+                      <div key={demande.id} className="border rounded-lg p-3 hover:bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-shrink-0">
+                                <h3 className="font-medium text-gray-900 text-sm">
+                                  {demande.grade && `${demande.grade} `}
+                                  {demande.prenom} {demande.nom}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
+                                    {getTypeLabel(demande.type)}
                                   </span>
-                                ))}
-                                {(demande as any).badges.length > 2 && (
-                                  <span key={`more-badges-${demande.id}`} className="text-xs text-gray-500">
-                                    +{(demande as any).badges.length - 2}
+                                  <span className="text-xs text-gray-500">
+                                    Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
                                   </span>
-                                )}
+                                  {demande.dateFaits && (
+                                    <span className="text-xs text-gray-500">
+                                      • Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
+                                    </span>
+                                  )}
+                                  
+                                  {(demande as any).badges && (demande as any).badges.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {(demande as any).badges.slice(0, 2).map((badgeRel: any) => (
+                                        <span
+                                          key={badgeRel.badge.id}
+                                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                                          style={badgeRel.badge.couleur ? {
+                                            backgroundColor: `${badgeRel.badge.couleur}20`,
+                                            color: badgeRel.badge.couleur
+                                          } : {}}
+                                        >
+                                          {badgeRel.badge.nom}
+                                        </span>
+                                      ))}
+                                      {(demande as any).badges.length > 2 && (
+                                        <span key={`more-badges-${demande.id}`} className="text-xs text-gray-500">
+                                          +{(demande as any).badges.length - 2}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            )}
+                              
+                              {dateAudience && (
+                                <div className="flex-shrink-0 ml-4">
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
+                                    {IconComponent && (
+                                      <IconComponent className="h-3 w-3 mr-1" />
+                                    )}
+                                    Audience {dayjs(dateAudience).format('DD/MM/YYYY')}
+                                    {daysDiff !== null && daysDiff >= 0 && (
+                                      <span className="ml-1">
+                                        - {daysDiff} j.
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <div>N° DS: {demande.numeroDS}</div>
-                            <div>Reçu le: {dayjs(demande.dateReception).format('DD/MM/YYYY')}</div>
-                            {demande.dateFaits && (
-                              <div>Faits du: {dayjs(demande.dateFaits).format('DD/MM/YYYY')}</div>
-                            )}
+                          
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-4">
+                            <button 
+                              onClick={() => handleViewDemande(demande)}
+                              className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50"
+                            >
+                              Voir
+                            </button>
+                            <button
+                              onClick={() => handleUnlinkDemande(demande)}
+                              disabled={unlinkDemandeMutation.isPending}
+                              className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                              title="Délier du dossier"
+                            >
+                              <XMarkIcon className="h-3 w-3" />
+                            </button>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button 
-                            onClick={() => handleViewDemande(demande)}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            Voir détails
-                          </button>
-                          <button
-                            onClick={() => handleUnlinkDemande(demande)}
-                            disabled={unlinkDemandeMutation.isPending}
-                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                            title="Délier du dossier"
-                          >
-                            <XMarkIcon className="h-4 w-4" />
-                          </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -601,23 +671,6 @@ const DossierDetail: React.FC = () => {
                       }
                     }
 
-                    const getTypeBadgeColor = (type: string) => {
-                      switch (type) {
-                        case 'AJ': 
-                        case 'OCTROI': 
-                          return 'bg-green-100 text-green-800'
-                        case 'AJE': 
-                          return 'bg-blue-100 text-blue-800'
-                        case 'PJ': 
-                          return 'bg-purple-100 text-purple-800'
-                        case 'REJET': 
-                          return 'bg-red-100 text-red-800'
-                        case 'OCTROI_PARTIEL': 
-                          return 'bg-yellow-100 text-yellow-800'
-                        default: 
-                          return 'bg-gray-100 text-gray-800'
-                      }
-                    }
 
                     return (
                       <div key={decision.id} className="border rounded-lg p-4 hover:bg-gray-50">
@@ -627,9 +680,6 @@ const DossierDetail: React.FC = () => {
                               <h3 className="font-semibold text-gray-900">
                                 {getTypeLabel(decision.type)}
                               </h3>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(decision.type)}`}>
-                                {decision.type}
-                              </span>
                               {decision.demandes && decision.demandes.length > 0 && (
                                 <div className="flex flex-wrap gap-1">
                                   {decision.demandes.slice(0, 2).map((d, index) => (

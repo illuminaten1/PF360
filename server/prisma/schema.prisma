@@ -140,6 +140,8 @@ model Decision {
   dateEnvoi       DateTime?    // Date d'envoi de la décision
   documentGenere  String?      // Path vers le document généré
   avis_hierarchiques Boolean   @default(false) // Présence d'avis hiérarchiques (OUI/NON)
+  typeVictMec        String?           // Type de décision : VICTIME | MIS_EN_CAUSE
+  considerant        String?           // Texte du considérant de la décision
   
   // Relations
   dossier         Dossier      @relation(fields: [dossierId], references: [id])

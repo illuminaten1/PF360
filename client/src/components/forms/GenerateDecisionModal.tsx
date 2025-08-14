@@ -14,6 +14,7 @@ const generateDecisionSchema = z.object({
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   visaId: z.string().min(1, "Le visa est requis"),
+  avis_hierarchiques: z.boolean().default(false),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional(),
   demandeIds: z.array(z.string()).min(1, "Au moins une demande doit être sélectionnée")
@@ -47,6 +48,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
 
   const selectedType = watch('type')
   const selectedDemandeIds = watch('demandeIds') || []
+  const selectedAvisHierarchiques = watch('avis_hierarchiques')
 
   // Fetch visas
   const { data: visas = [] } = useQuery<Visa[]>({
@@ -64,6 +66,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
         type: 'AJ',
         numero: '',
         visaId: '',
+        avis_hierarchiques: false,
         dateSignature: '',
         dateEnvoi: '',
         demandeIds: []
@@ -77,6 +80,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
         type: data.type,
         numero: data.numero,
         visaId: data.visaId,
+        avis_hierarchiques: data.avis_hierarchiques,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : undefined,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : undefined,
         dossierId: dossier.id,
@@ -282,6 +286,41 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       {errors.visaId && (
                         <p className="mt-1 text-sm text-red-600">{errors.visaId.message}</p>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Avis hiérarchiques */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Avis hiérarchiques
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setValue('avis_hierarchiques', false)}
+                        className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          selectedAvisHierarchiques === false
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Non
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setValue('avis_hierarchiques', true)}
+                        className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          selectedAvisHierarchiques === true
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Oui
+                        </span>
+                      </button>
                     </div>
                   </div>
 

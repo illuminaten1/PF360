@@ -184,6 +184,32 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
         filterFn: 'includesString'
       },
       {
+        accessorKey: 'avis_hierarchiques',
+        header: 'Avis hiérarchiques',
+        cell: ({ getValue }) => {
+          const avisHierarchiques = getValue<boolean>()
+          return (
+            <div className="flex items-center justify-center">
+              {avisHierarchiques ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Oui
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Non
+                </span>
+              )}
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: (row, columnId, value) => {
+          if (value === '') return true
+          const avisHierarchiques = row.getValue(columnId) as boolean
+          return value === 'true' ? avisHierarchiques : !avisHierarchiques
+        }
+      },
+      {
         id: 'demandeurs',
         header: 'Demandeurs',
         accessorFn: (row) => {

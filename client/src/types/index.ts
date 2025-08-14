@@ -353,6 +353,7 @@ export interface Decision {
   dateSignature?: string
   dateEnvoi?: string
   documentGenere?: string
+  avis_hierarchiques?: boolean
   dossier: {
     id: string
     numero: string

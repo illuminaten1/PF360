@@ -14,6 +14,7 @@ const decisionEditSchema = z.object({
     required_error: "Le type de décision est requis"
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
+  avis_hierarchiques: z.boolean().default(false),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional()
 })
@@ -27,6 +28,7 @@ interface Decision {
   date?: string
   dateSignature?: string
   dateEnvoi?: string
+  avis_hierarchiques?: boolean
   createdAt: string
   updatedAt: string
   creePar?: {
@@ -76,6 +78,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
   })
 
   const selectedType = watch('type')
+  const selectedAvisHierarchiques = watch('avis_hierarchiques')
 
   useEffect(() => {
     if (isOpen && decision) {
@@ -83,6 +86,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
       reset({
         type: decision.type as 'AJ' | 'AJE' | 'PJ' | 'REJET',
         numero: decision.numero || '',
+        avis_hierarchiques: decision.avis_hierarchiques || false,
         dateSignature: decision.dateSignature ? dayjs(decision.dateSignature).format('YYYY-MM-DD') : '',
         dateEnvoi: decision.dateEnvoi ? dayjs(decision.dateEnvoi).format('YYYY-MM-DD') : ''
       })
@@ -95,6 +99,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
         id: decision?.id,
         type: data.type,
         numero: data.numero,
+        avis_hierarchiques: data.avis_hierarchiques,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : null,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : null
       }
@@ -256,6 +261,40 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                     </div>
                   </div>
 
+                  {/* Avis hiérarchiques */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Avis hiérarchiques
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setValue('avis_hierarchiques', false)}
+                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
+                          selectedAvisHierarchiques === false
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Non
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setValue('avis_hierarchiques', true)}
+                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
+                          selectedAvisHierarchiques === true
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Oui
+                        </span>
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Demandes concernées (read-only) */}
                   {decision.demandes && decision.demandes.length > 0 && (

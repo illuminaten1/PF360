@@ -13,6 +13,7 @@ interface Decision {
   date?: string
   dateSignature?: string
   dateEnvoi?: string
+  avis_hierarchiques?: boolean
   createdAt: string
   updatedAt: string
   creePar?: {
@@ -211,6 +212,17 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                           <span className="block text-sm font-medium text-gray-600 mb-1">Code</span>
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTypeBadgeColor(decision.type)}`}>
                             {decision.type}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="block text-sm font-medium text-gray-600 mb-1">Avis hiérarchiques</span>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                            decision.avis_hierarchiques 
+                              ? 'bg-green-100 text-green-800 border-green-200' 
+                              : 'bg-gray-100 text-gray-800 border-gray-200'
+                          } border`}>
+                            {decision.avis_hierarchiques ? 'Oui' : 'Non'}
                           </span>
                         </div>
 

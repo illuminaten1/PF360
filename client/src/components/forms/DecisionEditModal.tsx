@@ -179,7 +179,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
                     <PencilIcon className="h-6 w-6 mr-2 text-blue-600" />
@@ -216,8 +216,39 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-                  {/* Numéro de décision et Type */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Première ligne complète : Type de décision */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Type de décision *
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {(['AJ', 'AJE', 'PJ', 'REJET'] as const).map((type) => (
+                        <label key={type} className="relative">
+                          <input
+                            type="radio"
+                            value={type}
+                            {...register('type')}
+                            className="sr-only"
+                          />
+                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                            selectedType === type
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
+                              {getTypeLabel(type)}
+                            </span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    {errors.type && (
+                      <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+                    )}
+                  </div>
+
+                  {/* Deuxième ligne : Numéro de décision et Type victime/mis en cause */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Numéro de décision */}
                     <div>
                       <label htmlFor="numero" className="block text-sm font-medium text-gray-700 mb-2">
@@ -239,150 +270,127 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                       )}
                     </div>
 
-                    {/* Type de décision */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Type de décision *
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {(['AJ', 'AJE', 'PJ', 'REJET'] as const).map((type) => (
-                          <label key={type} className="relative">
-                            <input
-                              type="radio"
-                              value={type}
-                              {...register('type')}
-                              className="sr-only"
-                            />
-                            <div className={`cursor-pointer rounded-lg border-2 p-2 text-center transition-all h-12 flex items-center justify-center ${
-                              selectedType === type
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}>
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
-                                {getTypeLabel(type)}
-                              </span>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                      {errors.type && (
-                        <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Avis hiérarchiques */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Avis hiérarchiques
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setValue('avis_hierarchiques', false)}
-                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
-                          selectedAvisHierarchiques === false
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Non
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setValue('avis_hierarchiques', true)}
-                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
-                          selectedAvisHierarchiques === true
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Oui
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Type Victime/Mis en cause */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Type de décision
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setValue('typeVictMec', 'VICTIME')}
-                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
-                          selectedTypeVictMec === 'VICTIME'
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
-                          Victime
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setValue('typeVictMec', 'MIS_EN_CAUSE')}
-                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
-                          selectedTypeVictMec === 'MIS_EN_CAUSE'
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          Mis en cause
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Considérant */}
-                  <div>
-                    <label htmlFor="considerant" className="block text-sm font-medium text-gray-700 mb-2">
-                      Considérant
-                    </label>
-                    <textarea
-                      {...register('considerant')}
-                      rows={4}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-                      placeholder="Texte du considérant de la décision..."
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Optionnel - Texte explicatif pour justifier la décision
-                    </p>
-                  </div>
-
-                  {/* Demandes concernées (read-only) */}
-                  {decision.demandes && decision.demandes.length > 0 && (
+                    {/* Type Victime/Mis en cause */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Demandes concernées
+                        Type de personne
                       </label>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto">
-                        <div className="space-y-2">
-                          {decision.demandes.map((demandeRel, index) => (
-                            <div key={index} className="bg-white p-2 rounded-lg border border-gray-200 flex items-center">
-                              <span className="font-medium text-gray-900">
-                                {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
-                                {demandeRel.demande.prenom} {demandeRel.demande.nom}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setValue('typeVictMec', 'VICTIME')}
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                            selectedTypeVictMec === 'VICTIME'
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                            Victime
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setValue('typeVictMec', 'MIS_EN_CAUSE')}
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                            selectedTypeVictMec === 'MIS_EN_CAUSE'
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            Mis en cause
+                          </span>
+                        </button>
                       </div>
-                      <p className="mt-2 text-xs text-gray-500">
-                        Les demandes concernées ne peuvent pas être modifiées après la création de la décision.
+                    </div>
+                  </div>
+
+                  {/* Troisième ligne : Visa (pas applicable pour modification) et Avis hiérarchiques */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Espace vide ou autre champ si nécessaire */}
+                    <div></div>
+
+                    {/* Avis hiérarchiques */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Avis hiérarchiques
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setValue('avis_hierarchiques', false)}
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                            selectedAvisHierarchiques === false
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            Non
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setValue('avis_hierarchiques', true)}
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                            selectedAvisHierarchiques === true
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Oui
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quatrième ligne : Demandes concernées et Considérant */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Demandes concernées */}
+                    <div>
+                      {decision.demandes && decision.demandes.length > 0 && (
+                        <>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Demandes concernées
+                          </label>
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 h-48 overflow-y-auto">
+                            <div className="space-y-2">
+                              {decision.demandes.map((demandeRel, index) => (
+                                <div key={index} className="bg-white p-2 rounded-lg border border-gray-200 flex items-center">
+                                  <span className="font-medium text-gray-900 text-sm">
+                                    {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
+                                    {demandeRel.demande.prenom} {demandeRel.demande.nom}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Considérant */}
+                    <div>
+                      <label htmlFor="considerant" className="block text-sm font-medium text-gray-700 mb-2">
+                        Considérant
+                      </label>
+                      <textarea
+                        {...register('considerant')}
+                        rows={8}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
+                        placeholder="Texte du considérant de la décision..."
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Optionnel - Texte explicatif pour justifier la décision
                       </p>
                     </div>
-                  )}
+                  </div>
 
-                  {/* Dates */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Dernière ligne complète : Dates */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="dateSignature" className="block text-sm font-medium text-gray-700 mb-2">
                         Date de signature
@@ -418,29 +426,8 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Note d'information */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-amber-600 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="text-sm font-medium text-amber-900 mb-1">
-                          À propos de la modification
-                        </h4>
-                        <div className="text-sm text-amber-800 space-y-1">
-                          <p>• Seul le type et les dates peuvent être modifiés</p>
-                          <p>• Les demandes concernées restent inchangées</p>
-                          <p>• Cette action sera tracée dans l'historique</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Actions */}
-                  <div className="flex justify-end space-x-3 pt-6 border-t">
+                  <div className="flex justify-end space-x-3 pt-6 border-t mt-8">
                     <button
                       type="button"
                       onClick={onClose}

@@ -64,18 +64,19 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
 
   useEffect(() => {
     if (isOpen && dossier) {
-      // Initialize form with default values
-      reset({
-        type: 'AJ',
-        numero: '',
-        visaId: '',
-        avis_hierarchiques: false,
-        typeVictMec: undefined,
-        considerant: '',
-        dateSignature: '',
-        dateEnvoi: '',
-        demandeIds: []
-      })
+      // Initialize form with default values with a small delay to ensure proper initialization
+      setTimeout(() => {
+        reset({
+          numero: '',
+          visaId: '',
+          avis_hierarchiques: false,
+          typeVictMec: undefined,
+          considerant: '',
+          dateSignature: '',
+          dateEnvoi: '',
+          demandeIds: []
+        })
+      }, 0)
     }
   }, [isOpen, dossier, reset])
 
@@ -197,23 +198,27 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {(['AJ', 'AJE', 'PJ', 'REJET'] as const).map((type) => (
-                        <label key={type} className="relative">
+                        <div key={type} className="relative">
                           <input
                             type="radio"
                             value={type}
                             {...register('type')}
                             className="sr-only"
+                            id={`type-${type}`}
                           />
-                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
-                            selectedType === type
-                              ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
-                              : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
-                          }`}>
+                          <label 
+                            htmlFor={`type-${type}`}
+                            onClick={() => setValue('type', type)}
+                            className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                              selectedType === type
+                                ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                                : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                            }`}>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
                               {getTypeLabel(type)}
                             </span>
-                          </div>
-                        </label>
+                          </label>
+                        </div>
                       ))}
                     </div>
                     {errors.type && (

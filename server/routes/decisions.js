@@ -14,6 +14,7 @@ const createDecisionSchema = z.object({
     required_error: "Le type de décision est requis" 
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
+  visaId: z.string().min(1, "Le visa est requis"),
   dateSignature: z.string().datetime().optional(),
   dateEnvoi: z.string().datetime().optional(),
   dossierId: z.string().min(1, "Le dossier est requis"),
@@ -23,6 +24,7 @@ const createDecisionSchema = z.object({
 const updateDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET']).optional(),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis").optional(),
+  visaId: z.string().min(1, "Le visa est requis").optional(),
   dateSignature: z.string().datetime().optional().nullable(),
   dateEnvoi: z.string().datetime().optional().nullable(),
   demandeIds: z.array(z.string()).optional()
@@ -37,6 +39,13 @@ router.get('/', async (req, res) => {
             id: true,
             numero: true,
             nomDossier: true
+          }
+        },
+        visa: {
+          select: {
+            id: true,
+            typeVisa: true,
+            texteVisa: true
           }
         },
         creePar: {
@@ -80,7 +89,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const validatedData = createDecisionSchema.parse(req.body);
-    const { type, numero, dateSignature, dateEnvoi, dossierId, demandeIds } = validatedData;
+    const { type, numero, visaId, dateSignature, dateEnvoi, dossierId, demandeIds } = validatedData;
 
     const decision = await prisma.$transaction(async (tx) => {
       // Créer la décision
@@ -88,6 +97,7 @@ router.post('/', async (req, res) => {
         data: {
           type,
           numero,
+          visaId,
           dateSignature: dateSignature ? new Date(dateSignature) : null,
           dateEnvoi: dateEnvoi ? new Date(dateEnvoi) : null,
           dossierId,
@@ -114,6 +124,13 @@ router.post('/', async (req, res) => {
           select: {
             numero: true,
             nomDossier: true
+          }
+        },
+        visa: {
+          select: {
+            id: true,
+            typeVisa: true,
+            texteVisa: true
           }
         },
         creePar: {
@@ -161,6 +178,13 @@ router.get('/:id', async (req, res) => {
             nomDossier: true
           }
         },
+        visa: {
+          select: {
+            id: true,
+            typeVisa: true,
+            texteVisa: true
+          }
+        },
         creePar: {
           select: {
             nom: true,
@@ -204,7 +228,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const validatedData = updateDecisionSchema.parse(req.body);
-    const { type, numero, dateSignature, dateEnvoi, demandeIds } = validatedData;
+    const { type, numero, visaId, dateSignature, dateEnvoi, demandeIds } = validatedData;
 
     const existingDecision = await prisma.decision.findUnique({
       where: { id: req.params.id }
@@ -222,6 +246,7 @@ router.put('/:id', async (req, res) => {
 
       if (type !== undefined) updateData.type = type;
       if (numero !== undefined) updateData.numero = numero;
+      if (visaId !== undefined) updateData.visaId = visaId;
       if (dateSignature !== undefined) {
         updateData.dateSignature = dateSignature ? new Date(dateSignature) : null;
       }
@@ -264,6 +289,13 @@ router.put('/:id', async (req, res) => {
           select: {
             numero: true,
             nomDossier: true
+          }
+        },
+        visa: {
+          select: {
+            id: true,
+            typeVisa: true,
+            texteVisa: true
           }
         },
         creePar: {

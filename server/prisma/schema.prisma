@@ -143,6 +143,8 @@ model Decision {
   // Relations
   dossier         Dossier      @relation(fields: [dossierId], references: [id])
   dossierId       String
+  visa            Visa         @relation(fields: [visaId], references: [id])
+  visaId          String
   creePar         User         @relation("DecisionCreateur", fields: [creeParId], references: [id])
   creeParId       String
   modifiePar      User?        @relation("DecisionModificateur", fields: [modifieParId], references: [id])
@@ -358,13 +360,16 @@ model Pce {
 }
 
 model Visa {
-  id                String   @id @default(cuid())
-  typeVisa          String   @unique // MILITAIRE | CIVIL
+  id                String     @id @default(cuid())
+  typeVisa          String     @unique // MILITAIRE | CIVIL
   texteVisa         String
-  active            Boolean  @default(true) // Pour activer/désactiver
+  active            Boolean    @default(true) // Pour activer/désactiver
   
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  // Relations
+  decisions         Decision[]
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
   
   @@map("visas")
 }

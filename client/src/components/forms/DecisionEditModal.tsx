@@ -15,6 +15,8 @@ const decisionEditSchema = z.object({
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   avis_hierarchiques: z.boolean().default(false),
+  typeVictMec: z.enum(['VICTIME', 'MIS_EN_CAUSE']).optional(),
+  considerant: z.string().optional(),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional()
 })
@@ -29,6 +31,8 @@ interface Decision {
   dateSignature?: string
   dateEnvoi?: string
   avis_hierarchiques?: boolean
+  typeVictMec?: 'VICTIME' | 'MIS_EN_CAUSE'
+  considerant?: string
   createdAt: string
   updatedAt: string
   creePar?: {
@@ -72,13 +76,15 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-    watch
+    watch,
+    setValue
   } = useForm<DecisionEditFormData>({
     resolver: zodResolver(decisionEditSchema)
   })
 
   const selectedType = watch('type')
   const selectedAvisHierarchiques = watch('avis_hierarchiques')
+  const selectedTypeVictMec = watch('typeVictMec')
 
   useEffect(() => {
     if (isOpen && decision) {
@@ -87,6 +93,8 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
         type: decision.type as 'AJ' | 'AJE' | 'PJ' | 'REJET',
         numero: decision.numero || '',
         avis_hierarchiques: decision.avis_hierarchiques || false,
+        typeVictMec: decision.typeVictMec,
+        considerant: decision.considerant || '',
         dateSignature: decision.dateSignature ? dayjs(decision.dateSignature).format('YYYY-MM-DD') : '',
         dateEnvoi: decision.dateEnvoi ? dayjs(decision.dateEnvoi).format('YYYY-MM-DD') : ''
       })
@@ -100,6 +108,8 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
         type: data.type,
         numero: data.numero,
         avis_hierarchiques: data.avis_hierarchiques,
+        typeVictMec: data.typeVictMec,
+        considerant: data.considerant,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : null,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : null
       }
@@ -294,6 +304,57 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                         </span>
                       </button>
                     </div>
+                  </div>
+
+                  {/* Type Victime/Mis en cause */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Type de décision
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setValue('typeVictMec', 'VICTIME')}
+                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
+                          selectedTypeVictMec === 'VICTIME'
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                          Victime
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setValue('typeVictMec', 'MIS_EN_CAUSE')}
+                        className={`rounded-lg border-2 p-4 text-center transition-all h-12 flex items-center justify-center ${
+                          selectedTypeVictMec === 'MIS_EN_CAUSE'
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          Mis en cause
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Considérant */}
+                  <div>
+                    <label htmlFor="considerant" className="block text-sm font-medium text-gray-700 mb-2">
+                      Considérant
+                    </label>
+                    <textarea
+                      {...register('considerant')}
+                      rows={4}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
+                      placeholder="Texte du considérant de la décision..."
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Optionnel - Texte explicatif pour justifier la décision
+                    </p>
                   </div>
 
                   {/* Demandes concernées (read-only) */}

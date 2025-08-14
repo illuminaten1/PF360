@@ -14,6 +14,8 @@ interface Decision {
   dateSignature?: string
   dateEnvoi?: string
   avis_hierarchiques?: boolean
+  typeVictMec?: 'VICTIME' | 'MIS_EN_CAUSE'
+  considerant?: string
   createdAt: string
   updatedAt: string
   creePar?: {
@@ -227,6 +229,21 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                         </div>
 
                         <div>
+                          <span className="block text-sm font-medium text-gray-600 mb-1">Type de décision</span>
+                          {decision.typeVictMec ? (
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${
+                              decision.typeVictMec === 'VICTIME' 
+                                ? 'bg-sky-100 text-sky-800 border-sky-200' 
+                                : 'bg-orange-100 text-orange-800 border-orange-200'
+                            }`}>
+                              {decision.typeVictMec === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">Non défini</span>
+                          )}
+                        </div>
+
+                        <div>
                           <span className="block text-sm font-medium text-gray-600 mb-1">Date de création</span>
                           <p className="text-gray-900">{formatDate(decision.createdAt)}</p>
                         </div>
@@ -273,6 +290,24 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                         )}
                       </div>
                     </div>
+
+                    {/* Considérant */}
+                    {decision.considerant && (
+                      <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-6 rounded-xl border border-amber-100">
+                        <div className="flex items-center mb-4">
+                          <div className="bg-amber-100 p-2 rounded-lg mr-3">
+                            <DocumentTextIcon className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <h4 className="text-lg font-semibold text-gray-900">Considérant</h4>
+                        </div>
+                        
+                        <div className="bg-white p-4 rounded-lg border border-amber-200">
+                          <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">
+                            {decision.considerant}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Demandes concernées */}
                     {decision.demandes && decision.demandes.length > 0 && (

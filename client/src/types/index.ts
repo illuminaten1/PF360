@@ -354,6 +354,8 @@ export interface Decision {
   dateEnvoi?: string
   documentGenere?: string
   avis_hierarchiques?: boolean
+  typeVictMec?: 'VICTIME' | 'MIS_EN_CAUSE'
+  considerant?: string
   dossier: {
     id: string
     numero: string

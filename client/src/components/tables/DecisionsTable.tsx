@@ -210,6 +210,28 @@ const DecisionsTable: React.FC<DecisionsTableProps> = ({
         }
       },
       {
+        accessorKey: 'typeVictMec',
+        header: 'Type',
+        cell: ({ getValue }) => {
+          const typeVictMec = getValue<'VICTIME' | 'MIS_EN_CAUSE'>()
+          if (!typeVictMec) return <span className="text-gray-400">-</span>
+          
+          return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              typeVictMec === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+            }`}>
+              {typeVictMec === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+            </span>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: (row, columnId, value) => {
+          if (value === '') return true
+          const typeVictMec = row.getValue(columnId) as string
+          return typeVictMec === value
+        }
+      },
+      {
         id: 'demandeurs',
         header: 'Demandeurs',
         accessorFn: (row) => {

@@ -10,12 +10,15 @@ import api from '@/utils/api'
 
 const generateDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], {
-    required_error: "Le type de décision est requis"
+    required_error: "Le type de décision est requis",
+    invalid_type_error: "Le type de décision est requis"
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   visaId: z.string().min(1, "Le visa est requis"),
   avis_hierarchiques: z.boolean().default(false),
-  typeVictMec: z.enum(['VICTIME', 'MIS_EN_CAUSE']).optional(),
+  typeVictMec: z.enum(['VICTIME', 'MIS_EN_CAUSE'], {
+    required_error: "Le type de personne est requis"
+  }),
   considerant: z.string().optional(),
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional(),
@@ -63,12 +66,13 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
   })
 
   useEffect(() => {
-    if (isOpen && dossier) {
+    if (isOpen && dossier && visas.length > 0) {
       // Initialize form with default values with a small delay to ensure proper initialization
       setTimeout(() => {
+        const militaryVisa = visas.find(v => v.typeVisa === 'MILITAIRE')
         reset({
           numero: '',
-          visaId: '',
+          visaId: militaryVisa?.id || '',
           avis_hierarchiques: false,
           typeVictMec: undefined,
           considerant: '',
@@ -78,7 +82,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
         })
       }, 0)
     }
-  }, [isOpen, dossier, reset])
+  }, [isOpen, dossier, visas, reset])
 
   const handleFormSubmit = async (data: GenerateDecisionFormData) => {
     try {
@@ -252,7 +256,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                     {/* Type Victime/Mis en cause */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Type de personne
+                        Type de personne *
                       </label>
                       <div className="grid grid-cols-2 gap-3">
                         <button
@@ -282,6 +286,9 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                           </span>
                         </button>
                       </div>
+                      {errors.typeVictMec && (
+                        <p className="mt-2 text-sm text-red-600">{errors.typeVictMec.message}</p>
+                      )}
                     </div>
                   </div>
 

@@ -3,7 +3,10 @@ import { Dialog, Transition } from '@headlessui/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, PencilIcon, ScaleIcon } from '@heroicons/react/24/outline'
+import { Visa } from '@/types'
+import api from '@/utils/api'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
 
@@ -14,6 +17,7 @@ const decisionEditSchema = z.object({
     required_error: "Le type de décision est requis"
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
+  visaId: z.string().min(1, "Le visa est requis"),
   avis_hierarchiques: z.boolean().default(false),
   typeVictMec: z.enum(['VICTIME', 'MIS_EN_CAUSE']).optional(),
   considerant: z.string().optional(),
@@ -35,6 +39,10 @@ interface Decision {
   considerant?: string
   createdAt: string
   updatedAt: string
+  visa?: {
+    id: string
+    typeVisa: string
+  }
   creePar?: {
     id: string
     prenom: string
@@ -86,12 +94,22 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
   const selectedAvisHierarchiques = watch('avis_hierarchiques')
   const selectedTypeVictMec = watch('typeVictMec')
 
+  // Fetch visas
+  const { data: visas = [] } = useQuery<Visa[]>({
+    queryKey: ['visas-active'],
+    queryFn: async () => {
+      const response = await api.get('/visa')
+      return response.data.filter((visa: Visa) => visa.active)
+    }
+  })
+
   useEffect(() => {
     if (isOpen && decision) {
       // Initialize form with decision values
       reset({
         type: decision.type as 'AJ' | 'AJE' | 'PJ' | 'REJET',
         numero: decision.numero || '',
+        visaId: '', // Laisser vide pour que l'utilisateur choisisse
         avis_hierarchiques: decision.avis_hierarchiques || false,
         typeVictMec: decision.typeVictMec,
         considerant: decision.considerant || '',
@@ -107,6 +125,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
         id: decision?.id,
         type: data.type,
         numero: data.numero,
+        visaId: data.visaId,
         avis_hierarchiques: data.avis_hierarchiques,
         typeVictMec: data.typeVictMec,
         considerant: data.considerant,
@@ -306,10 +325,58 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Troisième ligne : Visa (pas applicable pour modification) et Avis hiérarchiques */}
+                  {/* Troisième ligne : Visa et Avis hiérarchiques */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Espace vide ou autre champ si nécessaire */}
-                    <div></div>
+                    {/* Visa */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Visa à utiliser *
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {visas.length === 0 ? (
+                          <div className="col-span-2 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-lg p-4 text-center text-gray-500 h-16 flex items-center justify-center">
+                            Aucun visa disponible
+                          </div>
+                        ) : (
+                          ['CIVIL', 'MILITAIRE'].map((typeVisa) => {
+                            const visaOfType = visas.find(v => v.typeVisa === typeVisa)
+                            const isSelected = visaOfType && watch('visaId') === visaOfType.id
+                            
+                            return (
+                              <label key={typeVisa} className={`relative ${
+                                !visaOfType ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                              }`}>
+                                <input
+                                  type="radio"
+                                  value={visaOfType?.id || ''}
+                                  {...register('visaId')}
+                                  disabled={!visaOfType}
+                                  className="sr-only"
+                                />
+                                <div className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                                  isSelected
+                                    ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                                    : visaOfType 
+                                      ? 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                                      : 'border-gray-100 from-gray-50 to-gray-100'
+                                }`}>
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    typeVisa === 'CIVIL' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-orange-100 text-orange-800'
+                                  }`}>
+                                    {typeVisa}
+                                  </span>
+                                </div>
+                              </label>
+                            )
+                          })
+                        )}
+                      </div>
+                      {errors.visaId && (
+                        <p className="mt-2 text-sm text-red-600">{errors.visaId.message}</p>
+                      )}
+                    </div>
 
                     {/* Avis hiérarchiques */}
                     <div>

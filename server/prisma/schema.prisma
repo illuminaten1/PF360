@@ -139,6 +139,7 @@ model Decision {
   dateSignature   DateTime?    // Date de signature de la décision
   dateEnvoi       DateTime?    // Date d'envoi de la décision
   documentGenere  String?      // Path vers le document généré
+  avis_hierarchiques Boolean   @default(false) // Présence d'avis hiérarchiques (OUI/NON)
   
   // Relations
   dossier         Dossier      @relation(fields: [dossierId], references: [id])

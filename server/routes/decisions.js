@@ -15,6 +15,7 @@ const createDecisionSchema = z.object({
   }),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   visaId: z.string().min(1, "Le visa est requis"),
+  avis_hierarchiques: z.boolean().default(false),
   dateSignature: z.string().datetime().optional(),
   dateEnvoi: z.string().datetime().optional(),
   dossierId: z.string().min(1, "Le dossier est requis"),
@@ -25,6 +26,7 @@ const updateDecisionSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET']).optional(),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis").optional(),
   visaId: z.string().min(1, "Le visa est requis").optional(),
+  avis_hierarchiques: z.boolean().optional(),
   dateSignature: z.string().datetime().optional().nullable(),
   dateEnvoi: z.string().datetime().optional().nullable(),
   demandeIds: z.array(z.string()).optional()
@@ -89,7 +91,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const validatedData = createDecisionSchema.parse(req.body);
-    const { type, numero, visaId, dateSignature, dateEnvoi, dossierId, demandeIds } = validatedData;
+    const { type, numero, visaId, avis_hierarchiques, dateSignature, dateEnvoi, dossierId, demandeIds } = validatedData;
 
     const decision = await prisma.$transaction(async (tx) => {
       // Créer la décision
@@ -98,6 +100,7 @@ router.post('/', async (req, res) => {
           type,
           numero,
           visaId,
+          avis_hierarchiques,
           dateSignature: dateSignature ? new Date(dateSignature) : null,
           dateEnvoi: dateEnvoi ? new Date(dateEnvoi) : null,
           dossierId,
@@ -228,7 +231,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const validatedData = updateDecisionSchema.parse(req.body);
-    const { type, numero, visaId, dateSignature, dateEnvoi, demandeIds } = validatedData;
+    const { type, numero, visaId, avis_hierarchiques, dateSignature, dateEnvoi, demandeIds } = validatedData;
 
     const existingDecision = await prisma.decision.findUnique({
       where: { id: req.params.id }
@@ -247,6 +250,7 @@ router.put('/:id', async (req, res) => {
       if (type !== undefined) updateData.type = type;
       if (numero !== undefined) updateData.numero = numero;
       if (visaId !== undefined) updateData.visaId = visaId;
+      if (avis_hierarchiques !== undefined) updateData.avis_hierarchiques = avis_hierarchiques;
       if (dateSignature !== undefined) {
         updateData.dateSignature = dateSignature ? new Date(dateSignature) : null;
       }

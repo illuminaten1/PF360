@@ -192,7 +192,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
                   {/* Première ligne complète : Type de décision */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Type de décision *
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -204,10 +204,10 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                             {...register('type')}
                             className="sr-only"
                           />
-                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          <div className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                             selectedType === type
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                              : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
                           }`}>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(type)}`}>
                               {getTypeLabel(type)}
@@ -217,7 +217,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       ))}
                     </div>
                     {errors.type && (
-                      <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+                      <p className="mt-2 text-sm text-red-600">{errors.type.message}</p>
                     )}
                   </div>
 
@@ -246,17 +246,17 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
 
                     {/* Type Victime/Mis en cause */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Type de personne
                       </label>
                       <div className="grid grid-cols-2 gap-3">
                         <button
                           type="button"
                           onClick={() => setValue('typeVictMec', 'VICTIME')}
-                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                             selectedTypeVictMec === 'VICTIME'
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                              : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
                           }`}
                         >
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
@@ -266,10 +266,10 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setValue('typeVictMec', 'MIS_EN_CAUSE')}
-                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                             selectedTypeVictMec === 'MIS_EN_CAUSE'
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                              : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
                           }`}
                         >
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
@@ -289,7 +289,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       </label>
                       <div className="grid grid-cols-2 gap-3">
                         {visas.length === 0 ? (
-                          <div className="col-span-2 bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-gray-500">
+                          <div className="col-span-2 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-lg p-4 text-center text-gray-500 h-16 flex items-center justify-center">
                             Aucun visa disponible
                           </div>
                         ) : (
@@ -308,12 +308,12 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                                   disabled={!visaOfType}
                                   className="sr-only"
                                 />
-                                <div className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                                <div className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                                   isSelected
-                                    ? 'border-blue-500 bg-blue-50'
+                                    ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
                                     : visaOfType 
-                                      ? 'border-gray-200 hover:border-gray-300'
-                                      : 'border-gray-100 bg-gray-50'
+                                      ? 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                                      : 'border-gray-100 from-gray-50 to-gray-100'
                                 }`}>
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                     typeVisa === 'CIVIL' 
@@ -329,23 +329,23 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                         )}
                       </div>
                       {errors.visaId && (
-                        <p className="mt-1 text-sm text-red-600">{errors.visaId.message}</p>
+                        <p className="mt-2 text-sm text-red-600">{errors.visaId.message}</p>
                       )}
                     </div>
 
                     {/* Avis hiérarchiques */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Avis hiérarchiques
                       </label>
                       <div className="grid grid-cols-2 gap-3">
                         <button
                           type="button"
                           onClick={() => setValue('avis_hierarchiques', false)}
-                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                             selectedAvisHierarchiques === false
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                              : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
                           }`}
                         >
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -355,10 +355,10 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setValue('avis_hierarchiques', true)}
-                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center ${
+                          className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                             selectedAvisHierarchiques === true
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                              : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
                           }`}
                         >
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -373,7 +373,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Demandes à inclure */}
                     <div>
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <label className="block text-sm font-medium text-gray-700">
                           Demandes à inclure dans la décision *
                         </label>
@@ -395,38 +395,41 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                         </div>
                       </div>
                       
-                      <div className="border border-gray-300 rounded-md p-4 h-48 overflow-y-auto bg-gray-50">
-                        {dossier.demandes.length === 0 ? (
-                          <p className="text-gray-500 text-sm text-center py-4">
-                            Aucune demande disponible dans ce dossier
-                          </p>
-                        ) : (
-                          <div className="space-y-2">
-                            {dossier.demandes.map((demande) => (
-                              <label key={demande.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition-colors cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedDemandeIds.includes(demande.id)}
-                                  onChange={() => handleDemandeToggle(demande.id)}
-                                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-gray-900 text-sm">
-                                      {demande.grade && `${demande.grade} `}{demande.prenom} {demande.nom}
-                                    </span>
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                      demande.type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
-                                    }`}>
-                                      {demande.type.replace(/_/g, ' ')}
-                                    </span>
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all" style={{height: '224px'}}>
+                        <div className="h-full overflow-y-auto">
+                          {dossier.demandes.length === 0 ? (
+                            <p className="text-gray-500 text-sm text-center py-4">
+                              Aucune demande disponible dans ce dossier
+                            </p>
+                          ) : (
+                            <div className="space-y-2">
+                              {dossier.demandes.map((demande) => (
+                                <label key={demande.id} className="flex items-center space-x-3 p-3 rounded-lg bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedDemandeIds.includes(demande.id)}
+                                    onChange={() => handleDemandeToggle(demande.id)}
+                                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-gray-900 text-sm">
+                                        {demande.grade && `${demande.grade} `}{demande.prenom} {demande.nom}
+                                      </span>
+                                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                        demande.type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
+                                      }`}>
+                                        {demande.type.replace(/_/g, ' ')}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                              </label>
-                            ))}
-                          </div>
-                        )}
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
+                      
                       {errors.demandeIds && (
                         <p className="mt-1 text-sm text-red-600">{errors.demandeIds.message}</p>
                       )}
@@ -442,13 +445,20 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       <label htmlFor="considerant" className="block text-sm font-medium text-gray-700 mb-2">
                         Considérant
                       </label>
-                      <textarea
-                        {...register('considerant')}
-                        rows={8}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
-                        placeholder="Texte du considérant de la décision..."
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
+                      <div className="relative">
+                        <textarea
+                          {...register('considerant')}
+                          rows={8}
+                          className="block w-full px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
+                          placeholder="Texte du considérant de la décision..."
+                        />
+                        <div className="absolute top-3 right-3 pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-xs text-gray-500">
                         Optionnel - Texte explicatif pour justifier la décision
                       </p>
                     </div>

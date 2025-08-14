@@ -356,7 +356,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Demandes concernées
                           </label>
-                          <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all" style={{height: '224px'}}>
+                          <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all h-[256px]">
                             <div className="h-full overflow-y-auto space-y-2">
                               {decision.demandes.map((demandeRel, index) => (
                                 <div key={index} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center shadow-sm hover:shadow-md transition-shadow">
@@ -384,8 +384,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                       <div className="relative">
                         <textarea
                           {...register('considerant')}
-                          rows={8}
-                          className="block w-full px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
+                          className="block w-full h-[256px] px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
                           placeholder="Texte du considérant de la décision..."
                         />
                         <div className="absolute top-3 right-3 pointer-events-none">

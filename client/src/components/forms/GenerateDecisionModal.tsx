@@ -395,7 +395,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                         </div>
                       </div>
                       
-                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all" style={{height: '224px'}}>
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all h-[256px]">
                         <div className="h-full overflow-y-auto">
                           {dossier.demandes.length === 0 ? (
                             <p className="text-gray-500 text-sm text-center py-4">
@@ -433,11 +433,9 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       {errors.demandeIds && (
                         <p className="mt-1 text-sm text-red-600">{errors.demandeIds.message}</p>
                       )}
-                      {selectedDemandeIds.length > 0 && (
-                        <p className="mt-2 text-sm text-blue-600">
-                          {selectedDemandeIds.length} demande(s) sélectionnée(s) sur {dossier.demandes.length} dans le dossier
-                        </p>
-                      )}
+                      <p className="mt-2 text-xs text-gray-500">
+                        {selectedDemandeIds.length} demande(s) sélectionnée(s) sur {dossier.demandes.length} dans le dossier
+                      </p>
                     </div>
 
                     {/* Considérant */}
@@ -448,8 +446,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                       <div className="relative">
                         <textarea
                           {...register('considerant')}
-                          rows={8}
-                          className="block w-full px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
+                          className="block w-full h-[256px] px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
                           placeholder="Texte du considérant de la décision..."
                         />
                         <div className="absolute top-3 right-3 pointer-events-none">

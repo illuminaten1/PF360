@@ -60,7 +60,7 @@ router.get('/stats', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { nom, formatCourtNommage, texteConvention } = req.body;
+    const { nom, formatCourtNommage, texteConvention, intituleFicheReglement } = req.body;
     
     if (!nom) {
       return res.status(400).json({ error: 'Le nom est requis' });
@@ -78,7 +78,8 @@ router.post('/', async (req, res) => {
       data: { 
         nom,
         formatCourtNommage: formatCourtNommage || null,
-        texteConvention: texteConvention || null
+        texteConvention: texteConvention || null,
+        intituleFicheReglement: intituleFicheReglement || null
       }
     });
 
@@ -92,7 +93,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nom, formatCourtNommage, texteConvention } = req.body;
+    const { nom, formatCourtNommage, texteConvention, intituleFicheReglement } = req.body;
     
     if (!nom) {
       return res.status(400).json({ error: 'Le nom est requis' });
@@ -111,7 +112,8 @@ router.put('/:id', async (req, res) => {
       data: { 
         nom,
         formatCourtNommage: formatCourtNommage || null,
-        texteConvention: texteConvention || null
+        texteConvention: texteConvention || null,
+        intituleFicheReglement: intituleFicheReglement || null
       }
     });
 

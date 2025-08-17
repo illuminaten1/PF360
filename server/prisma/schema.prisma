@@ -261,10 +261,11 @@ model Log {
 }
 
 model Sgami {
-  id                  String    @id @default(cuid())
-  nom                 String    @unique
-  formatCourtNommage  String?
-  texteConvention     String?
+  id                     String    @id @default(cuid())
+  nom                    String    @unique
+  formatCourtNommage     String?
+  texteConvention        String?
+  intituleFicheReglement String?   // Intitulé SGAMI pour les fiches de règlement (ex: "SGAMI SUD, par mail : adresses@email.com")
   
   // Relations
   dossiers Dossier[]

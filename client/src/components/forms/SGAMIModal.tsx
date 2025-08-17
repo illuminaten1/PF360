@@ -14,7 +14,8 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
   const [formData, setFormData] = useState({
     nom: '',
     formatCourtNommage: '',
-    texteConvention: ''
+    texteConvention: '',
+    intituleFicheReglement: ''
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -24,13 +25,15 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
       setFormData({
         nom: sgami.nom || '',
         formatCourtNommage: sgami.formatCourtNommage || '',
-        texteConvention: (sgami as any).texteConvention || ''
+        texteConvention: (sgami as any).texteConvention || '',
+        intituleFicheReglement: (sgami as any).intituleFicheReglement || ''
       })
     } else {
       setFormData({
         nom: '',
         formatCourtNommage: '',
-        texteConvention: ''
+        texteConvention: '',
+        intituleFicheReglement: ''
       })
     }
     setErrors({})
@@ -63,7 +66,8 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
     const submitData: Partial<SGAMI> = {
       nom: formData.nom.trim(),
       formatCourtNommage: formData.formatCourtNommage.trim() || undefined,
-      texteConvention: formData.texteConvention.trim() || undefined
+      texteConvention: formData.texteConvention.trim() || undefined,
+      intituleFicheReglement: formData.intituleFicheReglement.trim() || undefined
     }
 
     onSubmit(submitData)
@@ -134,10 +138,29 @@ const SGAMIModal: React.FC<SGAMIModalProps> = ({ sgami, isOpen, onClose, onSubmi
               value={formData.texteConvention}
               onChange={handleInputChange}
               placeholder="Ex: La demande de règlement est constituée par la DGGN et envoyée pour mise en paiement au SGAMI SUD-EST."
-              rows={6}
+              rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
               disabled={isSubmitting}
             />
+          </div>
+
+          {/* Intitulé Fiche Règlement */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Intitulé pour les fiches de règlement
+            </label>
+            <textarea
+              name="intituleFicheReglement"
+              value={formData.intituleFicheReglement}
+              onChange={handleInputChange}
+              placeholder="Ex: SGAMI SUD, par mail : sylvie.gaconier@interieur.gouv.fr ; josiane.apelian@interieur.gouv.fr ; virginie.peluso@interieur.gouv.fr ; pierrette.ruggiu@interieur.gouv.fr"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
+              disabled={isSubmitting}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Format utilisé dans les fiches de règlement pour identifier le SGAMI et ses contacts
+            </p>
           </div>
 
 

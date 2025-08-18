@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
+const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -27,6 +28,8 @@ router.get('/', async (req, res) => {
       ...item,
       dossiersCount: item._count.dossiers
     }));
+
+    await logAction(req.user.id, 'LIST_SGAMI', `Consultation des SGAMI (${sgamiWithUsage.length} résultats)`);
 
     res.json(sgamiWithUsage);
   } catch (error) {
@@ -83,6 +86,8 @@ router.post('/', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'CREATE_SGAMI', `Création SGAMI ${sgami.nom}`, 'SGAMI', sgami.id);
+
     res.status(201).json(sgami);
   } catch (error) {
     console.error('Create SGAMI error:', error);
@@ -117,6 +122,8 @@ router.put('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'UPDATE_SGAMI', `Modification SGAMI ${sgami.nom}`, 'SGAMI', sgami.id);
+
     res.json(sgami);
   } catch (error) {
     console.error('Update SGAMI error:', error);
@@ -142,9 +149,13 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
+    const sgami = await prisma.sgami.findUnique({ where: { id } });
+    
     await prisma.sgami.delete({
       where: { id }
     });
+
+    await logAction(req.user.id, 'DELETE_SGAMI', `Suppression SGAMI ${sgami?.nom}`, 'SGAMI', id);
 
     res.json({ message: 'SGAMI supprimé avec succès' });
   } catch (error) {

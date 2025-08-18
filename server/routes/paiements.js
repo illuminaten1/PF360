@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
+const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -40,6 +41,8 @@ router.get('/', async (req, res) => {
       }
     });
     
+    await logAction(req.user.id, 'LIST_PAIEMENTS', `Consultation des paiements (${paiements.length} résultats)`);
+
     res.json(paiements);
   } catch (error) {
     console.error('Get paiements error:', error);
@@ -147,6 +150,8 @@ router.post('/', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'CREATE_PAIEMENT', `Création paiement ${paiement.facture || 'sans facture'}`, 'Paiement', paiement.id);
+
     res.status(201).json(paiement);
   } catch (error) {
     console.error('Create paiement error:', error);
@@ -182,6 +187,8 @@ router.get('/:id', async (req, res) => {
     if (!paiement) {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
+
+    await logAction(req.user.id, 'VIEW_PAIEMENT', `Consultation paiement ${paiement.facture || 'sans facture'}`, 'Paiement', paiement.id);
 
     res.json(paiement);
   } catch (error) {
@@ -277,6 +284,8 @@ router.put('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'UPDATE_PAIEMENT', `Modification paiement ${paiement.facture || 'sans facture'}`, 'Paiement', paiement.id);
+
     res.json(paiement);
   } catch (error) {
     console.error('Update paiement error:', error);
@@ -299,6 +308,8 @@ router.delete('/:id', async (req, res) => {
     await prisma.paiement.delete({
       where: { id }
     });
+
+    await logAction(req.user.id, 'DELETE_PAIEMENT', `Suppression paiement ${paiementExistant.facture || 'sans facture'}`, 'Paiement', id);
 
     res.json({ message: 'Paiement supprimé avec succès' });
   } catch (error) {

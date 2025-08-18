@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
+const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -56,6 +57,8 @@ router.get('/', async (req, res) => {
           avocat.villesIntervention) : 
         []
     }));
+
+    await logAction(req.user.id, 'LIST_AVOCATS', `Consultation des avocats (${avocatsWithParsedData.length} résultats)`);
 
     res.json(avocatsWithParsedData);
   } catch (error) {
@@ -118,6 +121,8 @@ router.post('/', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'CREATE_AVOCAT', `Création avocat ${avocat.nom} ${avocat.prenom}`, 'Avocat', avocat.id);
+
     res.status(201).json(avocat);
   } catch (error) {
     console.error('Create avocat error:', error);
@@ -160,6 +165,7 @@ router.get('/:id', async (req, res) => {
       }
     }
 
+    await logAction(req.user.id, 'VIEW_AVOCAT', `Consultation avocat ${avocat.nom} ${avocat.prenom}`, 'Avocat', avocat.id);
 
     res.json(avocat);
   } catch (error) {
@@ -235,6 +241,8 @@ router.put('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'UPDATE_AVOCAT', `Modification avocat ${avocat.nom} ${avocat.prenom}`, 'Avocat', avocat.id);
+
     res.json(avocat);
   } catch (error) {
     console.error('Update avocat error:', error);
@@ -266,6 +274,8 @@ router.delete('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'DEACTIVATE_AVOCAT', `Désactivation avocat ${avocatExistant.nom} ${avocatExistant.prenom}`, 'Avocat', id);
+
     res.json({ message: 'Avocat désactivé avec succès' });
   } catch (error) {
     console.error('Delete avocat error:', error);
@@ -296,6 +306,8 @@ router.put('/:id/activate', async (req, res) => {
         modifieParId: req.user.id
       }
     });
+
+    await logAction(req.user.id, 'ACTIVATE_AVOCAT', `Réactivation avocat ${avocatExistant.nom} ${avocatExistant.prenom}`, 'Avocat', id);
 
     res.json({ message: 'Avocat réactivé avec succès' });
   } catch (error) {

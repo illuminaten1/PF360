@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
+const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -32,6 +33,8 @@ router.get('/', async (req, res) => {
         nom: 'asc'
       }
     });
+
+    await logAction(req.user.id, 'LIST_DILIGENCES', `Consultation des diligences (${diligences.length} résultats)`);
 
     res.json(diligences);
   } catch (error) {
@@ -84,6 +87,8 @@ router.post('/', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'CREATE_DILIGENCE', `Création diligence ${diligence.nom}`, 'Diligence', diligence.id);
+
     res.status(201).json(diligence);
   } catch (error) {
     console.error('Create diligence error:', error);
@@ -125,6 +130,8 @@ router.put('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'UPDATE_DILIGENCE', `Modification diligence ${diligence.nom}`, 'Diligence', diligence.id);
+
     res.json(diligence);
   } catch (error) {
     console.error('Update diligence error:', error);
@@ -140,9 +147,13 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    const diligence = await prisma.diligence.findUnique({ where: { id } });
+    
     await prisma.diligence.delete({
       where: { id }
     });
+
+    await logAction(req.user.id, 'DELETE_DILIGENCE', `Suppression diligence ${diligence?.nom}`, 'Diligence', id);
 
     res.status(204).send();
   } catch (error) {

@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
+const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -14,6 +15,8 @@ router.get('/', async (req, res) => {
         { typeVisa: 'asc' }
       ]
     });
+
+    await logAction(req.user.id, 'LIST_VISAS', `Consultation des visas (${visas.length} résultats)`);
 
     res.json(visas);
   } catch (error) {
@@ -106,6 +109,8 @@ router.post('/', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'CREATE_VISA', `Création visa ${visa.typeVisa}`, 'Visa', visa.id);
+
     res.status(201).json(visa);
   } catch (error) {
     console.error('Create Visa error:', error);
@@ -139,6 +144,8 @@ router.put('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'UPDATE_VISA', `Modification visa ${visa.typeVisa}`, 'Visa', visa.id);
+
     res.json(visa);
   } catch (error) {
     console.error('Update Visa error:', error);
@@ -162,6 +169,8 @@ router.delete('/:id', async (req, res) => {
       where: { id },
       data: { active: false }
     });
+
+    await logAction(req.user.id, 'DELETE_VISA', `Désactivation visa ${visa.typeVisa}`, 'Visa', id);
 
     res.json({ message: 'Visa désactivé avec succès' });
     

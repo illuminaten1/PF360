@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
+const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -14,6 +15,8 @@ router.get('/', async (req, res) => {
         { ordre: 'asc' }
       ]
     });
+
+    await logAction(req.user.id, 'LIST_PCE', `Consultation des PCE (${pce.length} résultats)`);
 
     res.json(pce);
   } catch (error) {
@@ -91,6 +94,8 @@ router.put('/reorder', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'REORDER_PCE', `Réorganisation des PCE (${pceList.length} éléments)`);
+
     res.json({ message: 'Ordres mis à jour avec succès' });
   } catch (error) {
     console.error('Reorder PCE error:', error);
@@ -129,6 +134,8 @@ router.post('/', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'CREATE_PCE', `Création PCE ${pce.pceDetaille}`, 'PCE', pce.id);
+
     res.status(201).json(pce);
   } catch (error) {
     console.error('Create PCE error:', error);
@@ -162,6 +169,8 @@ router.put('/:id', async (req, res) => {
       }
     });
 
+    await logAction(req.user.id, 'UPDATE_PCE', `Modification PCE ${pce.pceDetaille}`, 'PCE', pce.id);
+
     res.json(pce);
   } catch (error) {
     console.error('Update PCE error:', error);
@@ -176,9 +185,13 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    const pce = await prisma.pce.findUnique({ where: { id } });
+    
     await prisma.pce.delete({
       where: { id }
     });
+
+    await logAction(req.user.id, 'DELETE_PCE', `Suppression PCE ${pce?.pceDetaille}`, 'PCE', id);
 
     res.json({ message: 'PCE supprimé avec succès' });
   } catch (error) {

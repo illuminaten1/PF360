@@ -158,18 +158,29 @@ const MainLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* Desktop sidebar - Compact */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-16 lg:flex-col">
+      {/* Desktop sidebar */}
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out ${
+        sidebarExpanded ? 'lg:w-48' : 'lg:w-16'
+      }`}>
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
-          <div className="flex items-center justify-center h-16 border-b border-gray-200">
+          <div className={`flex items-center h-16 border-b border-gray-200 transition-all duration-300 ${
+            sidebarExpanded ? 'px-4' : 'justify-center'
+          }`}>
             <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
               <GlobeAltIcon className="h-5 w-5 text-white" />
             </div>
+            <span className={`ml-2 text-xl font-bold text-gray-900 transition-all duration-300 ${
+              sidebarExpanded ? 'opacity-100 delay-150' : 'opacity-0 w-0 overflow-hidden'
+            }`}>PF360</span>
           </div>
-          <nav className="flex-1 px-2 py-4 space-y-1">
+          <nav className={`flex-1 py-4 space-y-1 transition-all duration-300 ${
+            sidebarExpanded ? 'px-4' : 'px-2'
+          }`}>
             <button
               onClick={() => setSidebarExpanded(!sidebarExpanded)}
-              className="w-full p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 flex items-center justify-center"
+              className={`w-full p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 flex items-center transition-all duration-300 ${
+                sidebarExpanded ? 'justify-end' : 'justify-center'
+              }`}
               title={sidebarExpanded ? 'Réduire le menu' : 'Étendre le menu'}
             >
               <Bars3Icon className="h-6 w-6" />
@@ -180,37 +191,67 @@ const MainLayout: React.FC = () => {
                 to={item.href}
                 className={`${
                   isActive(item.href)
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                } group flex items-center justify-center p-2 rounded-md text-sm font-medium`}
-                title={item.name}
+                    ? sidebarExpanded
+                      ? 'bg-primary-50 border-primary-500 text-primary-700'
+                      : 'bg-primary-50 text-primary-700'
+                    : sidebarExpanded
+                      ? 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                } group flex items-center p-2 text-sm font-medium rounded-md transition-all duration-300 ${
+                  sidebarExpanded ? 'border-l-4' : 'justify-center'
+                }`}
+                title={!sidebarExpanded ? item.name : undefined}
               >
                 <item.icon
                   className={`${
                     isActive(item.href) ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                  } h-6 w-6 flex-shrink-0`}
+                  } h-6 w-6 flex-shrink-0 transition-all duration-300 ${
+                    sidebarExpanded ? 'mr-3' : ''
+                  }`}
                 />
+                <span className={`transition-all duration-300 ${
+                  sidebarExpanded ? 'opacity-100 delay-150' : 'opacity-0 w-0 overflow-hidden'
+                }`}>{item.name}</span>
               </Link>
             ))}
             {user?.role === 'ADMIN' && (
               <>
-                <div className="mt-4 pt-4 border-t border-gray-200" />
+                <div className={`border-t border-gray-200 transition-all duration-300 ${
+                  sidebarExpanded ? 'mt-8 pt-4' : 'mt-4 pt-4'
+                }`}>
+                  <p className={`px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider transition-all duration-300 ${
+                    sidebarExpanded ? 'opacity-100 delay-150' : 'opacity-0 h-0 overflow-hidden'
+                  }`}>
+                    Administration
+                  </p>
+                </div>
                 {adminNavigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
                     className={`${
                       isActive(item.href)
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    } group flex items-center justify-center p-2 rounded-md text-sm font-medium`}
-                    title={item.name}
+                        ? sidebarExpanded
+                          ? 'bg-primary-50 border-primary-500 text-primary-700'
+                          : 'bg-primary-50 text-primary-700'
+                        : sidebarExpanded
+                          ? 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    } group flex items-center p-2 text-sm font-medium rounded-md transition-all duration-300 ${
+                      sidebarExpanded ? 'border-l-4' : 'justify-center'
+                    }`}
+                    title={!sidebarExpanded ? item.name : undefined}
                   >
                     <item.icon
                       className={`${
                         isActive(item.href) ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                      } h-6 w-6 flex-shrink-0`}
+                      } h-6 w-6 flex-shrink-0 transition-all duration-300 ${
+                        sidebarExpanded ? 'mr-3' : ''
+                      }`}
                     />
+                    <span className={`transition-all duration-300 ${
+                      sidebarExpanded ? 'opacity-100 delay-150' : 'opacity-0 w-0 overflow-hidden'
+                    }`}>{item.name}</span>
                   </Link>
                 ))}
               </>
@@ -219,78 +260,10 @@ const MainLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* Desktop sidebar - Expanded Overlay */}
-      {sidebarExpanded && (
-        <div className="hidden lg:block fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarExpanded(false)} />
-          <div className="fixed inset-y-0 left-16 flex w-48 flex-col bg-white shadow-xl">
-            <div className="flex items-center h-16 px-4 border-b border-gray-200">
-              <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <GlobeAltIcon className="h-5 w-5 text-white" />
-              </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">PF360</span>
-              <button
-                onClick={() => setSidebarExpanded(false)}
-                className="ml-auto p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            <nav className="flex-1 px-4 py-4 space-y-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`${
-                    isActive(item.href)
-                      ? 'bg-primary-50 border-primary-500 text-primary-700'
-                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  } group flex items-center px-2 py-2 border-l-4 text-sm font-medium`}
-                  onClick={() => setSidebarExpanded(false)}
-                >
-                  <item.icon
-                    className={`${
-                      isActive(item.href) ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                    } mr-3 h-6 w-6 flex-shrink-0`}
-                  />
-                  {item.name}
-                </Link>
-              ))}
-              {user?.role === 'ADMIN' && (
-                <>
-                  <div className="mt-8 pt-4 border-t border-gray-200">
-                    <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Administration
-                    </p>
-                  </div>
-                  {adminNavigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`${
-                        isActive(item.href)
-                          ? 'bg-primary-50 border-primary-500 text-primary-700'
-                          : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      } group flex items-center px-2 py-2 border-l-4 text-sm font-medium`}
-                      onClick={() => setSidebarExpanded(false)}
-                    >
-                      <item.icon
-                        className={`${
-                          isActive(item.href) ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                        } mr-3 h-6 w-6 flex-shrink-0`}
-                      />
-                      {item.name}
-                    </Link>
-                  ))}
-                </>
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
-
       {/* Main content */}
-      <div className="lg:pl-16">
+      <div className={`transition-all duration-300 ease-in-out ${
+        sidebarExpanded ? 'lg:pl-48' : 'lg:pl-16'
+      }`}>
         {/* Top bar */}
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">

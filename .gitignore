@@ -162,3 +162,12 @@ coverage/
 # Local development
 .env.development
 .env.production
+
+# Documents et fichiers de données
+*.csv
+*.odt
+*.doc
+*.docx
+*.txt
+!README.txt
+!readme.txt

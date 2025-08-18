@@ -55,6 +55,192 @@ const communes = [
 // Fonction utilitaire pour choisir un élément aléatoire
 const randomChoice = (array) => array[Math.floor(Math.random() * array.length)]
 
+// Templates de notes pour les dossiers
+const notesTemplates = [
+  {
+    type: 'echange_avocat',
+    templates: [
+      `📞 ${new Date().toLocaleDateString('fr-FR')} - Échange téléphonique avec Me {avocat}
+- Transmission du dossier complet et des pièces justificatives
+- Calendrier prévisionnel : audience estimée dans 2-3 mois
+- L'avocat confirme la prise en charge et demande un délai pour étudier le dossier
+- Prochain contact prévu dans 15 jours pour faire le point`,
+
+      `✉️ ${new Date().toLocaleDateString('fr-FR')} - Courrier de Me {avocat}
+- Accusé réception des pièces du dossier
+- Demande de complément d'information sur les circonstances de l'intervention
+- Nécessité d'obtenir le témoignage du binôme présent sur les lieux
+- Délai de réponse : 10 jours`,
+
+      `📞 ${new Date().toLocaleDateString('fr-FR')} - Entretien avec Me {avocat}
+- Point sur l'avancement de la procédure
+- L'avocat estime les chances de succès favorables
+- Stratégie défensive basée sur le respect du cadre légal d'intervention
+- Audience fixée au ${new Date(Date.now() + 60*24*60*60*1000).toLocaleDateString('fr-FR')}`
+    ]
+  },
+  {
+    type: 'compte_rendu_audience',
+    templates: [
+      `⚖️ COMPTE-RENDU D'AUDIENCE - ${new Date().toLocaleDateString('fr-FR')}
+Tribunal : Tribunal de Grande Instance de {ville}
+Président : M./Mme {nom_juge}
+Avocat : Me {avocat}
+
+DÉROULEMENT :
+- Plaidoirie de Me {avocat} axée sur le cadre légal de l'intervention
+- Questions du tribunal sur les circonstances précises des faits
+- Partie adverse représentée par Me {avocat_adverse}
+
+DÉCISION : Mise en délibéré au ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('fr-FR')}`,
+
+      `⚖️ AUDIENCE DE CONCILIATION - ${new Date().toLocaleDateString('fr-FR')}
+- Présence de toutes les parties
+- Proposition de règlement amiable à hauteur de {montant}€
+- Position de l'administration : acceptation sous réserve
+- Délai de réflexion accordé : 15 jours
+- Prochaine audience si échec : ${new Date(Date.now() + 45*24*60*60*1000).toLocaleDateString('fr-FR')}`,
+
+      `⚖️ RÉSULTAT D'AUDIENCE - ${new Date().toLocaleDateString('fr-FR')}
+DÉCISION : Relaxe / Condamnation symbolique
+- Reconnaissance du cadre légal de l'intervention
+- Déboutement des demandes de dommages-intérêts
+- Chaque partie supporte ses propres dépens
+- Pas d'appel envisagé par la partie adverse`
+    ]
+  },
+  {
+    type: 'echange_demandeur',
+    templates: [
+      `📞 ${new Date().toLocaleDateString('fr-FR')} - Contact avec {prenom} {nom}
+- Accusé réception de la demande de protection fonctionnelle
+- Explications sur la procédure et les délais
+- Transmission des coordonnées de l'avocat désigné
+- Le demandeur confirme son souhait de poursuivre la procédure`,
+
+      `📧 ${new Date().toLocaleDateString('fr-FR')} - Mail de {prenom} {nom}
+- Transmission de pièces complémentaires (certificats médicaux)
+- Inquiétudes concernant les délais de procédure
+- Demande de point régulier sur l'avancement
+- Réponse apportée avec planning prévisionnel`,
+
+      `📞 ${new Date().toLocaleDateString('fr-FR')} - Entretien avec {prenom} {nom}
+- Point sur l'évolution de la situation personnelle
+- Confirmation du maintien de la demande
+- Coordination avec les services de soutien psychologique
+- Prochaine échéance : audience du ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('fr-FR')}`
+    ]
+  },
+  {
+    type: 'information_generale',
+    templates: [
+      `📋 SYNTHÈSE DOSSIER - ${new Date().toLocaleDateString('fr-FR')}
+Type d'affaire : {type_affaire}
+Complexité : {niveau_complexite}
+Enjeux : Protection de l'agent et préservation de l'image de l'institution
+
+POINTS D'ATTENTION :
+- Médiatisation possible
+- Multiplicité des intervenants
+- Délais de procédure à respecter`,
+
+      `🔍 ANALYSE PRÉLIMINAIRE - ${new Date().toLocaleDateString('fr-FR')}
+Éléments favorables :
+- Intervention dans le cadre légal
+- Témoignages concordants des collègues
+- Respect des procédures
+
+Points de vigilance :
+- Contexte tendu de l'intervention
+- Éventuelles contradictions dans les témoignages
+- Nécessité d'expertise médicale`,
+
+      `📝 SUIVI ADMINISTRATIF - ${new Date().toLocaleDateString('fr-FR')}
+- Dossier complet et conforme
+- Toutes les pièces justificatives rassemblées
+- Avis hiérarchique favorable
+- Transmission à l'autorité compétente effectuée
+- Délai de traitement estimé : 2-3 mois`
+    ]
+  },
+  {
+    type: 'expertise_medicale',
+    templates: [
+      `🏥 RAPPORT D'EXPERTISE - ${new Date().toLocaleDateString('fr-FR')}
+Expert : Dr {nom_expert}
+Lieu : {lieu_expertise}
+
+CONCLUSIONS :
+- ITT constatée : {duree_itt} jours
+- Séquelles physiques : {nature_sequelles}
+- Retentissement psychologique évalué
+- Préjudice estimé : {montant_prejudice}€
+
+Contre-expertise demandée par la partie adverse`,
+
+      `🏥 ASSISTANCE À EXPERTISE - ${new Date().toLocaleDateString('fr-FR')}
+- Présence de Me {avocat} lors de l'expertise
+- Examination complète effectuée par Dr {nom_expert}
+- Observations formulées sur les circonstances
+- Remise des pièces médicales complémentaires
+- Rapport attendu sous 1 mois`,
+
+      `🏥 SUIVI MÉDICAL - ${new Date().toLocaleDateString('fr-FR')}
+- Évolution favorable de l'état de santé
+- Reprise progressive de l'activité professionnelle
+- Suivi psychologique maintenu
+- Certificat de consolidation en attente
+- Impact sur l'évaluation du préjudice`
+    ]
+  }
+]
+
+// Fonction pour générer des notes réalistes pour un dossier
+const generateDossierNotes = (dossier) => {
+  const notes = []
+  const nbNotes = Math.floor(Math.random() * 4) + 1 // 1 à 4 notes par dossier
+  
+  // Sélectionner des types de notes aléatoires
+  const availableTypes = notesTemplates.map(t => t.type)
+  const selectedTypes = []
+  
+  for (let i = 0; i < nbNotes; i++) {
+    const remainingTypes = availableTypes.filter(t => !selectedTypes.includes(t))
+    if (remainingTypes.length > 0) {
+      selectedTypes.push(randomChoice(remainingTypes))
+    } else {
+      selectedTypes.push(randomChoice(availableTypes))
+    }
+  }
+  
+  // Générer les notes
+  selectedTypes.forEach(type => {
+    const typeTemplates = notesTemplates.find(t => t.type === type)
+    const template = randomChoice(typeTemplates.templates)
+    
+    // Remplacer les placeholders
+    let note = template
+    note = note.replace(/{avocat}/g, `${randomChoice(prenoms)} ${randomChoice(noms)}`)
+    note = note.replace(/{avocat_adverse}/g, `${randomChoice(prenoms)} ${randomChoice(noms)}`)
+    note = note.replace(/{nom_juge}/g, randomChoice(noms))
+    note = note.replace(/{ville}/g, randomChoice(communes))
+    note = note.replace(/{montant}/g, Math.floor(Math.random() * 5000) + 1000)
+    note = note.replace(/{prenom}/g, randomChoice(prenoms))
+    note = note.replace(/{nom}/g, randomChoice(noms))
+    note = note.replace(/{type_affaire}/g, randomChoice(['Outrage', 'Rébellion', 'Violences', 'Diffamation']))
+    note = note.replace(/{niveau_complexite}/g, randomChoice(['Simple', 'Moyenne', 'Élevée']))
+    note = note.replace(/{nom_expert}/g, randomChoice(noms))
+    note = note.replace(/{lieu_expertise}/g, randomChoice(communes))
+    note = note.replace(/{duree_itt}/g, Math.floor(Math.random() * 15) + 1)
+    note = note.replace(/{nature_sequelles}/g, randomChoice(['Aucune', 'Légères', 'Modérées']))
+    note = note.replace(/{montant_prejudice}/g, Math.floor(Math.random() * 8000) + 2000)
+    
+    notes.push(note)
+  })
+  
+  return notes.join('\n\n---\n\n')
+}
+
 // Fonction pour supprimer les accents et caractères spéciaux
 const removeAccents = (str) => {
   return str.normalize('NFD')
@@ -239,11 +425,16 @@ const generateDossier = (year = 2025, users = [], sgamis = []) => {
     demandes.push(demande)
   }
   
-  return {
+  const dossierData = {
     numero: generateNumeroDossier(),
     assigneAId: assignedUser.id,
     sgamiId: assignedSgami.id,
     demandes
+  }
+
+  return {
+    ...dossierData,
+    notes: Math.random() > 0.3 ? generateDossierNotes(dossierData) : null // 70% des dossiers ont des notes
   }
 }
 
@@ -307,7 +498,8 @@ async function main() {
       data: {
         numero: testDossier.numero,
         assigneAId: testDossier.assigneAId,
-        sgamiId: testDossier.sgamiId
+        sgamiId: testDossier.sgamiId,
+        notes: testDossier.notes
       }
     })
     
@@ -341,7 +533,8 @@ async function main() {
         data: {
           numero: dossier.numero,
           assigneAId: dossier.assigneAId,
-          sgamiId: dossier.sgamiId
+          sgamiId: dossier.sgamiId,
+          notes: dossier.notes
         }
       })
       

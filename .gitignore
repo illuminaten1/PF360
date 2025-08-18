@@ -162,6 +162,3 @@ coverage/
 # Local development
 .env.development
 .env.production
-
-# CSV data files (should not be versioned)
-diligences.csv

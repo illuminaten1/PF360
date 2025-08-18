@@ -92,7 +92,7 @@ const generateNumeroDS = () => {
 // Fonction utilitaire pour générer un numéro de dossier unique
 let dossierCounter = 1
 const generateNumeroDossier = () => {
-  return `DOS${(dossierCounter++).toString().padStart(6, '0')}`
+  return (dossierCounter++).toString()
 }
 
 // Fonction utilitaire pour générer un NIGEND

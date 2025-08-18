@@ -7,14 +7,6 @@ import api from '@/utils/api'
 import DiligenceTable from '@/components/tables/DiligenceTable'
 import DiligenceModal from '@/components/forms/DiligenceModal'
 
-interface DiligenceStats {
-  totalDiligences: number
-  activeDiligences: number
-  inactiveDiligences: number
-  forfaitaires: number
-  demiJournee: number
-}
-
 const DiligencesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDiligence, setSelectedDiligence] = useState<Diligence | null>(null)
@@ -50,7 +42,7 @@ const DiligencesPage: React.FC = () => {
       toast.success('Diligence créée avec succès')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la création')
+      toast.error(error.response?.data?.message || 'Erreur lors de la création de la diligence')
     }
   })
 
@@ -67,7 +59,7 @@ const DiligencesPage: React.FC = () => {
       toast.success('Diligence modifiée avec succès')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la modification')
+      toast.error(error.response?.data?.message || 'Erreur lors de la modification de la diligence')
     }
   })
 
@@ -81,7 +73,7 @@ const DiligencesPage: React.FC = () => {
       toast.success('Diligence supprimée avec succès')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la suppression')
+      toast.error(error.response?.data?.message || 'Erreur lors de la suppression de la diligence')
     }
   })
 
@@ -95,171 +87,76 @@ const DiligencesPage: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleDeleteDiligence = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette diligence ?')) {
+  const handleDeleteDiligence = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette diligence ? Cette action est irréversible.')) {
       deleteDiligenceMutation.mutate(id)
     }
   }
 
-  const handleSubmit = (data: Partial<Diligence>) => {
+  const handleSubmit = (diligenceData: Partial<Diligence>) => {
     if (selectedDiligence) {
-      updateDiligenceMutation.mutate({ ...data, id: selectedDiligence.id })
+      updateDiligenceMutation.mutate({ ...diligenceData, id: selectedDiligence.id })
     } else {
-      createDiligenceMutation.mutate(data)
+      createDiligenceMutation.mutate(diligenceData)
     }
   }
 
+  const diligenceList = diligenceData || []
+
   return (
-    <div className="px-6 py-8">
-      {/* En-tête */}
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <ClipboardDocumentListIcon className="h-6 w-6" />
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <ClipboardDocumentListIcon className="w-7 h-7 mr-3 text-purple-600" />
             Gestion des diligences
           </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Gérez les différents types de diligences et leur mode de tarification
-          </p>
+          <p className="text-gray-600 mt-1">Gérez les différents types de diligences et leur mode de tarification</p>
         </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            type="button"
-            onClick={handleCreateDiligence}
-            className="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-          >
-            <PlusIcon className="h-4 w-4 inline mr-2" />
-            Nouvelle diligence
-          </button>
-        </div>
+        <button
+          onClick={handleCreateDiligence}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+        >
+          <PlusIcon className="w-5 h-5" />
+          <span>Nouvelle diligence</span>
+        </button>
       </div>
 
-      {/* Statistiques */}
       {stats && (
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <ClipboardDocumentListIcon className="h-6 w-6 text-gray-400" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total diligences
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {stats.totalDiligences}
-                    </dd>
-                  </dl>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100">
+                <ClipboardDocumentListIcon className="w-6 h-6 text-purple-600" />
               </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 bg-green-500 rounded-full"></div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Actives
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {stats.activeDiligences}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 bg-red-500 rounded-full"></div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Inactives
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {stats.inactiveDiligences}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 bg-blue-500 rounded-full"></div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Forfaitaires
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {stats.forfaitaires}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 bg-purple-500 rounded-full"></div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Demi-journée
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {stats.demiJournee}
-                    </dd>
-                  </dl>
-                </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total diligences</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.totalDiligences}</p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Tableau */}
-      <div className="mt-8">
-        <DiligenceTable
-          data={diligenceData || []}
-          isLoading={isLoading}
-          onEdit={handleEditDiligence}
-          onDelete={handleDeleteDiligence}
-        />
-      </div>
-
-      {/* Modal */}
-      <DiligenceModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setSelectedDiligence(null)
-        }}
-        onSubmit={handleSubmit}
-        diligence={selectedDiligence}
-        isLoading={createDiligenceMutation.isPending || updateDiligenceMutation.isPending}
+      <DiligenceTable
+        data={diligenceList}
+        loading={isLoading}
+        onEdit={handleEditDiligence}
+        onDelete={handleDeleteDiligence}
       />
+
+      {isModalOpen && (
+        <DiligenceModal
+          diligence={selectedDiligence}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedDiligence(null)
+          }}
+          onSubmit={handleSubmit}
+          isSubmitting={createDiligenceMutation.isPending || updateDiligenceMutation.isPending}
+        />
+      )}
     </div>
   )
 }

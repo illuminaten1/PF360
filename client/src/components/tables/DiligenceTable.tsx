@@ -1,166 +1,388 @@
-import React from 'react'
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import React, { useMemo } from 'react'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
+  flexRender,
+  type ColumnDef,
+  type SortingState,
+  type ColumnFiltersState,
+  type VisibilityState
+} from '@tanstack/react-table'
+import { 
+  PencilIcon, 
+  ClipboardDocumentListIcon,
+  TrashIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
+} from '@heroicons/react/24/outline'
 import { Diligence } from '@/types'
+import SearchBar from './SearchBar'
 
 interface DiligenceTableProps {
   data: Diligence[]
-  isLoading: boolean
+  loading?: boolean
   onEdit: (diligence: Diligence) => void
   onDelete: (id: string) => void
 }
 
+function Filter({ column }: { column: any }) {
+  const columnFilterValue = column.getFilterValue()
+
+  return (
+    <input
+      type="text"
+      value={(columnFilterValue ?? '') as string}
+      onChange={(e) => column.setFilterValue(e.target.value)}
+      placeholder={`Filtrer...`}
+      className="w-32 border shadow rounded px-2 py-1 text-xs"
+    />
+  )
+}
+
 const DiligenceTable: React.FC<DiligenceTableProps> = ({
   data,
-  isLoading,
+  loading = false,
   onEdit,
   onDelete
 }) => {
-  if (isLoading) {
-    return (
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-4 bg-gray-200 rounded"></div>
-              ))}
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'nom', desc: false }
+  ])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = React.useState('')
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('fr-FR')
+  }
+
+  const columns = useMemo<ColumnDef<Diligence>[]>(
+    () => [
+      {
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ getValue }) => {
+          return (
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <ClipboardDocumentListIcon className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <div className="text-sm font-medium text-gray-900">
+                  {getValue<string>()}
+                </div>
+              </div>
             </div>
-          </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'details',
+        header: 'Détails',
+        cell: ({ getValue }) => {
+          const details = getValue<string>()
+          return (
+            <div className="text-sm text-gray-900 max-w-md">
+              <div className="line-clamp-2">
+                {details}
+              </div>
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'typeTarification',
+        header: 'Type de tarification',
+        cell: ({ getValue }) => {
+          const type = getValue<string>()
+          switch (type) {
+            case 'FORFAITAIRE':
+              return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Forfaitaire
+                </span>
+              )
+            case 'DEMI_JOURNEE':
+              return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  Demi-journée
+                </span>
+              )
+            default:
+              return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {type}
+                </span>
+              )
+          }
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        accessorKey: 'active',
+        header: 'Statut',
+        cell: ({ getValue }) => {
+          const active = getValue<boolean>()
+          if (active === undefined || active) {
+            return (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Active
+              </span>
+            )
+          }
+          return (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              Inactive
+            </span>
+          )
+        },
+        enableColumnFilter: false,
+        sortingFn: 'basic'
+      },
+      {
+        accessorKey: 'createdAt',
+        header: 'Créé le',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-600">
+            {formatDate(getValue<string>())}
+          </span>
+        ),
+        enableColumnFilter: false,
+        sortingFn: 'datetime'
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const diligence = row.original
+          
+          return (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onEdit(diligence)}
+                className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
+                title="Modifier"
+              >
+                <PencilIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => onDelete(diligence.id)}
+                className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
+                title="Supprimer"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </div>
+          )
+        },
+        enableColumnFilter: false,
+        enableSorting: false
+      }
+    ],
+    [onEdit, onDelete, formatDate]
+  )
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      columnVisibility
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    initialState: {
+      pagination: {
+        pageSize: 20
+      }
+    }
+  })
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow">
+        <div className="animate-pulse">
+          <div className="h-12 bg-gray-200 rounded-t-lg mb-4"></div>
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="h-16 bg-gray-100 mb-2 mx-4"></div>
+          ))}
         </div>
       </div>
     )
   }
 
-  const getTypeTarificationBadge = (type: string) => {
-    switch (type) {
-      case 'FORFAITAIRE':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Forfaitaire
-          </span>
-        )
-      case 'DEMI_JOURNEE':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-            Demi-journée
-          </span>
-        )
-      default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {type}
-          </span>
-        )
-    }
-  }
-
-  const getStatusBadge = (active?: boolean) => {
-    if (active === undefined || active) {
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          Active
-        </span>
-      )
-    }
-    return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        Inactive
-      </span>
-    )
-  }
-
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="bg-white rounded-lg shadow">
+      <SearchBar 
+        globalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
+        filteredRowsCount={table.getFilteredRowModel().rows.length}
+        placeholder="Rechercher dans les diligences..."
+      />
+
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nom
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Détails
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Type de tarification
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Statut
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Créé par
-              </th>
-              <th scope="col" className="relative px-6 py-3">
-                <span className="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((diligence) => (
-              <tr key={diligence.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {diligence.nom}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900 max-w-xs">
-                    <div className="line-clamp-3">
-                      {diligence.details}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getTypeTarificationBadge(diligence.typeTarification)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(diligence.active)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {diligence.creePar ? (
-                    <div>
-                      <div className="font-medium">
-                        {diligence.creePar.grade ? `${diligence.creePar.grade} ` : ''}
-                        {diligence.creePar.nom} {diligence.creePar.prenom}
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th
+                    key={header.id}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        {header.isPlaceholder ? null : (
+                          <>
+                            <div
+                              className={`cursor-pointer select-none flex items-center ${
+                                header.column.getCanSort() ? 'hover:text-gray-700' : ''
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                              {header.column.getCanSort() && (
+                                <span className="ml-1">
+                                  {header.column.getIsSorted() === 'asc' ? (
+                                    <ChevronUpIcon className="h-4 w-4" />
+                                  ) : header.column.getIsSorted() === 'desc' ? (
+                                    <ChevronDownIcon className="h-4 w-4" />
+                                  ) : (
+                                    <div className="h-4 w-4 opacity-0 group-hover:opacity-100">
+                                      <ChevronUpIcon className="h-4 w-4" />
+                                    </div>
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                          </>
+                        )}
                       </div>
-                      {diligence.createdAt && (
-                        <div className="text-xs text-gray-400">
-                          {new Date(diligence.createdAt).toLocaleDateString('fr-FR')}
+                      {header.column.getCanFilter() && (
+                        <div>
+                          <Filter column={header.column} />
                         </div>
                       )}
                     </div>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => onEdit(diligence)}
-                      className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
-                      title="Modifier"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(diligence.id)}
-                      className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
-                      title="Supprimer"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                {row.getVisibleCells().map(cell => (
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4 whitespace-nowrap"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
-        {data.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Aucune diligence trouvée</p>
+      </div>
+
+      {/* Pagination */}
+      <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-700">
+            <span>
+              Page {table.getState().pagination.pageIndex + 1} sur{' '}
+              {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
+            </span>
           </div>
-        )}
+          
+          <div className="flex items-center space-x-2">
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={e => {
+                table.setPageSize(Number(e.target.value))
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              {[10, 20, 50, 100].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize} par page
+                </option>
+              ))}
+            </select>
+            
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                title="Première page"
+              >
+                {'<<'}
+              </button>
+              
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                title="Page précédente"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </button>
+              
+              <span className="px-3 py-1 text-sm">
+                {table.getState().pagination.pageIndex + 1}
+              </span>
+              
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                title="Page suivante"
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+              </button>
+              
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                title="Dernière page"
+              >
+                {'>>'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     res.json(diligences);
   } catch (error) {
     console.error('Get diligences error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -45,38 +45,14 @@ router.get('/stats', async (req, res) => {
   try {
     const totalDiligences = await prisma.diligence.count();
     
-    const activeDiligences = await prisma.diligence.count({
-      where: {
-        active: true
-      }
-    });
-    
-    const inactiveDiligences = totalDiligences - activeDiligences;
-    
-    const forfaitaires = await prisma.diligence.count({
-      where: {
-        typeTarification: 'FORFAITAIRE'
-      }
-    });
-    
-    const demiJournee = await prisma.diligence.count({
-      where: {
-        typeTarification: 'DEMI_JOURNEE'
-      }
-    });
-    
     const stats = {
-      totalDiligences,
-      activeDiligences,
-      inactiveDiligences,
-      forfaitaires,
-      demiJournee
+      totalDiligences
     };
     
     res.json(stats);
   } catch (error) {
     console.error('Get diligences stats error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -86,11 +62,11 @@ router.post('/', async (req, res) => {
     const { nom, details, typeTarification } = req.body;
     
     if (!nom || !details || !typeTarification) {
-      return res.status(400).json({ error: 'Nom, détails et type de tarification sont requis' });
+      return res.status(400).json({ message: 'Nom, détails et type de tarification sont requis' });
     }
 
     if (!['FORFAITAIRE', 'DEMI_JOURNEE'].includes(typeTarification)) {
-      return res.status(400).json({ error: 'Type de tarification invalide' });
+      return res.status(400).json({ message: 'Type de tarification invalide' });
     }
 
     const diligence = await prisma.diligence.create({
@@ -116,7 +92,7 @@ router.post('/', async (req, res) => {
     res.status(201).json(diligence);
   } catch (error) {
     console.error('Create diligence error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -127,7 +103,7 @@ router.put('/:id', async (req, res) => {
     const { nom, details, typeTarification, active } = req.body;
 
     if (typeTarification && !['FORFAITAIRE', 'DEMI_JOURNEE'].includes(typeTarification)) {
-      return res.status(400).json({ error: 'Type de tarification invalide' });
+      return res.status(400).json({ message: 'Type de tarification invalide' });
     }
 
     const diligence = await prisma.diligence.update({
@@ -163,9 +139,9 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     console.error('Update diligence error:', error);
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Diligence non trouvée' });
+      return res.status(404).json({ message: 'Diligence non trouvée' });
     }
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -182,9 +158,9 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Delete diligence error:', error);
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Diligence non trouvée' });
+      return res.status(404).json({ message: 'Diligence non trouvée' });
     }
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

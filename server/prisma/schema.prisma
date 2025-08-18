@@ -39,6 +39,8 @@ model User {
   paiements        Paiement[]
   avocatsCrees     Avocat[]    @relation("AvocatCreateur")
   avocatsModifies  Avocat[]    @relation("AvocatModificateur")
+  diligencesCrees  Diligence[] @relation("DiligenceCreateur")
+  diligencesModifiees Diligence[] @relation("DiligenceModificateur")
 
   @@map("users")
 }
@@ -174,6 +176,7 @@ model Convention {
   creePar         User      @relation(fields: [creeParId], references: [id])
   creeParId       String
   demandes        ConventionDemande[]
+  diligences      ConventionDiligence[]
   paiements       Paiement[]
   
   createdAt       DateTime  @default(now())
@@ -347,6 +350,16 @@ model ConventionDemande {
   @@map("conventions_demandes")
 }
 
+model ConventionDiligence {
+  convention   Convention @relation(fields: [conventionId], references: [id])
+  conventionId String
+  diligence    Diligence  @relation(fields: [diligenceId], references: [id])
+  diligenceId  String
+  
+  @@id([conventionId, diligenceId])
+  @@map("conventions_diligences")
+}
+
 model Pce {
   id                String   @id @default(cuid())
   ordre             Int      @unique
@@ -376,6 +389,28 @@ model Visa {
   updatedAt         DateTime   @updatedAt
   
   @@map("visas")
+}
+
+model Diligence {
+  id                String     @id @default(cuid())
+  nom               String     @unique
+  details           String
+  typeTarification  String     // FORFAITAIRE | DEMI_JOURNEE
+  active            Boolean    @default(true)
+  
+  // Champs de logging
+  creePar           User?      @relation("DiligenceCreateur", fields: [creeParId], references: [id])
+  creeParId         String?
+  modifiePar        User?      @relation("DiligenceModificateur", fields: [modifieParId], references: [id])
+  modifieParId      String?
+  
+  // Relations
+  conventions       ConventionDiligence[]
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  @@map("diligences")
 }
 
 // Note: Using strings instead of enums for SQLite compatibility

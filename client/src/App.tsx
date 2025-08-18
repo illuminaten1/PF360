@@ -14,6 +14,7 @@ import Badges from '@/pages/Badges'
 import SGAMIPage from '@/pages/SGAMI'
 import PCEPage from '@/pages/PCE'
 import VisaPage from '@/pages/Visa'
+import DiligencesPage from '@/pages/Diligences'
 import Decisions from '@/pages/Decisions'
 
 // Placeholder components for other pages
@@ -91,6 +92,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <VisaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="diligences"
+            element={
+              <ProtectedRoute adminOnly>
+                <DiligencesPage />
               </ProtectedRoute>
             }
           />

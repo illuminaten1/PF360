@@ -19,7 +19,8 @@ import {
   ShieldCheckIcon,
   UserIcon,
   TagIcon,
-  CurrencyEuroIcon
+  CurrencyEuroIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -40,6 +41,7 @@ const adminNavigation = [
   { name: 'Badges', href: '/badges', icon: TagIcon },
   { name: 'PCE', href: '/pce', icon: DocumentTextIcon },
   { name: 'Visas', href: '/visa', icon: EyeIcon },
+  { name: 'Diligences', href: '/diligences', icon: ClipboardDocumentListIcon },
   { name: 'Paramètres', href: '/parametres', icon: CogIcon },
 ]
 

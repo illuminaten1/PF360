@@ -21,7 +21,6 @@ const DiligenceModal: React.FC<DiligenceModalProps> = ({
   const [formData, setFormData] = useState({
     nom: '',
     details: '',
-    typeTarification: 'FORFAITAIRE' as 'FORFAITAIRE' | 'DEMI_JOURNEE',
     active: true
   })
 
@@ -32,14 +31,12 @@ const DiligenceModal: React.FC<DiligenceModalProps> = ({
       setFormData({
         nom: diligence.nom || '',
         details: diligence.details || '',
-        typeTarification: diligence.typeTarification || 'FORFAITAIRE',
         active: diligence.active !== false
       })
     } else {
       setFormData({
         nom: '',
         details: '',
-        typeTarification: 'FORFAITAIRE',
         active: true
       })
     }
@@ -156,20 +153,6 @@ const DiligenceModal: React.FC<DiligenceModalProps> = ({
                     )}
                   </div>
 
-                  <div>
-                    <label htmlFor="typeTarification" className="block text-sm font-medium text-gray-700">
-                      Type de tarification *
-                    </label>
-                    <select
-                      id="typeTarification"
-                      value={formData.typeTarification}
-                      onChange={(e) => handleInputChange('typeTarification', e.target.value as 'FORFAITAIRE' | 'DEMI_JOURNEE')}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    >
-                      <option value="FORFAITAIRE">Forfaitaire</option>
-                      <option value="DEMI_JOURNEE">Demi-journée</option>
-                    </select>
-                  </div>
 
                   <div className="flex items-center">
                     <input

@@ -295,107 +295,86 @@ async function main() {
     {
       nom: 'comparution sur reconnaissance préalable de culpabilité',
       details: 'Ces honoraires couvrent les diligences pour la représentation des militaires dans le cadre d\'une procédure de comparution sur reconnaissance préalable de culpabilité :\n- L\'étude des pièces communiquées par les clients ainsi que par le parquet\n- L\'entretien de préparation de l\'audience avec le ou les militaires\n- L\'audience de plaidoirie\n- Rédactions des conclusions\n- Le conseil en vue de l\'acceptation de la décision ou de l\'orientation vers une procédure d\'appel\n- La saisine du service d\'aide au recouvrement des victimes d\'infractions (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'audition libre ou garde à vue',
       details: 'Ces honoraires couvrent les diligences effectuées au titre de l\'assistance lors de l\'audition libre ou de la garde à vue.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'interrogatoire de première comparution',
       details: 'Ces honoraires couvrent les diligences effectuées au titre de l\'assistance lors de l\'interrogatoire de première comparution.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'information judiciaire',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la défense des militaires\n- L\'étude de toute pièce utile à la procédure\n- Les auditions devant le juge d\'instruction\n- Les observations présentées au juge d\'instruction\n- Les demandes de réalisation d\'actes dans l\'intérêt du ou des militaires\n- La saisine et/ou la préparation des audiences devant la chambre de l\'instruction\n- La préparation du dossier de plaidoirie\n- La rédaction de conclusions',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'information judiciaire sans mis en cause interpellé',
       details: 'Ces honoraires couvrent les diligences effectuées au titre de l\'assistance au cours de l\'information judiciaire jusqu\'à l\'interpellation du mis en cause.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'comparution immédiate',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la préparation de la défense des militaires\n- L\'étude de toute pièce utile à la procédure\n- La rédaction de conclusions\n- La préparation du dossier de plaidoirie\n- La présence lors de l\'audience de plaidoirie\n- La présence lors du délibéré\n- Le conseil en vue de l\'acceptation de la décision ou de l\'orientation vers une procédure d\'appel\n- La saisine du service d\'aide au recouvrement des victimes d\'infraction (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'première instance sans renvoi sur intérêts civils',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la préparation de la défense des militaires\n- L\'étude de toute pièce utile à la procédure\n- La rédaction de conclusions\n- La préparation du dossier de plaidoirie\n- La présence lors de l\'audience de plaidoirie\n- La présence lors du délibéré\n- Le conseil en vue de l\'acceptation de la décision ou de l\'orientation vers une procédure d\'appel\n- La saisine du service d\'aide au recouvrement des victimes d\'infraction (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'première instance avec renvoi sur intérêts civils',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la préparation de la défense des militaires\n- L\'étude de toute pièce utile à la procédure\n- L\'assistance à l\'expertise médicale et aux réunions subséquentes\n- La rédaction de dire à expert\n- La rédaction de conclusions\n- La préparation du dossier de plaidoirie\n- La présence lors de l\'audience sur le fond\n- La présence lors du délibéré\n- Le conseil en vue de l\'acceptation de la décision sur le fond ou l\'orientation vers une procédure d\'appel\n- La saisine du service d\'aide au recouvrement des victimes d\'infractions (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'appel',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous en vue de la préparation de la défense\n- L\'étude de toute pièce utile à la procédure\n- La rédaction de conclusions\n- La préparation du dossier de plaidoirie\n- L\'audience de plaidoirie\n- La présence lors du délibéré\n- Le conseil en vue de l\'acceptation de la décision ou l\'orientation vers un pourvoi en cassation\n- La saisine du service d\'aide au recouvrement des victimes d\'infractions (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'commission d\'indemnisation des victimes d\'infractions',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous en vue du rassemblement des pièces nécessaires à la procédure\n- La requête introductive et demande de provision\n- La préparation et l\'assistance à l\'expertise\n- La rédaction de conclusions et de dires\n- La préparation du dossier de plaidoirie\n- La requête pour la liquidation des préjudices\n- Le conseil en vue de l\'acceptation de l\'offre d\'indemnisation rendue ou l\'orientation vers une procédure d\'appel de la décision',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'ajout de militaire(s) au dossier',
       details: 'Ces honoraires couvrent les diligences supplémentaires liées à l\'ajout d\'un ou plusieurs militaires dans le dossier en cours de procédure.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'renvois d\'audiences',
       details: 'Ces honoraires couvrent les diligences supplémentaires occasionnées par le renvoi d\'audiences et les nouvelles préparations nécessaires.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'assistance à expertise médicale',
       details: 'Ces honoraires couvrent les diligences effectuées au titre de l\'assistance lors d\'expertises médicales.',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'multiplicité des actes à accomplir dans la procédure',
       details: 'Ces honoraires couvrent les diligences supplémentaires dues à la complexité et à la multiplicité des actes nécessaires dans la procédure.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'interpellation du mis en cause',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la défense des militaires\n- L\'étude de toute pièce utile à la procédure\n- Les auditions devant le juge d\'instruction\n- Les observations présentées au juge d\'instruction\n- Les demandes de réalisation d\'actes dans l\'intérêt du ou des militaires\n- La saisine et/ou la préparation des audiences devant la chambre de l\'instruction\n- La préparation du dossier de plaidoirie\n- La rédaction de conclusions',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'audience devant une autre juridiction (majeur/mineur)',
       details: 'Ces honoraires couvrent les diligences effectuées lors d\'audiences devant des juridictions autres que celles initialement saisies, notamment pour les affaires impliquant des majeurs et des mineurs.',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'cassation',
       details: 'Ces honoraires couvrent les diligences utiles et nécessaires à la défense des militaires devant la cour de cassation.',
-      typeTarification: 'FORFAITAIRE'
     },
     {
       nom: 'assises',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la préparation de la défense des militaires\n- L\'étude de toute pièce utile à la procédure communiquées par les clients ainsi que par le parquet\n- L\'assistance à l\'expertise médicale et aux réunions subséquentes\n- La rédaction de dire à expert\n- La rédaction de conclusions\n- La préparation du dossier de plaidoirie\n- La présence lors de l\'audience sur le fond et les éventuelles audiences de renvoi\n- La présence lors du délibéré\n- Le conseil en vue de l\'acceptation de la décision sur le fond ou l\'orientation vers une procédure d\'appel\n- La saisine du service d\'aide au recouvrement des victimes d\'infractions (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'assises appel',
       details: 'Ces honoraires couvrent les diligences énumérées ci-après :\n- Les rendez-vous, consultations et recherches réalisées en vue de l\'orientation de la procédure et de la préparation de la défense des militaires\n- L\'étude de toute pièce utile à la procédure communiquées par les clients ainsi que par le parquet\n- L\'assistance à l\'expertise médicale et aux réunions subséquentes\n- La rédaction de dire à expert\n- La rédaction de conclusions\n- La préparation du dossier de plaidoirie\n- La présence lors de l\'audience sur le fond et les éventuelles audiences de renvoi\n- La présence lors du délibéré\n- Le conseil en vue de l\'acceptation de la décision sur le fond ou l\'orientation vers une procédure de cassation\n- La saisine du service d\'aide au recouvrement des victimes d\'infractions (SARVI)',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'assistance à reconstitution',
       details: 'Ces honoraires couvrent les diligences effectuées au titre de l\'assistance lors de la reconstitution.',
-      typeTarification: 'DEMI_JOURNEE'
     },
     {
       nom: 'enquête',
       details: 'Ces honoraires couvrent les diligences effectuées au titre de l\'assistance lors de la phase d\'enquête.',
-      typeTarification: 'FORFAITAIRE'
     }
   ]
 

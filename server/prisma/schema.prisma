@@ -395,7 +395,6 @@ model Diligence {
   id                String     @id @default(cuid())
   nom               String     @unique
   details           String
-  typeTarification  String     // FORFAITAIRE | DEMI_JOURNEE
   active            Boolean    @default(true)
   
   // Champs de logging

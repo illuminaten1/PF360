@@ -104,35 +104,6 @@ const DiligenceTable: React.FC<DiligenceTableProps> = ({
         filterFn: 'includesString'
       },
       {
-        accessorKey: 'typeTarification',
-        header: 'Type de tarification',
-        cell: ({ getValue }) => {
-          const type = getValue<string>()
-          switch (type) {
-            case 'FORFAITAIRE':
-              return (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  Forfaitaire
-                </span>
-              )
-            case 'DEMI_JOURNEE':
-              return (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  Demi-journée
-                </span>
-              )
-            default:
-              return (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  {type}
-                </span>
-              )
-          }
-        },
-        enableColumnFilter: true,
-        filterFn: 'includesString'
-      },
-      {
         accessorKey: 'active',
         header: 'Statut',
         cell: ({ getValue }) => {

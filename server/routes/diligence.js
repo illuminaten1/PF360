@@ -59,21 +59,16 @@ router.get('/stats', async (req, res) => {
 // Créer une nouvelle diligence
 router.post('/', async (req, res) => {
   try {
-    const { nom, details, typeTarification } = req.body;
+    const { nom, details } = req.body;
     
-    if (!nom || !details || !typeTarification) {
-      return res.status(400).json({ message: 'Nom, détails et type de tarification sont requis' });
-    }
-
-    if (!['FORFAITAIRE', 'DEMI_JOURNEE'].includes(typeTarification)) {
-      return res.status(400).json({ message: 'Type de tarification invalide' });
+    if (!nom || !details) {
+      return res.status(400).json({ message: 'Nom et détails sont requis' });
     }
 
     const diligence = await prisma.diligence.create({
       data: {
         nom,
         details,
-        typeTarification,
         active: true,
         creeParId: req.user.id
       },
@@ -100,18 +95,13 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nom, details, typeTarification, active } = req.body;
-
-    if (typeTarification && !['FORFAITAIRE', 'DEMI_JOURNEE'].includes(typeTarification)) {
-      return res.status(400).json({ message: 'Type de tarification invalide' });
-    }
+    const { nom, details, active } = req.body;
 
     const diligence = await prisma.diligence.update({
       where: { id },
       data: {
         ...(nom && { nom }),
         ...(details && { details }),
-        ...(typeTarification && { typeTarification }),
         ...(typeof active === 'boolean' && { active }),
         modifieParId: req.user.id
       },

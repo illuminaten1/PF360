@@ -111,7 +111,6 @@ export interface Demande {
         diligence: {
           id: string
           nom: string
-          typeTarification: 'FORFAITAIRE' | 'DEMI_JOURNEE'
         }
       }>
     }
@@ -193,7 +192,6 @@ export interface Dossier {
       diligence: {
         id: string
         nom: string
-        typeTarification: 'FORFAITAIRE' | 'DEMI_JOURNEE'
       }
     }>
   }>
@@ -366,7 +364,6 @@ export interface Diligence {
   id: string
   nom: string
   details: string
-  typeTarification: 'FORFAITAIRE' | 'DEMI_JOURNEE'
   active?: boolean
   createdAt?: string
   updatedAt?: string

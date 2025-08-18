@@ -107,6 +107,13 @@ export interface Demande {
         nom: string
         prenom?: string
       }
+      diligences?: Array<{
+        diligence: {
+          id: string
+          nom: string
+          typeTarification: 'FORFAITAIRE' | 'DEMI_JOURNEE'
+        }
+      }>
     }
   }>
 }
@@ -180,6 +187,13 @@ export interface Dossier {
         nom: string
         prenom: string
         numeroDS: string
+      }
+    }>
+    diligences?: Array<{
+      diligence: {
+        id: string
+        nom: string
+        typeTarification: 'FORFAITAIRE' | 'DEMI_JOURNEE'
       }
     }>
   }>
@@ -346,6 +360,28 @@ export interface Visa {
   active?: boolean
   createdAt?: string
   updatedAt?: string
+}
+
+export interface Diligence {
+  id: string
+  nom: string
+  details: string
+  typeTarification: 'FORFAITAIRE' | 'DEMI_JOURNEE'
+  active?: boolean
+  createdAt?: string
+  updatedAt?: string
+  creePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    id: string
+    nom: string
+    prenom: string
+    grade?: string
+  }
 }
 
 export interface Decision {

@@ -34,6 +34,7 @@ import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DecisionViewModal from '@/components/forms/DecisionViewModal'
 import DecisionEditModal from '@/components/forms/DecisionEditModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
+import CreateConventionModal from '@/components/forms/CreateConventionModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 dayjs.extend(relativeTime)
@@ -50,6 +51,7 @@ const DossierDetail: React.FC = () => {
   const [isDecisionViewModalOpen, setIsDecisionViewModalOpen] = useState(false)
   const [isDecisionEditModalOpen, setIsDecisionEditModalOpen] = useState(false)
   const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
+  const [isCreateConventionModalOpen, setIsCreateConventionModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<any>(null)
   const [selectedDecision, setSelectedDecision] = useState<any>(null)
   const [notes, setNotes] = useState('')
@@ -174,6 +176,24 @@ const DossierDetail: React.FC = () => {
     }
   })
 
+  // Create convention mutation
+  const createConventionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.post('/conventions', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['conventions-all'] })
+      toast.success('Convention créée avec succès')
+      setIsCreateConventionModalOpen(false)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la création de la convention')
+    }
+  })
+
   const handleEditDossier = () => {
     setIsEditModalOpen(true)
   }
@@ -238,6 +258,18 @@ const DossierDetail: React.FC = () => {
 
   const handleSubmitDecisionEdit = async (data: any) => {
     await updateDecisionMutation.mutateAsync(data)
+  }
+
+  const handleCreateConvention = () => {
+    if (!dossier || dossier.decisions.length === 0) {
+      toast.error('Aucune décision disponible pour créer une convention')
+      return
+    }
+    setIsCreateConventionModalOpen(true)
+  }
+
+  const handleSubmitConvention = async (data: any) => {
+    await createConventionMutation.mutateAsync(data)
   }
 
   // Initialize notes when dossier loads
@@ -742,9 +774,10 @@ const DossierDetail: React.FC = () => {
                   Conventions d'honoraires ({dossier.conventions.length})
                 </h2>
                 <button 
+                  onClick={handleCreateConvention}
+                  disabled={dossier.decisions.length === 0}
                   className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={true}
-                  title="Création de convention - À venir"
+                  title={dossier.decisions.length === 0 ? "Aucune décision disponible" : "Créer une nouvelle convention"}
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Nouvelle convention
@@ -1069,6 +1102,16 @@ const DossierDetail: React.FC = () => {
           isOpen={isGenerateDecisionModalOpen}
           onClose={() => setIsGenerateDecisionModalOpen(false)}
           onSubmit={handleSubmitDecision}
+          dossier={dossier}
+        />
+      )}
+
+      {/* Create Convention Modal */}
+      {dossier && (
+        <CreateConventionModal
+          isOpen={isCreateConventionModalOpen}
+          onClose={() => setIsCreateConventionModalOpen(false)}
+          onSubmit={handleSubmitConvention}
           dossier={dossier}
         />
       )}

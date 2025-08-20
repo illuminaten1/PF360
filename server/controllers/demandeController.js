@@ -315,8 +315,10 @@ const getAllDemandes = async (req, res) => {
               convention: {
                 select: {
                   id: true,
+                  numero: true,
+                  type: true,
                   montantHT: true,
-                  date: true,
+                  dateCreation: true,
                   avocat: {
                     select: {
                       nom: true,

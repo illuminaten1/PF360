@@ -82,7 +82,7 @@ router.get('/', async (req, res) => {
           select: {
             id: true,
             montantHT: true,
-            date: true
+            dateCreation: true
           }
         },
         paiements: {
@@ -120,14 +120,17 @@ router.post('/', async (req, res) => {
     const { nomDossier, notes, sgamiId, assigneAId, badges = [] } = validatedData;
 
     const dossier = await prisma.$transaction(async (tx) => {
-      // Trouver le dernier numéro utilisé
-      const lastDossier = await tx.dossier.findFirst({
-        select: { numero: true },
-        orderBy: { numero: 'desc' }
+      // Trouver le dernier numéro utilisé (tri numérique)
+      const allDossiers = await tx.dossier.findMany({
+        select: { numero: true }
       });
+      
+      const maxNumber = allDossiers.length > 0 
+        ? Math.max(...allDossiers.map(d => parseInt(d.numero)))
+        : 0;
 
       // Calculer le prochain numéro séquentiel
-      const nextNumber = (parseInt(lastDossier?.numero || '0') + 1).toString();
+      const nextNumber = (maxNumber + 1).toString();
 
       // Créer le dossier avec le nouveau numéro
       return await tx.dossier.create({
@@ -418,7 +421,7 @@ router.put('/:id', async (req, res) => {
           select: {
             id: true,
             montantHT: true,
-            date: true
+            dateCreation: true
           }
         },
         paiements: {

@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
           select: { id: true, numero: true }
         },
         convention: {
-          select: { id: true, montantHT: true, date: true }
+          select: { id: true, montantHT: true, dateCreation: true }
         },
         avocat: {
           select: { id: true, nom: true, prenom: true }
@@ -136,7 +136,7 @@ router.post('/', async (req, res) => {
           select: { id: true, numero: true }
         },
         convention: {
-          select: { id: true, montantHT: true, date: true }
+          select: { id: true, montantHT: true, dateCreation: true }
         },
         avocat: {
           select: { id: true, nom: true, prenom: true }
@@ -170,7 +170,7 @@ router.get('/:id', async (req, res) => {
           select: { id: true, numero: true }
         },
         convention: {
-          select: { id: true, montantHT: true, date: true }
+          select: { id: true, montantHT: true, dateCreation: true }
         },
         avocat: {
           select: { id: true, nom: true, prenom: true }
@@ -270,7 +270,7 @@ router.put('/:id', async (req, res) => {
           select: { id: true, numero: true }
         },
         convention: {
-          select: { id: true, montantHT: true, date: true }
+          select: { id: true, montantHT: true, dateCreation: true }
         },
         avocat: {
           select: { id: true, nom: true, prenom: true }

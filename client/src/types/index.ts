@@ -163,6 +163,7 @@ export interface Dossier {
       prenom: string
     }
     demandes?: Array<{
+      demandeId: string
       demande: {
         nom: string
         prenom: string

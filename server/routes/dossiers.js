@@ -79,10 +79,53 @@ router.get('/', async (req, res) => {
           }
         },
         conventions: {
-          select: {
-            id: true,
-            montantHT: true,
-            dateCreation: true
+          include: {
+            avocat: {
+              select: {
+                id: true,
+                nom: true,
+                prenom: true,
+                region: true
+              }
+            },
+            creePar: {
+              select: {
+                nom: true,
+                prenom: true,
+                grade: true
+              }
+            },
+            modifiePar: {
+              select: {
+                nom: true,
+                prenom: true,
+                grade: true
+              }
+            },
+            demandes: {
+              include: {
+                demande: {
+                  select: {
+                    id: true,
+                    numeroDS: true,
+                    nom: true,
+                    prenom: true,
+                    type: true
+                  }
+                }
+              }
+            },
+            diligences: {
+              include: {
+                diligence: {
+                  select: {
+                    id: true,
+                    nom: true,
+                    details: true
+                  }
+                }
+              }
+            }
           }
         },
         paiements: {
@@ -277,20 +320,48 @@ router.get('/:id', async (req, res) => {
         },
         conventions: {
           include: {
-            avocat: true,
+            avocat: {
+              select: {
+                id: true,
+                nom: true,
+                prenom: true,
+                region: true
+              }
+            },
             creePar: {
               select: {
                 nom: true,
-                prenom: true
+                prenom: true,
+                grade: true
+              }
+            },
+            modifiePar: {
+              select: {
+                nom: true,
+                prenom: true,
+                grade: true
               }
             },
             demandes: {
               include: {
                 demande: {
                   select: {
+                    id: true,
+                    numeroDS: true,
                     nom: true,
                     prenom: true,
-                    numeroDS: true
+                    type: true
+                  }
+                }
+              }
+            },
+            diligences: {
+              include: {
+                diligence: {
+                  select: {
+                    id: true,
+                    nom: true,
+                    details: true
                   }
                 }
               }
@@ -418,10 +489,53 @@ router.put('/:id', async (req, res) => {
           }
         },
         conventions: {
-          select: {
-            id: true,
-            montantHT: true,
-            dateCreation: true
+          include: {
+            avocat: {
+              select: {
+                id: true,
+                nom: true,
+                prenom: true,
+                region: true
+              }
+            },
+            creePar: {
+              select: {
+                nom: true,
+                prenom: true,
+                grade: true
+              }
+            },
+            modifiePar: {
+              select: {
+                nom: true,
+                prenom: true,
+                grade: true
+              }
+            },
+            demandes: {
+              include: {
+                demande: {
+                  select: {
+                    id: true,
+                    numeroDS: true,
+                    nom: true,
+                    prenom: true,
+                    type: true
+                  }
+                }
+              }
+            },
+            diligences: {
+              include: {
+                diligence: {
+                  select: {
+                    id: true,
+                    nom: true,
+                    details: true
+                  }
+                }
+              }
+            }
           }
         },
         paiements: {

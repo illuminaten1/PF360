@@ -739,9 +739,13 @@ const DossierDetail: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <DocumentTextIcon className="h-5 w-5 mr-2" />
-                  Conventions ({dossier.conventions.length})
+                  Conventions d'honoraires ({dossier.conventions.length})
                 </h2>
-                <button className="btn-primary-outline flex items-center text-sm">
+                <button 
+                  className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={true}
+                  title="Création de convention - À venir"
+                >
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Nouvelle convention
                 </button>
@@ -749,30 +753,149 @@ const DossierDetail: React.FC = () => {
             </div>
             <div className="p-6">
               {dossier.conventions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune convention signée</p>
+                <p className="text-gray-500 text-center py-4">Aucune convention d'honoraires</p>
               ) : (
                 <div className="space-y-4">
-                  {dossier.conventions.map((convention) => (
-                    <div key={convention.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-2">
-                            {convention.avocat.nom} {convention.avocat.prenom}
-                          </h3>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <div>Montant: {convention.montantHT.toLocaleString('fr-FR')} € HT</div>
-                            <div>Date: {dayjs(convention.date).format('DD/MM/YYYY')}</div>
-                            {convention.creePar && (
-                              <div>Créée par: {convention.creePar.prenom} {convention.creePar.nom}</div>
-                            )}
+                  {dossier.conventions.map((convention) => {
+                    const getTypeBadge = (type: string) => {
+                      switch (type) {
+                        case 'CONVENTION':
+                          return 'bg-blue-100 text-blue-800'
+                        case 'AVENANT':
+                          return 'bg-orange-100 text-orange-800'
+                        default:
+                          return 'bg-gray-100 text-gray-800'
+                      }
+                    }
+
+                    const getVictimeMecBadge = (type: string) => {
+                      switch (type) {
+                        case 'VICTIME':
+                          return 'bg-sky-100 text-sky-800'
+                        case 'MIS_EN_CAUSE':
+                          return 'bg-amber-100 text-amber-800'
+                        default:
+                          return 'bg-gray-100 text-gray-800'
+                      }
+                    }
+
+                    const getVictimeMecLabel = (type: string) => {
+                      switch (type) {
+                        case 'VICTIME':
+                          return 'Victime'
+                        case 'MIS_EN_CAUSE':
+                          return 'Mis en cause'
+                        default:
+                          return type
+                      }
+                    }
+
+                    return (
+                      <div key={convention.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4 mb-2">
+                              <h3 className="font-semibold text-gray-900">
+                                Convention n°{convention.numero}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadge(convention.type)}`}>
+                                  {convention.type}
+                                </span>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(convention.victimeOuMisEnCause)}`}>
+                                  {getVictimeMecLabel(convention.victimeOuMisEnCause)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-900 mb-2">
+                              <strong>{convention.avocat.prenom} {convention.avocat.nom}</strong>
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div className="flex items-center gap-4">
+                                <span>Montant HT: <strong>{convention.montantHT.toLocaleString('fr-FR')} €</strong></span>
+                                {convention.montantHTGagePrecedemment && (
+                                  <span>Montant gagé préc.: {convention.montantHTGagePrecedemment.toLocaleString('fr-FR')} €</span>
+                                )}
+                              </div>
+                              {convention.instance && (
+                                <div>Instance: {convention.instance}</div>
+                              )}
+                              <div className="flex items-center gap-4">
+                                <span>Créée le: {dayjs(convention.dateCreation).format('DD/MM/YYYY')}</span>
+                                {convention.dateRetourSigne ? (
+                                  <span className="flex items-center text-green-600">
+                                    <CheckCircleIcon className="h-4 w-4 mr-1" />
+                                    Signée le {dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center text-orange-600">
+                                    <ClockIcon className="h-4 w-4 mr-1" />
+                                    En attente de signature
+                                  </span>
+                                )}
+                              </div>
+                              {convention.demandes && convention.demandes.length > 0 && (
+                                <div className="mt-2">
+                                  <span className="text-xs text-gray-500">Demandeurs: </span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {convention.demandes.slice(0, 3).map((d, index) => (
+                                      <span key={`demande-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {d.demande.prenom} {d.demande.nom}
+                                      </span>
+                                    ))}
+                                    {convention.demandes.length > 3 && (
+                                      <span key={`more-demandes-${convention.id}`} className="text-xs text-gray-500">
+                                        +{convention.demandes.length - 3} autre(s)
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              {convention.diligences && convention.diligences.length > 0 && (
+                                <div className="mt-2">
+                                  <span className="text-xs text-gray-500">Diligences: </span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {convention.diligences.slice(0, 2).map((d, index) => (
+                                      <span key={`diligence-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        {d.diligence.nom}
+                                      </span>
+                                    ))}
+                                    {convention.diligences.length > 2 && (
+                                      <span key={`more-diligences-${convention.id}`} className="text-xs text-gray-500">
+                                        +{convention.diligences.length - 2} autre(s)
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              {convention.creePar && (
+                                <div className="text-xs">
+                                  Créée par: {(convention.creePar as any).grade && `${(convention.creePar as any).grade} `}
+                                  {convention.creePar.prenom} {convention.creePar.nom}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                              disabled={true}
+                              title="Modification - À venir"
+                            >
+                              Modifier
+                            </button>
+                            <button 
+                              className="text-green-600 hover:text-green-800 text-sm"
+                              disabled={true}
+                              title="Détails - À venir"
+                            >
+                              Voir détails
+                            </button>
                           </div>
                         </div>
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">
-                          Voir détails
-                        </button>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

@@ -105,10 +105,13 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
 
   const handleFormSubmit = async (data: CreateConventionFormData) => {
     try {
+      console.log('=== DEBUG: Form submit triggered ===');
+      console.log('Form data:', data);
+      
       // Get demande IDs from selected decisions
       const demandeIds = dossier.decisions
         .filter(decision => data.decisionIds.includes(decision.id))
-        .flatMap(decision => decision.demandes?.map(d => d.demande.id) || [])
+        .flatMap(decision => decision.demandes?.map(d => d.demandeId).filter(id => id) || [])
       
       const cleanedData = {
         type: data.type,
@@ -123,6 +126,9 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
         diligences: data.diligenceId ? [data.diligenceId] : []
       }
 
+      console.log('=== DEBUG: Cleaned data to send ===');
+      console.log(cleanedData);
+      
       await onSubmit(cleanedData)
       onClose()
     } catch (error) {

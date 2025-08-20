@@ -36,6 +36,7 @@ model User {
   decisionsCrees   Decision[]  @relation("DecisionCreateur")
   decisionsModifiees Decision[] @relation("DecisionModificateur")
   conventions      Convention[]
+  conventionsModifiees Convention[] @relation("ConventionModificateur")
   paiements        Paiement[]
   avocatsCrees     Avocat[]    @relation("AvocatCreateur")
   avocatsModifies  Avocat[]    @relation("AvocatModificateur")
@@ -163,10 +164,16 @@ model Decision {
 }
 
 model Convention {
-  id              String    @id @default(cuid())
-  date            DateTime  @default(now())
-  montantHT       Float
-  documentGenere  String?   // Path vers le document généré
+  id                          String    @id @default(cuid())
+  numero                      Int       @unique // Auto-incrémenté à partir de 1
+  type                        String    // CONVENTION | AVENANT
+  victimeOuMisEnCause         String    // VICTIME | MIS_EN_CAUSE
+  instance                    String    // Instance judiciaire
+  montantHT                   Float     // Montant HT en euros
+  montantHTGagePrecedemment   Float?    // Pour les avenants seulement
+  dateCreation               DateTime  @default(now())
+  dateRetourSigne            DateTime? // Date de retour de la convention signée par l'avocat
+  documentGenere             String?   // Path vers le document généré
   
   // Relations
   dossier         Dossier   @relation(fields: [dossierId], references: [id])
@@ -175,6 +182,8 @@ model Convention {
   avocatId        String
   creePar         User      @relation(fields: [creeParId], references: [id])
   creeParId       String
+  modifiePar      User?     @relation("ConventionModificateur", fields: [modifieParId], references: [id])
+  modifieParId    String?
   demandes        ConventionDemande[]
   diligences      ConventionDiligence[]
   paiements       Paiement[]

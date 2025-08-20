@@ -16,6 +16,7 @@ import PCEPage from '@/pages/PCE'
 import VisaPage from '@/pages/Visa'
 import DiligencesPage from '@/pages/Diligences'
 import Decisions from '@/pages/Decisions'
+import Conventions from '@/pages/Conventions'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -48,7 +49,7 @@ function App() {
           <Route path="dossiers" element={<Dossiers />} />
           <Route path="dossiers/:id" element={<DossierDetail />} />
           <Route path="decisions" element={<Decisions />} />
-          <Route path="conventions" element={<PlaceholderPage title="Conventions" />} />
+          <Route path="conventions" element={<Conventions />} />
           <Route path="paiements" element={<PlaceholderPage title="Paiements" />} />
           <Route path="avocats" element={<Avocats />} />
           <Route path="revue" element={<PlaceholderPage title="Revue" />} />

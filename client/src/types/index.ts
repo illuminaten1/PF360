@@ -101,8 +101,10 @@ export interface Demande {
   conventions?: Array<{
     convention: {
       id: string
+      numero: number
+      type: 'CONVENTION' | 'AVENANT'
       montantHT: number
-      date: string
+      dateCreation: string
       avocat: {
         nom: string
         prenom?: string
@@ -170,8 +172,15 @@ export interface Dossier {
   }>
   conventions: Array<{
     id: string
+    numero: number
+    type: 'CONVENTION' | 'AVENANT'
+    victimeOuMisEnCause: 'VICTIME' | 'MIS_EN_CAUSE'
+    instance: string
     montantHT: number
-    date: string
+    montantHTGagePrecedemment?: number
+    dateCreation: string
+    dateRetourSigne?: string
+    documentGenere?: string
     avocat: {
       id: string
       nom: string
@@ -414,6 +423,70 @@ export interface Decision {
       prenom: string
       numeroDS: string
     }
+  }>
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Convention {
+  id: string
+  numero: number
+  type: 'CONVENTION' | 'AVENANT'
+  victimeOuMisEnCause: 'VICTIME' | 'MIS_EN_CAUSE'
+  instance: string
+  montantHT: number
+  montantHTGagePrecedemment?: number
+  dateCreation: string
+  dateRetourSigne?: string
+  documentGenere?: string
+  dossier: {
+    numero: string
+    nomDossier?: string
+    notes?: string
+  }
+  avocat: {
+    id: string
+    nom: string
+    prenom?: string
+    region?: string
+    adressePostale?: string
+    telephonePublic1?: string
+    email?: string
+  }
+  creePar: {
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  modifiePar?: {
+    nom: string
+    prenom: string
+    grade?: string
+  }
+  demandes: Array<{
+    demande: {
+      id: string
+      numeroDS: string
+      nom: string
+      prenom: string
+      type: 'VICTIME' | 'MIS_EN_CAUSE'
+      grade?: string
+      branche?: string
+    }
+  }>
+  diligences: Array<{
+    diligence: {
+      id: string
+      nom: string
+      details: string
+    }
+  }>
+  paiements?: Array<{
+    id: string
+    facture?: string
+    montantHT: number
+    montantTTC: number
+    createdAt: string
   }>
   createdAt: string
   updatedAt: string

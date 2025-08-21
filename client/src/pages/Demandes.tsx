@@ -16,6 +16,7 @@ interface DemandesStats {
   demandesNonAffecteesAnnee: number
   demandesSansDecision: number
   demandesNonAffecteesToday: number
+  mesDemandes: number
 }
 
 const Demandes: React.FC = () => {
@@ -214,6 +215,19 @@ const Demandes: React.FC = () => {
     }
   }
 
+  const applyMyDemandesFilter = () => {
+    if (tableRef.current && user) {
+      const userFullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.trim()
+      
+      tableRef.current.setColumnFilters([
+        {
+          id: 'assigneA',
+          value: [userFullName]
+        }
+      ])
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -237,6 +251,19 @@ const Demandes: React.FC = () => {
         {stats && (
           <div className="flex flex-col gap-6 mb-6">
             <div className="flex flex-col md:flex-row gap-6">
+              {/* Mes demandes - Section séparée */}
+              <div className="md:w-64">
+                <div className="text-sm font-medium text-gray-700 mb-3">Personnel</div>
+                <div 
+                  className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-indigo-200"
+                  onClick={applyMyDemandesFilter}
+                  title="Cliquer pour filtrer toutes mes demandes assignées"
+                >
+                  <div className="text-2xl font-bold text-indigo-600">{stats.mesDemandes}</div>
+                  <div className="text-sm text-gray-600">Mes demandes</div>
+                </div>
+              </div>
+
               {/* Statistiques de l'année */}
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>

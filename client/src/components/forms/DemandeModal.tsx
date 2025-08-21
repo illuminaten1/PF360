@@ -15,7 +15,7 @@ const demandeSchema = z.object({
   
   // Infos militaires
   nigend: z.string().optional(),
-  grade: z.string().min(1, 'Grade requis'),
+  gradeId: z.string().min(1, 'Grade requis'),
   statutDemandeur: z.string().min(1, 'Statut du demandeur requis'),
   branche: z.string().optional(),
   formationAdministrative: z.string().optional(),
@@ -104,7 +104,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       numeroDS: '',
       type: 'VICTIME',
       nigend: '',
-      grade: '',
+      gradeId: '',
       statutDemandeur: '',
       branche: '',
       formationAdministrative: '',
@@ -166,7 +166,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           numeroDS: demande.numeroDS,
           type: demande.type as 'VICTIME' | 'MIS_EN_CAUSE',
           nigend: demande.nigend || '',
-          grade: demande.grade || '',
+          gradeId: demande.grade?.id || '',
           statutDemandeur: demande.statutDemandeur || '',
           branche: demande.branche || '',
           formationAdministrative: demande.formationAdministrative || '',
@@ -204,7 +204,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           numeroDS: '',
           type: 'VICTIME',
           nigend: '',
-          grade: '',
+          gradeId: '',
           statutDemandeur: '',
           branche: '',
           formationAdministrative: '',
@@ -403,14 +403,14 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           Grade <span className="text-red-500">*</span>
                         </label>
                         <GradeSelector
-                          value={watch('grade')}
-                          onChange={(value) => setValue('grade', value)}
+                          value={watch('gradeId')}
+                          onChange={(value) => setValue('gradeId', value)}
                           disabled={isSubmitting}
                           required
                           className="input w-full"
                         />
-                        {errors.grade && (
-                          <p className="mt-1 text-sm text-red-600">{errors.grade.message}</p>
+                        {errors.gradeId && (
+                          <p className="mt-1 text-sm text-red-600">{errors.gradeId.message}</p>
                         )}
                       </div>
 

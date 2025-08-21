@@ -1126,7 +1126,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
       />
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={{ minHeight: '400px' }}>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             {table.getHeaderGroups().map(headerGroup => (
@@ -1196,7 +1196,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
               </tr>
             ))}
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200" style={{ minHeight: '200px' }}>
+          <tbody className="bg-white divide-y divide-gray-200">
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td 

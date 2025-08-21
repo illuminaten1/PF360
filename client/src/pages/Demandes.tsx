@@ -238,18 +238,20 @@ const Demandes: React.FC = () => {
         demande={selectedDemande}
       />
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCloseDeleteModal}
-        onConfirm={handleConfirmDelete}
-        itemName={selectedDemande ? `${selectedDemande.grade ? `${selectedDemande.grade} ` : ''}${selectedDemande.prenom} ${selectedDemande.nom}` : ''}
-        itemIdentifier={selectedDemande?.numeroDS || ''}
-        itemType="la demande"
-        title="Supprimer la demande"
-        message={selectedDemande ? `Cette action supprimera définitivement la demande effectuée par ${selectedDemande.prenom} ${selectedDemande.nom}. Cette action ne peut pas être annulée.` : ''}
-        confirmButtonText="Supprimer la demande"
-        isLoading={deleteDemandeMutation.isPending}
-      />
+      {selectedDemande && (
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+          itemName={`${selectedDemande.grade?.gradeAbrege ? `${selectedDemande.grade.gradeAbrege} ` : ''}${selectedDemande.prenom} ${selectedDemande.nom}`}
+          itemIdentifier={selectedDemande.numeroDS || 'N/A'}
+          itemType="la demande"
+          title="Supprimer la demande"
+          message={`Cette action supprimera définitivement la demande n°${selectedDemande.numeroDS} effectuée par ${selectedDemande.grade?.gradeAbrege ? `${selectedDemande.grade.gradeAbrege} ` : ''}${selectedDemande.prenom} ${selectedDemande.nom}. Cette action ne peut pas être annulée.`}
+          confirmButtonText="Supprimer la demande"
+          isLoading={deleteDemandeMutation.isPending}
+        />
+      )}
     </div>
   )
 }

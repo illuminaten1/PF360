@@ -34,14 +34,15 @@ interface CalendrierAudiencesProps {
 
 const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '' }) => {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [activeStartDate, setActiveStartDate] = useState(new Date())
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const navigate = useNavigate()
 
   const { data: audiences = [], isLoading } = useQuery<Audience[]>({
-    queryKey: ['my-audiences', currentDate.getMonth() + 1, currentDate.getFullYear()],
+    queryKey: ['my-audiences', activeStartDate.getMonth() + 1, activeStartDate.getFullYear()],
     queryFn: async () => {
-      const response = await api.get(`/demandes/my-audiences?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`)
+      const response = await api.get(`/demandes/my-audiences?month=${activeStartDate.getMonth() + 1}&year=${activeStartDate.getFullYear()}`)
       return response.data
     }
   })
@@ -107,7 +108,7 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
   return (
     <div className={`bg-white rounded-lg shadow p-6 ${className}`}>
       <h3 className="text-lg font-medium text-gray-900 mb-4">
-        Mes audiences - {dayjs(currentDate).format('MMMM YYYY')}
+        Mes audiences - {dayjs(activeStartDate).format('MMMM YYYY')}
       </h3>
       
       <div className="space-y-4">
@@ -115,6 +116,16 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
           <Calendar
             value={currentDate}
             onChange={(value) => setCurrentDate(value as Date)}
+            onActiveStartDateChange={({ activeStartDate }) => {
+              if (activeStartDate) {
+                setActiveStartDate(activeStartDate)
+                // Si on change de mois, garder le jour 1 du nouveau mois comme date sélectionnée
+                if (activeStartDate.getMonth() !== currentDate.getMonth() || 
+                    activeStartDate.getFullYear() !== currentDate.getFullYear()) {
+                  setCurrentDate(new Date(activeStartDate.getFullYear(), activeStartDate.getMonth(), 1))
+                }
+              }
+            }}
             tileContent={tileContent}
             tileClassName={tileClassName}
             locale="fr-FR"

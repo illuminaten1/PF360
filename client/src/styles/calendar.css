@@ -69,9 +69,30 @@
   color: #9ca3af;
 }
 
-.calendar-container .react-calendar__month-view__days__day--active {
-  background-color: #dbeafe;
-  border-color: #3b82f6;
+/* Neutraliser la couleur rouge des week-ends et autres jours problématiques */
+.calendar-container .react-calendar__month-view__days__day--weekend {
+  color: #374151 !important;
+}
+
+.calendar-container .react-calendar__tile--active {
+  background-color: #3b82f6 !important;
+  border-color: #1d4ed8 !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.calendar-container .react-calendar__tile--active:enabled:hover,
+.calendar-container .react-calendar__tile--active:enabled:focus {
+  background-color: #2563eb !important;
+}
+
+/* Styles pour les jours sélectionnés avec des audiences */
+.calendar-container .react-calendar__tile--active .w-2.h-2.bg-blue-500 {
+  background-color: white !important;
+}
+
+.calendar-container .react-calendar__tile--active .text-blue-600 {
+  color: white !important;
 }
 
 .calendar-container .react-calendar__tile.has-audiences {

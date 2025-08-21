@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { PlusIcon, UserIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, ChevronDoubleUpIcon } from '@heroicons/react/24/outline'
 import { Grade } from '@/types'
 import api from '@/utils/api'
 import GradesTable from '@/components/tables/GradesTable'
@@ -132,7 +132,7 @@ const GradesPage: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-            <UserIcon className="w-7 h-7 mr-3 text-indigo-600" />
+            <ChevronDoubleUpIcon className="w-7 h-7 mr-3 text-indigo-600" />
             Gestion des grades
           </h1>
           <p className="text-gray-600 mt-1">Gérez les grades militaires et leur ordre</p>
@@ -161,7 +161,7 @@ const GradesPage: React.FC = () => {
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-indigo-100">
-              <UserIcon className="w-6 h-6 text-indigo-600" />
+              <ChevronDoubleUpIcon className="w-6 h-6 text-indigo-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Grades</p>

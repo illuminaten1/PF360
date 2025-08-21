@@ -53,7 +53,8 @@ model Demande {
   
   // Infos militaires
   nigend                 String?
-  grade                  String?
+  grade                  Grade?    @relation(fields: [gradeId], references: [id])
+  gradeId                String?
   statutDemandeur        String? // OG | OCTA | SOG | CSTAGN | GAV | Civil | Réserviste | Retraité | Ayant-droit
   branche                String? // GD | GM | GR | État-Major | GIE SPÉ | DG et ORG. CENTRAUX | GIGN
   formationAdministrative String? // Liste des formations administratives
@@ -390,6 +391,9 @@ model Grade {
   ordre            Int      @unique
   gradeComplet     String   @unique // Ex: Maréchal des logis-chef
   gradeAbrege      String   // Ex: MDC
+  
+  // Relations
+  demandes         Demande[]
   
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

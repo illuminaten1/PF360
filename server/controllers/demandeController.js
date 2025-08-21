@@ -110,7 +110,7 @@ const demandeSchema = z.object({
   
   // Infos militaires
   nigend: z.string().optional(),
-  grade: z.string().min(1, 'Grade requis'),
+  gradeId: z.string().min(1, 'Grade requis'),
   statutDemandeur: z.string().min(1, 'Statut du demandeur requis'),
   branche: z.string().optional(),
   formationAdministrative: z.string().optional(),
@@ -267,6 +267,14 @@ const getAllDemandes = async (req, res) => {
       prisma.demande.findMany({
         where,
         include: {
+          grade: {
+            select: {
+              id: true,
+              gradeComplet: true,
+              gradeAbrege: true,
+              ordre: true
+            }
+          },
           dossier: {
             select: {
               id: true,
@@ -365,6 +373,14 @@ const getDemandeById = async (req, res) => {
     const demande = await prisma.demande.findUnique({
       where: { id: req.params.id },
       include: {
+        grade: {
+          select: {
+            id: true,
+            gradeComplet: true,
+            gradeAbrege: true,
+            ordre: true
+          }
+        },
         dossier: {
           include: {
             sgami: true,

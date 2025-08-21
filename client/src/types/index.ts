@@ -27,7 +27,8 @@ export interface Demande {
   numeroDS: string
   type: 'VICTIME' | 'MIS_EN_CAUSE'
   nigend?: string
-  grade?: 'Général' | 'Colonel' | 'Lieutenant-colonel' | 'Chef d\'escadron' | 'Commandant' | 'Capitaine' | 'Lieutenant' | 'Sous-lieutenant' | 'Aspirant' | 'Major' | 'Adjudant-chef' | 'Adjudant' | 'Maréchal des logis-chef' | 'Gendarme' | 'Élève gendarme' | 'Maréchal des logis' | 'Brigadier-chef' | 'Brigadier' | 'Gendarme adjoint volontaire' | 'Gendarme adjoint de 2ème classe' | 'Madame' | 'Monsieur'
+  grade?: Grade
+  gradeId?: string
   statutDemandeur?: 'OG' | 'OCTA' | 'SOG' | 'CSTAGN' | 'GAV' | 'Civil' | 'Réserviste' | 'Retraité' | 'Ayant-droit'
   branche?: 'GD' | 'GM' | 'GR' | 'État-Major' | 'GIE SPÉ' | 'DG et ORG. CENTRAUX' | 'GIGN'
   formationAdministrative?: 'Auvergne-Rhône-Alpes' | 'Bourgogne-Franche-Comté' | 'Bretagne' | 'Centre-Val-de-Loire' | 'Corse' | 'Grand Est' | 'Hauts-de-France' | 'Ile-de-France' | 'Nouvelle-Aquitaine' | 'Normandie' | 'Occitanie' | 'Pays-de-la-Loire' | 'Provence-Alpes-Côte-d\'Azur' | 'Guadeloupe' | 'Guyane' | 'Martinique' | 'Mayotte' | 'Nouvelle-Calédonie' | 'Wallis-et-Futuna' | 'Polynésie française' | 'La Réunion' | 'Saint Barthélémy / Saint-Martin' | 'Saint-Pierre-et-Miquelon' | 'Garde républicaine' | 'IGAG' | 'IGGN' | 'DGGN' | 'GIGN' | 'COMSOPGN' | 'PJGN' | 'CEGN' | 'CGOM' | 'CRJ' | 'ANFSI' | 'COSSEN' | 'COMCYBER-MI' | 'CESAN' | 'SAILMI' | 'GSAN' | 'GTA' | 'GARM' | 'CFAGN' | 'GMAR' | 'GAIR' | 'AUTRE'

@@ -717,18 +717,19 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       },
       // 4. grade
       {
-        accessorKey: 'grade',
+        id: 'grade',
         header: 'Grade',
+        accessorFn: (row) => row.grade?.gradeAbrege || '-',
         cell: ({ getValue }) => (
-          <div className="text-sm text-gray-900">
-            {getValue<string>() || '-'}
+          <div className="text-sm text-gray-900 font-mono">
+            {getValue<string>()}
           </div>
         ),
         enableColumnFilter: true,
         filterFn: (row, _columnId, filterValue: string[]) => {
           if (!filterValue || filterValue.length === 0) return true
           
-          const grade = row.getValue('grade') as string
+          const grade = row.grade?.gradeAbrege
           return filterValue.includes(grade || '')
         }
       },

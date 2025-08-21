@@ -38,7 +38,7 @@ const GradeSelector: React.FC<GradeSelectorProps> = ({
     >
       <option value="">{isLoading ? 'Chargement...' : placeholder}</option>
       {grades?.map((grade) => (
-        <option key={grade.id} value={grade.gradeComplet}>
+        <option key={grade.id} value={grade.id}>
           {grade.gradeComplet}
         </option>
       ))}

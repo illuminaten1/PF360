@@ -89,23 +89,9 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
           <Calendar
             value={currentDate}
             onChange={(value) => setCurrentDate(value as Date)}
-            onActiveStartDateChange={({ activeStartDate }) => {
-              if (activeStartDate) {
-                setCurrentDate(activeStartDate)
-              }
-            }}
             tileContent={tileContent}
             tileClassName={tileClassName}
             locale="fr-FR"
-            className="custom-calendar"
-            showNavigation={true}
-            navigationLabel={({ date }) => 
-              dayjs(date).format('MMMM YYYY')
-            }
-            prevLabel="‹"
-            nextLabel="›"
-            prev2Label="«"
-            next2Label="»"
           />
         </div>
 

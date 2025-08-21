@@ -1,17 +1,12 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-hot-toast'
-import GradesTable from '../components/tables/GradesTable'
-import DraggableGradesTable from '../components/tables/DraggableGradesTable'
-import GradeModal from '../components/forms/GradeModal'
+import toast from 'react-hot-toast'
+import { PlusIcon, UserIcon } from '@heroicons/react/24/outline'
 import { Grade } from '@/types'
-import { 
-  PlusIcon, 
-  UserIcon,
-  ArrowsUpDownIcon,
-  TableCellsIcon,
-  TrashIcon
-} from '@heroicons/react/24/outline'
+import api from '@/utils/api'
+import GradesTable from '@/components/tables/GradesTable'
+import DraggableGradesTable from '@/components/tables/DraggableGradesTable'
+import GradeModal from '@/components/forms/GradeModal'
 
 interface GradeStats {
   totalGrades: number
@@ -24,266 +19,187 @@ const GradesPage: React.FC = () => {
 
   const queryClient = useQueryClient()
 
-  // Queries
-  const { data: grades = [], isLoading } = useQuery({
-    queryKey: ['grades'],
+  const { data: gradeData, isLoading } = useQuery({
+    queryKey: ['grades-all'],
     queryFn: async () => {
-      const response = await fetch('/api/grades')
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des grades')
-      }
-      return response.json()
+      const response = await api.get('/grades')
+      return response.data
     }
   })
 
-  const { data: stats } = useQuery<GradeStats>({
+  const { data: stats } = useQuery({
     queryKey: ['grades-stats'],
     queryFn: async () => {
-      const response = await fetch('/api/grades/stats')
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des statistiques')
-      }
-      return response.json()
+      const response = await api.get('/grades/stats')
+      return response.data
     }
   })
 
-  // Mutations
-  const createMutation = useMutation({
+  const createGradeMutation = useMutation({
     mutationFn: async (gradeData: Partial<Grade>) => {
-      const response = await fetch('/api/grades', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(gradeData)
-      })
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erreur lors de la création')
-      }
-      return response.json()
+      const response = await api.post('/grades', gradeData)
+      return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grades'] })
+      queryClient.invalidateQueries({ queryKey: ['grades-all'] })
       queryClient.invalidateQueries({ queryKey: ['grades-stats'] })
       setIsModalOpen(false)
       setSelectedGrade(null)
       toast.success('Grade créé avec succès')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Erreur lors de la création du grade')
     }
   })
 
-  const updateMutation = useMutation({
+  const updateGradeMutation = useMutation({
     mutationFn: async ({ id, ...gradeData }: Partial<Grade> & { id: string }) => {
-      const response = await fetch(`/api/grades/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(gradeData)
-      })
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erreur lors de la modification')
-      }
-      return response.json()
+      const response = await api.put(`/grades/${id}`, gradeData)
+      return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grades'] })
+      queryClient.invalidateQueries({ queryKey: ['grades-all'] })
+      queryClient.invalidateQueries({ queryKey: ['grades-stats'] })
       setIsModalOpen(false)
       setSelectedGrade(null)
       toast.success('Grade modifié avec succès')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Erreur lors de la modification du grade')
     }
   })
 
-  const deleteMutation = useMutation({
+  const deleteGradeMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/grades/${id}`, {
-        method: 'DELETE'
-      })
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erreur lors de la suppression')
-      }
-      return response.json()
+      await api.delete(`/grades/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grades'] })
+      queryClient.invalidateQueries({ queryKey: ['grades-all'] })
       queryClient.invalidateQueries({ queryKey: ['grades-stats'] })
       toast.success('Grade supprimé avec succès')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Erreur lors de la suppression du grade')
     }
   })
 
-  const reorderMutation = useMutation({
+  const reorderGradeMutation = useMutation({
     mutationFn: async (gradesList: Grade[]) => {
-      const response = await fetch('/api/grades/reorder', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gradesList })
-      })
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erreur lors de la réorganisation')
-      }
-      return response.json()
+      const response = await api.put('/grades/reorder', { gradesList })
+      return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grades'] })
+      queryClient.invalidateQueries({ queryKey: ['grades-all'] })
       toast.success('Ordre des grades mis à jour')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la réorganisation')
     }
   })
 
-  const handleSubmit = (gradeData: Partial<Grade>) => {
-    if (selectedGrade) {
-      updateMutation.mutate({ ...gradeData, id: selectedGrade.id })
-    } else {
-      createMutation.mutate(gradeData)
-    }
-  }
-
-  const handleEdit = (grade: Grade) => {
-    setSelectedGrade(grade)
-    setIsModalOpen(true)
-  }
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce grade ?')) {
-      deleteMutation.mutate(id)
-    }
-  }
-
-  const handleReorder = (newOrder: Grade[]) => {
-    reorderMutation.mutate(newOrder)
-  }
-
-  const openCreateModal = () => {
+  const handleCreateGrade = () => {
     setSelectedGrade(null)
     setIsModalOpen(true)
   }
 
+  const handleEditGrade = (grade: Grade) => {
+    setSelectedGrade(grade)
+    setIsModalOpen(true)
+  }
+
+  const handleDeleteGrade = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce grade ? Cette action est irréversible.')) {
+      deleteGradeMutation.mutate(id)
+    }
+  }
+
+  const handleSubmit = (gradeData: Partial<Grade>) => {
+    if (selectedGrade) {
+      updateGradeMutation.mutate({ ...gradeData, id: selectedGrade.id })
+    } else {
+      createGradeMutation.mutate(gradeData)
+    }
+  }
+
+  const handleReorder = (newOrder: Grade[]) => {
+    reorderGradeMutation.mutate(newOrder)
+  }
+
+  const gradeList = gradeData || []
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between">
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des grades</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Gérez les grades et leur ordre d'apparition dans l'application
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <UserIcon className="w-7 h-7 mr-3 text-indigo-600" />
+            Gestion des grades
+          </h1>
+          <p className="text-gray-600 mt-1">Gérez les grades militaires et leur ordre</p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="flex items-center space-x-3">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={useDraggableTable}
+              onChange={(e) => setUseDraggableTable(e.target.checked)}
+              className="mr-2"
+            />
+            <span className="text-sm text-gray-600">Mode réorganisation</span>
+          </label>
           <button
-            type="button"
-            onClick={openCreateModal}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onClick={handleCreateGrade}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
           >
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Nouveau grade
+            <PlusIcon className="w-5 h-5" />
+            <span>Nouveau grade</span>
           </button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <UserIcon className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total des grades
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats?.totalGrades || 0}
-                  </dd>
-                </dl>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-indigo-100">
+              <UserIcon className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Total Grades</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats?.totalGrades || 0}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Table Controls */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="sm:flex sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Mode d'affichage
-              </h3>
-              <div className="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Choisissez le mode d'affichage des grades.</p>
-              </div>
-            </div>
-            <div className="mt-5 sm:mt-0 sm:ml-6 sm:flex-shrink-0 sm:flex sm:items-center">
-              <div className="flex rounded-md shadow-sm">
-                <button
-                  onClick={() => setUseDraggableTable(false)}
-                  className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                    !useDraggableTable
-                      ? 'bg-blue-50 border-blue-200 text-blue-700'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <TableCellsIcon className="h-4 w-4 mr-2" />
-                  Tableau
-                </button>
-                <button
-                  onClick={() => setUseDraggableTable(true)}
-                  className={`relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                    useDraggableTable
-                      ? 'bg-blue-50 border-blue-200 text-blue-700'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <ArrowsUpDownIcon className="h-4 w-4 mr-2" />
-                  Réorganiser
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Table */}
       {useDraggableTable ? (
         <DraggableGradesTable
-          data={grades}
+          data={gradeList}
           loading={isLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={handleEditGrade}
+          onDelete={handleDeleteGrade}
           onReorder={handleReorder}
         />
       ) : (
         <GradesTable
-          data={grades}
+          data={gradeList}
           loading={isLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={handleEditGrade}
+          onDelete={handleDeleteGrade}
         />
       )}
 
-      {/* Modal */}
-      <GradeModal
-        grade={selectedGrade}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setSelectedGrade(null)
-        }}
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
-      />
+      {isModalOpen && (
+        <GradeModal
+          grade={selectedGrade}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedGrade(null)
+          }}
+          onSubmit={handleSubmit}
+          isSubmitting={createGradeMutation.isPending || updateGradeMutation.isPending}
+        />
+      )}
     </div>
   )
 }

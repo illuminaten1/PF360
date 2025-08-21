@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, forwardRef, useImperativeHandle } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   useReactTable,
@@ -46,6 +46,11 @@ interface DemandesTableProps {
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
   canDelete?: boolean
+}
+
+export interface DemandesTableRef {
+  setColumnFilters: (filters: any[]) => void
+  clearAllFilters: () => void
 }
 
 function Filter({ column }: { column: any }) {
@@ -561,7 +566,7 @@ function DateRangeFilter({ column }: { column: any }) {
   )
 }
 
-const DemandesTable: React.FC<DemandesTableProps> = ({
+const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({ 
   data,
   loading = false,
   onView,
@@ -569,7 +574,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   onDelete,
   onAddToDossier,
   canDelete = true
-}) => {
+}, ref) => {
   const navigate = useNavigate()
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'dateReception', desc: true }
@@ -1088,6 +1093,17 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     }
   })
 
+  // Expose les méthodes via la ref
+  useImperativeHandle(ref, () => ({
+    setColumnFilters: (filters: any[]) => {
+      setColumnFilters(filters)
+    },
+    clearAllFilters: () => {
+      setColumnFilters([])
+      setGlobalFilter('')
+    }
+  }), [setColumnFilters, setGlobalFilter])
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow">
@@ -1296,6 +1312,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
       />
     </div>
   )
-}
+})
+
+DemandesTable.displayName = 'DemandesTable'
 
 export default DemandesTable

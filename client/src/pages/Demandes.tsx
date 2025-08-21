@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/utils/api'
-import DemandesTable from '@/components/tables/DemandesTable'
+import DemandesTable, { DemandesTableRef } from '@/components/tables/DemandesTable'
 import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
@@ -24,6 +24,7 @@ const Demandes: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const { user } = useAuth()
+  const tableRef = useRef<DemandesTableRef>(null)
 
   const queryClient = useQueryClient()
 
@@ -149,6 +150,70 @@ const Demandes: React.FC = () => {
     }
   }
 
+  // Fonctions pour appliquer les filtres depuis les statistiques
+  const applyYearFilter = () => {
+    if (tableRef.current) {
+      const currentYear = new Date().getFullYear()
+      const startOfYear = `${currentYear}-01-01`
+      
+      tableRef.current.setColumnFilters([
+        {
+          id: 'dateReception',
+          value: { from: startOfYear }
+        }
+      ])
+    }
+  }
+
+
+  const applyUnassignedYearFilter = () => {
+    if (tableRef.current) {
+      const currentYear = new Date().getFullYear()
+      const startOfYear = `${currentYear}-01-01`
+      
+      tableRef.current.setColumnFilters([
+        {
+          id: 'dateReception',
+          value: { from: startOfYear }
+        },
+        {
+          id: 'assigneA',
+          value: ['Non assigné']
+        }
+      ])
+    }
+  }
+
+  const applyTodayFilter = () => {
+    if (tableRef.current) {
+      const today = new Date().toISOString().split('T')[0]
+      
+      tableRef.current.setColumnFilters([
+        {
+          id: 'dateReception',
+          value: { from: today, to: today }
+        }
+      ])
+    }
+  }
+
+  const applyTodayUnassignedFilter = () => {
+    if (tableRef.current) {
+      const today = new Date().toISOString().split('T')[0]
+      
+      tableRef.current.setColumnFilters([
+        {
+          id: 'dateReception',
+          value: { from: today, to: today }
+        },
+        {
+          id: 'assigneA',
+          value: ['Non assigné']
+        }
+      ])
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -170,45 +235,71 @@ const Demandes: React.FC = () => {
 
         {/* Stats */}
         {stats && (
-          <div className="flex flex-col md:flex-row gap-6 mb-6">
-            {/* Statistiques de l'année */}
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
-                  <div className="text-sm text-gray-600">Total</div>
+          <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Statistiques de l'année */}
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div 
+                    className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-blue-200"
+                    onClick={applyYearFilter}
+                    title="Cliquer pour filtrer les demandes de l'année"
+                  >
+                    <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
+                    <div className="text-sm text-gray-600">Total</div>
+                  </div>
+                  <div 
+                    className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-red-200"
+                    onClick={applyUnassignedYearFilter}
+                    title="Cliquer pour filtrer les demandes non affectées de l'année"
+                  >
+                    <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesAnnee}</div>
+                    <div className="text-sm text-gray-600">Non affectées</div>
+                  </div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="text-2xl font-bold text-purple-600">{stats.demandesSansDecision}</div>
-                  <div className="text-sm text-gray-600">Sans décision</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesAnnee}</div>
-                  <div className="text-sm text-gray-600">Non affectées</div>
+              </div>
+              
+              {/* Statistiques actuelles */}
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-700 mb-3">Aujourd'hui</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div 
+                    className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-green-200"
+                    onClick={applyTodayFilter}
+                    title="Cliquer pour filtrer les demandes reçues aujourd'hui"
+                  >
+                    <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
+                    <div className="text-sm text-gray-600">Reçues</div>
+                  </div>
+                  <div 
+                    className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-red-200"
+                    onClick={applyTodayUnassignedFilter}
+                    title="Cliquer pour filtrer les demandes non affectées d'aujourd'hui"
+                  >
+                    <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesToday}</div>
+                    <div className="text-sm text-gray-600">Non affectées</div>
+                  </div>
                 </div>
               </div>
             </div>
             
-            {/* Statistiques actuelles */}
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-700 mb-3">Aujourd'hui</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-                  <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
-                  <div className="text-sm text-gray-600">Reçues</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
-                  <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesToday}</div>
-                  <div className="text-sm text-gray-600">Non affectées</div>
-                </div>
-              </div>
+            {/* Bouton pour effacer les filtres */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => tableRef.current?.clearAllFilters()}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
+                title="Effacer tous les filtres et afficher toutes les demandes"
+              >
+                Effacer tous les filtres
+              </button>
             </div>
           </div>
         )}
       </div>
 
       <DemandesTable
+        ref={tableRef}
         data={demandes}
         loading={isLoading}
         onView={handleViewDemande}

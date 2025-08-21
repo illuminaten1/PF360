@@ -33,7 +33,8 @@ const createConventionSchema = z.object({
   avocatId: z.string().min(1, "L'avocat est requis"),
   diligenceId: z.string().optional(),
   dateRetourSigne: z.string().optional(),
-  decisionIds: z.array(z.string()).min(1, "Au moins une décision doit être sélectionnée")
+  decisionIds: z.array(z.string()).min(1, "Au moins une décision doit être sélectionnée"),
+  demandeIds: z.array(z.string()).min(1, "Au moins un demandeur doit être sélectionné")
 })
 
 type CreateConventionFormData = z.infer<typeof createConventionSchema>
@@ -65,6 +66,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
   const selectedType = watch('type')
   const selectedVictimeOuMisEnCause = watch('victimeOuMisEnCause')
   const selectedDecisionIds = watch('decisionIds') || []
+  const selectedDemandeIds = watch('demandeIds') || []
 
   // Fetch avocats
   const { data: avocats = [] } = useQuery({
@@ -97,7 +99,8 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
           avocatId: '',
           diligenceId: '',
           dateRetourSigne: '',
-          decisionIds: []
+          decisionIds: [],
+          demandeIds: []
         })
       }, 0)
     }
@@ -108,10 +111,8 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
       console.log('=== DEBUG: Form submit triggered ===');
       console.log('Form data:', data);
       
-      // Get demande IDs from selected decisions
-      const demandeIds = dossier.decisions
-        .filter(decision => data.decisionIds.includes(decision.id))
-        .flatMap(decision => decision.demandes?.map(d => d.demandeId).filter(id => id) || [])
+      // Use the selected demande IDs from the form
+      const demandeIds = data.demandeIds
       
       const cleanedData = {
         type: data.type,
@@ -151,7 +152,46 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
 
   const handleDeselectAllDecisions = () => {
     setValue('decisionIds', [])
+    setValue('demandeIds', [])
   }
+
+  // Get available demandeurs based on selected decisions
+  const availableDemandeurs = dossier.decisions
+    .filter(decision => selectedDecisionIds.includes(decision.id))
+    .flatMap(decision => decision.demandes || [])
+    .reduce((acc, demandeRel) => {
+      const key = demandeRel.demandeId
+      if (!acc.find(d => d.demandeId === key)) {
+        acc.push(demandeRel)
+      }
+      return acc
+    }, [] as any[])
+
+  const handleDemandeToggle = (demandeId: string) => {
+    const currentIds = selectedDemandeIds || []
+    const newIds = currentIds.includes(demandeId)
+      ? currentIds.filter(id => id !== demandeId)
+      : [...currentIds, demandeId]
+    setValue('demandeIds', newIds)
+  }
+
+  const handleSelectAllDemandeurs = () => {
+    const allDemandeIds = availableDemandeurs.map(d => d.demandeId)
+    setValue('demandeIds', allDemandeIds)
+  }
+
+  const handleDeselectAllDemandeurs = () => {
+    setValue('demandeIds', [])
+  }
+
+  // Clear selected demandeurs when decisions change
+  React.useEffect(() => {
+    const currentAvailableIds = availableDemandeurs.map(d => d.demandeId)
+    const filteredDemandeIds = selectedDemandeIds.filter(id => currentAvailableIds.includes(id))
+    if (filteredDemandeIds.length !== selectedDemandeIds.length) {
+      setValue('demandeIds', filteredDemandeIds)
+    }
+  }, [selectedDecisionIds, setValue, availableDemandeurs])
 
   const getTypeBadge = (type: string) => {
     switch (type) {
@@ -427,8 +467,8 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Quatrième ligne : Décisions et Date de retour */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Quatrième ligne : Décisions */}
+                  <div>
                     {/* Décisions à inclure */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -500,21 +540,95 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                         {selectedDecisionIds.length} décision(s) sélectionnée(s) sur {dossier.decisions.length} dans le dossier
                       </p>
                     </div>
+                  </div>
 
-                    {/* Date de retour signée */}
+                  {/* Cinquième ligne : Demandeurs concernés */}
+                  {selectedDecisionIds.length > 0 && (
                     <div>
-                      <label htmlFor="dateRetourSigne" className="block text-sm font-medium text-gray-700 mb-2">
-                        Date de retour signée
-                      </label>
-                      <input
-                        type="date"
-                        {...register('dateRetourSigne')}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Laissez vide si pas encore signée
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Demandeurs concernés *
+                        </label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSelectAllDemandeurs}
+                            className="text-xs text-blue-600 hover:text-blue-800 underline"
+                            disabled={availableDemandeurs.length === 0}
+                          >
+                            Tout sélectionner
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDeselectAllDemandeurs}
+                            className="text-xs text-gray-600 hover:text-gray-800 underline"
+                          >
+                            Tout désélectionner
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-100 hover:from-green-100 hover:to-emerald-200 border-2 border-green-200 rounded-lg p-4 shadow-sm transition-all h-[200px]">
+                        <div className="h-full overflow-y-auto">
+                          {availableDemandeurs.length === 0 ? (
+                            <p className="text-gray-500 text-sm text-center py-4">
+                              Sélectionnez d'abord une ou plusieurs décisions
+                            </p>
+                          ) : (
+                            <div className="space-y-2">
+                              {availableDemandeurs.map((demandeRel) => (
+                                <label key={demandeRel.demandeId} className="flex items-center space-x-3 p-3 rounded-lg bg-white border border-green-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedDemandeIds.includes(demandeRel.demandeId)}
+                                    onChange={() => handleDemandeToggle(demandeRel.demandeId)}
+                                    className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-gray-900 text-sm">
+                                        {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
+                                        {demandeRel.demande.prenom} {demandeRel.demande.nom}
+                                      </span>
+                                      {demandeRel.demande.numeroDS && (
+                                        <span className="text-xs text-gray-500">
+                                          N° {demandeRel.demande.numeroDS}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {demandeRel.demande.type === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+                                    </div>
+                                  </div>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {errors.demandeIds && (
+                        <p className="mt-1 text-sm text-red-600">{errors.demandeIds.message}</p>
+                      )}
+                      <p className="mt-2 text-xs text-gray-500">
+                        {selectedDemandeIds.length} demandeur(s) sélectionné(s) sur {availableDemandeurs.length} disponible(s)
                       </p>
                     </div>
+                  )}
+
+                  {/* Sixième ligne : Date de retour signée */}
+                  <div>
+                    <label htmlFor="dateRetourSigne" className="block text-sm font-medium text-gray-700 mb-2">
+                      Date de retour signée
+                    </label>
+                    <input
+                      type="date"
+                      {...register('dateRetourSigne')}
+                      className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Laissez vide si pas encore signée
+                    </p>
                   </div>
 
                   {/* Actions */}

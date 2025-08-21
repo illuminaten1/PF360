@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
-import api from '@/utils/api'
+import CalendrierAudiences from '@/components/CalendrierAudiences'
 import {
   FolderIcon,
   DocumentTextIcon,
@@ -178,12 +178,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Activité récente</h3>
-          <div className="text-sm text-gray-500">
-            Les fonctionnalités de suivi d'activité seront disponibles prochainement.
-          </div>
-        </div>
+        <CalendrierAudiences />
 
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Actions rapides</h3>

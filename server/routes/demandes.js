@@ -7,7 +7,8 @@ const {
   updateDemande,
   deleteDemande,
   getUsers,
-  getStats
+  getStats,
+  getMyAudiences
 } = require('../controllers/demandeController');
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.use(authMiddleware);
 
 router.get('/stats', getStats);
 router.get('/users', getUsers);
+router.get('/my-audiences', getMyAudiences);
 router.get('/', getAllDemandes);
 router.post('/', createDemande);
 router.get('/:id', getDemandeById);

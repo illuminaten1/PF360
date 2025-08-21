@@ -401,6 +401,54 @@ async function main() {
   const diligenceCount = await prisma.diligence.count()
   console.log(`✅ ${diligenceCount} diligences insérées avec succès!`)
 
+  // Seed Grades data
+  console.log('🌱 Starting Grades seeding...')
+
+  const gradesData = [
+    { ordre: 1, gradeComplet: 'Général', gradeAbrege: 'GEN' },
+    { ordre: 2, gradeComplet: 'Colonel', gradeAbrege: 'COL' },
+    { ordre: 3, gradeComplet: 'Lieutenant-colonel', gradeAbrege: 'LCL' },
+    { ordre: 4, gradeComplet: "Chef d'escadron", gradeAbrege: 'CEN' },
+    { ordre: 5, gradeComplet: 'Commandant', gradeAbrege: 'CDT' },
+    { ordre: 6, gradeComplet: 'Capitaine', gradeAbrege: 'CNE' },
+    { ordre: 7, gradeComplet: 'Lieutenant', gradeAbrege: 'LTN' },
+    { ordre: 8, gradeComplet: 'Sous-lieutenant', gradeAbrege: 'SLT' },
+    { ordre: 9, gradeComplet: 'Aspirant', gradeAbrege: 'ASP' },
+    { ordre: 10, gradeComplet: 'Major', gradeAbrege: 'MAJ' },
+    { ordre: 11, gradeComplet: 'Adjudant-chef', gradeAbrege: 'ADC' },
+    { ordre: 12, gradeComplet: 'Adjudant', gradeAbrege: 'ADJ' },
+    { ordre: 13, gradeComplet: 'Maréchal des logis-chef', gradeAbrege: 'MDC' },
+    { ordre: 14, gradeComplet: 'Gendarme', gradeAbrege: 'GND' },
+    { ordre: 15, gradeComplet: 'Élève gendarme', gradeAbrege: 'ELG' },
+    { ordre: 16, gradeComplet: 'Maréchal des logis', gradeAbrege: 'MDL' },
+    { ordre: 17, gradeComplet: 'Brigadier-chef', gradeAbrege: 'BRC' },
+    { ordre: 18, gradeComplet: 'Brigadier', gradeAbrege: 'BRI' },
+    { ordre: 19, gradeComplet: 'Gendarme adjoint volontaire', gradeAbrege: 'GAV' },
+    { ordre: 20, gradeComplet: 'Gendarme adjoint de 2ème classe', gradeAbrege: 'GA2' },
+    { ordre: 21, gradeComplet: 'Madame', gradeAbrege: 'Mme' },
+    { ordre: 22, gradeComplet: 'Monsieur', gradeAbrege: 'M' }
+  ]
+
+  console.log(`🎖️  ${gradesData.length} grades à insérer...`)
+
+  // Supprimer les grades existants
+  await prisma.grade.deleteMany({})
+  console.log('🗑️  Grades existants supprimés')
+
+  // Insérer les nouveaux grades
+  for (const grade of gradesData) {
+    try {
+      await prisma.grade.create({
+        data: grade
+      })
+    } catch (error) {
+      console.error(`❌ Erreur lors de l'insertion du grade: ${grade.gradeComplet}`, error.message)
+    }
+  }
+
+  const gradeCount = await prisma.grade.count()
+  console.log(`✅ ${gradeCount} grades insérés avec succès!`)
+
   console.log('🎉 Database seeding completed!')
   console.log('')
   console.log('Login credentials:')

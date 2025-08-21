@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { Demande, Dossier } from '@/types'
 import api from '@/utils/api'
+import GradeSelector from './GradeSelector'
 
 const demandeSchema = z.object({
   numeroDS: z.string().min(1, 'Numéro DS requis'),
@@ -401,35 +402,13 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <label className="label block text-gray-700 mb-2">
                           Grade <span className="text-red-500">*</span>
                         </label>
-                        <select
-                          {...register('grade', { required: 'Grade requis' })}
-                          className="input w-full"
+                        <GradeSelector
+                          value={watch('grade')}
+                          onChange={(value) => setValue('grade', value)}
                           disabled={isSubmitting}
-                        >
-                          <option value="">-- Sélectionner un grade --</option>
-                          <option value="Général">Général</option>
-                          <option value="Colonel">Colonel</option>
-                          <option value="Lieutenant-colonel">Lieutenant-colonel</option>
-                          <option value="Chef d'escadron">Chef d'escadron</option>
-                          <option value="Commandant">Commandant</option>
-                          <option value="Capitaine">Capitaine</option>
-                          <option value="Lieutenant">Lieutenant</option>
-                          <option value="Sous-lieutenant">Sous-lieutenant</option>
-                          <option value="Aspirant">Aspirant</option>
-                          <option value="Major">Major</option>
-                          <option value="Adjudant-chef">Adjudant-chef</option>
-                          <option value="Adjudant">Adjudant</option>
-                          <option value="Maréchal des logis-chef">Maréchal des logis-chef</option>
-                          <option value="Gendarme">Gendarme</option>
-                          <option value="Élève gendarme">Élève gendarme</option>
-                          <option value="Maréchal des logis">Maréchal des logis</option>
-                          <option value="Brigadier-chef">Brigadier-chef</option>
-                          <option value="Brigadier">Brigadier</option>
-                          <option value="Gendarme adjoint volontaire">Gendarme adjoint volontaire</option>
-                          <option value="Gendarme adjoint de 2ème classe">Gendarme adjoint de 2ème classe</option>
-                          <option value="Madame">Madame</option>
-                          <option value="Monsieur">Monsieur</option>
-                        </select>
+                          required
+                          className="input w-full"
+                        />
                         {errors.grade && (
                           <p className="mt-1 text-sm text-red-600">{errors.grade.message}</p>
                         )}

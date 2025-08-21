@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import api from '@/utils/api'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
-import { EyeIcon, FolderIcon } from '@heroicons/react/24/outline'
+import { FolderIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import { Demande } from '@/types'
@@ -135,9 +135,13 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <div className="font-medium text-blue-900">
+                        <button
+                          onClick={() => handleViewDemande(audience)}
+                          className="font-medium text-blue-900 hover:text-blue-700 transition-colors cursor-pointer"
+                          title="Visualiser la demande"
+                        >
                           {audience.numeroDS}
-                        </div>
+                        </button>
                         {audience.dossier && (
                           <button
                             onClick={() => handleDossierClick(audience.dossierId!)}
@@ -158,17 +162,8 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
                         {audience.qualificationInfraction && ` • ${audience.qualificationInfraction}`}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-blue-600 font-medium">
-                        {dayjs(audience.dateAudience).format('HH:mm')}
-                      </div>
-                      <button
-                        onClick={() => handleViewDemande(audience)}
-                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Visualiser la demande"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
+                    <div className="text-sm text-blue-600 font-medium">
+                      {dayjs(audience.dateAudience).format('HH:mm')}
                     </div>
                   </div>
                 </div>

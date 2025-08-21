@@ -6,6 +6,10 @@ import { useQuery } from '@tanstack/react-query'
 import api from '@/utils/api'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
+import { EyeIcon, FolderIcon } from '@heroicons/react/24/outline'
+import { useNavigate } from 'react-router-dom'
+import DemandeViewModal from '@/components/forms/DemandeViewModal'
+import { Demande } from '@/types'
 
 dayjs.locale('fr')
 
@@ -18,6 +22,10 @@ interface Audience {
   type: 'VICTIME' | 'MIS_EN_CAUSE'
   commune?: string
   qualificationInfraction?: string
+  dossierId?: string
+  dossier?: {
+    numero: string
+  }
 }
 
 interface CalendrierAudiencesProps {
@@ -26,6 +34,9 @@ interface CalendrierAudiencesProps {
 
 const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '' }) => {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
+  const navigate = useNavigate()
 
   const { data: audiences = [], isLoading } = useQuery<Audience[]>({
     queryKey: ['my-audiences', currentDate.getMonth() + 1, currentDate.getFullYear()],
@@ -78,6 +89,21 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
 
   const selectedDateAudiences = getAudiencesForDate(currentDate)
 
+  const handleViewDemande = async (audience: Audience) => {
+    try {
+      // Récupérer la demande complète pour affichage dans le modal
+      const response = await api.get(`/demandes/${audience.id}`)
+      setSelectedDemande(response.data)
+      setIsViewModalOpen(true)
+    } catch (error) {
+      console.error('Erreur lors du chargement de la demande:', error)
+    }
+  }
+
+  const handleDossierClick = (dossierId: string) => {
+    navigate(`/dossiers/${dossierId}`)
+  }
+
   return (
     <div className={`bg-white rounded-lg shadow p-6 ${className}`}>
       <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -107,9 +133,21 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
                   className="p-3 bg-blue-50 rounded-lg border border-blue-200"
                 >
                   <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-blue-900">
-                        {audience.numeroDS}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-blue-900">
+                          {audience.numeroDS}
+                        </div>
+                        {audience.dossier && (
+                          <button
+                            onClick={() => handleDossierClick(audience.dossierId!)}
+                            className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 transition-colors flex items-center gap-1"
+                            title="Voir le dossier"
+                          >
+                            <FolderIcon className="h-3 w-3" />
+                            Dossier {audience.dossier.numero}
+                          </button>
+                        )}
                       </div>
                       <div className="text-sm text-gray-600">
                         {audience.prenom} {audience.nom}
@@ -120,8 +158,17 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
                         {audience.qualificationInfraction && ` • ${audience.qualificationInfraction}`}
                       </div>
                     </div>
-                    <div className="text-sm text-blue-600 font-medium">
-                      {dayjs(audience.dateAudience).format('HH:mm')}
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm text-blue-600 font-medium">
+                        {dayjs(audience.dateAudience).format('HH:mm')}
+                      </div>
+                      <button
+                        onClick={() => handleViewDemande(audience)}
+                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="Visualiser la demande"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -138,6 +185,14 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
         </div>
       </div>
 
+      <DemandeViewModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false)
+          setSelectedDemande(null)
+        }}
+        demande={selectedDemande}
+      />
     </div>
   )
 }

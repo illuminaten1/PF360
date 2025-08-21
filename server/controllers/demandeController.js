@@ -908,7 +908,13 @@ const getMyAudiences = async (req, res) => {
         prenom: true,
         type: true,
         commune: true,
-        qualificationInfraction: true
+        qualificationInfraction: true,
+        dossierId: true,
+        dossier: {
+          select: {
+            numero: true
+          }
+        }
       },
       orderBy: {
         dateAudience: 'asc'

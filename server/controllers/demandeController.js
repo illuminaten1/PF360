@@ -748,11 +748,18 @@ const deleteDemande = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({
+      where: {
+        // Exclure les utilisateurs désactivés
+        active: {
+          not: false
+        }
+      },
       select: {
         id: true,
         nom: true,
         prenom: true,
-        grade: true
+        grade: true,
+        active: true
       },
       orderBy: [
         { nom: 'asc' },

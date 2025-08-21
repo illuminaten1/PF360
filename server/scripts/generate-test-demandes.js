@@ -4,13 +4,7 @@ const prisma = new PrismaClient()
 
 // Données de base pour la génération aléatoire
 const types = ['VICTIME', 'MIS_EN_CAUSE']
-const grades = [
-  'Général', 'Colonel', 'Lieutenant-colonel', 'Chef d\'escadron', 'Commandant', 
-  'Capitaine', 'Lieutenant', 'Sous-lieutenant', 'Aspirant', 'Major', 
-  'Adjudant-chef', 'Adjudant', 'Maréchal des logis-chef', 'Gendarme', 
-  'Élève gendarme', 'Maréchal des logis', 'Brigadier-chef', 'Brigadier',
-  'Gendarme adjoint volontaire', 'Gendarme adjoint de 2ème classe'
-]
+// Les grades seront récupérés depuis la base de données
 const statutsDemandeur = ['OG', 'OCTA', 'SOG', 'CSTAGN', 'GAV', 'Civil', 'Réserviste', 'Retraité', 'Ayant-droit']
 const branches = ['GD', 'GM', 'GR', 'État-Major', 'GIE SPÉ', 'DG et ORG. CENTRAUX', 'GIGN']
 const positions = ['EN_SERVICE', 'HORS_SERVICE']
@@ -287,7 +281,7 @@ const generateNigend = () => {
 }
 
 // Fonction pour générer une demande aléatoire avec paramètres de dossier
-const generateRandomDemande = (year = null, dossierParams = null) => {
+const generateRandomDemande = (year = null, dossierParams = null, grades = []) => {
   const type = randomChoice(types)
   const nom = randomChoice(noms) // Noms déjà en majuscules
   const prenom = randomChoice(prenoms)
@@ -334,7 +328,7 @@ const generateRandomDemande = (year = null, dossierParams = null) => {
     type,
     // Infos militaires (optionnelles)
     nigend: hasDetails ? generateNigend().toString() : null,
-    grade: hasDetails ? randomChoice(grades) : null,
+    gradeId: hasDetails && grades.length > 0 ? randomChoice(grades).id : null,
     statutDemandeur: hasDetails ? randomChoice(statutsDemandeur) : null,
     branche: hasDetails ? randomChoice(branches) : null,
     formationAdministrative: hasDetails ? randomChoice(['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne', 'Centre-Val-de-Loire', 'Corse', 'Grand Est', 'Hauts-de-France', 'Ile-de-France', 'Nouvelle-Aquitaine', 'Normandie', 'Occitanie', 'Pays-de-la-Loire', 'Provence-Alpes-Côte-d\'Azur']) : null,
@@ -370,7 +364,7 @@ const generateRandomDemande = (year = null, dossierParams = null) => {
 }
 
 // Fonction pour générer un dossier avec ses demandes
-const generateDossier = (year = 2025, users = [], sgamis = []) => {
+const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
   // Nombre de demandes par dossier (entre 1 et 14, moyenne ~3)
   const weights = [15, 25, 20, 15, 10, 5, 3, 2, 2, 1, 1, 1, 0.5, 0.5] // Poids pour 1 à 14 demandes
   const totalWeight = weights.reduce((sum, w) => sum + w, 0)
@@ -419,7 +413,7 @@ const generateDossier = (year = 2025, users = [], sgamis = []) => {
   
   const demandes = []
   for (let i = 0; i < nbDemandes; i++) {
-    const demande = generateRandomDemande(year, dossierParams)
+    const demande = generateRandomDemande(year, dossierParams, grades)
     // Assigner la même personne à toutes les demandes du dossier
     demande.assigneAId = assignedUser.id
     demandes.push(demande)
@@ -450,10 +444,12 @@ async function main() {
   const badges = await prisma.badge.findMany()
   const users = await prisma.user.findMany({ where: { active: true } })
   const sgamis = await prisma.sgami.findMany()
+  const grades = await prisma.grade.findMany({ orderBy: { ordre: 'asc' } })
   
   console.log(`🏷️  Badges disponibles : ${badges.map(b => b.nom).join(', ')}`)
   console.log(`👥 Utilisateurs disponibles : ${users.map(u => u.identifiant).join(', ')}`)
   console.log(`🏢 SGAMI disponibles : ${sgamis.map(s => s.formatCourtNommage).join(', ')}`)
+  console.log(`🎖️  Grades disponibles : ${grades.map(g => g.gradeAbrege).join(', ')}`)
   
   if (users.length === 0) {
     console.error('❌ Aucun utilisateur trouvé ! Exécutez d\'abord le seed.')
@@ -465,13 +461,18 @@ async function main() {
     return
   }
   
+  if (grades.length === 0) {
+    console.error('❌ Aucun grade trouvé ! Exécutez d\'abord le seed.')
+    return
+  }
+  
   const dossiers = []
   let totalDemandesGenerees = 0
   
   // Génération des dossiers et leurs demandes pour 2025
   console.log(`📅 Génération des dossiers et demandes pour 2025...`)
   for (let i = 0; i < nbDossiers && totalDemandesGenerees < totalDemandes; i++) {
-    const dossier = generateDossier(2025, users, sgamis)
+    const dossier = generateDossier(2025, users, sgamis, grades)
     // Limiter le nombre de demandes si on dépasse le total souhaité
     if (totalDemandesGenerees + dossier.demandes.length > totalDemandes) {
       dossier.demandes = dossier.demandes.slice(0, totalDemandes - totalDemandesGenerees)

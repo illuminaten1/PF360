@@ -934,8 +934,30 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
             </div>
           )
         },
-        enableColumnFilter: false,
-        sortingFn: 'datetime'
+        enableColumnFilter: true,
+        sortingFn: 'datetime',
+        filterFn: (row, _columnId, filterValue: { from?: string; to?: string }) => {
+          if (!filterValue) return true
+          
+          const date = row.getValue('dateAudience') as string
+          if (!date) return false // Exclure les lignes sans date si un filtre est appliqué
+          
+          const rowDate = dayjs(date).startOf('day')
+          
+          const fromDate = filterValue.from ? dayjs(filterValue.from).startOf('day') : null
+          const toDate = filterValue.to ? dayjs(filterValue.to).startOf('day') : null
+          
+          if (fromDate && toDate) {
+            return (rowDate.isAfter(fromDate) || rowDate.isSame(fromDate)) && 
+                   (rowDate.isBefore(toDate) || rowDate.isSame(toDate))
+          } else if (fromDate) {
+            return rowDate.isAfter(fromDate) || rowDate.isSame(fromDate)
+          } else if (toDate) {
+            return rowDate.isBefore(toDate) || rowDate.isSame(toDate)
+          }
+          
+          return true
+        }
       },
       // 11. actions
       {
@@ -1184,6 +1206,8 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                           ) : header.column.id === 'dateReception' ? (
                             <DateRangeFilter column={header.column} />
                           ) : header.column.id === 'dateFaits' ? (
+                            <DateRangeFilter column={header.column} />
+                          ) : header.column.id === 'dateAudience' ? (
                             <DateRangeFilter column={header.column} />
                           ) : (
                             <Filter column={header.column} />

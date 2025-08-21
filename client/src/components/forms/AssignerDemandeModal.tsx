@@ -49,8 +49,11 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
     staleTime: 30000
   })
 
-  // Filtrer les utilisateurs basé sur la recherche
+  // Filtrer les utilisateurs basé sur la recherche et exclure les utilisateurs désactivés
   const filteredUtilisateurs = utilisateurs.filter((user: User) => {
+    // Exclure les utilisateurs désactivés (active = false)
+    if (user.active === false) return false
+    
     if (!searchTerm) return true
     const fullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.toLowerCase()
     return fullName.includes(searchTerm.toLowerCase())
@@ -193,7 +196,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                       <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-500">
                         {searchTerm 
-                          ? 'Aucun utilisateur ne correspond à la recherche'
+                          ? 'Aucun utilisateur actif ne correspond à la recherche'
                           : 'Aucun utilisateur disponible'
                         }
                       </p>

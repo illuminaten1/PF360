@@ -260,6 +260,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
                 name="mail"
                 value={formData.mail}
                 onChange={handleInputChange}
+                autoComplete="email"
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.mail ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -279,6 +280,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
                 name="telephone"
                 value={formData.telephone}
                 onChange={handleInputChange}
+                autoComplete="tel"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isSubmitting}
               />
@@ -295,6 +297,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, isOpen, onClose, onSubmit, 
               name="password"
               value={formData.password}
               onChange={handleInputChange}
+              autoComplete="new-password"
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.password ? 'border-red-500' : 'border-gray-300'
               }`}

@@ -655,7 +655,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         cell: ({ getValue, row }) => (
           <div 
             className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-            onClick={() => onView(row.original)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onView(row.original)
+            }}
           >
             {getValue<string>()}
           </div>
@@ -795,14 +798,20 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             <div className="text-sm">
               <div 
                 className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-                onClick={() => handleViewDossier(demande.dossier!.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleViewDossier(demande.dossier!.id)
+                }}
               >
                 {demande.dossier.numero}
               </div>
             </div>
           ) : (
             <button
-              onClick={() => onAddToDossier(demande)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddToDossier(demande)
+              }}
               className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
             >
               <FolderIcon className="h-4 w-4 mr-1" />
@@ -918,14 +927,20 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         cell: ({ row }) => (
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => onView(row.original)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onView(row.original)
+              }}
               className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
               title="Voir"
             >
               <EyeIcon className="h-5 w-5" />
             </button>
             <button
-              onClick={() => onEdit(row.original)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(row.original)
+              }}
               className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
               title="Modifier"
             >
@@ -933,7 +948,10 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
             </button>
             {canDelete && (
               <button
-                onClick={() => onDelete(row.original)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(row.original)
+                }}
                 className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
                 title="Supprimer"
               >

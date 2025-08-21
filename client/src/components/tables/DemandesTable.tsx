@@ -583,6 +583,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     type: true,
     grade: true,
     nom: true,
+    prenom: true,
     dateFaits: true,
     dossier: true,
     assigneA: true,
@@ -590,7 +591,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
     actions: true,
     // Colonnes masquées mais searchables
     badges: false,
-    prenom: false,
     nigend: false,
     unite: false,
     commune: false
@@ -748,7 +748,19 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         enableColumnFilter: true,
         filterFn: 'includesString'
       },
-      // 6. dateFaits
+      // 6. prenom
+      {
+        accessorKey: 'prenom',
+        header: 'Prénom',
+        cell: ({ getValue }) => (
+          <div className="text-gray-900">
+            {getValue<string>()}
+          </div>
+        ),
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      // 7. dateFaits
       {
         accessorKey: 'dateFaits',
         header: 'Date faits',
@@ -787,7 +799,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           return true
         }
       },
-      // 7. dossier
+      // 8. dossier
       {
         id: 'dossier',
         header: 'Dossier',
@@ -823,7 +835,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         filterFn: 'includesString',
         enableSorting: false
       },
-      // 8. assigneA
+      // 9. assigneA
       {
         id: 'assigneA',
         header: 'Assigné à',
@@ -881,7 +893,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           return filterValue.includes(assigneString)
         }
       },
-      // 9. dateAudience
+      // 10. dateAudience
       {
         accessorKey: 'dateAudience',
         header: 'Date audience',
@@ -920,7 +932,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         enableColumnFilter: false,
         sortingFn: 'datetime'
       },
-      // 10. actions
+      // 11. actions
       {
         id: 'actions',
         header: 'Actions',
@@ -1011,17 +1023,6 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
           
           return filterValue.some(selectedBadge => badgeNames.includes(selectedBadge))
         }
-      },
-      {
-        accessorKey: 'prenom',
-        header: 'Prénom',
-        cell: ({ getValue }) => (
-          <div className="text-gray-900">
-            {getValue<string>()}
-          </div>
-        ),
-        enableColumnFilter: true,
-        filterFn: 'includesString'
       },
       {
         accessorKey: 'nigend',

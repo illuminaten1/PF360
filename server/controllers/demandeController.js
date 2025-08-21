@@ -874,6 +874,56 @@ const getStats = async (req, res) => {
   }
 };
 
+const getMyAudiences = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    let dateFilter = {};
+    
+    if (month && year) {
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59, 999);
+      
+      dateFilter = {
+        dateAudience: {
+          gte: startDate,
+          lte: endDate
+        }
+      };
+    }
+    
+    const audiences = await prisma.demande.findMany({
+      where: {
+        assigneAId: req.user.id,
+        dateAudience: {
+          not: null
+        },
+        ...dateFilter
+      },
+      select: {
+        id: true,
+        numeroDS: true,
+        dateAudience: true,
+        nom: true,
+        prenom: true,
+        type: true,
+        commune: true,
+        qualificationInfraction: true
+      },
+      orderBy: {
+        dateAudience: 'asc'
+      }
+    });
+
+    await logAction(req.user.id, 'LIST_MY_AUDIENCES', `Consultation de mes audiences (${audiences.length} résultats)`);
+
+    res.json(audiences);
+  } catch (error) {
+    console.error('Get my audiences error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
 module.exports = {
   getAllDemandes,
   getDemandeById,
@@ -882,6 +932,7 @@ module.exports = {
   deleteDemande,
   getUsers,
   getStats,
+  getMyAudiences,
   syncDemandeBadgesFromDossier,
   syncSingleDemandeBadges
 };

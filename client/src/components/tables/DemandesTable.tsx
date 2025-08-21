@@ -721,7 +721,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         header: 'Grade',
         accessorFn: (row) => row.grade?.gradeAbrege || '-',
         cell: ({ getValue }) => (
-          <div className="text-sm text-gray-900 font-mono">
+          <div className="text-sm text-gray-900">
             {getValue<string>()}
           </div>
         ),
@@ -729,8 +729,8 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
         filterFn: (row, _columnId, filterValue: string[]) => {
           if (!filterValue || filterValue.length === 0) return true
           
-          const grade = row.grade?.gradeAbrege
-          return filterValue.includes(grade || '')
+          const grade = row.original.grade?.gradeAbrege || '-'
+          return filterValue.includes(grade)
         }
       },
       // 5. nom

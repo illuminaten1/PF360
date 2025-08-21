@@ -40,6 +40,7 @@ const adminNavigation = [
   { name: 'SGAMI', href: '/sgami', icon: CurrencyEuroIcon },
   { name: 'Badges', href: '/badges', icon: TagIcon },
   { name: 'PCE', href: '/pce', icon: DocumentTextIcon },
+  { name: 'Grades', href: '/grades', icon: UserIcon },
   { name: 'Visas', href: '/visa', icon: EyeIcon },
   { name: 'Diligences', href: '/diligences', icon: ClipboardDocumentListIcon },
   { name: 'Paramètres', href: '/parametres', icon: CogIcon },

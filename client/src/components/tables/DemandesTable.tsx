@@ -578,7 +578,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
   const [globalFilter, setGlobalFilter] = React.useState('')
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     // Colonnes visibles
-    numeroDS: true,
+    numeroDS: false,
     dateReception: true,
     type: true,
     grade: true,
@@ -1178,7 +1178,7 @@ const DemandesTable: React.FC<DemandesTableProps> = ({
               </tr>
             ) : (
               table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50">
+                <tr key={row.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onView(row.original)}>
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}

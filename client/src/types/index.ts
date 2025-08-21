@@ -361,6 +361,15 @@ export interface PCE {
   updatedAt?: string
 }
 
+export interface Grade {
+  id: string
+  ordre: number
+  gradeComplet: string
+  gradeAbrege: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface Visa {
   id: string
   typeVisa: string

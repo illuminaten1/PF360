@@ -385,6 +385,18 @@ model Pce {
   @@map("pce")
 }
 
+model Grade {
+  id               String   @id @default(cuid())
+  ordre            Int      @unique
+  gradeComplet     String   @unique // Ex: Maréchal des logis-chef
+  gradeAbrege      String   // Ex: MDC
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@map("grades")
+}
+
 model Visa {
   id                String     @id @default(cuid())
   typeVisa          String     @unique // MILITAIRE | CIVIL

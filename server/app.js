@@ -20,6 +20,7 @@ const pceRoutes = require('./routes/pce');
 const gradeRoutes = require('./routes/grades');
 const visaRoutes = require('./routes/visa');
 const diligenceRoutes = require('./routes/diligence');
+const templateRoutes = require('./routes/templates');
 const logRoutes = require('./routes/logs');
 
 const app = express();
@@ -70,6 +71,7 @@ app.use('/api/pce', pceRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/visa', visaRoutes);
 app.use('/api/diligences', diligenceRoutes);
+app.use('/api/templates', templateRoutes);
 app.use('/api/logs', logRoutes);
 
 // Health check

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+const API_BASE_URL = (import.meta.env?.VITE_API_URL as string) || 'http://localhost:3001/api'
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -36,5 +36,20 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// API Templates
+export const templatesAPI = {
+  getStatus: () => api.get('/templates/status'),
+  downloadTemplate: (templateType: string) => 
+    api.get(`/templates/${templateType}/download`, { 
+      responseType: 'blob' 
+    }),
+  uploadTemplate: (templateType: string, formData: FormData) => 
+    api.post(`/templates/${templateType}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  restoreTemplate: (templateType: string) => 
+    api.post(`/templates/${templateType}/restore`),
+}
 
 export default api

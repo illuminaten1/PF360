@@ -49,6 +49,17 @@ const communes = [
 // Fonction utilitaire pour choisir un élément aléatoire
 const randomChoice = (array) => array[Math.floor(Math.random() * array.length)]
 
+// Fonction pour éviter les week-ends (samedi = 6, dimanche = 0)
+const avoidWeekend = (date) => {
+  const day = date.getDay()
+  if (day === 0) { // Dimanche -> Lundi
+    date.setDate(date.getDate() + 1)
+  } else if (day === 6) { // Samedi -> Lundi
+    date.setDate(date.getDate() + 2)
+  }
+  return date
+}
+
 // Templates de notes pour les dossiers
 const notesTemplates = [
   {
@@ -320,7 +331,7 @@ const generateRandomDemande = (year = null, dossierParams = null, grades = []) =
   } else if (Math.random() > 0.6 && dateFaits) {
     // Générer une nouvelle date d'audience (jusqu'à 6 mois après la date des faits)
     const maxAudienceDate = new Date(dateFaits.getTime() + 6 * 30 * 24 * 60 * 60 * 1000) // +6 mois
-    dateAudience = new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime()))
+    dateAudience = avoidWeekend(new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime())))
   }
   
   return {
@@ -396,7 +407,7 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
   if (Math.random() > 0.6) {
     // L'audience peut être jusqu'à 6 mois après la date des faits
     const maxAudienceDate = new Date(dateFaits.getTime() + 6 * 30 * 24 * 60 * 60 * 1000) // +6 mois
-    dateAudienceCommune = new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime()))
+    dateAudienceCommune = avoidWeekend(new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime())))
   }
   
   const dossierParams = {

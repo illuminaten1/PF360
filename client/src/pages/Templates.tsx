@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { 
   ArrowDownTrayIcon, 
   ArrowUpTrayIcon, 
   ArrowPathIcon,
-  ExclamationTriangleIcon 
+  ExclamationTriangleIcon,
+  DocumentDuplicateIcon,
+  CheckCircleIcon,
+  CogIcon
 } from '@heroicons/react/24/outline'
 import { templatesAPI } from '@/utils/api'
 
@@ -20,8 +25,19 @@ interface Templates {
   reglement: Template
 }
 
+interface TemplateStats {
+  totalTemplates: number
+  customTemplates: number
+  defaultTemplates: number
+}
+
 const Templates: React.FC = () => {
-  const [templates, setTemplates] = useState<Templates>({
+  const [showRestoreModal, setShowRestoreModal] = useState(false)
+  const [templateToRestore, setTemplateToRestore] = useState<keyof Templates | ''>('')
+  
+  const queryClient = useQueryClient()
+  
+  const TEMPLATE_CONFIG: Templates = {
     decision: { 
       name: 'Template de décision', 
       filename: 'decision_template.docx', 
@@ -42,13 +58,7 @@ const Templates: React.FC = () => {
       filename: 'reglement_template.docx', 
       status: 'default' 
     }
-  })
-
-  const [loading, setLoading] = useState(false)
-  const [showRestoreModal, setShowRestoreModal] = useState(false)
-  const [templateToRestore, setTemplateToRestore] = useState<keyof Templates | ''>('')
-  const [successMessage, setSuccessMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
+  }
 
   const decisionInputRef = useRef<HTMLInputElement>(null)
   const conventionInputRef = useRef<HTMLInputElement>(null)
@@ -62,42 +72,44 @@ const Templates: React.FC = () => {
     reglement: reglementInputRef
   }
 
-  useEffect(() => {
-    fetchTemplatesStatus()
-  }, [])
-
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(''), 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [successMessage])
-
-  useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => setErrorMessage(''), 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [errorMessage])
-
-  const fetchTemplatesStatus = async () => {
-    try {
+  // Fetch templates status
+  const { data: templatesStatus, isLoading: isLoadingStatus } = useQuery({
+    queryKey: ['templates-status'],
+    queryFn: async () => {
       const response = await templatesAPI.getStatus()
-      setTemplates(prevTemplates => ({
-        ...prevTemplates,
-        decision: { ...prevTemplates.decision, status: response.data.decision || 'default' },
-        convention: { ...prevTemplates.convention, status: response.data.convention || 'default' },
-        avenant: { ...prevTemplates.avenant, status: response.data.avenant || 'default' },
-        reglement: { ...prevTemplates.reglement, status: response.data.reglement || 'default' }
-      }))
-    } catch (err) {
-      console.error('Erreur lors de la récupération du statut des templates', err)
+      return response.data
     }
-  }
+  })
 
-  const handleDownloadTemplate = async (templateType: keyof Templates) => {
-    setLoading(true)
-    try {
+  // Calculate stats
+  const stats: TemplateStats = useMemo(() => {
+    if (!templatesStatus) {
+      return { totalTemplates: 4, customTemplates: 0, defaultTemplates: 4 }
+    }
+    
+    const customCount = Object.values(templatesStatus).filter(status => status === 'custom').length
+    return {
+      totalTemplates: 4,
+      customTemplates: customCount,
+      defaultTemplates: 4 - customCount
+    }
+  }, [templatesStatus])
+
+  // Get current templates with status
+  const templates: Templates = useMemo(() => {
+    const result = { ...TEMPLATE_CONFIG }
+    if (templatesStatus) {
+      Object.keys(result).forEach(key => {
+        const templateKey = key as keyof Templates
+        result[templateKey].status = templatesStatus[templateKey] || 'default'
+      })
+    }
+    return result
+  }, [templatesStatus])
+
+  // Download template mutation
+  const downloadTemplateMutation = useMutation({
+    mutationFn: async (templateType: keyof Templates) => {
       const response = await templatesAPI.downloadTemplate(templateType)
       
       const url = window.URL.createObjectURL(new Blob([response.data]))
@@ -109,76 +121,75 @@ const Templates: React.FC = () => {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       
-      setSuccessMessage(`Template ${templates[templateType].name} téléchargé avec succès`)
-    } catch (err: any) {
-      console.error(`Erreur lors du téléchargement du template ${templateType}:`, err)
-      setErrorMessage(`Impossible de télécharger le template ${templates[templateType].name}`)
-    } finally {
-      setLoading(false)
+      return templateType
+    },
+    onSuccess: (templateType) => {
+      toast.success(`Template ${templates[templateType].name} téléchargé avec succès`)
+    },
+    onError: (error: any, templateType) => {
+      toast.error(`Impossible de télécharger le template ${templates[templateType].name}`)
     }
+  })
+
+  // Upload template mutation
+  const uploadTemplateMutation = useMutation({
+    mutationFn: async ({ templateType, file }: { templateType: keyof Templates; file: File }) => {
+      const formData = new FormData()
+      formData.append('template', file)
+      await templatesAPI.uploadTemplate(templateType, formData)
+      return templateType
+    },
+    onSuccess: (templateType) => {
+      queryClient.invalidateQueries({ queryKey: ['templates-status'] })
+      toast.success(`Template ${templates[templateType].name} mis à jour avec succès`)
+      // Clear file input
+      if (inputRefs[templateType]?.current) {
+        inputRefs[templateType].current!.value = ''
+      }
+    },
+    onError: (error: any, { templateType }) => {
+      toast.error(`Impossible d'uploader le template ${templates[templateType].name}: ${error.response?.data?.error || error.message}`)
+    }
+  })
+
+  // Restore template mutation
+  const restoreTemplateMutation = useMutation({
+    mutationFn: async (templateType: keyof Templates) => {
+      await templatesAPI.restoreTemplate(templateType)
+      return templateType
+    },
+    onSuccess: (templateType) => {
+      queryClient.invalidateQueries({ queryKey: ['templates-status'] })
+      setShowRestoreModal(false)
+      setTemplateToRestore('')
+      toast.success(`Template ${templates[templateType].name} restauré avec succès`)
+    },
+    onError: (error: any, templateType) => {
+      toast.error(`Impossible de restaurer le template ${templates[templateType].name}`)
+    }
+  })
+
+  // Handlers
+  const handleDownloadTemplate = (templateType: keyof Templates) => {
+    downloadTemplateMutation.mutate(templateType)
   }
 
-  const handleUploadTemplate = async (event: React.ChangeEvent<HTMLInputElement>, templateType: keyof Templates) => {
+  const handleUploadTemplate = (event: React.ChangeEvent<HTMLInputElement>, templateType: keyof Templates) => {
     const file = event.target.files?.[0]
     if (!file) return
     
     const fileExt = file.name.split('.').pop()?.toLowerCase()
     if (fileExt !== 'docx') {
-      setErrorMessage('Le fichier doit être au format DOCX (.docx)')
+      toast.error('Le fichier doit être au format DOCX (.docx)')
       return
     }
     
-    setLoading(true)
-    
-    try {
-      const formData = new FormData()
-      formData.append('template', file)
-      
-      await templatesAPI.uploadTemplate(templateType, formData)
-      
-      setTemplates(prevTemplates => ({
-        ...prevTemplates,
-        [templateType]: {
-          ...prevTemplates[templateType],
-          status: 'custom'
-        }
-      }))
-      
-      setSuccessMessage(`Template ${templates[templateType].name} mis à jour avec succès`)
-    } catch (err: any) {
-      console.error(`Erreur lors de l'upload du template ${templateType}:`, err)
-      setErrorMessage(`Impossible d'uploader le template ${templates[templateType].name}: ${err.response?.data?.error || err.message}`)
-    } finally {
-      setLoading(false)
-      if (inputRefs[templateType]?.current) {
-        inputRefs[templateType].current!.value = ''
-      }
-    }
+    uploadTemplateMutation.mutate({ templateType, file })
   }
 
-  const handleRestoreTemplate = async () => {
+  const handleRestoreTemplate = () => {
     if (!templateToRestore) return
-    
-    setLoading(true)
-    try {
-      await templatesAPI.restoreTemplate(templateToRestore)
-      
-      setTemplates(prevTemplates => ({
-        ...prevTemplates,
-        [templateToRestore]: {
-          ...prevTemplates[templateToRestore],
-          status: 'default'
-        }
-      }))
-      
-      setShowRestoreModal(false)
-      setSuccessMessage(`Template ${templates[templateToRestore].name} restauré avec succès`)
-    } catch (err: any) {
-      console.error(`Erreur lors de la restauration du template ${templateToRestore}`, err)
-      setErrorMessage(`Impossible de restaurer le template ${templates[templateToRestore].name}`)
-    } finally {
-      setLoading(false)
-    }
+    restoreTemplateMutation.mutate(templateToRestore)
   }
 
   const triggerFileInput = (templateType: keyof Templates) => {
@@ -192,39 +203,60 @@ const Templates: React.FC = () => {
     setShowRestoreModal(true)
   }
 
+  const isLoadingActions = downloadTemplateMutation.isPending || uploadTemplateMutation.isPending || restoreTemplateMutation.isPending
+
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Gestion des templates</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Gérez les templates utilisés pour la génération des documents (décisions, conventions, avenants et fiches de règlement).
-        </p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <DocumentDuplicateIcon className="w-7 h-7 mr-3 text-blue-600" />
+            Gestion des templates
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Gérez les templates utilisés pour la génération des documents
+          </p>
+        </div>
       </div>
 
-      {/* Messages de notification */}
-      {successMessage && (
-        <div className="mb-6 rounded-md bg-green-50 p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">
-                {successMessage}
-              </p>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100">
+              <DocumentDuplicateIcon className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Total templates</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.totalTemplates}</p>
             </div>
           </div>
         </div>
-      )}
-
-      {errorMessage && (
-        <div className="mb-6 rounded-md bg-red-50 p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <p className="text-sm font-medium text-red-800">
-                {errorMessage}
-              </p>
+        
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100">
+              <CheckCircleIcon className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Templates personnalisés</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.customTemplates}</p>
             </div>
           </div>
         </div>
-      )}
+        
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-gray-100">
+              <CogIcon className="w-6 h-6 text-gray-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Templates par défaut</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.defaultTemplates}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Avertissement */}
       <div className="mb-6 rounded-md bg-yellow-50 p-4 border-l-4 border-yellow-400">
@@ -239,69 +271,66 @@ const Templates: React.FC = () => {
         </div>
       </div>
 
-      {/* Liste des templates */}
-      <div className="space-y-6">
+      {/* Templates Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {Object.entries(templates).map(([key, template]) => {
           const templateType = key as keyof Templates
           return (
-            <div key={key} className="bg-white shadow rounded-lg border border-gray-200">
-              <div className="p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-4 sm:mb-0">
-                    <h3 className="text-lg font-medium text-gray-900">{template.name}</h3>
-                    <div className="mt-1">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        template.status === 'custom' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {template.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={() => handleDownloadTemplate(templateType)}
-                      disabled={loading}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                      title="Télécharger le template actuel"
-                    >
-                      <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                      Télécharger
-                    </button>
-                    
-                    <button
-                      onClick={() => triggerFileInput(templateType)}
-                      disabled={loading}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
-                      title="Uploader un template personnalisé"
-                    >
-                      <ArrowUpTrayIcon className="h-4 w-4 mr-2" />
-                      Uploader
-                    </button>
-                    
-                    <input
-                      type="file"
-                      ref={inputRefs[templateType]}
-                      className="hidden"
-                      accept=".docx"
-                      onChange={(e) => handleUploadTemplate(e, templateType)}
-                    />
-                    
-                    {template.status === 'custom' && (
-                      <button
-                        onClick={() => openRestoreConfirmation(templateType)}
-                        disabled={loading}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                        title="Restaurer le template par défaut"
-                      >
-                        <ArrowPathIcon className="h-4 w-4 mr-2" />
-                        Restaurer
-                      </button>
-                    )}
-                  </div>
+            <div key={key} className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">{template.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{template.filename}</p>
                 </div>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  template.status === 'custom' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {template.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
+                </span>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => handleDownloadTemplate(templateType)}
+                  disabled={isLoadingActions}
+                  className="btn-secondary flex items-center text-sm"
+                  title="Télécharger le template actuel"
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                  Télécharger
+                </button>
+                
+                <button
+                  onClick={() => triggerFileInput(templateType)}
+                  disabled={isLoadingActions}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                  title="Uploader un template personnalisé"
+                >
+                  <ArrowUpTrayIcon className="h-4 w-4 mr-1" />
+                  Uploader
+                </button>
+                
+                <input
+                  type="file"
+                  ref={inputRefs[templateType]}
+                  className="hidden"
+                  accept=".docx"
+                  onChange={(e) => handleUploadTemplate(e, templateType)}
+                />
+                
+                {template.status === 'custom' && (
+                  <button
+                    onClick={() => openRestoreConfirmation(templateType)}
+                    disabled={isLoadingActions}
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                    title="Restaurer le template par défaut"
+                  >
+                    <ArrowPathIcon className="h-4 w-4 mr-1" />
+                    Restaurer
+                  </button>
+                )}
               </div>
             </div>
           )
@@ -309,12 +338,12 @@ const Templates: React.FC = () => {
       </div>
 
       {/* Modal de confirmation de restauration */}
-      {showRestoreModal && (
+      {showRestoreModal && templateToRestore && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowRestoreModal(false)}></div>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -322,12 +351,12 @@ const Templates: React.FC = () => {
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      Restaurer le template {templateToRestore ? templates[templateToRestore].name : ''}
+                      Restaurer le template
                     </h3>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
                         Êtes-vous sûr de vouloir restaurer le template par défaut pour 
-                        <strong> {templateToRestore ? templates[templateToRestore].name : ''}</strong> ?
+                        <strong> {templates[templateToRestore].name}</strong> ?
                       </p>
                       <p className="mt-2 text-sm text-yellow-600">
                         Cette action remplacera définitivement votre template personnalisé par le template par défaut.
@@ -336,18 +365,20 @@ const Templates: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="btn-primary"
                   onClick={handleRestoreTemplate}
+                  disabled={restoreTemplateMutation.isPending}
                 >
-                  Restaurer
+                  {restoreTemplateMutation.isPending ? 'Restauration...' : 'Restaurer'}
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="btn-secondary"
                   onClick={() => setShowRestoreModal(false)}
+                  disabled={restoreTemplateMutation.isPending}
                 >
                   Annuler
                 </button>

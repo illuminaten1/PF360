@@ -124,10 +124,10 @@ const Templates: React.FC = () => {
       return templateType
     },
     onSuccess: (templateType) => {
-      toast.success(`Template ${templates[templateType].name} téléchargé avec succès`)
+      toast.success(`${templates[templateType].name} téléchargé avec succès`)
     },
     onError: (error: any, templateType) => {
-      toast.error(`Impossible de télécharger le template ${templates[templateType].name}`)
+      toast.error(`Impossible de télécharger le ${templates[templateType].name}`)
     }
   })
 
@@ -141,14 +141,14 @@ const Templates: React.FC = () => {
     },
     onSuccess: (templateType) => {
       queryClient.invalidateQueries({ queryKey: ['templates-status'] })
-      toast.success(`Template ${templates[templateType].name} mis à jour avec succès`)
+      toast.success(`${templates[templateType].name} mis à jour avec succès`)
       // Clear file input
       if (inputRefs[templateType]?.current) {
         inputRefs[templateType].current!.value = ''
       }
     },
     onError: (error: any, { templateType }) => {
-      toast.error(`Impossible d'uploader le template ${templates[templateType].name}: ${error.response?.data?.error || error.message}`)
+      toast.error(`Impossible d'uploader le ${templates[templateType].name}: ${error.response?.data?.error || error.message}`)
     }
   })
 
@@ -162,10 +162,10 @@ const Templates: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['templates-status'] })
       setShowRestoreModal(false)
       setTemplateToRestore('')
-      toast.success(`Template ${templates[templateType].name} restauré avec succès`)
+      toast.success(`${templates[templateType].name} restauré avec succès`)
     },
     onError: (error: any, templateType) => {
-      toast.error(`Impossible de restaurer le template ${templates[templateType].name}`)
+      toast.error(`Impossible de restaurer le ${templates[templateType].name}`)
     }
   })
 
@@ -258,18 +258,6 @@ const Templates: React.FC = () => {
         </div>
       </div>
 
-      {/* Avertissement */}
-      <div className="mb-6 rounded-md bg-yellow-50 p-4 border-l-4 border-yellow-400">
-        <div className="flex">
-          <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
-          <div className="ml-3">
-            <p className="text-sm text-yellow-700">
-              <strong>Important :</strong> Consultez la documentation avant de modifier les templates.
-              Les templates personnalisés remplacent les templates par défaut pour la génération des documents.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -305,7 +293,7 @@ const Templates: React.FC = () => {
                 <button
                   onClick={() => triggerFileInput(templateType)}
                   disabled={isLoadingActions}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
                   title="Uploader un template personnalisé"
                 >
                   <ArrowUpTrayIcon className="h-4 w-4 mr-1" />

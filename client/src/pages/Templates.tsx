@@ -5,6 +5,7 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon 
 } from '@heroicons/react/24/outline'
+import { templatesAPI } from '@/utils/api'
 
 interface Template {
   name: string
@@ -81,15 +82,14 @@ const Templates: React.FC = () => {
 
   const fetchTemplatesStatus = async () => {
     try {
-      // TODO: Implement API call to get templates status
-      // const response = await templatesAPI.getStatus()
-      // setTemplates(prevTemplates => ({
-      //   ...prevTemplates,
-      //   decision: { ...prevTemplates.decision, status: response.data.decision || 'default' },
-      //   convention: { ...prevTemplates.convention, status: response.data.convention || 'default' },
-      //   avenant: { ...prevTemplates.avenant, status: response.data.avenant || 'default' },
-      //   reglement: { ...prevTemplates.reglement, status: response.data.reglement || 'default' }
-      // }))
+      const response = await templatesAPI.getStatus()
+      setTemplates(prevTemplates => ({
+        ...prevTemplates,
+        decision: { ...prevTemplates.decision, status: response.data.decision || 'default' },
+        convention: { ...prevTemplates.convention, status: response.data.convention || 'default' },
+        avenant: { ...prevTemplates.avenant, status: response.data.avenant || 'default' },
+        reglement: { ...prevTemplates.reglement, status: response.data.reglement || 'default' }
+      }))
     } catch (err) {
       console.error('Erreur lors de la récupération du statut des templates', err)
     }
@@ -98,19 +98,19 @@ const Templates: React.FC = () => {
   const handleDownloadTemplate = async (templateType: keyof Templates) => {
     setLoading(true)
     try {
-      // TODO: Implement API call to download template
-      // const response = await templatesAPI.downloadTemplate(templateType)
-      // 
-      // const url = window.URL.createObjectURL(new Blob([response.data]))
-      // const link = document.createElement('a')
-      // link.href = url
-      // link.setAttribute('download', templates[templateType].filename)
-      // document.body.appendChild(link)
-      // link.click()
-      // document.body.removeChild(link)
+      const response = await templatesAPI.downloadTemplate(templateType)
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', templates[templateType].filename)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
       
       setSuccessMessage(`Template ${templates[templateType].name} téléchargé avec succès`)
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Erreur lors du téléchargement du template ${templateType}:`, err)
       setErrorMessage(`Impossible de télécharger le template ${templates[templateType].name}`)
     } finally {
@@ -131,11 +131,10 @@ const Templates: React.FC = () => {
     setLoading(true)
     
     try {
-      // TODO: Implement API call to upload template
-      // const formData = new FormData()
-      // formData.append('template', file)
-      // 
-      // await templatesAPI.uploadTemplate(templateType, formData)
+      const formData = new FormData()
+      formData.append('template', file)
+      
+      await templatesAPI.uploadTemplate(templateType, formData)
       
       setTemplates(prevTemplates => ({
         ...prevTemplates,
@@ -146,9 +145,9 @@ const Templates: React.FC = () => {
       }))
       
       setSuccessMessage(`Template ${templates[templateType].name} mis à jour avec succès`)
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Erreur lors de l'upload du template ${templateType}:`, err)
-      setErrorMessage(`Impossible d'uploader le template ${templates[templateType].name}`)
+      setErrorMessage(`Impossible d'uploader le template ${templates[templateType].name}: ${err.response?.data?.error || err.message}`)
     } finally {
       setLoading(false)
       if (inputRefs[templateType]?.current) {
@@ -162,8 +161,7 @@ const Templates: React.FC = () => {
     
     setLoading(true)
     try {
-      // TODO: Implement API call to restore template
-      // await templatesAPI.restoreTemplate(templateToRestore)
+      await templatesAPI.restoreTemplate(templateToRestore)
       
       setTemplates(prevTemplates => ({
         ...prevTemplates,
@@ -175,7 +173,7 @@ const Templates: React.FC = () => {
       
       setShowRestoreModal(false)
       setSuccessMessage(`Template ${templates[templateToRestore].name} restauré avec succès`)
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Erreur lors de la restauration du template ${templateToRestore}`, err)
       setErrorMessage(`Impossible de restaurer le template ${templates[templateToRestore].name}`)
     } finally {

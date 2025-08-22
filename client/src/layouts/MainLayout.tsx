@@ -21,7 +21,8 @@ import {
   UserIcon,
   TagIcon,
   CurrencyEuroIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -44,6 +45,7 @@ const adminNavigation = [
   { name: 'Grades', href: '/grades', icon: ChevronDoubleUpIcon },
   { name: 'Visas', href: '/visa', icon: EyeIcon },
   { name: 'Diligences', href: '/diligences', icon: ClipboardDocumentListIcon },
+  { name: 'Templates', href: '/templates', icon: DocumentDuplicateIcon },
   { name: 'Paramètres', href: '/parametres', icon: CogIcon },
 ]
 

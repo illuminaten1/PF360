@@ -18,6 +18,7 @@ import DiligencesPage from '@/pages/Diligences'
 import Decisions from '@/pages/Decisions'
 import Conventions from '@/pages/Conventions'
 import GradesPage from '@/pages/Grades'
+import Templates from '@/pages/Templates'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -110,6 +111,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <GradesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="templates"
+            element={
+              <ProtectedRoute adminOnly>
+                <Templates />
               </ProtectedRoute>
             }
           />

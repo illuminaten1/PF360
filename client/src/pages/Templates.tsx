@@ -8,32 +8,19 @@ import {
   ExclamationTriangleIcon,
   DocumentDuplicateIcon,
   CheckCircleIcon,
-  CogIcon
+  CogIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline'
 import { templatesAPI } from '@/utils/api'
+import { Template, Templates, TemplateStats } from '@/types/template'
+import TemplateVersionHistory from '@/components/TemplateVersionHistory'
 
-interface Template {
-  name: string
-  filename: string
-  status: 'default' | 'custom'
-}
-
-interface Templates {
-  decision: Template
-  convention: Template
-  avenant: Template
-  reglement: Template
-}
-
-interface TemplateStats {
-  totalTemplates: number
-  customTemplates: number
-  defaultTemplates: number
-}
 
 const Templates: React.FC = () => {
   const [showRestoreModal, setShowRestoreModal] = useState(false)
   const [templateToRestore, setTemplateToRestore] = useState<keyof Templates | ''>('')
+  const [showVersionHistory, setShowVersionHistory] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<keyof Templates | ''>('')
   
   const queryClient = useQueryClient()
   
@@ -203,6 +190,11 @@ const Templates: React.FC = () => {
     setShowRestoreModal(true)
   }
 
+  const openVersionHistory = (templateType: keyof Templates) => {
+    setSelectedTemplate(templateType)
+    setShowVersionHistory(true)
+  }
+
   const isLoadingActions = downloadTemplateMutation.isPending || uploadTemplateMutation.isPending || restoreTemplateMutation.isPending
 
   return (
@@ -308,6 +300,16 @@ const Templates: React.FC = () => {
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
                 
+                <button
+                  onClick={() => openVersionHistory(templateType)}
+                  disabled={isLoadingActions}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                  title="Voir l'historique des versions"
+                >
+                  <ClockIcon className="h-4 w-4 mr-1" />
+                  Historique
+                </button>
+                
                 {template.status === 'custom' && (
                   <button
                     onClick={() => openRestoreConfirmation(templateType)}
@@ -375,6 +377,17 @@ const Templates: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Historique des versions */}
+      <TemplateVersionHistory
+        templateType={selectedTemplate}
+        templateName={selectedTemplate ? templates[selectedTemplate].name : ''}
+        isOpen={showVersionHistory}
+        onClose={() => {
+          setShowVersionHistory(false)
+          setSelectedTemplate('')
+        }}
+      />
     </div>
   )
 }

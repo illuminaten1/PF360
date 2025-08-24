@@ -20,7 +20,7 @@ export interface Template {
   status: 'default' | 'custom'
 }
 
-export interface Templates {
+export interface TemplatesConfig {
   decision: Template
   convention: Template
   avenant: Template

@@ -12,19 +12,19 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline'
 import { templatesAPI } from '@/utils/api'
-import { Template, Templates, TemplateStats } from '@/types/template'
+import { Template, TemplatesConfig, TemplateStats } from '@/types/template'
 import TemplateVersionHistory from '@/components/TemplateVersionHistory'
 
 
 const Templates: React.FC = () => {
   const [showRestoreModal, setShowRestoreModal] = useState(false)
-  const [templateToRestore, setTemplateToRestore] = useState<keyof Templates | ''>('')
+  const [templateToRestore, setTemplateToRestore] = useState<keyof TemplatesConfig | ''>('')
   const [showVersionHistory, setShowVersionHistory] = useState(false)
-  const [selectedTemplate, setSelectedTemplate] = useState<keyof Templates | ''>('')
+  const [selectedTemplate, setSelectedTemplate] = useState<keyof TemplatesConfig | ''>('')
   
   const queryClient = useQueryClient()
   
-  const TEMPLATE_CONFIG: Templates = {
+  const TEMPLATE_CONFIG: TemplatesConfig = {
     decision: { 
       name: 'Template de décision', 
       filename: 'decision_template.docx', 
@@ -83,11 +83,11 @@ const Templates: React.FC = () => {
   }, [templatesStatus])
 
   // Get current templates with status
-  const templates: Templates = useMemo(() => {
+  const templates: TemplatesConfig = useMemo(() => {
     const result = { ...TEMPLATE_CONFIG }
     if (templatesStatus) {
       Object.keys(result).forEach(key => {
-        const templateKey = key as keyof Templates
+        const templateKey = key as keyof TemplatesConfig
         result[templateKey].status = templatesStatus[templateKey] || 'default'
       })
     }
@@ -96,7 +96,7 @@ const Templates: React.FC = () => {
 
   // Download template mutation
   const downloadTemplateMutation = useMutation({
-    mutationFn: async (templateType: keyof Templates) => {
+    mutationFn: async (templateType: keyof TemplatesConfig) => {
       const response = await templatesAPI.downloadTemplate(templateType)
       
       const url = window.URL.createObjectURL(new Blob([response.data]))
@@ -120,7 +120,7 @@ const Templates: React.FC = () => {
 
   // Upload template mutation
   const uploadTemplateMutation = useMutation({
-    mutationFn: async ({ templateType, file }: { templateType: keyof Templates; file: File }) => {
+    mutationFn: async ({ templateType, file }: { templateType: keyof TemplatesConfig; file: File }) => {
       const formData = new FormData()
       formData.append('template', file)
       await templatesAPI.uploadTemplate(templateType, formData)
@@ -141,7 +141,7 @@ const Templates: React.FC = () => {
 
   // Restore template mutation
   const restoreTemplateMutation = useMutation({
-    mutationFn: async (templateType: keyof Templates) => {
+    mutationFn: async (templateType: keyof TemplatesConfig) => {
       await templatesAPI.restoreTemplate(templateType)
       return templateType
     },
@@ -157,11 +157,11 @@ const Templates: React.FC = () => {
   })
 
   // Handlers
-  const handleDownloadTemplate = (templateType: keyof Templates) => {
+  const handleDownloadTemplate = (templateType: keyof TemplatesConfig) => {
     downloadTemplateMutation.mutate(templateType)
   }
 
-  const handleUploadTemplate = (event: React.ChangeEvent<HTMLInputElement>, templateType: keyof Templates) => {
+  const handleUploadTemplate = (event: React.ChangeEvent<HTMLInputElement>, templateType: keyof TemplatesConfig) => {
     const file = event.target.files?.[0]
     if (!file) return
     
@@ -179,18 +179,18 @@ const Templates: React.FC = () => {
     restoreTemplateMutation.mutate(templateToRestore)
   }
 
-  const triggerFileInput = (templateType: keyof Templates) => {
+  const triggerFileInput = (templateType: keyof TemplatesConfig) => {
     if (inputRefs[templateType]?.current) {
       inputRefs[templateType].current!.click()
     }
   }
 
-  const openRestoreConfirmation = (templateType: keyof Templates) => {
+  const openRestoreConfirmation = (templateType: keyof TemplatesConfig) => {
     setTemplateToRestore(templateType)
     setShowRestoreModal(true)
   }
 
-  const openVersionHistory = (templateType: keyof Templates) => {
+  const openVersionHistory = (templateType: keyof TemplatesConfig) => {
     setSelectedTemplate(templateType)
     setShowVersionHistory(true)
   }
@@ -254,7 +254,7 @@ const Templates: React.FC = () => {
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {Object.entries(templates).map(([key, template]) => {
-          const templateType = key as keyof Templates
+          const templateType = key as keyof TemplatesConfig
           return (
             <div key={key} className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">

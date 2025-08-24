@@ -42,6 +42,7 @@ model User {
   avocatsModifies  Avocat[]    @relation("AvocatModificateur")
   diligencesCrees  Diligence[] @relation("DiligenceCreateur")
   diligencesModifiees Diligence[] @relation("DiligenceModificateur")
+  templatesUploadees TemplateVersion[] @relation("TemplateVersionUploader")
 
   @@map("users")
 }
@@ -435,6 +436,26 @@ model Diligence {
   updatedAt         DateTime   @updatedAt
   
   @@map("diligences")
+}
+
+model TemplateVersion {
+  id                String   @id @default(cuid())
+  templateType      String   // decision | convention | avenant | reglement
+  versionNumber     Int      // 1, 2, 3, etc.
+  filename          String   // nom du fichier sur disque
+  originalName      String   // nom original du fichier uploadé
+  isActive          Boolean  @default(false) // version actuellement active
+  fileSize          Int?     // taille du fichier en octets
+  
+  // Relations
+  uploadedBy        User     @relation("TemplateVersionUploader", fields: [uploadedById], references: [id])
+  uploadedById      String
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([templateType, versionNumber])
+  @@map("template_versions")
 }
 
 // Note: Using strings instead of enums for SQLite compatibility

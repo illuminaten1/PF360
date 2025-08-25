@@ -423,10 +423,24 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
   const assignedSgami = randomChoice(sgamis)
   
   const demandes = []
+  const aujourdhui = new Date()
+  aujourdhui.setHours(0, 0, 0, 0) // Début de la journée
+  const demainDebut = new Date(aujourdhui.getTime() + 24 * 60 * 60 * 1000) // Début de demain
+  
   for (let i = 0; i < nbDemandes; i++) {
     const demande = generateRandomDemande(year, dossierParams, grades)
-    // Assigner la même personne à toutes les demandes du dossier
-    demande.assigneAId = assignedUser.id
+    
+    // Vérifier si la demande est reçue aujourd'hui
+    const estDuJour = demande.dateReception >= aujourdhui && demande.dateReception < demainDebut
+    
+    // Si c'est une demande du jour, 30% de chance de ne pas être assignée
+    // Sinon, toujours assignée
+    if (estDuJour && Math.random() < 0.3) {
+      demande.assigneAId = null
+    } else {
+      demande.assigneAId = assignedUser.id
+    }
+    
     demandes.push(demande)
   }
   

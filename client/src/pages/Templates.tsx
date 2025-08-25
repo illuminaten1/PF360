@@ -12,11 +12,11 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline'
 import { templatesAPI } from '@/utils/api'
-import { Template, TemplatesConfig, TemplateStats } from '@/types/template'
+import { TemplatesConfig, TemplateStats } from '@/types/template'
 import TemplateVersionHistory from '@/components/TemplateVersionHistory'
 
 
-const Templates: React.FC = () => {
+const TemplatesPage: React.FC = () => {
   const [showRestoreModal, setShowRestoreModal] = useState(false)
   const [templateToRestore, setTemplateToRestore] = useState<keyof TemplatesConfig | ''>('')
   const [showVersionHistory, setShowVersionHistory] = useState(false)
@@ -60,7 +60,7 @@ const Templates: React.FC = () => {
   }
 
   // Fetch templates status
-  const { data: templatesStatus, isLoading: isLoadingStatus } = useQuery({
+  const { data: templatesStatus } = useQuery({
     queryKey: ['templates-status'],
     queryFn: async () => {
       const response = await templatesAPI.getStatus()
@@ -113,7 +113,7 @@ const Templates: React.FC = () => {
     onSuccess: (templateType) => {
       toast.success(`${templates[templateType].name} téléchargé avec succès`)
     },
-    onError: (error: any, templateType) => {
+    onError: (_, templateType) => {
       toast.error(`Impossible de télécharger le ${templates[templateType].name}`)
     }
   })
@@ -151,7 +151,7 @@ const Templates: React.FC = () => {
       setTemplateToRestore('')
       toast.success(`${templates[templateType].name} restauré avec succès`)
     },
-    onError: (error: any, templateType) => {
+    onError: (_, templateType) => {
       toast.error(`Impossible de restaurer le ${templates[templateType].name}`)
     }
   })
@@ -392,4 +392,4 @@ const Templates: React.FC = () => {
   )
 }
 
-export default Templates
+export default TemplatesPage

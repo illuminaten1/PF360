@@ -109,7 +109,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
       reset({
         type: decision.type as 'AJ' | 'AJE' | 'PJ' | 'REJET',
         numero: decision.numero || '',
-        visaId: '', // Laisser vide pour que l'utilisateur choisisse
+        visaId: decision.visa?.id || '',
         avis_hierarchiques: decision.avis_hierarchiques || false,
         typeVictMec: decision.typeVictMec,
         considerant: decision.considerant || '',
@@ -343,36 +343,34 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                             const isSelected = visaOfType && watch('visaId') === visaOfType.id
                             
                             return (
-                              <label key={typeVisa} className={`relative ${
-                                !visaOfType ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                              }`}>
-                                <input
-                                  type="radio"
-                                  value={visaOfType?.id || ''}
-                                  {...register('visaId')}
-                                  disabled={!visaOfType}
-                                  className="sr-only"
-                                />
-                                <div className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                              <button
+                                key={typeVisa}
+                                type="button"
+                                onClick={() => visaOfType && setValue('visaId', visaOfType.id)}
+                                disabled={!visaOfType}
+                                className={`relative ${
+                                  !visaOfType ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                } rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
                                   isSelected
                                     ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
                                     : visaOfType 
                                       ? 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
                                       : 'border-gray-100 from-gray-50 to-gray-100'
                                 }`}>
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    typeVisa === 'CIVIL' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-orange-100 text-orange-800'
-                                  }`}>
-                                    {typeVisa}
-                                  </span>
-                                </div>
-                              </label>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  typeVisa === 'CIVIL' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-orange-100 text-orange-800'
+                                }`}>
+                                  {typeVisa}
+                                </span>
+                              </button>
                             )
                           })
                         )}
                       </div>
+                      {/* Hidden input for form validation */}
+                      <input type="hidden" {...register('visaId')} />
                       {errors.visaId && (
                         <p className="mt-2 text-sm text-red-600">{errors.visaId.message}</p>
                       )}

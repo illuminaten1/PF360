@@ -299,10 +299,25 @@ router.get('/:id', async (req, res) => {
         },
         decisions: {
           include: {
+            visa: {
+              select: {
+                id: true,
+                typeVisa: true,
+                texteVisa: true
+              }
+            },
             creePar: {
               select: {
                 nom: true,
-                prenom: true
+                prenom: true,
+                grade: true
+              }
+            },
+            modifiePar: {
+              select: {
+                nom: true,
+                prenom: true,
+                grade: true
               }
             },
             demandes: {

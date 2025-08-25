@@ -305,11 +305,18 @@ const generateRandomDemande = (year = null, dossierParams = null, grades = []) =
   
   // Générer les dates dans le bon ordre chronologique
   const now = new Date()
-  const startOfYear = new Date('2025-01-01T00:00:00.000Z')
-  const oneDayBefore = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Hier au minimum
+  let startOfYear, maxDateForGeneration
+  
+  if (year === 2024) {
+    startOfYear = new Date('2024-01-01T00:00:00.000Z')
+    maxDateForGeneration = new Date('2024-12-31T23:59:59.999Z')
+  } else {
+    startOfYear = new Date('2025-01-01T00:00:00.000Z')
+    maxDateForGeneration = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Hier au minimum
+  }
   
   // 1. Date des faits - utiliser celle du dossier ou générer une nouvelle
-  const dateFaits = dateFaitsBase || (hasDetails ? new Date(startOfYear.getTime() + Math.random() * (oneDayBefore.getTime() - startOfYear.getTime())) : null)
+  const dateFaits = dateFaitsBase || (hasDetails ? new Date(startOfYear.getTime() + Math.random() * (maxDateForGeneration.getTime() - startOfYear.getTime())) : null)
   
   // 2. Date de réception - si dossier, proche de la date de réception du dossier (±1 semaine)
   let dateReception
@@ -317,10 +324,21 @@ const generateRandomDemande = (year = null, dossierParams = null, grades = []) =
     const baseDate = dossierParams.dateReceptionBase
     const uneSeamaine = 7 * 24 * 60 * 60 * 1000 // 1 semaine en millisecondes
     const minDate = new Date(Math.max(baseDate.getTime() - uneSeamaine, dateFaits?.getTime() || startOfYear.getTime()))
-    const maxDate = new Date(Math.min(baseDate.getTime() + uneSeamaine, now.getTime()))
+    
+    let maxDate
+    if (year === 2024) {
+      maxDate = new Date(Math.min(baseDate.getTime() + uneSeamaine, maxDateForGeneration.getTime()))
+    } else {
+      maxDate = new Date(Math.min(baseDate.getTime() + uneSeamaine, now.getTime()))
+    }
+    
     dateReception = new Date(minDate.getTime() + Math.random() * (maxDate.getTime() - minDate.getTime()))
   } else {
-    dateReception = dateFaits ? new Date(dateFaits.getTime() + Math.random() * (now.getTime() - dateFaits.getTime())) : (year ? randomDateInYear(year) : randomDate())
+    if (year === 2024) {
+      dateReception = dateFaits ? new Date(dateFaits.getTime() + Math.random() * (maxDateForGeneration.getTime() - dateFaits.getTime())) : randomDateInYear(year)
+    } else {
+      dateReception = dateFaits ? new Date(dateFaits.getTime() + Math.random() * (now.getTime() - dateFaits.getTime())) : (year ? randomDateInYear(year) : randomDate())
+    }
   }
   
   // 3. Date d'audience (si elle existe, utiliser celle du dossier ou générer une nouvelle)
@@ -393,21 +411,44 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
   const unite = `Brigade de ${randomChoice(communes)}`
   const commune = randomChoice(communes)
   
-  // Date des faits commune
+  // Date des faits commune selon l'année
   const now = new Date()
-  const startOfYear = new Date('2025-01-01T00:00:00.000Z')
-  const oneDayBefore = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-  const dateFaits = new Date(startOfYear.getTime() + Math.random() * (oneDayBefore.getTime() - startOfYear.getTime()))
+  let startOfYear, maxDateForFacts
+  
+  if (year === 2024) {
+    startOfYear = new Date('2024-01-01T00:00:00.000Z')
+    maxDateForFacts = new Date('2024-12-31T23:59:59.999Z')
+  } else {
+    startOfYear = new Date('2025-01-01T00:00:00.000Z')
+    maxDateForFacts = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  }
+  
+  const dateFaits = new Date(startOfYear.getTime() + Math.random() * (maxDateForFacts.getTime() - startOfYear.getTime()))
   
   // Date de réception de base pour le dossier
-  const dateReceptionBase = new Date(dateFaits.getTime() + Math.random() * (now.getTime() - dateFaits.getTime()))
+  let dateReceptionBase
+  if (year === 2024) {
+    const maxReceptionDate = new Date('2024-12-31T23:59:59.999Z')
+    dateReceptionBase = new Date(dateFaits.getTime() + Math.random() * (maxReceptionDate.getTime() - dateFaits.getTime()))
+  } else {
+    dateReceptionBase = new Date(dateFaits.getTime() + Math.random() * (now.getTime() - dateFaits.getTime()))
+  }
   
   // Date d'audience commune pour toutes les demandes du dossier (si elle existe)
   let dateAudienceCommune = null
   if (Math.random() > 0.6) {
     // L'audience peut être jusqu'à 6 mois après la date des faits
     const maxAudienceDate = new Date(dateFaits.getTime() + 6 * 30 * 24 * 60 * 60 * 1000) // +6 mois
-    dateAudienceCommune = avoidWeekend(new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime())))
+    // Pour 2024, s'assurer que l'audience reste en 2024 si possible
+    if (year === 2024) {
+      const endOf2024 = new Date('2024-12-31T23:59:59.999Z')
+      const actualMaxDate = maxAudienceDate > endOf2024 ? endOf2024 : maxAudienceDate
+      if (actualMaxDate > dateFaits) {
+        dateAudienceCommune = avoidWeekend(new Date(dateFaits.getTime() + Math.random() * (actualMaxDate.getTime() - dateFaits.getTime())))
+      }
+    } else {
+      dateAudienceCommune = avoidWeekend(new Date(dateFaits.getTime() + Math.random() * (maxAudienceDate.getTime() - dateFaits.getTime())))
+    }
   }
   
   const dossierParams = {
@@ -423,10 +464,24 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
   const assignedSgami = randomChoice(sgamis)
   
   const demandes = []
+  const aujourdhui = new Date()
+  aujourdhui.setHours(0, 0, 0, 0) // Début de la journée
+  const demainDebut = new Date(aujourdhui.getTime() + 24 * 60 * 60 * 1000) // Début de demain
+  
   for (let i = 0; i < nbDemandes; i++) {
     const demande = generateRandomDemande(year, dossierParams, grades)
-    // Assigner la même personne à toutes les demandes du dossier
-    demande.assigneAId = assignedUser.id
+    
+    // Vérifier si la demande est reçue aujourd'hui (seulement pour 2025)
+    const estDuJour = year === 2025 && demande.dateReception >= aujourdhui && demande.dateReception < demainDebut
+    
+    // Si c'est une demande du jour (2025), 30% de chance de ne pas être assignée
+    // Pour 2024, toutes les demandes sont assignées
+    if (estDuJour && Math.random() < 0.3) {
+      demande.assigneAId = null
+    } else {
+      demande.assigneAId = assignedUser.id
+    }
+    
     demandes.push(demande)
   }
   
@@ -445,11 +500,16 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
 
 async function main() {
   // Génération pour 2025 - calculer le nombre de dossiers nécessaires
-  const totalDemandes = 2825
+  const totalDemandes2025 = 2825
+  const totalDemandes2024 = 5000
   const moyenneDemandes = 3 // Moyenne de demandes par dossier
-  const nbDossiers = Math.ceil(totalDemandes / moyenneDemandes)
+  const nbDossiers2025 = Math.ceil(totalDemandes2025 / moyenneDemandes)
+  const nbDossiers2024 = Math.ceil(totalDemandes2024 / moyenneDemandes)
   
-  console.log(`🚀 Génération de ~${totalDemandes} demandes réparties dans ${nbDossiers} dossiers (du 1er janvier 2025 à aujourd'hui)...`)
+  console.log(`🚀 Génération de données de test :`)
+  console.log(`   - 2024 : ~${totalDemandes2024} demandes réparties dans ${nbDossiers2024} dossiers`)
+  console.log(`   - 2025 : ~${totalDemandes2025} demandes réparties dans ${nbDossiers2025} dossiers (du 1er janvier à aujourd'hui)`)
+  console.log(`   - TOTAL : ~${totalDemandes2024 + totalDemandes2025} demandes dans ${nbDossiers2024 + nbDossiers2025} dossiers`)
   
   // Récupérer les données nécessaires
   const badges = await prisma.badge.findMany()
@@ -480,21 +540,42 @@ async function main() {
   const dossiers = []
   let totalDemandesGenerees = 0
   
-  // Génération des dossiers et leurs demandes pour 2025
-  console.log(`📅 Génération des dossiers et demandes pour 2025...`)
-  for (let i = 0; i < nbDossiers && totalDemandesGenerees < totalDemandes; i++) {
-    const dossier = generateDossier(2025, users, sgamis, grades)
+  // Génération des dossiers et leurs demandes pour 2024
+  console.log(`📅 Génération des dossiers et demandes pour 2024...`)
+  for (let i = 0; i < nbDossiers2024 && totalDemandesGenerees < totalDemandes2024; i++) {
+    const dossier = generateDossier(2024, users, sgamis, grades)
     // Limiter le nombre de demandes si on dépasse le total souhaité
-    if (totalDemandesGenerees + dossier.demandes.length > totalDemandes) {
-      dossier.demandes = dossier.demandes.slice(0, totalDemandes - totalDemandesGenerees)
+    if (totalDemandesGenerees + dossier.demandes.length > totalDemandes2024) {
+      dossier.demandes = dossier.demandes.slice(0, totalDemandes2024 - totalDemandesGenerees)
     }
     dossiers.push(dossier)
     totalDemandesGenerees += dossier.demandes.length
     
-    if ((i + 1) % 100 === 0) {
-      console.log(`✅ ${i + 1}/${nbDossiers} dossiers générés (${totalDemandesGenerees} demandes)...`)
+    if ((i + 1) % 200 === 0) {
+      console.log(`✅ ${i + 1}/${nbDossiers2024} dossiers 2024 générés (${totalDemandesGenerees} demandes)...`)
     }
   }
+  
+  console.log(`📊 2024 : ${dossiers.length} dossiers générés avec ${totalDemandesGenerees} demandes`)
+  
+  // Génération des dossiers et leurs demandes pour 2025
+  let totalDemandesGenerees2025 = 0
+  console.log(`📅 Génération des dossiers et demandes pour 2025...`)
+  for (let i = 0; i < nbDossiers2025 && totalDemandesGenerees2025 < totalDemandes2025; i++) {
+    const dossier = generateDossier(2025, users, sgamis, grades)
+    // Limiter le nombre de demandes si on dépasse le total souhaité
+    if (totalDemandesGenerees2025 + dossier.demandes.length > totalDemandes2025) {
+      dossier.demandes = dossier.demandes.slice(0, totalDemandes2025 - totalDemandesGenerees2025)
+    }
+    dossiers.push(dossier)
+    totalDemandesGenerees2025 += dossier.demandes.length
+    
+    if ((i + 1) % 100 === 0) {
+      console.log(`✅ ${i + 1}/${nbDossiers2025} dossiers 2025 générés (${totalDemandesGenerees2025} demandes)...`)
+    }
+  }
+  
+  totalDemandesGenerees += totalDemandesGenerees2025
   
   console.log(`📊 ${dossiers.length} dossiers générés avec ${totalDemandesGenerees} demandes au total`)
   

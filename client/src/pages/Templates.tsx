@@ -16,7 +16,7 @@ import { Template, Templates, TemplateStats } from '@/types/template'
 import TemplateVersionHistory from '@/components/TemplateVersionHistory'
 
 
-const Templates: React.FC = () => {
+const TemplatesPage: React.FC = () => {
   const [showRestoreModal, setShowRestoreModal] = useState(false)
   const [templateToRestore, setTemplateToRestore] = useState<keyof Templates | ''>('')
   const [showVersionHistory, setShowVersionHistory] = useState(false)
@@ -392,4 +392,4 @@ const Templates: React.FC = () => {
   )
 }
 
-export default Templates
+export default TemplatesPage

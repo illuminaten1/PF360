@@ -35,6 +35,7 @@ import DecisionViewModal from '@/components/forms/DecisionViewModal'
 import DecisionEditModal from '@/components/forms/DecisionEditModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import CreateConventionModal from '@/components/forms/CreateConventionModal'
+import PaiementModal from '@/components/forms/PaiementModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 dayjs.extend(relativeTime)
@@ -52,8 +53,10 @@ const DossierDetail: React.FC = () => {
   const [isDecisionEditModalOpen, setIsDecisionEditModalOpen] = useState(false)
   const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
   const [isCreateConventionModalOpen, setIsCreateConventionModalOpen] = useState(false)
+  const [isPaiementModalOpen, setIsPaiementModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<any>(null)
   const [selectedDecision, setSelectedDecision] = useState<any>(null)
+  const [selectedPaiement, setSelectedPaiement] = useState<any>(null)
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
@@ -194,6 +197,60 @@ const DossierDetail: React.FC = () => {
     }
   })
 
+  // Create paiement mutation
+  const createPaiementMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.post('/paiements', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['paiements-all'] })
+      toast.success('Paiement créé avec succès')
+      setIsPaiementModalOpen(false)
+      setSelectedPaiement(null)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la création du paiement')
+    }
+  })
+
+  // Update paiement mutation
+  const updatePaiementMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.put(`/paiements/${data.id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['paiements-all'] })
+      toast.success('Paiement modifié avec succès')
+      setIsPaiementModalOpen(false)
+      setSelectedPaiement(null)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la modification du paiement')
+    }
+  })
+
+  // Delete paiement mutation
+  const deletePaiementMutation = useMutation({
+    mutationFn: async (paiementId: string) => {
+      await api.delete(`/paiements/${paiementId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['paiements-all'] })
+      toast.success('Paiement supprimé avec succès')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la suppression du paiement')
+    }
+  })
+
   const handleEditDossier = () => {
     setIsEditModalOpen(true)
   }
@@ -270,6 +327,35 @@ const DossierDetail: React.FC = () => {
 
   const handleSubmitConvention = async (data: any) => {
     await createConventionMutation.mutateAsync(data)
+  }
+
+  const handleCreatePaiement = () => {
+    setSelectedPaiement(null)
+    setIsPaiementModalOpen(true)
+  }
+
+  const handleEditPaiement = (paiement: any) => {
+    setSelectedPaiement(paiement)
+    setIsPaiementModalOpen(true)
+  }
+
+  const handleDeletePaiement = (paiement: any) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ce paiement de ${paiement.montantTTC.toLocaleString('fr-FR')} € ?`)) {
+      deletePaiementMutation.mutate(paiement.id)
+    }
+  }
+
+  const handleSubmitPaiement = async (data: any) => {
+    if (selectedPaiement) {
+      await updatePaiementMutation.mutateAsync(data)
+    } else {
+      await createPaiementMutation.mutateAsync(data)
+    }
+  }
+
+  const handleClosePaiementModal = () => {
+    setIsPaiementModalOpen(false)
+    setSelectedPaiement(null)
   }
 
   // Initialize notes when dossier loads
@@ -942,7 +1028,10 @@ const DossierDetail: React.FC = () => {
                   <CurrencyEuroIcon className="h-5 w-5 mr-2" />
                   Paiements ({dossier.paiements.length})
                 </h2>
-                <button className="btn-primary-outline flex items-center text-sm">
+                <button 
+                  onClick={handleCreatePaiement}
+                  className="btn-primary-outline flex items-center text-sm"
+                >
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Nouveau paiement
                 </button>
@@ -953,34 +1042,118 @@ const DossierDetail: React.FC = () => {
                 <p className="text-gray-500 text-center py-4">Aucun paiement enregistré</p>
               ) : (
                 <div className="space-y-4">
-                  {dossier.paiements.map((paiement) => (
-                    <div key={paiement.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4 mb-2">
-                            <span className="font-semibold text-gray-900">
-                              {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
-                            </span>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              paiement.nature === 'AVOCAT' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {paiement.nature}
-                            </span>
+                  {dossier.paiements.map((paiement) => {
+                    const getNatureBadge = (nature: string) => {
+                      switch (nature) {
+                        case 'AVOCAT':
+                          return 'bg-blue-100 text-blue-800'
+                        case 'AUTRES_INTERVENANTS':
+                          return 'bg-orange-100 text-orange-800'
+                        default:
+                          return 'bg-gray-100 text-gray-800'
+                      }
+                    }
+
+                    const getQualiteBadge = (qualite: string) => {
+                      switch (qualite) {
+                        case 'Avocat':
+                          return 'bg-blue-100 text-blue-800'
+                        case 'Commissaire de justice':
+                          return 'bg-purple-100 text-purple-800'
+                        case 'Militaire de la gendarmerie nationale':
+                          return 'bg-green-100 text-green-800'
+                        case 'Régisseur du tribunal judiciaire':
+                          return 'bg-amber-100 text-amber-800'
+                        case 'Médecin':
+                          return 'bg-red-100 text-red-800'
+                        case 'Victime':
+                          return 'bg-sky-100 text-sky-800'
+                        default:
+                          return 'bg-gray-100 text-gray-800'
+                      }
+                    }
+
+                    return (
+                      <div key={paiement.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4 mb-2">
+                              <span className="font-semibold text-gray-900">
+                                {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getNatureBadge(paiement.nature)}`}>
+                                  {paiement.nature === 'AVOCAT' ? 'Avocat' : 'Autres intervenants'}
+                                </span>
+                                {(paiement as any).qualiteBeneficiaire && (
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getQualiteBadge((paiement as any).qualiteBeneficiaire)}`}>
+                                    {(paiement as any).qualiteBeneficiaire}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-900 mb-2">
+                              <strong>{(paiement as any).identiteBeneficiaire || 'Bénéficiaire non renseigné'}</strong>
+                              {(paiement as any).sgami && (
+                                <span className="ml-2 text-gray-600">• SGAMI: {(paiement as any).sgami.nom}</span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div className="flex items-center gap-4">
+                                <span>HT: {paiement.montantHT.toLocaleString('fr-FR')} €</span>
+                                {paiement.facture && <span>Facture: {paiement.facture}</span>}
+                              </div>
+                              {(paiement as any).emissionTitrePerception && (
+                                <div className="flex items-center gap-4">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
+                                    (paiement as any).emissionTitrePerception === 'OUI' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    Émission titre: {(paiement as any).emissionTitrePerception}
+                                  </span>
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
+                                    (paiement as any).conventionJointeFRI === 'OUI' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    Convention jointe: {(paiement as any).conventionJointeFRI}
+                                  </span>
+                                </div>
+                              )}
+                              {(paiement as any).dateServiceFait && (
+                                <div>Service fait: {dayjs((paiement as any).dateServiceFait).format('DD/MM/YYYY')}</div>
+                              )}
+                              {(paiement as any).pce && (
+                                <div>PCE: {(paiement as any).pce.pceDetaille} - {(paiement as any).pce.pceNumerique}</div>
+                              )}
+                              {paiement.creePar && (
+                                <div className="text-xs">
+                                  Créé par: {paiement.creePar.grade && `${paiement.creePar.grade} `}
+                                  {paiement.creePar.prenom} {paiement.creePar.nom}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <div>HT: {paiement.montantHT.toLocaleString('fr-FR')} €</div>
-                            {paiement.facture && <div>Facture: {paiement.facture}</div>}
-                            {paiement.creePar && (
-                              <div>Créé par: {paiement.creePar.prenom} {paiement.creePar.nom}</div>
-                            )}
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => handleEditPaiement(paiement)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              Modifier
+                            </button>
+                            <button 
+                              onClick={() => handleDeletePaiement(paiement)}
+                              disabled={deletePaiementMutation.isPending}
+                              className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                            >
+                              Supprimer
+                            </button>
                           </div>
                         </div>
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">
-                          Voir détails
-                        </button>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -1113,6 +1286,18 @@ const DossierDetail: React.FC = () => {
           onClose={() => setIsCreateConventionModalOpen(false)}
           onSubmit={handleSubmitConvention}
           dossier={dossier}
+        />
+      )}
+
+      {/* Paiement Modal */}
+      {dossier && id && (
+        <PaiementModal
+          isOpen={isPaiementModalOpen}
+          onClose={handleClosePaiementModal}
+          onSubmit={handleSubmitPaiement}
+          paiement={selectedPaiement}
+          dossierId={id}
+          title={selectedPaiement ? 'Modifier le paiement' : 'Nouveau paiement'}
         />
       )}
     </div>

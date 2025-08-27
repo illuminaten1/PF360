@@ -24,7 +24,7 @@ const Revue: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/api/demandes/users')
+      const response = await api.get('/demandes/users')
       setUsers(response.data)
     } catch (error) {
       console.error('Error fetching users:', error)

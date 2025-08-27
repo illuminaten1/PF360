@@ -67,7 +67,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
     try {
       setLoading(true)
       // Récupérer toutes les demandes de l'utilisateur sans décision
-      const response = await api.get('/api/demandes', {
+      const response = await api.get('/demandes', {
         params: {
           assigneAId: selectedUserId,
           limit: 1000 // Grande limite pour récupérer toutes les demandes
@@ -100,7 +100,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
 
     try {
       setSaving(true)
-      await api.put(`/api/demandes/${editingCell.demandeId}`, {
+      await api.put(`/demandes/${editingCell.demandeId}`, {
         commentaireDecision: editingCell.value
       })
 

@@ -10,24 +10,27 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
   try {
-    const { dossierId } = req.query;
+    const { dossierId, sgamiId } = req.query;
     
     const where = {};
     if (dossierId) {
       where.dossierId = dossierId;
+    }
+    if (sgamiId) {
+      where.sgamiId = sgamiId;
     }
 
     const paiements = await prisma.paiement.findMany({
       where,
       include: {
         dossier: {
-          select: { id: true, numero: true }
+          select: { id: true, numero: true, nomDossier: true }
         },
-        convention: {
-          select: { id: true, montantHT: true, dateCreation: true }
+        sgami: {
+          select: { id: true, nom: true, intituleFicheReglement: true }
         },
         avocat: {
-          select: { id: true, nom: true, prenom: true }
+          select: { id: true, nom: true, prenom: true, region: true }
         },
         pce: {
           select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
@@ -57,22 +60,53 @@ router.post('/', async (req, res) => {
       montantHT,
       montantTTC,
       nature,
+      emissionTitrePerception,
+      qualiteBeneficiaire,
+      identiteBeneficiaire,
+      dateServiceFait,
+      conventionJointeFRI,
+      adresseBeneficiaire,
+      siretOuRidet,
+      titulaireCompteBancaire,
+      codeEtablissement,
+      codeGuichet,
+      numeroCompte,
+      cleRIB,
       ficheReglement,
       dossierId,
-      conventionId,
+      sgamiId,
       avocatId,
       pceId
     } = req.body;
 
-    if (!montantHT || !montantTTC || !nature || !dossierId) {
+    if (!montantHT || !montantTTC || !nature || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
-        error: 'Les champs montantHT, montantTTC, nature et dossierId sont obligatoires' 
+        error: 'Les champs montantHT, montantTTC, nature, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
       });
     }
 
     if (!['AVOCAT', 'AUTRES_INTERVENANTS'].includes(nature)) {
       return res.status(400).json({ 
         error: 'La nature doit être AVOCAT ou AUTRES_INTERVENANTS' 
+      });
+    }
+
+    if (!['OUI', 'NON'].includes(emissionTitrePerception)) {
+      return res.status(400).json({ 
+        error: 'emissionTitrePerception doit être OUI ou NON' 
+      });
+    }
+
+    if (!['OUI', 'NON'].includes(conventionJointeFRI)) {
+      return res.status(400).json({ 
+        error: 'conventionJointeFRI doit être OUI ou NON' 
+      });
+    }
+
+    const qualitesValides = ['Avocat', 'Commissaire de justice', 'Militaire de la gendarmerie nationale', 'Régisseur du tribunal judiciaire', 'Médecin', 'Victime'];
+    if (!qualitesValides.includes(qualiteBeneficiaire)) {
+      return res.status(400).json({ 
+        error: 'qualiteBeneficiaire doit être une des valeurs autorisées' 
       });
     }
 
@@ -85,6 +119,15 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ error: 'Dossier non trouvé' });
     }
 
+    // Vérifier que le SGAMI existe
+    const sgamiExistant = await prisma.sgami.findUnique({
+      where: { id: sgamiId }
+    });
+
+    if (!sgamiExistant) {
+      return res.status(404).json({ error: 'SGAMI non trouvé' });
+    }
+
     // Si un avocat est spécifié, vérifier qu'il existe et est actif
     if (avocatId) {
       const avocatExistant = await prisma.avocat.findUnique({
@@ -93,17 +136,6 @@ router.post('/', async (req, res) => {
 
       if (!avocatExistant) {
         return res.status(404).json({ error: 'Avocat non trouvé ou inactif' });
-      }
-    }
-
-    // Si une convention est spécifiée, vérifier qu'elle existe
-    if (conventionId) {
-      const conventionExistante = await prisma.convention.findUnique({
-        where: { id: conventionId }
-      });
-
-      if (!conventionExistante) {
-        return res.status(404).json({ error: 'Convention non trouvée' });
       }
     }
 
@@ -124,22 +156,34 @@ router.post('/', async (req, res) => {
         montantHT,
         montantTTC,
         nature,
+        emissionTitrePerception,
+        qualiteBeneficiaire,
+        identiteBeneficiaire,
+        dateServiceFait: dateServiceFait ? new Date(dateServiceFait) : null,
+        conventionJointeFRI,
+        adresseBeneficiaire,
+        siretOuRidet,
+        titulaireCompteBancaire,
+        codeEtablissement,
+        codeGuichet,
+        numeroCompte,
+        cleRIB,
         ficheReglement,
         dossierId,
-        conventionId,
+        sgamiId,
         avocatId,
         pceId,
         creeParId: req.user.id
       },
       include: {
         dossier: {
-          select: { id: true, numero: true }
+          select: { id: true, numero: true, nomDossier: true }
         },
-        convention: {
-          select: { id: true, montantHT: true, dateCreation: true }
+        sgami: {
+          select: { id: true, nom: true, intituleFicheReglement: true }
         },
         avocat: {
-          select: { id: true, nom: true, prenom: true }
+          select: { id: true, nom: true, prenom: true, region: true }
         },
         pce: {
           select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
@@ -167,13 +211,13 @@ router.get('/:id', async (req, res) => {
       where: { id },
       include: {
         dossier: {
-          select: { id: true, numero: true }
+          select: { id: true, numero: true, nomDossier: true }
         },
-        convention: {
-          select: { id: true, montantHT: true, dateCreation: true }
+        sgami: {
+          select: { id: true, nom: true, intituleFicheReglement: true }
         },
         avocat: {
-          select: { id: true, nom: true, prenom: true }
+          select: { id: true, nom: true, prenom: true, region: true }
         },
         pce: {
           select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
@@ -205,8 +249,20 @@ router.put('/:id', async (req, res) => {
       montantHT,
       montantTTC,
       nature,
+      emissionTitrePerception,
+      qualiteBeneficiaire,
+      identiteBeneficiaire,
+      dateServiceFait,
+      conventionJointeFRI,
+      adresseBeneficiaire,
+      siretOuRidet,
+      titulaireCompteBancaire,
+      codeEtablissement,
+      codeGuichet,
+      numeroCompte,
+      cleRIB,
       ficheReglement,
-      conventionId,
+      sgamiId,
       avocatId,
       pceId
     } = req.body;
@@ -219,9 +275,9 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
 
-    if (!montantHT || !montantTTC || !nature) {
+    if (!montantHT || !montantTTC || !nature || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
-        error: 'Les champs montantHT, montantTTC et nature sont obligatoires' 
+        error: 'Les champs montantHT, montantTTC, nature, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
       });
     }
 
@@ -229,6 +285,34 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ 
         error: 'La nature doit être AVOCAT ou AUTRES_INTERVENANTS' 
       });
+    }
+
+    if (!['OUI', 'NON'].includes(emissionTitrePerception)) {
+      return res.status(400).json({ 
+        error: 'emissionTitrePerception doit être OUI ou NON' 
+      });
+    }
+
+    if (!['OUI', 'NON'].includes(conventionJointeFRI)) {
+      return res.status(400).json({ 
+        error: 'conventionJointeFRI doit être OUI ou NON' 
+      });
+    }
+
+    const qualitesValides = ['Avocat', 'Commissaire de justice', 'Militaire de la gendarmerie nationale', 'Régisseur du tribunal judiciaire', 'Médecin', 'Victime'];
+    if (!qualitesValides.includes(qualiteBeneficiaire)) {
+      return res.status(400).json({ 
+        error: 'qualiteBeneficiaire doit être une des valeurs autorisées' 
+      });
+    }
+
+    // Vérifier que le SGAMI existe
+    const sgamiExistant = await prisma.sgami.findUnique({
+      where: { id: sgamiId }
+    });
+
+    if (!sgamiExistant) {
+      return res.status(404).json({ error: 'SGAMI non trouvé' });
     }
 
     // Si un avocat est spécifié, vérifier qu'il existe et est actif
@@ -242,14 +326,14 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    // Si une convention est spécifiée, vérifier qu'elle existe
-    if (conventionId) {
-      const conventionExistante = await prisma.convention.findUnique({
-        where: { id: conventionId }
+    // Si un PCE est spécifié, vérifier qu'il existe
+    if (pceId) {
+      const pceExistant = await prisma.pce.findUnique({
+        where: { id: pceId }
       });
 
-      if (!conventionExistante) {
-        return res.status(404).json({ error: 'Convention non trouvée' });
+      if (!pceExistant) {
+        return res.status(404).json({ error: 'PCE non trouvé' });
       }
     }
 
@@ -260,20 +344,32 @@ router.put('/:id', async (req, res) => {
         montantHT,
         montantTTC,
         nature,
+        emissionTitrePerception,
+        qualiteBeneficiaire,
+        identiteBeneficiaire,
+        dateServiceFait: dateServiceFait ? new Date(dateServiceFait) : null,
+        conventionJointeFRI,
+        adresseBeneficiaire,
+        siretOuRidet,
+        titulaireCompteBancaire,
+        codeEtablissement,
+        codeGuichet,
+        numeroCompte,
+        cleRIB,
         ficheReglement,
-        conventionId,
+        sgamiId,
         avocatId,
         pceId
       },
       include: {
         dossier: {
-          select: { id: true, numero: true }
+          select: { id: true, numero: true, nomDossier: true }
         },
-        convention: {
-          select: { id: true, montantHT: true, dateCreation: true }
+        sgami: {
+          select: { id: true, nom: true, intituleFicheReglement: true }
         },
         avocat: {
-          select: { id: true, nom: true, prenom: true }
+          select: { id: true, nom: true, prenom: true, region: true }
         },
         pce: {
           select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }

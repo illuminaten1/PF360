@@ -29,6 +29,7 @@ import {
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useNavigate } from 'react-router-dom'
 import { exportRevueDecisions } from '@/utils/excelExport'
+import { useAuth } from '@/contexts/AuthContext'
 
 dayjs.locale('fr')
 
@@ -276,6 +277,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
   selectedUser 
 }) => {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [data, setData] = useState<Demande[]>([])
   const [loading, setLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([
@@ -542,13 +544,15 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
                   <span className="text-sm text-gray-400 italic">Aucun commentaire</span>
                 )}
               </div>
-              <button
-                onClick={() => handleEditComment(demande.id, currentValue)}
-                className="p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
-                title="Modifier le commentaire"
-              >
-                <PencilIcon className="h-4 w-4" />
-              </button>
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => handleEditComment(demande.id, currentValue)}
+                  className="p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
+                  title="Modifier le commentaire"
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </button>
+              )}
             </div>
           )
         },

@@ -39,7 +39,8 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     cleRIB: '',
     sgamiId: '',
     avocatId: '',
-    pceId: ''
+    pceId: '',
+    decisions: [] as string[]
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -74,6 +75,16 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     enabled: isOpen
   })
 
+  // Fetch decisions for the current dossier
+  const { data: decisions = [] } = useQuery({
+    queryKey: ['dossier-decisions', dossierId],
+    queryFn: async () => {
+      const response = await api.get(`/dossiers/${dossierId}`)
+      return response.data.decisions || []
+    },
+    enabled: isOpen && !!dossierId
+  })
+
   const qualitesBeneficiaire = [
     'Avocat',
     'Commissaire de justice',
@@ -103,7 +114,8 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         cleRIB: paiement.cleRIB || '',
         sgamiId: paiement.sgami.id,
         avocatId: paiement.avocat?.id || '',
-        pceId: paiement.pce?.id || ''
+        pceId: paiement.pce?.id || '',
+        decisions: paiement.decisions?.map(d => d.decision.id) || []
       })
     } else if (isOpen) {
       // Reset form for new paiement
@@ -125,7 +137,8 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         cleRIB: '',
         sgamiId: '',
         avocatId: '',
-        pceId: ''
+        pceId: '',
+        decisions: []
       })
     }
     setErrors({})
@@ -161,6 +174,20 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     }
   }
 
+  const handleDecisionChange = (decisionId: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      decisions: checked 
+        ? [...prev.decisions, decisionId]
+        : prev.decisions.filter(id => id !== decisionId)
+    }))
+    
+    // Clear error when user makes a selection
+    if (errors.decisions) {
+      setErrors(prev => ({ ...prev, decisions: '' }))
+    }
+  }
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {}
 
@@ -186,6 +213,10 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
       newErrors.avocatId = 'Vous devez sélectionner un avocat'
     }
 
+    if (!formData.decisions || formData.decisions.length === 0) {
+      newErrors.decisions = 'Au moins une décision doit être sélectionnée'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -197,7 +228,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
       return
     }
 
-    const submitData = {
+    const submitData: any = {
       ...formData,
       montantHT: formData.montantHT ? Number(formData.montantHT) : null,
       montantTTC: Number(formData.montantTTC),
@@ -328,6 +359,32 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Décisions associées */}
+            <div className="md:col-span-2">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Décisions associées *</h3>
+              <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-50 p-3 rounded-md">
+                {decisions.length > 0 ? (
+                  decisions.map((decision: any) => (
+                    <label key={decision.id} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.decisions.includes(decision.id)}
+                        onChange={(e) => handleDecisionChange(decision.id, e.target.checked)}
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {decision.type} {decision.numero && `- ${decision.numero}`}
+                        {decision.dateSignature && ` (${new Date(decision.dateSignature).toLocaleDateString()})`}
+                      </span>
+                    </label>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">Aucune décision disponible pour ce dossier</p>
+                )}
+              </div>
+              {errors.decisions && <p className="text-red-500 text-xs mt-1">{errors.decisions}</p>}
             </div>
 
             {/* Bénéficiaire */}

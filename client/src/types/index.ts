@@ -353,6 +353,14 @@ export interface Paiement {
     pceNumerique: string
     codeMarchandise: string
   }
+  decisions: Array<{
+    decision: {
+      id: string
+      type: string
+      dateSignature?: string
+      numero?: string
+    }
+  }>
   creePar: {
     id: string
     nom: string
@@ -444,6 +452,13 @@ export interface Decision {
       nom: string
       prenom: string
       numeroDS: string
+    }
+  }>
+  paiements?: Array<{
+    paiement: {
+      id: string
+      facture?: string
+      montantTTC: number
     }
   }>
   createdAt: string

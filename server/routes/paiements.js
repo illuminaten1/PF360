@@ -75,12 +75,19 @@ router.post('/', async (req, res) => {
       dossierId,
       sgamiId,
       avocatId,
-      pceId
+      pceId,
+      decisions = []
     } = req.body;
 
     if (!montantTTC || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
         error: 'Les champs montantTTC, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
+      });
+    }
+
+    if (!decisions || !Array.isArray(decisions) || decisions.length === 0) {
+      return res.status(400).json({ 
+        error: 'Au moins une décision doit être associée au paiement' 
       });
     }
 
@@ -165,7 +172,12 @@ router.post('/', async (req, res) => {
         sgamiId,
         avocatId,
         pceId,
-        creeParId: req.user.id
+        creeParId: req.user.id,
+        decisions: {
+          create: decisions.map(decisionId => ({
+            decisionId
+          }))
+        }
       },
       include: {
         dossier: {
@@ -182,6 +194,18 @@ router.post('/', async (req, res) => {
         },
         creePar: {
           select: { id: true, nom: true, prenom: true, grade: true }
+        },
+        decisions: {
+          include: {
+            decision: {
+              select: {
+                id: true,
+                type: true,
+                numero: true,
+                dateSignature: true
+              }
+            }
+          }
         }
       }
     });
@@ -216,6 +240,18 @@ router.get('/:id', async (req, res) => {
         },
         creePar: {
           select: { id: true, nom: true, prenom: true, grade: true }
+        },
+        decisions: {
+          include: {
+            decision: {
+              select: {
+                id: true,
+                type: true,
+                numero: true,
+                dateSignature: true
+              }
+            }
+          }
         }
       }
     });
@@ -255,7 +291,8 @@ router.put('/:id', async (req, res) => {
       ficheReglement,
       sgamiId,
       avocatId,
-      pceId
+      pceId,
+      decisions = []
     } = req.body;
 
     const paiementExistant = await prisma.paiement.findUnique({
@@ -269,6 +306,12 @@ router.put('/:id', async (req, res) => {
     if (!montantTTC || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
         error: 'Les champs montantTTC, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
+      });
+    }
+
+    if (!decisions || !Array.isArray(decisions) || decisions.length === 0) {
+      return res.status(400).json({ 
+        error: 'Au moins une décision doit être associée au paiement' 
       });
     }
 
@@ -322,46 +365,71 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    const paiement = await prisma.paiement.update({
-      where: { id },
-      data: {
-        facture,
-        montantHT,
-        montantTTC,
-        emissionTitrePerception,
-        qualiteBeneficiaire,
-        identiteBeneficiaire,
-        dateServiceFait: dateServiceFait ? new Date(dateServiceFait) : null,
-        conventionJointeFRI,
-        adresseBeneficiaire,
-        siretOuRidet,
-        titulaireCompteBancaire,
-        codeEtablissement,
-        codeGuichet,
-        numeroCompte,
-        cleRIB,
-        ficheReglement,
-        sgamiId,
-        avocatId,
-        pceId
-      },
-      include: {
-        dossier: {
-          select: { id: true, numero: true, nomDossier: true }
+    const paiement = await prisma.$transaction(async (tx) => {
+      // Supprimer les anciennes relations avec les décisions
+      await tx.paiementDecision.deleteMany({
+        where: { paiementId: id }
+      });
+
+      // Mettre à jour le paiement avec les nouvelles relations
+      return await tx.paiement.update({
+        where: { id },
+        data: {
+          facture,
+          montantHT,
+          montantTTC,
+          emissionTitrePerception,
+          qualiteBeneficiaire,
+          identiteBeneficiaire,
+          dateServiceFait: dateServiceFait ? new Date(dateServiceFait) : null,
+          conventionJointeFRI,
+          adresseBeneficiaire,
+          siretOuRidet,
+          titulaireCompteBancaire,
+          codeEtablissement,
+          codeGuichet,
+          numeroCompte,
+          cleRIB,
+          ficheReglement,
+          sgamiId,
+          avocatId,
+          pceId,
+          decisions: {
+            create: decisions.map(decisionId => ({
+              decisionId
+            }))
+          }
         },
-        sgami: {
-          select: { id: true, nom: true, intituleFicheReglement: true }
-        },
-        avocat: {
-          select: { id: true, nom: true, prenom: true, region: true }
-        },
-        pce: {
-          select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
-        },
-        creePar: {
-          select: { id: true, nom: true, prenom: true, grade: true }
+        include: {
+          dossier: {
+            select: { id: true, numero: true, nomDossier: true }
+          },
+          sgami: {
+            select: { id: true, nom: true, intituleFicheReglement: true }
+          },
+          avocat: {
+            select: { id: true, nom: true, prenom: true, region: true }
+          },
+          pce: {
+            select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
+          },
+          creePar: {
+            select: { id: true, nom: true, prenom: true, grade: true }
+          },
+          decisions: {
+            include: {
+              decision: {
+                select: {
+                  id: true,
+                  type: true,
+                  numero: true,
+                  dateSignature: true
+                }
+              }
+            }
+          }
         }
-      }
+      });
     });
 
     await logAction(req.user.id, 'UPDATE_PAIEMENT', `Modification paiement ${paiement.facture || 'sans facture'}`, 'Paiement', paiement.id);

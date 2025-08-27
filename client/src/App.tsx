@@ -20,6 +20,7 @@ import Conventions from '@/pages/Conventions'
 import Paiements from '@/pages/Paiements'
 import GradesPage from '@/pages/Grades'
 import Templates from '@/pages/Templates'
+import Revue from '@/pages/Revue'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -55,7 +56,7 @@ function App() {
           <Route path="conventions" element={<Conventions />} />
           <Route path="paiements" element={<Paiements />} />
           <Route path="avocats" element={<Avocats />} />
-          <Route path="revue" element={<PlaceholderPage title="Revue" />} />
+          <Route path="revue" element={<Revue />} />
           <Route path="statistiques" element={<PlaceholderPage title="Statistiques" />} />
           
           {/* Admin routes */}

@@ -59,7 +59,6 @@ router.post('/', async (req, res) => {
       facture,
       montantHT,
       montantTTC,
-      nature,
       emissionTitrePerception,
       qualiteBeneficiaire,
       identiteBeneficiaire,
@@ -79,15 +78,9 @@ router.post('/', async (req, res) => {
       pceId
     } = req.body;
 
-    if (!montantHT || !montantTTC || !nature || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
+    if (!montantHT || !montantTTC || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
-        error: 'Les champs montantHT, montantTTC, nature, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
-      });
-    }
-
-    if (!['AVOCAT', 'AUTRES_INTERVENANTS'].includes(nature)) {
-      return res.status(400).json({ 
-        error: 'La nature doit être AVOCAT ou AUTRES_INTERVENANTS' 
+        error: 'Les champs montantHT, montantTTC, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
       });
     }
 
@@ -155,7 +148,6 @@ router.post('/', async (req, res) => {
         facture,
         montantHT,
         montantTTC,
-        nature,
         emissionTitrePerception,
         qualiteBeneficiaire,
         identiteBeneficiaire,
@@ -248,7 +240,6 @@ router.put('/:id', async (req, res) => {
       facture,
       montantHT,
       montantTTC,
-      nature,
       emissionTitrePerception,
       qualiteBeneficiaire,
       identiteBeneficiaire,
@@ -275,15 +266,9 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
 
-    if (!montantHT || !montantTTC || !nature || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
+    if (!montantHT || !montantTTC || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
-        error: 'Les champs montantHT, montantTTC, nature, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
-      });
-    }
-
-    if (!['AVOCAT', 'AUTRES_INTERVENANTS'].includes(nature)) {
-      return res.status(400).json({ 
-        error: 'La nature doit être AVOCAT ou AUTRES_INTERVENANTS' 
+        error: 'Les champs montantHT, montantTTC, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
       });
     }
 
@@ -343,7 +328,6 @@ router.put('/:id', async (req, res) => {
         facture,
         montantHT,
         montantTTC,
-        nature,
         emissionTitrePerception,
         qualiteBeneficiaire,
         identiteBeneficiaire,

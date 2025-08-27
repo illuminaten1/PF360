@@ -210,13 +210,8 @@ export interface Dossier {
     id: string
     montantHT: number
     montantTTC: number
-    nature: 'AVOCAT' | 'AUTRES_INTERVENANTS'
+    qualiteBeneficiaire?: 'Avocat' | 'Commissaire de justice' | 'Militaire de la gendarmerie nationale' | 'Régisseur du tribunal judiciaire' | 'Médecin' | 'Victime'
     facture?: string
-    convention?: {
-      id: string
-      montantHT: number
-      date: string
-    }
     creePar?: {
       nom: string
       prenom: string
@@ -319,7 +314,6 @@ export interface Paiement {
   facture?: string
   montantHT: number
   montantTTC: number
-  nature: 'AVOCAT' | 'AUTRES_INTERVENANTS'
   emissionTitrePerception: 'OUI' | 'NON'
   qualiteBeneficiaire: 'Avocat' | 'Commissaire de justice' | 'Militaire de la gendarmerie nationale' | 'Régisseur du tribunal judiciaire' | 'Médecin' | 'Victime'
   identiteBeneficiaire: string

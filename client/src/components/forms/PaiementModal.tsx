@@ -87,7 +87,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     if (isOpen && paiement) {
       setFormData({
         facture: paiement.facture || '',
-        montantHT: paiement.montantHT.toString(),
+        montantHT: paiement.montantHT?.toString() || '',
         montantTTC: paiement.montantTTC.toString(),
         emissionTitrePerception: paiement.emissionTitrePerception,
         qualiteBeneficiaire: paiement.qualiteBeneficiaire,
@@ -164,9 +164,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {}
 
-    if (!formData.montantHT) {
-      newErrors.montantHT = 'Le montant HT est obligatoire'
-    } else if (isNaN(Number(formData.montantHT)) || Number(formData.montantHT) <= 0) {
+    if (formData.montantHT && (isNaN(Number(formData.montantHT)) || Number(formData.montantHT) <= 0)) {
       newErrors.montantHT = 'Le montant HT doit être un nombre positif'
     }
 
@@ -201,7 +199,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
 
     const submitData = {
       ...formData,
-      montantHT: Number(formData.montantHT),
+      montantHT: formData.montantHT ? Number(formData.montantHT) : null,
       montantTTC: Number(formData.montantTTC),
       dossierId,
       dateServiceFait: formData.dateServiceFait || null,

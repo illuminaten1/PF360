@@ -208,7 +208,7 @@ export interface Dossier {
   }>
   paiements: Array<{
     id: string
-    montantHT: number
+    montantHT?: number
     montantTTC: number
     qualiteBeneficiaire?: 'Avocat' | 'Commissaire de justice' | 'Militaire de la gendarmerie nationale' | 'Régisseur du tribunal judiciaire' | 'Médecin' | 'Victime'
     facture?: string
@@ -312,7 +312,7 @@ export interface Avocat {
 export interface Paiement {
   id: string
   facture?: string
-  montantHT: number
+  montantHT?: number
   montantTTC: number
   emissionTitrePerception: 'OUI' | 'NON'
   qualiteBeneficiaire: 'Avocat' | 'Commissaire de justice' | 'Militaire de la gendarmerie nationale' | 'Régisseur du tribunal judiciaire' | 'Médecin' | 'Victime'
@@ -506,7 +506,7 @@ export interface Convention {
   paiements?: Array<{
     id: string
     facture?: string
-    montantHT: number
+    montantHT?: number
     montantTTC: number
     createdAt: string
   }>

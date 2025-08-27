@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
 
@@ -6,6 +6,7 @@ interface ExcelColumn {
   header: string
   accessor: string | ((row: Demande) => any)
   formatter?: (value: any) => string
+  width?: number
 }
 
 interface ExportOptions {
@@ -15,15 +16,25 @@ interface ExportOptions {
   data: Demande[]
 }
 
-export const exportToExcel = (options: ExportOptions) => {
+export const exportToExcel = async (options: ExportOptions) => {
   const { filename, sheetName, columns, data } = options
 
-  // Créer les en-têtes
-  const headers = columns.map(col => col.header)
+  // Créer un nouveau classeur
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet(sheetName)
 
-  // Créer les données transformées
-  const rows = data.map(row => {
-    return columns.map(col => {
+  // Définir les colonnes avec leurs largeurs
+  worksheet.columns = columns.map(col => ({
+    header: col.header,
+    key: col.header.toLowerCase().replace(/\s+/g, '_'),
+    width: col.width || 15
+  }))
+
+  // Ajouter les données
+  data.forEach(row => {
+    const rowData: any = {}
+    
+    columns.forEach(col => {
       let value: any
 
       if (typeof col.accessor === 'string') {
@@ -36,37 +47,104 @@ export const exportToExcel = (options: ExportOptions) => {
 
       // Appliquer le formateur si défini
       if (col.formatter && value !== null && value !== undefined) {
-        return col.formatter(value)
+        value = col.formatter(value)
       }
 
       // Valeur par défaut pour les valeurs nulles/undefined
       if (value === null || value === undefined) {
-        return ''
+        value = ''
       }
 
-      return value
+      const key = col.header.toLowerCase().replace(/\s+/g, '_')
+      rowData[key] = value
     })
+
+    worksheet.addRow(rowData)
   })
 
-  // Créer la feuille de calcul
-  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
-
-  // Ajuster la largeur des colonnes
-  const colWidths = headers.map((_, colIndex) => {
-    const headerLength = headers[colIndex].length
-    const maxDataLength = Math.max(
-      ...rows.map(row => String(row[colIndex] || '').length)
-    )
-    return { wch: Math.max(headerLength, maxDataLength, 10) }
+  // Styler l'en-tête (première ligne)
+  const headerRow = worksheet.getRow(1)
+  headerRow.height = 30
+  
+  headerRow.eachCell((cell) => {
+    cell.font = {
+      name: 'Calibri',
+      size: 12,
+      bold: true,
+      color: { argb: 'FFFFFFFF' }
+    }
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF366092' }
+    }
+    cell.alignment = {
+      vertical: 'middle',
+      horizontal: 'center'
+    }
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF000000' } },
+      left: { style: 'thin', color: { argb: 'FF000000' } },
+      bottom: { style: 'thin', color: { argb: 'FF000000' } },
+      right: { style: 'thin', color: { argb: 'FF000000' } }
+    }
   })
-  worksheet['!cols'] = colWidths
 
-  // Créer le classeur
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  // Styler les lignes de données
+  for (let i = 2; i <= worksheet.rowCount; i++) {
+    const row = worksheet.getRow(i)
+    row.height = 25
+    
+    // Alternance de couleurs
+    const isEvenRow = i % 2 === 0
+    const bgColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF'
+    
+    row.eachCell((cell) => {
+      cell.font = {
+        name: 'Calibri',
+        size: 11,
+        color: { argb: 'FF000000' }
+      }
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: bgColor }
+      }
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'left'
+      }
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+        left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+        right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+      }
+    })
+  }
 
-  // Télécharger le fichier
-  XLSX.writeFile(workbook, filename)
+  // Appliquer un filtre automatique sur l'en-tête
+  worksheet.autoFilter = {
+    from: 'A1',
+    to: { row: 1, column: columns.length }
+  }
+
+  // Générer le buffer du fichier
+  const buffer = await workbook.xlsx.writeBuffer()
+
+  // Créer un blob et télécharger
+  const blob = new Blob([buffer], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  })
+  
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
 }
 
 // Fonction utilitaire pour accéder aux propriétés imbriquées
@@ -77,7 +155,7 @@ const getNestedProperty = (obj: any, path: string): any => {
 }
 
 // Configurations d'export pour les différentes tables
-export const exportRevueDecisions = (data: Demande[], selectedUser?: { nom: string; prenom: string; grade?: string }) => {
+export const exportRevueDecisions = async (data: Demande[], selectedUser?: { nom: string; prenom: string; grade?: string }) => {
   const userInfo = selectedUser 
     ? `${selectedUser.grade ? `${selectedUser.grade} ` : ''}${selectedUser.prenom} ${selectedUser.nom}`
     : 'Utilisateur'
@@ -85,36 +163,42 @@ export const exportRevueDecisions = (data: Demande[], selectedUser?: { nom: stri
   const columns: ExcelColumn[] = [
     {
       header: 'Nom',
-      accessor: 'nom'
+      accessor: 'nom',
+      width: 18
     },
     {
       header: 'Prénom',
-      accessor: 'prenom'
+      accessor: 'prenom',
+      width: 18
     },
     {
       header: 'Qualité',
       accessor: 'type',
-      formatter: (value: string) => value === 'VICTIME' ? 'Victime' : 'Mis en cause'
+      formatter: (value: string) => value === 'VICTIME' ? 'Victime' : 'Mis en cause',
+      width: 15
     },
     {
       header: 'Date de réception',
       accessor: 'dateReception',
-      formatter: (value: string) => value ? dayjs(value).format('DD/MM/YYYY') : ''
+      formatter: (value: string) => value ? dayjs(value).format('DD/MM/YYYY') : '',
+      width: 18
     },
     {
       header: 'Dossier',
-      accessor: (row: Demande) => row.dossier?.numero || 'Non lié'
+      accessor: (row: Demande) => row.dossier?.numero || 'Non lié',
+      width: 20
     },
     {
       header: 'Commentaire',
       accessor: 'commentaireDecision',
-      formatter: (value: string) => value || 'Aucun commentaire'
+      formatter: (value: string) => value || 'Aucun commentaire',
+      width: 35
     }
   ]
 
   const filename = `Revue_Decisions_${userInfo.replace(/\s+/g, '_')}_${dayjs().format('YYYY-MM-DD')}.xlsx`
 
-  exportToExcel({
+  await exportToExcel({
     filename,
     sheetName: 'Demandes sans décision',
     columns,
@@ -122,7 +206,7 @@ export const exportRevueDecisions = (data: Demande[], selectedUser?: { nom: stri
   })
 }
 
-export const exportRevueConventions = (data: Demande[], selectedUser?: { nom: string; prenom: string; grade?: string }) => {
+export const exportRevueConventions = async (data: Demande[], selectedUser?: { nom: string; prenom: string; grade?: string }) => {
   const userInfo = selectedUser 
     ? `${selectedUser.grade ? `${selectedUser.grade} ` : ''}${selectedUser.prenom} ${selectedUser.nom}`
     : 'Utilisateur'
@@ -130,16 +214,19 @@ export const exportRevueConventions = (data: Demande[], selectedUser?: { nom: st
   const columns: ExcelColumn[] = [
     {
       header: 'Nom',
-      accessor: 'nom'
+      accessor: 'nom',
+      width: 18
     },
     {
       header: 'Prénom',
-      accessor: 'prenom'
+      accessor: 'prenom',
+      width: 18
     },
     {
       header: 'Qualité',
       accessor: 'type',
-      formatter: (value: string) => value === 'VICTIME' ? 'Victime' : 'Mis en cause'
+      formatter: (value: string) => value === 'VICTIME' ? 'Victime' : 'Mis en cause',
+      width: 15
     },
     {
       header: 'Date de décision PJ',
@@ -149,22 +236,25 @@ export const exportRevueConventions = (data: Demande[], selectedUser?: { nom: st
         )
         return decisionPj?.decision.dateSignature || null
       },
-      formatter: (value: string) => value ? dayjs(value).format('DD/MM/YYYY') : '-'
+      formatter: (value: string) => value ? dayjs(value).format('DD/MM/YYYY') : '-',
+      width: 20
     },
     {
       header: 'Dossier',
-      accessor: (row: Demande) => row.dossier?.numero || 'Non lié'
+      accessor: (row: Demande) => row.dossier?.numero || 'Non lié',
+      width: 20
     },
     {
       header: 'Commentaire',
       accessor: 'commentaireConvention',
-      formatter: (value: string) => value || 'Aucun commentaire'
+      formatter: (value: string) => value || 'Aucun commentaire',
+      width: 35
     }
   ]
 
   const filename = `Revue_Conventions_${userInfo.replace(/\s+/g, '_')}_${dayjs().format('YYYY-MM-DD')}.xlsx`
 
-  exportToExcel({
+  await exportToExcel({
     filename,
     sheetName: 'Demandes PJ sans convention',
     columns,

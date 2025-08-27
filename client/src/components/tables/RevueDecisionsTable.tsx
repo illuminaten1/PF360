@@ -361,9 +361,13 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
     navigate(`/dossiers/${dossierId}`)
   }
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (data.length === 0) return
-    exportRevueDecisions(table.getFilteredRowModel().rows.map(row => row.original), selectedUser)
+    try {
+      await exportRevueDecisions(table.getFilteredRowModel().rows.map(row => row.original), selectedUser)
+    } catch (error) {
+      console.error('Erreur lors de l\'export Excel:', error)
+    }
   }
 
   const getTypeColor = (type: string) => {

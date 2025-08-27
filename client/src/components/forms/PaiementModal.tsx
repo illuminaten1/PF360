@@ -265,7 +265,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Montant HT (€) *
+                Montant HT (€)
               </label>
               <input
                 type="number"
@@ -276,7 +276,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.montantHT ? 'border-red-300' : 'border-gray-300'
                 }`}
-                required
               />
               {errors.montantHT && <p className="text-red-500 text-xs mt-1">{errors.montantHT}</p>}
             </div>

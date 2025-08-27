@@ -385,7 +385,30 @@ router.get('/:id', async (req, res) => {
         },
         paiements: {
           include: {
-            convention: true,
+            sgami: {
+              select: {
+                id: true,
+                nom: true,
+                intituleFicheReglement: true
+              }
+            },
+            avocat: {
+              select: {
+                id: true,
+                nom: true,
+                prenom: true,
+                region: true
+              }
+            },
+            pce: {
+              select: {
+                id: true,
+                ordre: true,
+                pceDetaille: true,
+                pceNumerique: true,
+                codeMarchandise: true
+              }
+            },
             creePar: {
               select: {
                 nom: true,

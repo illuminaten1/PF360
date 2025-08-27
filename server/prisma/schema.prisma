@@ -198,7 +198,7 @@ model Convention {
 model Paiement {
   id                        String      @id @default(cuid())
   facture                   String?     // Numéro de facture
-  montantHT                 Float
+  montantHT                 Float?
   montantTTC                Float
   emissionTitrePerception   String      // OUI | NON
   qualiteBeneficiaire       String      // Avocat | Commissaire de justice | Militaire de la gendarmerie nationale | Régisseur du tribunal judiciaire | Médecin | Victime

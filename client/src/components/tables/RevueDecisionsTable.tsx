@@ -23,10 +23,12 @@ import {
   PencilIcon,
   CheckIcon,
   XMarkIcon,
-  FolderIcon
+  FolderIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useNavigate } from 'react-router-dom'
+import { exportRevueDecisions } from '@/utils/excelExport'
 
 dayjs.locale('fr')
 
@@ -359,6 +361,11 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
     navigate(`/dossiers/${dossierId}`)
   }
 
+  const handleExportExcel = () => {
+    if (data.length === 0) return
+    exportRevueDecisions(table.getFilteredRowModel().rows.map(row => row.original), selectedUser)
+  }
+
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
   }
@@ -582,12 +589,26 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
       {/* En-tête avec informations utilisateur */}
       {selectedUser && (
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">
-            Demandes sans décision - {selectedUser.grade && `${selectedUser.grade} `}{selectedUser.prenom} {selectedUser.nom}
-          </h3>
-          <p className="mt-1 text-sm text-gray-600">
-            {data.length} demande{data.length !== 1 ? 's' : ''} sans décision
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">
+                Demandes sans décision - {selectedUser.grade && `${selectedUser.grade} `}{selectedUser.prenom} {selectedUser.nom}
+              </h3>
+              <p className="mt-1 text-sm text-gray-600">
+                {data.length} demande{data.length !== 1 ? 's' : ''} sans décision
+              </p>
+            </div>
+            {data.length > 0 && (
+              <button
+                onClick={handleExportExcel}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                title="Exporter vers Excel"
+              >
+                <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                Exporter Excel
+              </button>
+            )}
+          </div>
         </div>
       )}
 

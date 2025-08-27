@@ -12,14 +12,32 @@ interface User {
 }
 
 const Revue: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'decisions' | 'conventions'>('decisions')
+  const [activeTab, setActiveTab] = useState<'decisions' | 'conventions'>(() => {
+    return (sessionStorage.getItem('revue-active-tab') as 'decisions' | 'conventions') || 'decisions'
+  })
   const [users, setUsers] = useState<User[]>([])
-  const [selectedUserId, setSelectedUserId] = useState<string>('')
+  const [selectedUserId, setSelectedUserId] = useState<string>(() => {
+    return sessionStorage.getItem('revue-selected-user-id') || ''
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchUsers()
   }, [])
+
+  // Sauvegarder l'onglet actif
+  useEffect(() => {
+    sessionStorage.setItem('revue-active-tab', activeTab)
+  }, [activeTab])
+
+  // Sauvegarder l'utilisateur sélectionné
+  useEffect(() => {
+    if (selectedUserId) {
+      sessionStorage.setItem('revue-selected-user-id', selectedUserId)
+    } else {
+      sessionStorage.removeItem('revue-selected-user-id')
+    }
+  }, [selectedUserId])
 
   const fetchUsers = async () => {
     try {

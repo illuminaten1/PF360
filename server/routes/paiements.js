@@ -78,9 +78,9 @@ router.post('/', async (req, res) => {
       pceId
     } = req.body;
 
-    if (!montantHT || !montantTTC || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
+    if (!montantTTC || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
-        error: 'Les champs montantHT, montantTTC, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
+        error: 'Les champs montantTTC, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
       });
     }
 
@@ -266,9 +266,9 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
 
-    if (!montantHT || !montantTTC || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
+    if (!montantTTC || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
       return res.status(400).json({ 
-        error: 'Les champs montantHT, montantTTC, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
+        error: 'Les champs montantTTC, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
       });
     }
 

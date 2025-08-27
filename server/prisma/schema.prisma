@@ -89,6 +89,10 @@ model Demande {
   soutienSocial          Boolean   @default(false)
   soutienMedical         Boolean   @default(false)
   
+  // Commentaires de suivi
+  commentaireDecision    String?
+  commentaireConvention  String?
+  
   dateReception          DateTime  @default(now())
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt

@@ -362,9 +362,13 @@ const RevueConventionsTable: React.FC<RevueConventionsTableProps> = ({
     navigate(`/dossiers/${dossierId}`)
   }
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (data.length === 0) return
-    exportRevueConventions(table.getFilteredRowModel().rows.map(row => row.original), selectedUser)
+    try {
+      await exportRevueConventions(table.getFilteredRowModel().rows.map(row => row.original), selectedUser)
+    } catch (error) {
+      console.error('Erreur lors de l\'export Excel:', error)
+    }
   }
 
   const getTypeColor = (type: string) => {

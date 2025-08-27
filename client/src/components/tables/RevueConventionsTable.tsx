@@ -302,7 +302,7 @@ const RevueConventionsTable: React.FC<RevueConventionsTableProps> = ({
       const demandesAvecDecisionPjSansConvention = response.data.demandes.filter((demande: Demande) => {
         // Vérifier s'il y a une décision de protection juridictionnelle
         const hasDecisionPj = demande.decisions && demande.decisions.some(decisionItem => 
-          decisionItem.decision.type === 'PROTECTION_JURIDICTIONNELLE'
+          decisionItem.decision.type === 'PJ'
         )
         
         // Vérifier s'il n'y a pas de convention d'honoraires
@@ -409,9 +409,9 @@ const RevueConventionsTable: React.FC<RevueConventionsTableProps> = ({
         header: 'Date de décision PJ',
         accessorFn: (row) => {
           const decisionPj = row.decisions?.find(decisionItem => 
-            decisionItem.decision.type === 'PROTECTION_JURIDICTIONNELLE'
+            decisionItem.decision.type === 'PJ'
           )
-          return decisionPj?.decision.date || null
+          return decisionPj?.decision.dateSignature || null
         },
         cell: ({ getValue }) => {
           const date = getValue<string>()

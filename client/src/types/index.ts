@@ -96,7 +96,9 @@ export interface Demande {
     decision: {
       id: string
       type: string
-      date: string
+      date?: string
+      dateSignature?: string
+      dateEnvoi?: string
     }
   }>
   conventions?: Array<{

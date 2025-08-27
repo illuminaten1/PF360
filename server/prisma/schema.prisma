@@ -188,7 +188,6 @@ model Convention {
   modifieParId    String?
   demandes        ConventionDemande[]
   diligences      ConventionDiligence[]
-  paiements       Paiement[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -197,18 +196,33 @@ model Convention {
 }
 
 model Paiement {
-  id              String      @id @default(cuid())
-  facture         String?     // Numéro de facture
-  montantHT       Float
-  montantTTC      Float
-  nature          String // AVOCAT | AUTRES_INTERVENANTS
-  ficheReglement  String?     // Path vers la fiche générée
+  id                        String      @id @default(cuid())
+  facture                   String?     // Numéro de facture
+  montantHT                 Float
+  montantTTC                Float
+  nature                    String      // AVOCAT | AUTRES_INTERVENANTS
+  emissionTitrePerception   String      // OUI | NON
+  qualiteBeneficiaire       String      // Avocat | Commissaire de justice | Militaire de la gendarmerie nationale | Régisseur du tribunal judiciaire | Médecin | Victime
+  identiteBeneficiaire      String
+  dateServiceFait           DateTime?
+  conventionJointeFRI       String      // OUI | NON
+  
+  // Coordonnées bénéficiaire (peuvent être pré-remplies depuis l'avocat)
+  adresseBeneficiaire       String?
+  siretOuRidet              String?
+  titulaireCompteBancaire   String?
+  codeEtablissement         String?
+  codeGuichet              String?
+  numeroCompte             String?
+  cleRIB                   String?
+  
+  ficheReglement           String?     // Path vers la fiche générée
   
   // Relations
   dossier         Dossier     @relation(fields: [dossierId], references: [id])
   dossierId       String
-  convention      Convention? @relation(fields: [conventionId], references: [id])
-  conventionId    String?
+  sgami           Sgami       @relation(fields: [sgamiId], references: [id])
+  sgamiId         String
   avocat          Avocat?     @relation(fields: [avocatId], references: [id])
   avocatId        String?
   pce             Pce?        @relation(fields: [pceId], references: [id])
@@ -283,6 +297,7 @@ model Sgami {
   
   // Relations
   dossiers Dossier[]
+  paiements Paiement[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -465,6 +480,9 @@ model TemplateVersion {
 // - Position: "EN_SERVICE" | "HORS_SERVICE"
 // - TypeDecision: "AJ" | "AJE" | "PJ" | "REJET"
 // - NaturePaiement: "AVOCAT" | "AUTRES_INTERVENANTS"
+// - EmissionTitrePerception: "OUI" | "NON"
+// - QualiteBeneficiaire: "Avocat" | "Commissaire de justice" | "Militaire de la gendarmerie nationale" | "Régisseur du tribunal judiciaire" | "Médecin" | "Victime"
+// - ConventionJointeFRI: "OUI" | "NON"
 // - StatutDemandeur: "OG" | "OCTA" | "SOG" | "CSTAGN" | "GAV" | "Civil" | "Réserviste" | "Retraité" | "Ayant-droit"
 // - Grade: "Général" | "Colonel" | "Lieutenant-colonel" | "Chef d'escadron" | "Commandant" | "Capitaine" | "Lieutenant" | "Sous-lieutenant" | "Aspirant" | "Major" | "Adjudant-chef" | "Adjudant" | "Maréchal des logis-chef" | "Gendarme" | "Élève gendarme" | "Maréchal des logis" | "Brigadier-chef" | "Brigadier" | "Gendarme adjoint volontaire" | "Gendarme adjoint de 2ème classe" | "Madame" | "Monsieur"
 // - Branche: "GD" | "GM" | "GR" | "État-Major" | "GIE SPÉ" | "DG et ORG. CENTRAUX" | "GIGN"

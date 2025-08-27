@@ -454,7 +454,16 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
         },
         enableColumnFilter: true,
         filterFn: 'includesString',
-        enableSorting: false
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as string
+          const b = rowB.getValue(columnId) as string
+          
+          if (a === 'Non lié' && b === 'Non lié') return 0
+          if (a === 'Non lié') return 1
+          if (b === 'Non lié') return -1
+          
+          return a.localeCompare(b, 'fr', { numeric: true })
+        }
       },
       {
         accessorKey: 'commentaireDecision',

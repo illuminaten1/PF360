@@ -83,7 +83,13 @@ async function main() {
       email: 'j.dupont@avocats.fr',
       villesIntervention: JSON.stringify(['Paris', 'Versailles', 'Créteil', 'Bobigny', 'Pontoise']),
       notes: 'Très expérimenté en droit pénal. Disponible pour interventions urgentes. Excellentes relations avec les tribunaux parisiens.',
-      specialisation: 'Droit pénal'
+      specialisation: 'Droit pénal',
+      siretOuRidet: '12345678901234',
+      titulaireDuCompteBancaire: 'DUPONT Jean',
+      codeEtablissement: '30004',
+      codeGuichet: '00170',
+      numeroDeCompte: '00001234567',
+      cle: '89'
     },
     {
       nom: 'MARTIN',
@@ -94,7 +100,13 @@ async function main() {
       email: 'm.martin@avocats.fr',
       villesIntervention: JSON.stringify(['Lyon', 'Villeurbanne', 'Saint-Étienne', 'Grenoble', 'Chambéry']),
       notes: 'Spécialisée dans les affaires familiales et successions. Très pédagogue avec les clients. Maîtrise parfaitement les procédures d\'urgence.',
-      specialisation: 'Droit civil'
+      specialisation: 'Droit civil',
+      siretOuRidet: '98765432109876',
+      titulaireDuCompteBancaire: 'MARTIN Marie',
+      codeEtablissement: '10278',
+      codeGuichet: '00050',
+      numeroDeCompte: '00009876543',
+      cle: '21'
     },
     {
       nom: 'LEROY',
@@ -105,7 +117,13 @@ async function main() {
       email: 'p.leroy@avocats.fr',
       villesIntervention: JSON.stringify(['Marseille', 'Aix-en-Provence', 'Toulon', 'Nice', 'Avignon']),
       notes: 'Expert en contentieux administratif et marchés publics. Ancien magistrat administratif. Très rigoureux dans le suivi des dossiers.',
-      specialisation: 'Droit administratif'
+      specialisation: 'Droit administratif',
+      siretOuRidet: '45678912345678',
+      titulaireDuCompteBancaire: 'LEROY Pierre',
+      codeEtablissement: '13807',
+      codeGuichet: '00020',
+      numeroDeCompte: '00005551234',
+      cle: '67'
     }
   ]
 

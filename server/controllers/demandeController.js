@@ -144,6 +144,10 @@ const demandeSchema = z.object({
   soutienSocial: z.boolean().default(false),
   soutienMedical: z.boolean().default(false),
   
+  // Commentaires de suivi
+  commentaireDecision: z.string().optional(),
+  commentaireConvention: z.string().optional(),
+  
   // Date de réception
   dateReception: z.string().optional(),
   

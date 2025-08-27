@@ -20,9 +20,11 @@ import {
   ChevronRightIcon,
   PencilIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  FolderIcon
 } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import { useNavigate } from 'react-router-dom'
 
 dayjs.locale('fr')
 
@@ -45,6 +47,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
   selectedUserId, 
   selectedUser 
 }) => {
+  const navigate = useNavigate()
   const [data, setData] = useState<Demande[]>([])
   const [loading, setLoading] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([
@@ -125,6 +128,10 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
     setEditingCell(null)
   }
 
+  const handleViewDossier = (dossierId: string) => {
+    navigate(`/dossiers/${dossierId}`)
+  }
+
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
   }
@@ -174,6 +181,30 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
           </div>
         ),
         sortingFn: 'datetime'
+      },
+      {
+        id: 'dossier',
+        header: 'Dossier',
+        accessorFn: (row) => row.dossier?.numero || 'Non lié',
+        cell: ({ row }) => {
+          const demande = row.original
+          return demande.dossier ? (
+            <div className="text-sm">
+              <div 
+                className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleViewDossier(demande.dossier!.id)
+                }}
+              >
+                {demande.dossier.numero}
+              </div>
+            </div>
+          ) : (
+            <span className="text-sm text-gray-400 italic">Non lié</span>
+          )
+        },
+        enableSorting: false
       },
       {
         accessorKey: 'commentaireDecision',
@@ -243,7 +274,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
         enableSorting: false
       }
     ],
-    [editingCell, saving]
+    [editingCell, saving, handleViewDossier]
   )
 
   const table = useReactTable({

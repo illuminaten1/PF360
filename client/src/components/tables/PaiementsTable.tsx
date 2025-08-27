@@ -58,17 +58,6 @@ function Filter({ column }: { column: any }) {
   )
 }
 
-const getNatureBadge = (nature: string) => {
-  switch (nature) {
-    case 'AVOCAT':
-      return 'bg-blue-100 text-blue-800'
-    case 'AUTRES_INTERVENANTS':
-      return 'bg-orange-100 text-orange-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
 const getQualiteBeneficiaireBadge = (qualite: string) => {
   switch (qualite) {
     case 'Avocat':
@@ -143,20 +132,6 @@ const PaiementsTable: React.FC<PaiementsTableProps> = ({
             </div>
           </div>
         ),
-        enableColumnFilter: true,
-        filterFn: 'includesString'
-      },
-      {
-        accessorKey: 'nature',
-        header: 'Nature',
-        cell: ({ getValue }) => {
-          const nature = getValue<string>()
-          return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getNatureBadge(nature)}`}>
-              {nature === 'AVOCAT' ? 'Avocat' : 'Autres intervenants'}
-            </span>
-          )
-        },
         enableColumnFilter: true,
         filterFn: 'includesString'
       },

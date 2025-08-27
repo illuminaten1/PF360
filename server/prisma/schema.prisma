@@ -200,7 +200,6 @@ model Paiement {
   facture                   String?     // Numéro de facture
   montantHT                 Float
   montantTTC                Float
-  nature                    String      // AVOCAT | AUTRES_INTERVENANTS
   emissionTitrePerception   String      // OUI | NON
   qualiteBeneficiaire       String      // Avocat | Commissaire de justice | Militaire de la gendarmerie nationale | Régisseur du tribunal judiciaire | Médecin | Victime
   identiteBeneficiaire      String
@@ -479,7 +478,6 @@ model TemplateVersion {
 // - TypeDemande: "VICTIME" | "MIS_EN_CAUSE"  
 // - Position: "EN_SERVICE" | "HORS_SERVICE"
 // - TypeDecision: "AJ" | "AJE" | "PJ" | "REJET"
-// - NaturePaiement: "AVOCAT" | "AUTRES_INTERVENANTS"
 // - EmissionTitrePerception: "OUI" | "NON"
 // - QualiteBeneficiaire: "Avocat" | "Commissaire de justice" | "Militaire de la gendarmerie nationale" | "Régisseur du tribunal judiciaire" | "Médecin" | "Victime"
 // - ConventionJointeFRI: "OUI" | "NON"

@@ -1043,17 +1043,6 @@ const DossierDetail: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {dossier.paiements.map((paiement) => {
-                    const getNatureBadge = (nature: string) => {
-                      switch (nature) {
-                        case 'AVOCAT':
-                          return 'bg-blue-100 text-blue-800'
-                        case 'AUTRES_INTERVENANTS':
-                          return 'bg-orange-100 text-orange-800'
-                        default:
-                          return 'bg-gray-100 text-gray-800'
-                      }
-                    }
-
                     const getQualiteBadge = (qualite: string) => {
                       switch (qualite) {
                         case 'Avocat':
@@ -1082,9 +1071,6 @@ const DossierDetail: React.FC = () => {
                                 {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
                               </span>
                               <div className="flex items-center gap-2">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getNatureBadge(paiement.nature)}`}>
-                                  {paiement.nature === 'AVOCAT' ? 'Avocat' : 'Autres intervenants'}
-                                </span>
                                 {(paiement as any).qualiteBeneficiaire && (
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getQualiteBadge((paiement as any).qualiteBeneficiaire)}`}>
                                     {(paiement as any).qualiteBeneficiaire}

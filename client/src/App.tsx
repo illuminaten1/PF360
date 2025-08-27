@@ -17,6 +17,7 @@ import VisaPage from '@/pages/Visa'
 import DiligencesPage from '@/pages/Diligences'
 import Decisions from '@/pages/Decisions'
 import Conventions from '@/pages/Conventions'
+import Paiements from '@/pages/Paiements'
 import GradesPage from '@/pages/Grades'
 import Templates from '@/pages/Templates'
 
@@ -52,7 +53,7 @@ function App() {
           <Route path="dossiers/:id" element={<DossierDetail />} />
           <Route path="decisions" element={<Decisions />} />
           <Route path="conventions" element={<Conventions />} />
-          <Route path="paiements" element={<PlaceholderPage title="Paiements" />} />
+          <Route path="paiements" element={<Paiements />} />
           <Route path="avocats" element={<Avocats />} />
           <Route path="revue" element={<PlaceholderPage title="Revue" />} />
           <Route path="statistiques" element={<PlaceholderPage title="Statistiques" />} />

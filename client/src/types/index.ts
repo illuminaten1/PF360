@@ -320,20 +320,37 @@ export interface Paiement {
   montantHT: number
   montantTTC: number
   nature: 'AVOCAT' | 'AUTRES_INTERVENANTS'
+  emissionTitrePerception: 'OUI' | 'NON'
+  qualiteBeneficiaire: 'Avocat' | 'Commissaire de justice' | 'Militaire de la gendarmerie nationale' | 'Régisseur du tribunal judiciaire' | 'Médecin' | 'Victime'
+  identiteBeneficiaire: string
+  dateServiceFait?: string
+  conventionJointeFRI: 'OUI' | 'NON'
+  
+  // Coordonnées bénéficiaire
+  adresseBeneficiaire?: string
+  siretOuRidet?: string
+  titulaireCompteBancaire?: string
+  codeEtablissement?: string
+  codeGuichet?: string
+  numeroCompte?: string
+  cleRIB?: string
+  
   ficheReglement?: string
-  dossier?: {
+  dossier: {
     id: string
     numero: string
+    nomDossier?: string
   }
-  convention?: {
+  sgami: {
     id: string
-    montantHT: number
-    date: string
+    nom: string
+    intituleFicheReglement?: string
   }
   avocat?: {
     id: string
     nom: string
     prenom?: string
+    region?: string
   }
   pce?: {
     id: string
@@ -342,7 +359,7 @@ export interface Paiement {
     pceNumerique: string
     codeMarchandise: string
   }
-  creePar?: {
+  creePar: {
     id: string
     nom: string
     prenom: string

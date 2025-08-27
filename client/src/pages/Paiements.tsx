@@ -78,7 +78,7 @@ const Paiements: React.FC = () => {
     const autresIntervenantCount = paiements.filter(p => p.qualiteBeneficiaire !== 'Avocat').length
     const emissionTitreCount = paiements.filter(p => p.emissionTitrePerception === 'OUI').length
     const conventionJointeCount = paiements.filter(p => p.conventionJointeFRI === 'OUI').length
-    const totalMontantHT = paiements.reduce((sum, p) => sum + p.montantHT, 0)
+    const totalMontantHT = paiements.reduce((sum, p) => sum + (p.montantHT || 0), 0)
     const totalMontantTTC = paiements.reduce((sum, p) => sum + p.montantTTC, 0)
 
     return {

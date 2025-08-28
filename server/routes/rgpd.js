@@ -202,59 +202,34 @@ router.get('/search', requireAdmin, async (req, res) => {
 
     const searchTerm = q.toLowerCase();
 
-    // Pour SQLite, on fait une recherche case-sensitive puis on filtre côté JavaScript
-    // Rechercher dans les demandeurs
-    const demandeurs = await prisma.demande.findMany({
-      select: {
-        id: true,
-        nom: true,
-        prenom: true,
-        nigend: true,
-        numeroDS: true,
-        emailProfessionnel: true,
-        emailPersonnel: true
-      },
-      take: 100 // Plus large pour filtrer ensuite
-    });
+    // Recherche optimisée pour SQLite avec LIKE pour simuler l'insensitive
+    const demandeurs = await prisma.$queryRaw`
+      SELECT id, nom, prenom, nigend, numeroDS, emailProfessionnel, emailPersonnel
+      FROM demandes 
+      WHERE LOWER(nom) LIKE ${'%' + searchTerm + '%'}
+         OR LOWER(prenom) LIKE ${'%' + searchTerm + '%'}
+         OR LOWER(nigend) LIKE ${'%' + searchTerm + '%'}
+         OR LOWER(numeroDS) LIKE ${'%' + searchTerm + '%'}
+         OR LOWER(emailProfessionnel) LIKE ${'%' + searchTerm + '%'}
+         OR LOWER(emailPersonnel) LIKE ${'%' + searchTerm + '%'}
+      LIMIT 20
+    `;
 
-    // Filtrer côté JavaScript pour recherche insensible à la casse
-    const filteredDemandeurs = demandeurs.filter(d => {
-      const searchFields = [
-        d.nom?.toLowerCase() || '',
-        d.prenom?.toLowerCase() || '',
-        d.nigend?.toLowerCase() || '',
-        d.numeroDS?.toLowerCase() || '',
-        d.emailProfessionnel?.toLowerCase() || '',
-        d.emailPersonnel?.toLowerCase() || ''
-      ];
-      return searchFields.some(field => field.includes(searchTerm));
-    }).slice(0, 20);
-
-    // Rechercher dans les avocats
-    const avocats = await prisma.avocat.findMany({
-      where: { active: true },
-      select: {
-        id: true,
-        nom: true,
-        prenom: true,
-        email: true
-      },
-      take: 50 // Plus large pour filtrer ensuite
-    });
-
-    // Filtrer côté JavaScript pour recherche insensible à la casse
-    const filteredAvocats = avocats.filter(a => {
-      const searchFields = [
-        a.nom?.toLowerCase() || '',
-        a.prenom?.toLowerCase() || '',
-        a.email?.toLowerCase() || ''
-      ];
-      return searchFields.some(field => field.includes(searchTerm));
-    }).slice(0, 20);
+    // Recherche optimisée pour les avocats aussi
+    const avocats = await prisma.$queryRaw`
+      SELECT id, nom, prenom, email
+      FROM avocats 
+      WHERE active = 1 AND (
+        LOWER(nom) LIKE ${'%' + searchTerm + '%'}
+        OR LOWER(prenom) LIKE ${'%' + searchTerm + '%'}
+        OR LOWER(email) LIKE ${'%' + searchTerm + '%'}
+      )
+      LIMIT 20
+    `;
 
     // Formater les résultats
     const results = [
-      ...filteredDemandeurs.map(d => ({
+      ...demandeurs.map(d => ({
         id: d.id,
         type: 'demandeur',
         nom: d.nom,
@@ -263,7 +238,7 @@ router.get('/search', requireAdmin, async (req, res) => {
         nigend: d.nigend,
         numeroDS: d.numeroDS
       })),
-      ...filteredAvocats.map(a => ({
+      ...avocats.map(a => ({
         id: a.id,
         type: 'avocat',
         nom: a.nom,

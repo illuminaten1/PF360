@@ -166,7 +166,7 @@ const MainLayout: React.FC = () => {
       <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out ${
         sidebarExpanded ? 'lg:w-48' : 'lg:w-16'
       }`}>
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
+        <div className="flex flex-col h-full bg-white border-r border-gray-200">
           <div className={`flex items-center h-16 border-b border-gray-200 transition-all duration-300 ${
             sidebarExpanded ? 'px-4' : 'justify-center'
           }`}>
@@ -177,7 +177,7 @@ const MainLayout: React.FC = () => {
               sidebarExpanded ? 'opacity-100 delay-150' : 'opacity-0 w-0 overflow-hidden'
             }`}>PF360</span>
           </div>
-          <nav className={`flex-1 py-4 space-y-1 transition-all duration-300 ${
+          <nav className={`flex-1 py-4 space-y-1 transition-all duration-300 overflow-y-auto min-h-0 ${
             sidebarExpanded ? 'px-4' : 'px-2'
           }`}>
             <button

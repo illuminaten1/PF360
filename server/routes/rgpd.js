@@ -45,6 +45,10 @@ const generatePDFContent = (doc, exportData) => {
     doc.text(`Prénom: ${personData.prenom}`);
   }
   
+  if (personData.type) {
+    doc.text(`Type de demande: ${personData.type === 'VICTIME' ? 'Victime' : 'Mis en cause'}`);
+  }
+  
   if (personData.nigend) {
     doc.text(`NIGEND: ${personData.nigend}`);
   }
@@ -65,12 +69,37 @@ const generatePDFContent = (doc, exportData) => {
     doc.text(`Email: ${personData.email}`);
   }
   
+  // Pour les avocats seulement
+  if (personType === 'avocat') {
+    if (personData.telephonePublic1) {
+      doc.text(`Téléphone public 1: ${personData.telephonePublic1}`);
+    }
+    
+    if (personData.telephonePublic2) {
+      doc.text(`Téléphone public 2: ${personData.telephonePublic2}`);
+    }
+    
+    if (personData.telephonePrive) {
+      doc.text(`Téléphone privé: ${personData.telephonePrive}`);
+    }
+  }
+  
   if (personData.telephoneProfessionnel) {
     doc.text(`Téléphone professionnel: ${personData.telephoneProfessionnel}`);
   }
   
   if (personData.telephonePersonnel) {
     doc.text(`Téléphone personnel: ${personData.telephonePersonnel}`);
+  }
+  
+  if (personData.adressePostaleLigne1) {
+    doc.text(`Adresse: ${personData.adressePostaleLigne1}`);
+    if (personData.adressePostaleLigne2) {
+      doc.text(`         ${personData.adressePostaleLigne2}`);
+    }
+    if (personData.codePostal) {
+      doc.text(`Code postal: ${personData.codePostal}`);
+    }
   }
   
   doc.moveDown(2);
@@ -98,6 +127,14 @@ const generatePDFContent = (doc, exportData) => {
         doc.text(`Unité: ${personData.unite}`);
       }
       
+      if (personData.formationAdministrative) {
+        doc.text(`Formation administrative: ${personData.formationAdministrative}`);
+      }
+      
+      if (personData.departement) {
+        doc.text(`Département d'affectation: ${personData.departement}`);
+      }
+      
       doc.moveDown(2);
     }
     
@@ -115,6 +152,10 @@ const generatePDFContent = (doc, exportData) => {
         doc.text(`Commune: ${personData.commune}`);
       }
       
+      if (personData.position) {
+        doc.text(`Position: ${personData.position === 'EN_SERVICE' ? 'En service' : 'Hors service'}`);
+      }
+      
       if (personData.contexteMissionnel) {
         doc.text(`Contexte missionnel: ${personData.contexteMissionnel}`);
       }
@@ -127,8 +168,85 @@ const generatePDFContent = (doc, exportData) => {
         doc.text(`Résumé: ${personData.resume}`);
       }
       
+      if (personData.qualificationsPenales) {
+        doc.text(`Qualification pénale: ${personData.qualificationsPenales}`);
+      }
+      
+      if (personData.dateAudience) {
+        doc.text(`Date d'audience: ${new Date(personData.dateAudience).toLocaleDateString('fr-FR')}`);
+      }
+      
+      if (personData.blessures) {
+        doc.text(`Blessures: ${personData.blessures}`);
+      }
+      
+      if (personData.partieCivile) {
+        doc.text(`Partie civile: Oui`);
+        if (personData.montantPartieCivile) {
+          doc.text(`Montant partie civile: ${personData.montantPartieCivile}€`);
+        }
+      }
+      
       doc.moveDown(2);
     }
+    
+    // Section soutiens
+    if (personData.soutienPsychologique || personData.soutienSocial || personData.soutienMedical) {
+      doc.fontSize(14).font('Helvetica-Bold').text('SOUTIENS DEMANDÉS', { underline: true });
+      doc.moveDown();
+      doc.fontSize(12).font('Helvetica');
+      
+      if (personData.soutienPsychologique) {
+        doc.text('✓ Soutien psychologique');
+      }
+      
+      if (personData.soutienSocial) {
+        doc.text('✓ Soutien social');
+      }
+      
+      if (personData.soutienMedical) {
+        doc.text('✓ Soutien médical');
+      }
+      
+      doc.moveDown(2);
+    }
+    
+    // Section commentaires (si présents)
+    if (personData.commentaireDecision || personData.commentaireConvention) {
+      doc.fontSize(14).font('Helvetica-Bold').text('COMMENTAIRES DE SUIVI', { underline: true });
+      doc.moveDown();
+      doc.fontSize(12).font('Helvetica');
+      
+      if (personData.commentaireDecision) {
+        doc.text(`Commentaire décision: ${personData.commentaireDecision}`);
+      }
+      
+      if (personData.commentaireConvention) {
+        doc.text(`Commentaire convention: ${personData.commentaireConvention}`);
+      }
+      
+      doc.moveDown(2);
+    }
+    
+    // Section dates administratives
+    doc.fontSize(14).font('Helvetica-Bold').text('INFORMATIONS ADMINISTRATIVES', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12).font('Helvetica');
+    
+    if (personData.dateReception) {
+      doc.text(`Date de réception de la demande: ${new Date(personData.dateReception).toLocaleDateString('fr-FR')}`);
+    }
+    
+    if (personData.createdAt) {
+      doc.text(`Date de création en base: ${new Date(personData.createdAt).toLocaleDateString('fr-FR')}`);
+    }
+    
+    if (personData.updatedAt && personData.updatedAt !== personData.createdAt) {
+      doc.text(`Dernière modification: ${new Date(personData.updatedAt).toLocaleDateString('fr-FR')}`);
+    }
+    
+    doc.moveDown(2);
+    
   } else if (personType === 'avocat') {
     // Informations professionnelles de l'avocat
     doc.fontSize(14).font('Helvetica-Bold').text('INFORMATIONS PROFESSIONNELLES', { underline: true });
@@ -139,8 +257,20 @@ const generatePDFContent = (doc, exportData) => {
       doc.text(`Région: ${personData.region}`);
     }
     
+    if (personData.adressePostale) {
+      doc.text(`Adresse postale: ${personData.adressePostale}`);
+    }
+    
     if (personData.specialisation) {
       doc.text(`Spécialisation: ${personData.specialisation}`);
+    }
+    
+    if (personData.siretOuRidet) {
+      doc.text(`SIRET/RIDET: ${personData.siretOuRidet}`);
+    }
+    
+    if (personData.notes) {
+      doc.text(`Notes: ${personData.notes}`);
     }
     
     if (personData.villesIntervention) {
@@ -152,6 +282,38 @@ const generatePDFContent = (doc, exportData) => {
       } catch (e) {
         // Si ce n'est pas du JSON valide, afficher tel quel
         doc.text(`Villes d'intervention: ${personData.villesIntervention}`);
+      }
+    }
+    
+    // Section données bancaires (sensibles mais nécessaires pour RGPD)
+    if (personData.titulaireDuCompteBancaire || personData.codeEtablissement || personData.codeGuichet || 
+        personData.numeroDeCompte || personData.cle) {
+      doc.moveDown(1);
+      doc.fontSize(14).font('Helvetica-Bold').text('INFORMATIONS BANCAIRES', { underline: true });
+      doc.moveDown();
+      doc.fontSize(10).font('Helvetica');
+      doc.text('⚠️  Données sensibles - Confidentialité absolue requise', { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(12).font('Helvetica');
+      
+      if (personData.titulaireDuCompteBancaire) {
+        doc.text(`Titulaire du compte: ${personData.titulaireDuCompteBancaire}`);
+      }
+      
+      if (personData.codeEtablissement) {
+        doc.text(`Code établissement: ${personData.codeEtablissement}`);
+      }
+      
+      if (personData.codeGuichet) {
+        doc.text(`Code guichet: ${personData.codeGuichet}`);
+      }
+      
+      if (personData.numeroDeCompte) {
+        doc.text(`Numéro de compte: ${personData.numeroDeCompte}`);
+      }
+      
+      if (personData.cle) {
+        doc.text(`Clé RIB: ${personData.cle}`);
       }
     }
     

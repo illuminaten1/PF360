@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const PDFDocument = require('pdfkit');
 
 // Middleware combiné pour admin
 const requireAdmin = [authMiddleware, adminMiddleware];
@@ -8,6 +9,187 @@ const { logAction } = require('../utils/logger');
 
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// Fonction pour générer le contenu PDF
+const generatePDFContent = (doc, exportData) => {
+  const { personData, exportDate, exportedBy, personType, metadata } = exportData;
+  
+  // Header du document
+  doc.fontSize(20).font('Helvetica-Bold').text('EXPORT DONNÉES PERSONNELLES - RGPD', { align: 'center' });
+  doc.moveDown();
+  
+  // Informations de l'export
+  doc.fontSize(12).font('Helvetica');
+  doc.text(`Date d'export: ${new Date(exportDate).toLocaleDateString('fr-FR')}`, { align: 'right' });
+  doc.text(`Exporté par: ${exportedBy}`, { align: 'right' });
+  doc.text(`Type de personne: ${personType === 'demandeur' ? 'Demandeur' : 'Avocat'}`, { align: 'right' });
+  doc.moveDown(2);
+
+  // Conformité RGPD
+  if (metadata.rgpdCompliant) {
+    doc.fillColor('green').fontSize(10).text('✓ Export conforme RGPD Article 15', { align: 'center' });
+    doc.fillColor('black');
+    if (metadata.dataAnonymized) {
+      doc.text('✓ Données tierces anonymisées', { align: 'center' });
+    }
+    doc.moveDown(2);
+  }
+
+  // Informations de la personne
+  doc.fontSize(16).font('Helvetica-Bold').text('INFORMATIONS PERSONNELLES', { underline: true });
+  doc.moveDown();
+  
+  doc.fontSize(12).font('Helvetica');
+  if (personData.nom && personData.prenom) {
+    doc.text(`Nom: ${personData.nom}`);
+    doc.text(`Prénom: ${personData.prenom}`);
+  }
+  
+  if (personData.nigend) {
+    doc.text(`NIGEND: ${personData.nigend}`);
+  }
+  
+  if (personData.numeroDS) {
+    doc.text(`Numéro DS: ${personData.numeroDS}`);
+  }
+  
+  if (personData.emailProfessionnel) {
+    doc.text(`Email professionnel: ${personData.emailProfessionnel}`);
+  }
+  
+  if (personData.emailPersonnel) {
+    doc.text(`Email personnel: ${personData.emailPersonnel}`);
+  }
+  
+  if (personData.email) {
+    doc.text(`Email: ${personData.email}`);
+  }
+  
+  if (personData.telephoneProfessionnel) {
+    doc.text(`Téléphone professionnel: ${personData.telephoneProfessionnel}`);
+  }
+  
+  if (personData.telephonePersonnel) {
+    doc.text(`Téléphone personnel: ${personData.telephonePersonnel}`);
+  }
+  
+  doc.moveDown(2);
+
+  // Informations complémentaires selon le type
+  if (personType === 'demandeur') {
+    if (personData.grade) {
+      doc.fontSize(14).font('Helvetica-Bold').text('INFORMATIONS MILITAIRES', { underline: true });
+      doc.moveDown();
+      doc.fontSize(12).font('Helvetica');
+      
+      if (personData.grade.gradeComplet) {
+        doc.text(`Grade: ${personData.grade.gradeComplet} (${personData.grade.gradeAbrege})`);
+      }
+      
+      if (personData.statutDemandeur) {
+        doc.text(`Statut: ${personData.statutDemandeur}`);
+      }
+      
+      if (personData.branche) {
+        doc.text(`Branche: ${personData.branche}`);
+      }
+      
+      if (personData.unite) {
+        doc.text(`Unité: ${personData.unite}`);
+      }
+      
+      doc.moveDown(2);
+    }
+    
+    // Informations sur les faits
+    if (personData.dateFaits || personData.commune || personData.contexteMissionnel) {
+      doc.fontSize(14).font('Helvetica-Bold').text('INFORMATIONS SUR LES FAITS', { underline: true });
+      doc.moveDown();
+      doc.fontSize(12).font('Helvetica');
+      
+      if (personData.dateFaits) {
+        doc.text(`Date des faits: ${new Date(personData.dateFaits).toLocaleDateString('fr-FR')}`);
+      }
+      
+      if (personData.commune) {
+        doc.text(`Commune: ${personData.commune}`);
+      }
+      
+      if (personData.contexteMissionnel) {
+        doc.text(`Contexte missionnel: ${personData.contexteMissionnel}`);
+      }
+      
+      if (personData.qualificationInfraction) {
+        doc.text(`Qualification: ${personData.qualificationInfraction}`);
+      }
+      
+      if (personData.resume) {
+        doc.text(`Résumé: ${personData.resume}`);
+      }
+      
+      doc.moveDown(2);
+    }
+  } else if (personType === 'avocat') {
+    // Informations professionnelles de l'avocat
+    doc.fontSize(14).font('Helvetica-Bold').text('INFORMATIONS PROFESSIONNELLES', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12).font('Helvetica');
+    
+    if (personData.region) {
+      doc.text(`Région: ${personData.region}`);
+    }
+    
+    if (personData.specialisation) {
+      doc.text(`Spécialisation: ${personData.specialisation}`);
+    }
+    
+    if (personData.villesIntervention) {
+      try {
+        const villes = JSON.parse(personData.villesIntervention);
+        if (Array.isArray(villes) && villes.length > 0) {
+          doc.text(`Villes d'intervention: ${villes.join(', ')}`);
+        }
+      } catch (e) {
+        // Si ce n'est pas du JSON valide, afficher tel quel
+        doc.text(`Villes d'intervention: ${personData.villesIntervention}`);
+      }
+    }
+    
+    doc.moveDown(2);
+  }
+
+  // Données relationnelles (si incluses)
+  if (personData.dossier || personData.conventions || personData.paiements) {
+    doc.fontSize(14).font('Helvetica-Bold').text('DONNÉES ASSOCIÉES', { underline: true });
+    doc.moveDown();
+    doc.fontSize(10).font('Helvetica');
+    
+    doc.text('Note: Les données d\'autres personnes ont été anonymisées conformément au RGPD.', { 
+      align: 'justify',
+      width: 500
+    });
+    doc.moveDown();
+    
+    // Résumé statistique plutôt que détails complets
+    if (personData.conventions && personData.conventions.length > 0) {
+      doc.text(`Nombre de conventions associées: ${personData.conventions.length}`);
+    }
+    
+    if (personData.paiements && personData.paiements.length > 0) {
+      doc.text(`Nombre de paiements associés: ${personData.paiements.length}`);
+    }
+    
+    doc.moveDown(2);
+  }
+
+  // Footer avec informations légales
+  doc.fontSize(8).font('Helvetica');
+  doc.text('___', { align: 'center' });
+  doc.moveDown();
+  doc.text(`Document généré le ${new Date(exportDate).toLocaleDateString('fr-FR')} à ${new Date(exportDate).toLocaleTimeString('fr-FR')}`, { align: 'center' });
+  doc.text('Conformément à l\'Article 15 du RGPD - Droit d\'accès de la personne concernée', { align: 'center' });
+  doc.text('Les données d\'autres personnes ont été anonymisées pour respecter leur vie privée', { align: 'center' });
+};
 
 // Recherche de personnes (demandeurs et avocats)
 router.get('/search', requireAdmin, async (req, res) => {
@@ -318,46 +500,42 @@ router.post('/export', requireAdmin, async (req, res) => {
       personId
     );
 
-    // Préparer la réponse selon le format
-    if (format === 'json') {
-      const exportData = {
-        exportDate: new Date().toISOString(),
-        exportedBy: `${req.user.prenom} ${req.user.nom}`,
-        personType,
-        personData: anonymizedData,
-        metadata: {
-          rgpdCompliant: true,
-          dataAnonymized: true,
-          exportReason: 'Demande d\'accès Article 15 RGPD'
-        }
-      };
+    // Préparer les données d'export
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      exportedBy: `${req.user.prenom} ${req.user.nom}`,
+      personType,
+      personData: anonymizedData,
+      metadata: {
+        rgpdCompliant: true,
+        dataAnonymized: true,
+        exportReason: 'Demande d\'accès Article 15 RGPD'
+      }
+    };
 
+    const timestamp = Date.now();
+    const filename = `export_rgpd_${personType}_${personData.prenom}_${personData.nom}_${timestamp}`;
+
+    if (format === 'json') {
+      // Export JSON
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', 
-        `attachment; filename="export_rgpd_${personType}_${personId}_${Date.now()}.json"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
       res.json(exportData);
     } else {
-      // Pour le PDF, on utiliserait une bibliothèque comme puppeteer ou pdfkit
-      // Pour l'instant, on retourne les données JSON avec un header PDF
-      const exportData = {
-        exportDate: new Date().toISOString(),
-        exportedBy: `${req.user.prenom} ${req.user.nom}`,
-        personType,
-        personData: anonymizedData,
-        metadata: {
-          rgpdCompliant: true,
-          dataAnonymized: true,
-          exportReason: 'Demande d\'accès Article 15 RGPD'
-        }
-      };
-
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 
-        `attachment; filename="export_rgpd_${personType}_${personId}_${Date.now()}.pdf"`);
+      // Export PDF avec PDFKit
+      const doc = new PDFDocument({ margin: 50 });
       
-      // TODO: Implémenter la génération PDF réelle
-      // Pour l'instant, on retourne du JSON
-      res.json(exportData);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
+      
+      // Pipe le PDF directement vers la response
+      doc.pipe(res);
+      
+      // Génération du contenu PDF
+      generatePDFContent(doc, exportData);
+      
+      // Finaliser le PDF
+      doc.end();
     }
 
   } catch (error) {

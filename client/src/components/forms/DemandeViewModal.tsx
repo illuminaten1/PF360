@@ -165,7 +165,10 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                         {demande.grade && (
                           <div>
                             <span className="block text-sm font-medium text-gray-600 mb-1">Grade</span>
-                            <p className="text-gray-900 font-medium">{demande.grade?.gradeComplet}</p>
+                            <p className="text-gray-900 font-medium">
+                              {demande.grade?.gradeComplet}
+                              {demande.grade?.gradeAbrege && ` (${demande.grade.gradeAbrege})`}
+                            </p>
                           </div>
                         )}
                         
@@ -493,7 +496,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                         <p className="text-gray-900">
                           {demande.assigneA ? (
                             <span>
-                              {demande.assigneA.grade && `${typeof demande.assigneA.grade === 'object' ? demande.assigneA.grade.gradeComplet : demande.assigneA.grade} `}
+                              {(demande.assigneA as any).grade && `${(demande.assigneA as any).grade} `}
                               {demande.assigneA.prenom} {demande.assigneA.nom}
                             </span>
                           ) : (
@@ -508,7 +511,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           {formatDateTime(demande.createdAt)}
                           {demande.creePar && (
                             <span className="block text-gray-600 text-xs mt-1">
-                              par {demande.creePar.grade && `${typeof demande.creePar.grade === 'object' ? demande.creePar.grade.gradeComplet : demande.creePar.grade} `}
+                              par {(demande.creePar as any).grade && `${(demande.creePar as any).grade} `}
                               {demande.creePar.prenom} {demande.creePar.nom}
                             </span>
                           )}
@@ -518,7 +521,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           {formatDateTime(demande.updatedAt)}
                           {demande.modifiePar && (
                             <span className="block text-gray-600 text-xs mt-1">
-                              par {demande.modifiePar.grade && `${typeof demande.modifiePar.grade === 'object' ? demande.modifiePar.grade.gradeComplet : demande.modifiePar.grade} `}
+                              par {(demande.modifiePar as any).grade && `${(demande.modifiePar as any).grade} `}
                               {demande.modifiePar.prenom} {demande.modifiePar.nom}
                             </span>
                           )}

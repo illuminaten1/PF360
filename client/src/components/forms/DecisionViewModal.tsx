@@ -36,7 +36,9 @@ interface Decision {
       prenom: string
       nom: string
       numeroDS: string
-      grade?: string
+      grade?: {
+        gradeAbrege: string
+      }
     }
   }>
 }
@@ -327,7 +329,7 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                               <div className="flex items-center justify-between">
                                 <div>
                                   <h5 className="font-semibold text-gray-900">
-                                    {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
+                                    {demandeRel.demande.grade?.gradeAbrege && `${demandeRel.demande.grade.gradeAbrege} `}
                                     {demandeRel.demande.prenom} {demandeRel.demande.nom}
                                   </h5>
                                   <p className="text-sm text-gray-600">

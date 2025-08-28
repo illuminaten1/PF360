@@ -324,10 +324,8 @@ router.get('/:id', async (req, res) => {
             demandes: {
               include: {
                 demande: {
-                  select: {
-                    nom: true,
-                    prenom: true,
-                    numeroDS: true
+                  include: {
+                    grade: true
                   }
                 }
               }

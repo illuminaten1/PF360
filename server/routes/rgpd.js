@@ -20,18 +20,9 @@ router.get('/search', requireAdmin, async (req, res) => {
 
     const searchTerm = q.toLowerCase();
 
+    // Pour SQLite, on fait une recherche case-sensitive puis on filtre côté JavaScript
     // Rechercher dans les demandeurs
     const demandeurs = await prisma.demande.findMany({
-      where: {
-        OR: [
-          { nom: { contains: searchTerm, mode: 'insensitive' } },
-          { prenom: { contains: searchTerm, mode: 'insensitive' } },
-          { nigend: { contains: searchTerm, mode: 'insensitive' } },
-          { numeroDS: { contains: searchTerm, mode: 'insensitive' } },
-          { emailProfessionnel: { contains: searchTerm, mode: 'insensitive' } },
-          { emailPersonnel: { contains: searchTerm, mode: 'insensitive' } }
-        ]
-      },
       select: {
         id: true,
         nom: true,
@@ -41,35 +32,47 @@ router.get('/search', requireAdmin, async (req, res) => {
         emailProfessionnel: true,
         emailPersonnel: true
       },
-      take: 20
+      take: 100 // Plus large pour filtrer ensuite
     });
+
+    // Filtrer côté JavaScript pour recherche insensible à la casse
+    const filteredDemandeurs = demandeurs.filter(d => {
+      const searchFields = [
+        d.nom?.toLowerCase() || '',
+        d.prenom?.toLowerCase() || '',
+        d.nigend?.toLowerCase() || '',
+        d.numeroDS?.toLowerCase() || '',
+        d.emailProfessionnel?.toLowerCase() || '',
+        d.emailPersonnel?.toLowerCase() || ''
+      ];
+      return searchFields.some(field => field.includes(searchTerm));
+    }).slice(0, 20);
 
     // Rechercher dans les avocats
     const avocats = await prisma.avocat.findMany({
-      where: {
-        AND: [
-          { active: true },
-          {
-            OR: [
-              { nom: { contains: searchTerm, mode: 'insensitive' } },
-              { prenom: { contains: searchTerm, mode: 'insensitive' } },
-              { email: { contains: searchTerm, mode: 'insensitive' } }
-            ]
-          }
-        ]
-      },
+      where: { active: true },
       select: {
         id: true,
         nom: true,
         prenom: true,
         email: true
       },
-      take: 20
+      take: 50 // Plus large pour filtrer ensuite
     });
+
+    // Filtrer côté JavaScript pour recherche insensible à la casse
+    const filteredAvocats = avocats.filter(a => {
+      const searchFields = [
+        a.nom?.toLowerCase() || '',
+        a.prenom?.toLowerCase() || '',
+        a.email?.toLowerCase() || ''
+      ];
+      return searchFields.some(field => field.includes(searchTerm));
+    }).slice(0, 20);
 
     // Formater les résultats
     const results = [
-      ...demandeurs.map(d => ({
+      ...filteredDemandeurs.map(d => ({
         id: d.id,
         type: 'demandeur',
         nom: d.nom,
@@ -78,7 +81,7 @@ router.get('/search', requireAdmin, async (req, res) => {
         nigend: d.nigend,
         numeroDS: d.numeroDS
       })),
-      ...avocats.map(a => ({
+      ...filteredAvocats.map(a => ({
         id: a.id,
         type: 'avocat',
         nom: a.nom,

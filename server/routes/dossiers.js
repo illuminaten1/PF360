@@ -250,6 +250,7 @@ router.get('/:id', async (req, res) => {
       include: {
         demandes: {
           include: {
+            grade: true,
             decisions: {
               include: {
                 decision: true

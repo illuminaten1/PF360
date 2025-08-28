@@ -668,7 +668,7 @@ const DossierDetail: React.FC = () => {
                             <div className="flex items-center justify-between">
                               <div className="flex-shrink-0">
                                 <h3 className="font-medium text-gray-900 text-sm">
-                                  {demande.grade && `${demande.grade} `}
+                                  {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
                                   {demande.prenom} {demande.nom}
                                 </h3>
                                 <div className="flex items-center gap-2 mt-1">
@@ -1086,7 +1086,7 @@ const DossierDetail: React.FC = () => {
                             </div>
                             <div className="text-sm text-gray-600 space-y-1">
                               <div className="flex items-center gap-4">
-                                <span>HT: {paiement.montantHT.toLocaleString('fr-FR')} €</span>
+                                <span>HT: {(paiement.montantHT || 0).toLocaleString('fr-FR')} €</span>
                                 {paiement.facture && <span>Facture: {paiement.facture}</span>}
                               </div>
                               {(paiement as any).emissionTitrePerception && (
@@ -1115,7 +1115,7 @@ const DossierDetail: React.FC = () => {
                               )}
                               {paiement.creePar && (
                                 <div className="text-xs">
-                                  Créé par: {paiement.creePar.grade && `${paiement.creePar.grade} `}
+                                  Créé par: {(paiement.creePar as any).grade && `${(paiement.creePar as any).grade} `}
                                   {paiement.creePar.prenom} {paiement.creePar.nom}
                                 </div>
                               )}

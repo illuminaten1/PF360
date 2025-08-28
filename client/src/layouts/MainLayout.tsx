@@ -9,7 +9,6 @@ import {
   DocumentIcon,
   CreditCardIcon,
   UsersIcon,
-  CogIcon,
   UserCircleIcon,
   EyeIcon,
   PresentationChartLineIcon,
@@ -46,7 +45,6 @@ const adminNavigation = [
   { name: 'Visas', href: '/visa', icon: EyeIcon },
   { name: 'Diligences', href: '/diligences', icon: ClipboardDocumentListIcon },
   { name: 'Templates', href: '/templates', icon: DocumentDuplicateIcon },
-  { name: 'Paramètres', href: '/parametres', icon: CogIcon },
 ]
 
 const MainLayout: React.FC = () => {

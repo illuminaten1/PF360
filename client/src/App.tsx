@@ -124,14 +124,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="parametres"
-            element={
-              <ProtectedRoute adminOnly>
-                <PlaceholderPage title="Paramètres" />
-              </ProtectedRoute>
-            }
-          />
         </Route>
         
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

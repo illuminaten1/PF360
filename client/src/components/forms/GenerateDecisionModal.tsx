@@ -426,7 +426,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium text-gray-900 text-sm">
-                                        {demande.grade && `${demande.grade} `}{demande.prenom} {demande.nom}
+                                        {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}{demande.prenom} {demande.nom}
                                       </span>
                                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                                         demande.type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'

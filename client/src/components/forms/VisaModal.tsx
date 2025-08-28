@@ -80,7 +80,7 @@ const VisaModal: React.FC<VisaModalProps> = ({
               value={formData.typeVisa}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Sélectionnez un type</option>
               <option value="MILITAIRE">Militaire</option>
@@ -99,7 +99,7 @@ const VisaModal: React.FC<VisaModalProps> = ({
               onChange={handleChange}
               required
               rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Entrez le texte du visa..."
             />
           </div>

@@ -105,8 +105,8 @@ const GradeModal: React.FC<GradeModalProps> = ({ grade, isOpen, onClose, onSubmi
                     id="gradeComplet"
                     value={formData.gradeComplet}
                     onChange={(e) => handleInputChange('gradeComplet', e.target.value)}
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                      errors.gradeComplet ? 'border-red-300' : ''
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.gradeComplet ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="Ex: Maréchal des logis-chef"
                   />
@@ -124,8 +124,8 @@ const GradeModal: React.FC<GradeModalProps> = ({ grade, isOpen, onClose, onSubmi
                     id="gradeAbrege"
                     value={formData.gradeAbrege}
                     onChange={(e) => handleInputChange('gradeAbrege', e.target.value)}
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                      errors.gradeAbrege ? 'border-red-300' : ''
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.gradeAbrege ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="Ex: MDC"
                   />

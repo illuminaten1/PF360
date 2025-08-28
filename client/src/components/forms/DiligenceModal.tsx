@@ -124,8 +124,8 @@ const DiligenceModal: React.FC<DiligenceModalProps> = ({
                       id="nom"
                       value={formData.nom}
                       onChange={(e) => handleInputChange('nom', e.target.value)}
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
-                        errors.nom ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.nom ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Ex: comparution sur reconnaissance préalable de culpabilité"
                     />
@@ -143,8 +143,8 @@ const DiligenceModal: React.FC<DiligenceModalProps> = ({
                       rows={6}
                       value={formData.details}
                       onChange={(e) => handleInputChange('details', e.target.value)}
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
-                        errors.details ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.details ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Décrivez en détail les diligences couvertes par ces honoraires..."
                     />

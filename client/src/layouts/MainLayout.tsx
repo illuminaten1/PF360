@@ -45,6 +45,7 @@ const adminNavigation = [
   { name: 'Visas', href: '/visa', icon: EyeIcon },
   { name: 'Diligences', href: '/diligences', icon: ClipboardDocumentListIcon },
   { name: 'Templates', href: '/templates', icon: DocumentDuplicateIcon },
+  { name: 'RGPD', href: '/rgpd', icon: ShieldCheckIcon },
 ]
 
 const MainLayout: React.FC = () => {

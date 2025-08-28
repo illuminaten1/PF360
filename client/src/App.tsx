@@ -21,6 +21,7 @@ import Paiements from '@/pages/Paiements'
 import GradesPage from '@/pages/Grades'
 import Templates from '@/pages/Templates'
 import Revue from '@/pages/Revue'
+import RGPD from '@/pages/RGPD'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -121,6 +122,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <Templates />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="rgpd"
+            element={
+              <ProtectedRoute adminOnly>
+                <RGPD />
               </ProtectedRoute>
             }
           />

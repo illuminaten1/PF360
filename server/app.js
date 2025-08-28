@@ -22,6 +22,7 @@ const visaRoutes = require('./routes/visa');
 const diligenceRoutes = require('./routes/diligence');
 const templateRoutes = require('./routes/templates');
 const logRoutes = require('./routes/logs');
+const rgpdRoutes = require('./routes/rgpd');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -73,6 +74,7 @@ app.use('/api/visa', visaRoutes);
 app.use('/api/diligences', diligenceRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/logs', logRoutes);
+app.use('/api/rgpd', rgpdRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -35,6 +35,7 @@ import {
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
 import AssignerDemandeModal from '../forms/AssignerDemandeModal'
+import { useAuth } from '@/contexts/AuthContext'
 
 dayjs.locale('fr')
 
@@ -576,6 +577,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   canDelete = true
 }, ref) => {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'dateReception', desc: true }
   ])
@@ -857,34 +859,41 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                       {assigneA.grade && `${assigneA.grade} `}{assigneA.prenom} {assigneA.nom}
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedDemandeId(demande.id)
-                      setSelectedDemandeNumeroDS(demande.numeroDS)
-                      setCurrentAssignee(assigneA)
-                      setShowAssignerModal(true)
-                    }}
-                    className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
-                  >
-                    <PencilIcon className="h-3 w-3 mr-1" />
-                    Modifier
-                  </button>
+                  {user?.role === 'ADMIN' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedDemandeId(demande.id)
+                        setSelectedDemandeNumeroDS(demande.numeroDS)
+                        setCurrentAssignee(assigneA)
+                        setShowAssignerModal(true)
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                      <PencilIcon className="h-3 w-3 mr-1" />
+                      Modifier
+                    </button>
+                  )}
                 </div>
               ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSelectedDemandeId(demande.id)
-                    setSelectedDemandeNumeroDS(demande.numeroDS)
-                    setCurrentAssignee(null)
-                    setShowAssignerModal(true)
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                >
-                  <UserPlusIcon className="h-4 w-4 mr-1" />
-                  Assigner
-                </button>
+                <div className="flex items-center">
+                  <span className="text-gray-400 italic">Non assigné</span>
+                  {user?.role === 'ADMIN' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedDemandeId(demande.id)
+                        setSelectedDemandeNumeroDS(demande.numeroDS)
+                        setCurrentAssignee(null)
+                        setShowAssignerModal(true)
+                      }}
+                      className="ml-2 text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                      <UserPlusIcon className="h-4 w-4 mr-1" />
+                      Assigner
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )

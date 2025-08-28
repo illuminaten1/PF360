@@ -279,7 +279,10 @@ const RevueConventionsTable: React.FC<RevueConventionsTableProps> = ({
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'dateDecisionPj', desc: true }
   ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() => {
+    const saved = sessionStorage.getItem('revue-conventions-filters')
+    return saved ? JSON.parse(saved) : []
+  })
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -290,6 +293,11 @@ const RevueConventionsTable: React.FC<RevueConventionsTableProps> = ({
       setData([])
     }
   }, [selectedUserId])
+
+  // Sauvegarder les filtres
+  useEffect(() => {
+    sessionStorage.setItem('revue-conventions-filters', JSON.stringify(columnFilters))
+  }, [columnFilters])
 
   const fetchDemandesSansConvention = async () => {
     if (!selectedUserId) return
@@ -374,6 +382,7 @@ const RevueConventionsTable: React.FC<RevueConventionsTableProps> = ({
       console.error('Erreur lors de l\'export Excel:', error)
     }
   }
+
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'

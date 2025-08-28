@@ -283,7 +283,10 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'dateReception', desc: true }
   ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() => {
+    const saved = sessionStorage.getItem('revue-decisions-filters')
+    return saved ? JSON.parse(saved) : []
+  })
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -294,6 +297,11 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
       setData([])
     }
   }, [selectedUserId])
+
+  // Sauvegarder les filtres
+  useEffect(() => {
+    sessionStorage.setItem('revue-decisions-filters', JSON.stringify(columnFilters))
+  }, [columnFilters])
 
   const fetchDemandesSansDecision = async () => {
     if (!selectedUserId) return
@@ -373,6 +381,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
       console.error('Erreur lors de l\'export Excel:', error)
     }
   }
+
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'

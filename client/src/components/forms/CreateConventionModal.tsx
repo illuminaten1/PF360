@@ -29,7 +29,7 @@ const createConventionSchema = z.object({
     required_error: "L'instance est requise"
   }),
   montantHT: z.number().positive("Le montant HT doit être positif"),
-  montantHTGagePrecedemment: z.number().positive().optional(),
+  montantHTGagePrecedemment: z.number().positive().optional().nullable(),
   avocatId: z.string().min(1, "L'avocat est requis"),
   diligenceId: z.string().optional(),
   dateRetourSigne: z.string().optional(),
@@ -122,7 +122,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
           type: undefined,
           victimeOuMisEnCause: undefined,
           instance: undefined,
-          montantHT: 0,
+          montantHT: undefined,
           montantHTGagePrecedemment: undefined,
           avocatId: '',
           diligenceId: '',
@@ -226,6 +226,13 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
       setValue('demandeIds', filteredDemandeIds)
     }
   }, [selectedDecisionIds, setValue, availableDemandeurs])
+
+  // Clear montantHTGagePrecedemment when switching to CONVENTION
+  React.useEffect(() => {
+    if (selectedType === 'CONVENTION') {
+      setValue('montantHTGagePrecedemment', undefined)
+    }
+  }, [selectedType, setValue])
 
 
   const getVictimeMecLabel = (type: string) => {

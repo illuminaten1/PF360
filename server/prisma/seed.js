@@ -160,6 +160,25 @@ async function main() {
 
   console.log('✅ Test user created:', testUser.identifiant)
 
+  // Create Hervé LEGREFFIER user
+  const hervePassword = await bcrypt.hash('herve123', 12)
+  
+  const herveUser = await prisma.user.upsert({
+    where: { identifiant: 'herve' },
+    update: {},
+    create: {
+      identifiant: 'herve',
+      password: hervePassword,
+      nom: 'LEGREFFIER',
+      prenom: 'Hervé',
+      mail: 'herve.legreffier@interieur.gouv.fr',
+      role: 'GREFFIER',
+      grade: 'MDL'
+    }
+  })
+
+  console.log('✅ Hervé LEGREFFIER user created:', herveUser.identifiant)
+
   // Create default visas
   const visasData = [
     {

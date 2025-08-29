@@ -19,6 +19,7 @@ import {
   ChevronDoubleUpIcon,
   UserIcon,
   TagIcon,
+  BuildingOfficeIcon,
   CurrencyEuroIcon,
   ClipboardDocumentListIcon,
   DocumentDuplicateIcon
@@ -40,6 +41,7 @@ const adminNavigation = [
   { name: 'Utilisateurs', href: '/utilisateurs', icon: UserCircleIcon },
   { name: 'SGAMI', href: '/sgami', icon: CurrencyEuroIcon },
   { name: 'Badges', href: '/badges', icon: TagIcon },
+  { name: 'BAP', href: '/bap', icon: BuildingOfficeIcon },
   { name: 'PCE', href: '/pce', icon: DocumentTextIcon },
   { name: 'Grades', href: '/grades', icon: ChevronDoubleUpIcon },
   { name: 'Visas', href: '/visa', icon: EyeIcon },

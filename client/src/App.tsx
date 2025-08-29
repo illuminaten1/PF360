@@ -11,6 +11,7 @@ import Demandes from '@/pages/Demandes'
 import Avocats from '@/pages/Avocats'
 import Users from '@/pages/Users'
 import Badges from '@/pages/Badges'
+import BAPPage from '@/pages/BAP'
 import SGAMIPage from '@/pages/SGAMI'
 import PCEPage from '@/pages/PCE'
 import VisaPage from '@/pages/Visa'
@@ -81,6 +82,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <Badges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="bap"
+            element={
+              <ProtectedRoute adminOnly>
+                <BAPPage />
               </ProtectedRoute>
             }
           />

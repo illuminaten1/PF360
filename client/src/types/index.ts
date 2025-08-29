@@ -243,6 +243,20 @@ export interface Badge {
   demandesCount?: number
 }
 
+export interface BAP {
+  id: string
+  nomBAP: string
+  mail1?: string
+  mail2?: string
+  mail3?: string
+  mail4?: string
+  totalUsage?: number
+  dossiersCount?: number
+  demandesCount?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface Sgami {
   id: string
   nom: string

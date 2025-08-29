@@ -1041,21 +1041,13 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                   )}
                 </div>
               ) : (
-                <div>
-                  <div className="flex flex-wrap gap-1 mb-1">
-                    {baps.slice(0, 2).map((bapRel: any) => (
-                      <span
-                        key={bapRel.bap.id}
-                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                      >
-                        {bapRel.bap.nomBAP}
-                      </span>
+                <div className="flex items-center space-x-2">
+                  <div className="text-gray-900">
+                    {baps.map((bapRel: any, index: number) => (
+                      <div key={bapRel.bap.id} className="font-medium">
+                        {index > 0 && ', '}{bapRel.bap.nomBAP}
+                      </div>
                     ))}
-                    {baps.length > 2 && (
-                      <span className="text-xs text-gray-500">
-                        +{baps.length - 2}
-                      </span>
-                    )}
                   </div>
                   {user?.role === 'ADMIN' && (
                     <button

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { Dialog, Transition, Listbox } from '@headlessui/react'
 import { useQuery } from '@tanstack/react-query'
-import { XMarkIcon, BanknotesIcon, UserIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, BanknotesIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Paiement } from '@/types'
 import api from '@/utils/api'
 
@@ -44,6 +45,9 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const [selectedSgami, setSelectedSgami] = useState<any>(null)
+  const [selectedAvocat, setSelectedAvocat] = useState<any>(null)
+  const [selectedPce, setSelectedPce] = useState<any>(null)
 
   // Fetch SGAMIS
   const { data: sgamis = [] } = useQuery({
@@ -117,6 +121,14 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         pceId: paiement.pce?.id || '',
         decisions: paiement.decisions?.map(d => d.decision.id) || []
       })
+      // Set selected objects from loaded data
+      const foundSgami = sgamis.find((s: any) => s.id === paiement.sgami?.id) || paiement.sgami || null
+      const foundAvocat = avocats.find((a: any) => a.id === paiement.avocat?.id) || paiement.avocat || null
+      const foundPce = pces.find((p: any) => p.id === paiement.pce?.id) || paiement.pce || null
+      
+      setSelectedSgami(foundSgami)
+      setSelectedAvocat(foundAvocat)
+      setSelectedPce(foundPce)
     } else if (isOpen) {
       // Reset form for new paiement
       setFormData({
@@ -140,29 +152,30 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         pceId: '',
         decisions: []
       })
+      // Reset selected objects
+      setSelectedSgami(null)
+      setSelectedAvocat(null)
+      setSelectedPce(null)
     }
     setErrors({})
-  }, [isOpen, paiement])
+  }, [isOpen, paiement, sgamis, avocats, pces])
 
   // Auto-fill when avocat is selected
   useEffect(() => {
-    if (formData.avocatId && avocats.length > 0) {
-      const selectedAvocat = avocats.find((a: any) => a.id === formData.avocatId)
-      if (selectedAvocat) {
-        setFormData(prev => ({
-          ...prev,
-          identiteBeneficiaire: `${selectedAvocat.prenom || ''} ${selectedAvocat.nom}`.trim(),
-          adresseBeneficiaire: selectedAvocat.adressePostale || '',
-          siretOuRidet: selectedAvocat.siretOuRidet || '',
-          titulaireCompteBancaire: selectedAvocat.titulaireDuCompteBancaire || '',
-          codeEtablissement: selectedAvocat.codeEtablissement || '',
-          codeGuichet: selectedAvocat.codeGuichet || '',
-          numeroCompte: selectedAvocat.numeroDeCompte || '',
-          cleRIB: selectedAvocat.cle || ''
-        }))
-      }
+    if (selectedAvocat) {
+      setFormData(prev => ({
+        ...prev,
+        identiteBeneficiaire: `${selectedAvocat.prenom || ''} ${selectedAvocat.nom}`.trim(),
+        adresseBeneficiaire: selectedAvocat.adressePostale || '',
+        siretOuRidet: selectedAvocat.siretOuRidet || '',
+        titulaireCompteBancaire: selectedAvocat.titulaireDuCompteBancaire || '',
+        codeEtablissement: selectedAvocat.codeEtablissement || '',
+        codeGuichet: selectedAvocat.codeGuichet || '',
+        numeroCompte: selectedAvocat.numeroDeCompte || '',
+        cleRIB: selectedAvocat.cle || ''
+      }))
     }
-  }, [formData.avocatId, avocats])
+  }, [selectedAvocat])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -245,25 +258,48 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     onSubmit(submitData)
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-            <BanknotesIcon className="h-6 w-6 mr-2" />
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
-        </div>
+    <Transition appear show={isOpen} as={React.Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={React.Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
+                    <BanknotesIcon className="h-6 w-6 mr-2 text-blue-600" />
+                    {title}
+                  </Dialog.Title>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-md text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    <XMarkIcon className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Informations générales */}
             <div className="md:col-span-2">
@@ -275,22 +311,83 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 SGAMI *
               </label>
-              <select
-                name="sgamiId"
-                value={formData.sgamiId}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.sgamiId ? 'border-red-300' : 'border-gray-300'
-                }`}
-                required
+              <Listbox 
+                value={selectedSgami} 
+                onChange={(sgami) => {
+                  setSelectedSgami(sgami)
+                  setFormData(prev => ({ ...prev, sgamiId: sgami?.id || '' }))
+                }}
               >
-                <option value="">Sélectionner un SGAMI</option>
-                {sgamis.map((sgami: any) => (
-                  <option key={sgami.id} value={sgami.id}>
-                    {sgami.nom}
-                  </option>
-                ))}
-              </select>
+                <div className="relative">
+                  <Listbox.Button className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                    errors.sgamiId ? 'border-red-300' : 'border-gray-200'
+                  }`}>
+                    <span className="block truncate">
+                      {selectedSgami ? selectedSgami.nom : 'Sélectionner un SGAMI'}
+                    </span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
+                  <Transition
+                    as={React.Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      <Listbox.Option
+                        value={null}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                            active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <>
+                            <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                              Sélectionner un SGAMI
+                            </span>
+                            {selected ? (
+                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                      {sgamis.map((sgami: any) => (
+                        <Listbox.Option
+                          key={sgami.id}
+                          value={sgami}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                            }`
+                          }
+                        >
+                          {({ selected }) => (
+                            <>
+                              <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                {sgami.nom}
+                              </span>
+                              {selected ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </div>
+              </Listbox>
               {errors.sgamiId && <p className="text-red-500 text-xs mt-1">{errors.sgamiId}</p>}
             </div>
 
@@ -304,8 +401,9 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="montantHT"
                 value={formData.montantHT}
                 onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.montantHT ? 'border-red-300' : 'border-gray-300'
+                placeholder="0.00"
+                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                  errors.montantHT ? 'border-red-300' : 'border-gray-200'
                 }`}
               />
               {errors.montantHT && <p className="text-red-500 text-xs mt-1">{errors.montantHT}</p>}
@@ -321,8 +419,9 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="montantTTC"
                 value={formData.montantTTC}
                 onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.montantTTC ? 'border-red-300' : 'border-gray-300'
+                placeholder="0.00"
+                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-lg font-semibold text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                  errors.montantTTC ? 'border-red-300' : 'border-gray-200'
                 }`}
                 required
               />
@@ -346,45 +445,126 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Code PCE
               </label>
-              <select
-                name="pceId"
-                value={formData.pceId}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              <Listbox 
+                value={selectedPce} 
+                onChange={(pce) => {
+                  setSelectedPce(pce)
+                  setFormData(prev => ({ ...prev, pceId: pce?.id || '' }))
+                }}
               >
-                <option value="">Sélectionner un code PCE</option>
-                {pces.map((pce: any) => (
-                  <option key={pce.id} value={pce.id}>
-                    {pce.pceDetaille} - {pce.pceNumerique}
-                  </option>
-                ))}
-              </select>
+                <div className="relative">
+                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200">
+                    <span className="block truncate">
+                      {selectedPce ? (
+                        `${selectedPce.pceDetaille} - ${selectedPce.pceNumerique}`
+                      ) : (
+                        'Sélectionner un code PCE'
+                      )}
+                    </span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
+                  <Transition
+                    as={React.Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      <Listbox.Option
+                        value={null}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                            active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <>
+                            <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                              Sélectionner un code PCE
+                            </span>
+                            {selected ? (
+                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                      {pces.map((pce: any) => (
+                        <Listbox.Option
+                          key={pce.id}
+                          value={pce}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                            }`
+                          }
+                        >
+                          {({ selected }) => (
+                            <>
+                              <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                {pce.pceDetaille} - {pce.pceNumerique}
+                              </span>
+                              {selected ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </div>
+              </Listbox>
             </div>
 
             {/* Décisions associées */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Décisions associées *</h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-50 p-3 rounded-md">
-                {decisions.length > 0 ? (
-                  decisions.map((decision: any) => (
-                    <label key={decision.id} className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.decisions.includes(decision.id)}
-                        onChange={(e) => handleDecisionChange(decision.id, e.target.checked)}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {decision.type} {decision.numero && `- ${decision.numero}`}
-                        {decision.dateSignature && ` (${new Date(decision.dateSignature).toLocaleDateString()})`}
-                      </span>
-                    </label>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500">Aucune décision disponible pour ce dossier</p>
-                )}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all h-[200px]">
+                <div className="h-full overflow-y-auto">
+                  {decisions.length > 0 ? (
+                    <div className="space-y-2">
+                      {decisions.map((decision: any) => (
+                        <label key={decision.id} className="flex items-center space-x-3 p-3 rounded-lg bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.decisions.includes(decision.id)}
+                            onChange={(e) => handleDecisionChange(decision.id, e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900 text-sm">
+                                {decision.type} {decision.numero && `- N° ${decision.numero}`}
+                              </span>
+                              {decision.dateSignature && (
+                                <span className="text-xs text-gray-500">
+                                  ({new Date(decision.dateSignature).toLocaleDateString()})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm text-center py-4">Aucune décision disponible pour ce dossier</p>
+                  )}
+                </div>
               </div>
               {errors.decisions && <p className="text-red-500 text-xs mt-1">{errors.decisions}</p>}
+              <p className="mt-2 text-xs text-gray-500">
+                {formData.decisions.length} décision(s) sélectionnée(s) sur {decisions.length} disponible(s)
+              </p>
             </div>
 
             {/* Bénéficiaire */}
@@ -396,19 +576,31 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Qualité bénéficiaire *
               </label>
-              <select
-                name="qualiteBeneficiaire"
-                value={formData.qualiteBeneficiaire}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {qualitesBeneficiaire.map((qualite) => (
-                  <option key={qualite} value={qualite}>
-                    {qualite}
-                  </option>
+                  <button
+                    key={qualite}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, qualiteBeneficiaire: qualite }))}
+                    className={`cursor-pointer rounded-lg border-2 p-3 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                      formData.qualiteBeneficiaire === qualite
+                        ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                        : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      qualite === 'Avocat' ? 'bg-blue-100 text-blue-800' :
+                      qualite === 'Commissaire de justice' ? 'bg-purple-100 text-purple-800' :
+                      qualite === 'Militaire de la gendarmerie nationale' ? 'bg-green-100 text-green-800' :
+                      qualite === 'Régisseur du tribunal judiciaire' ? 'bg-amber-100 text-amber-800' :
+                      qualite === 'Médecin' ? 'bg-red-100 text-red-800' :
+                      qualite === 'Victime' ? 'bg-sky-100 text-sky-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {qualite}
+                    </span>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
             {formData.qualiteBeneficiaire === 'Avocat' && (
@@ -416,22 +608,87 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Avocat *
                 </label>
-                <select
-                  name="avocatId"
-                  value={formData.avocatId}
-                  onChange={handleChange}
-                  className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.avocatId ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  required
+                <Listbox 
+                  value={selectedAvocat} 
+                  onChange={(avocat) => {
+                    setSelectedAvocat(avocat)
+                    setFormData(prev => ({ ...prev, avocatId: avocat?.id || '' }))
+                  }}
                 >
-                  <option value="">Sélectionner un avocat</option>
-                  {avocats.map((avocat: any) => (
-                    <option key={avocat.id} value={avocat.id}>
-                      {avocat.prenom} {avocat.nom} {avocat.region && `(${avocat.region})`}
-                    </option>
-                  ))}
-                </select>
+                  <div className="relative">
+                    <Listbox.Button className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                      errors.avocatId ? 'border-red-300' : 'border-gray-200'
+                    }`}>
+                      <span className="block truncate">
+                        {selectedAvocat ? (
+                          `${selectedAvocat.prenom} ${selectedAvocat.nom} ${selectedAvocat.region ? `(${selectedAvocat.region})` : ''}`
+                        ) : (
+                          'Sélectionner un avocat'
+                        )}
+                      </span>
+                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <ChevronUpDownIcon
+                          className="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </Listbox.Button>
+                    <Transition
+                      as={React.Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Listbox.Option
+                          value={null}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                            }`
+                          }
+                        >
+                          {({ selected }) => (
+                            <>
+                              <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                Sélectionner un avocat
+                              </span>
+                              {selected ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                        {avocats.map((avocat: any) => (
+                          <Listbox.Option
+                            key={avocat.id}
+                            value={avocat}
+                            className={({ active }) =>
+                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                              }`
+                            }
+                          >
+                            {({ selected }) => (
+                              <>
+                                <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                  {avocat.prenom} {avocat.nom} {avocat.region && `(${avocat.region})`}
+                                </span>
+                                {selected ? (
+                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Transition>
+                  </div>
+                </Listbox>
                 {errors.avocatId && <p className="text-red-500 text-xs mt-1">{errors.avocatId}</p>}
               </div>
             )}
@@ -558,32 +815,68 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Émission titre de perception *
               </label>
-              <select
-                name="emissionTitrePerception"
-                value={formData.emissionTitrePerception}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="OUI">Oui</option>
-                <option value="NON">Non</option>
-              </select>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, emissionTitrePerception: 'NON' }))}
+                  className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                    formData.emissionTitrePerception === 'NON'
+                      ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                      : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                  }`}
+                >
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Non
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, emissionTitrePerception: 'OUI' }))}
+                  className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                    formData.emissionTitrePerception === 'OUI'
+                      ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                      : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                  }`}
+                >
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Oui
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Convention jointe FRI *
               </label>
-              <select
-                name="conventionJointeFRI"
-                value={formData.conventionJointeFRI}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="OUI">Oui</option>
-                <option value="NON">Non</option>
-              </select>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, conventionJointeFRI: 'NON' }))}
+                  className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                    formData.conventionJointeFRI === 'NON'
+                      ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                      : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                  }`}
+                >
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Non
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, conventionJointeFRI: 'OUI' }))}
+                  className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                    formData.conventionJointeFRI === 'OUI'
+                      ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                      : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                  }`}
+                >
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Oui
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div>
@@ -600,24 +893,29 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-            >
-              {paiement ? 'Modifier le paiement' : 'Créer le paiement'}
-            </button>
+                  {/* Actions */}
+                  <div className="flex justify-end space-x-3 pt-6 border-t mt-8">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="btn-secondary"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-primary"
+                    >
+                      {paiement ? 'Modifier le paiement' : 'Créer le paiement'}
+                    </button>
+                  </div>
+                </form>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </Dialog>
+    </Transition>
   )
 }
 

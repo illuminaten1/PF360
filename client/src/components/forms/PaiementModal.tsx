@@ -306,7 +306,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               <h3 className="text-lg font-medium text-gray-900 mb-4">Informations générales</h3>
             </div>
 
-
+            {/* Première ligne: SGAMI - PCE */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 SGAMI *
@@ -389,56 +389,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 </div>
               </Listbox>
               {errors.sgamiId && <p className="text-red-500 text-xs mt-1">{errors.sgamiId}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Montant HT (€)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                name="montantHT"
-                value={formData.montantHT}
-                onChange={handleChange}
-                placeholder="0.00"
-                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
-                  errors.montantHT ? 'border-red-300' : 'border-gray-200'
-                }`}
-              />
-              {errors.montantHT && <p className="text-red-500 text-xs mt-1">{errors.montantHT}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Montant TTC (€) *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                name="montantTTC"
-                value={formData.montantTTC}
-                onChange={handleChange}
-                placeholder="0.00"
-                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-lg font-semibold text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
-                  errors.montantTTC ? 'border-red-300' : 'border-gray-200'
-                }`}
-                required
-              />
-              {errors.montantTTC && <p className="text-red-500 text-xs mt-1">{errors.montantTTC}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Numéro de facture
-              </label>
-              <input
-                type="text"
-                name="facture"
-                value={formData.facture}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
             </div>
 
             <div>
@@ -526,6 +476,71 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               </Listbox>
             </div>
 
+            {/* Deuxième ligne: Montant HT - Montant TTC */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Montant HT (€)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                name="montantHT"
+                value={formData.montantHT}
+                onChange={handleChange}
+                placeholder="0.00"
+                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                  errors.montantHT ? 'border-red-300' : 'border-gray-200'
+                }`}
+              />
+              {errors.montantHT && <p className="text-red-500 text-xs mt-1">{errors.montantHT}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Montant TTC (€) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                name="montantTTC"
+                value={formData.montantTTC}
+                onChange={handleChange}
+                placeholder="0.00"
+                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-lg font-semibold text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                  errors.montantTTC ? 'border-red-300' : 'border-gray-200'
+                }`}
+                required
+              />
+              {errors.montantTTC && <p className="text-red-500 text-xs mt-1">{errors.montantTTC}</p>}
+            </div>
+
+            {/* Troisième ligne: Numéro de facture - Date du service fait */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Numéro de facture
+              </label>
+              <input
+                type="text"
+                name="facture"
+                value={formData.facture}
+                onChange={handleChange}
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date service fait
+              </label>
+              <input
+                type="date"
+                name="dateServiceFait"
+                value={formData.dateServiceFait}
+                onChange={handleChange}
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
+              />
+            </div>
+
             {/* Décisions associées */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Décisions associées *</h3>
@@ -572,7 +587,8 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Bénéficiaire</h3>
             </div>
 
-            <div>
+            {/* Qualité bénéficiaire - toute la largeur */}
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Qualité bénéficiaire *
               </label>
@@ -603,8 +619,9 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               </div>
             </div>
 
+            {/* Ligne avocat si qualité = Avocat - toute la largeur */}
             {formData.qualiteBeneficiaire === 'Avocat' && (
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Avocat *
                 </label>
@@ -693,6 +710,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               </div>
             )}
 
+            {/* Les autres champs en 2x2 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Identité bénéficiaire *
@@ -702,8 +720,8 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="identiteBeneficiaire"
                 value={formData.identiteBeneficiaire}
                 onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.identiteBeneficiaire ? 'border-red-300' : 'border-gray-300'
+                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                  errors.identiteBeneficiaire ? 'border-red-300' : 'border-gray-200'
                 }`}
                 required
               />
@@ -719,7 +737,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="adresseBeneficiaire"
                 value={formData.adresseBeneficiaire}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
 
@@ -732,16 +750,18 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="siretOuRidet"
                 value={formData.siretOuRidet}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
+
 
             {/* Coordonnées bancaires */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Coordonnées bancaires</h3>
             </div>
 
-            <div>
+            {/* Titulaire du compte bancaire - toute la largeur */}
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Titulaire du compte bancaire
               </label>
@@ -750,10 +770,13 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="titulaireCompteBancaire"
                 value={formData.titulaireCompteBancaire}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
+          </div>
 
+          {/* Les 4 champs RIB sur la même ligne */}
+          <div className="grid grid-cols-4 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Code établissement
@@ -763,7 +786,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="codeEtablissement"
                 value={formData.codeEtablissement}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
 
@@ -776,7 +799,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="codeGuichet"
                 value={formData.codeGuichet}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
 
@@ -789,7 +812,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="numeroCompte"
                 value={formData.numeroCompte}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
 
@@ -802,11 +825,14 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 name="cleRIB"
                 value={formData.cleRIB}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200"
               />
             </div>
+          </div>
 
-            {/* Options */}
+          {/* Convention jointe - Titre de perception */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Options - titre sur toute la largeur */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Options</h3>
             </div>
@@ -879,18 +905,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date service fait
-              </label>
-              <input
-                type="date"
-                name="dateServiceFait"
-                value={formData.dateServiceFait}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
           </div>
 
                   {/* Actions */}

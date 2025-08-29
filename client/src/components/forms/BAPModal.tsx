@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { Dialog, Transition } from '@headlessui/react'
+import { XMarkIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline'
 import { BAP } from '@/types'
 
 interface BAPModalProps {
@@ -91,22 +92,45 @@ const BAPModal: React.FC<BAPModalProps> = ({ bap, isOpen, onClose, onSubmit, isS
     onSubmit(submitData)
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">
-            {bap ? 'Modifier le BAP' : 'Nouveau BAP'}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
-        </div>
+    <Transition appear show={isOpen} as={React.Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={React.Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
+                    <BuildingOffice2Icon className="h-6 w-6 mr-2 text-blue-600" />
+                    {bap ? 'Modifier le BAP' : 'Nouveau BAP'}
+                  </Dialog.Title>
+                  <button
+                    onClick={onClose}
+                    className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
+                  >
+                    <XMarkIcon className="h-5 w-5" />
+                  </button>
+                </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nom du BAP */}
@@ -120,7 +144,7 @@ const BAPModal: React.FC<BAPModalProps> = ({ bap, isOpen, onClose, onSubmit, isS
               value={formData.nomBAP}
               onChange={handleInputChange}
               placeholder="Ex: RGARA, RGBRET, RGOCC..."
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.nomBAP ? 'border-red-500' : 'border-gray-300'
               }`}
               disabled={isSubmitting}
@@ -144,7 +168,7 @@ const BAPModal: React.FC<BAPModalProps> = ({ bap, isOpen, onClose, onSubmit, isS
                   value={formData[fieldName]}
                   onChange={handleInputChange}
                   placeholder={`Adresse email ${index + 1}`}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors[fieldName] ? 'border-red-500' : 'border-gray-300'
                   }`}
                   disabled={isSubmitting}
@@ -162,24 +186,20 @@ const BAPModal: React.FC<BAPModalProps> = ({ bap, isOpen, onClose, onSubmit, isS
 
           {/* Aperçu */}
           {formData.nomBAP && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <label className="block text-sm font-medium text-blue-900 mb-2">
                 Aperçu du BAP
               </label>
               <div className="space-y-2">
                 <div className="flex items-center">
-                  <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full mr-3">
-                    <span className="text-blue-600 text-xs font-bold">
-                      {formData.nomBAP.substring(0, 2).toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="font-medium text-gray-900">{formData.nomBAP}</span>
+                  <BuildingOffice2Icon className="h-5 w-5 text-blue-600 mr-3" />
+                  <span className="font-medium text-blue-900">{formData.nomBAP}</span>
                 </div>
                 
                 {[formData.mail1, formData.mail2, formData.mail3, formData.mail4]
                   .filter(Boolean)
                   .map((email, index) => (
-                    <div key={index} className="text-xs text-gray-600 ml-11">
+                    <div key={index} className="text-xs text-blue-700 ml-8">
                       {email}
                     </div>
                   ))}
@@ -187,26 +207,30 @@ const BAPModal: React.FC<BAPModalProps> = ({ bap, isOpen, onClose, onSubmit, isS
             </div>
           )}
 
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+              className="btn-secondary"
               disabled={isSubmitting}
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
+              className="btn-primary"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Enregistrement...' : (bap ? 'Modifier' : 'Créer')}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
   )
 }
 

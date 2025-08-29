@@ -6,7 +6,8 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   BuildingOfficeIcon,
-  CheckIcon
+  CheckIcon,
+  BuildingOffice2Icon
 } from '@heroicons/react/24/outline'
 import api from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -164,7 +165,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
-                      <BuildingOfficeIcon className="h-6 w-6 mr-2 text-indigo-600" />
+                      <BuildingOffice2Icon className="h-6 w-6 mr-2 text-blue-600" />
                       Assigner un BAP à la demande {demandeNumeroDS}
                     </Dialog.Title>
                     <p className="mt-1 text-sm text-gray-600">
@@ -191,7 +192,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Rechercher un BAP..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -224,25 +225,17 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                           <div
                             key={bap.id}
                             className={`px-4 py-3 border rounded-lg cursor-pointer transition-colors ${
-                              selectedBAPId === bap.id
-                                ? 'border-indigo-500 bg-indigo-50'
-                                : isCurrentlyAssigned(bap.id)
+                              isCurrentlyAssigned(bap.id)
                                 ? 'border-green-500 bg-green-50'
+                                : selectedBAPId === bap.id
+                                ? 'border-blue-500 bg-blue-50'
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                             }`}
                             onClick={() => handleSelectBAP(bap.id)}
                           >
                             <div className="flex items-center">
-                              <div className="flex-shrink-0">
-                                <input
-                                  type="radio"
-                                  name="bap-selection"
-                                  checked={selectedBAPId === bap.id}
-                                  onChange={() => handleSelectBAP(bap.id)}
-                                  className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0 ml-3">
+                              <BuildingOfficeIcon className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-900">

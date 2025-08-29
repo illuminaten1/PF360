@@ -1,15 +1,14 @@
 import React from 'react'
-import { PencilIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { Visa } from '@/types'
 
 interface VisaTableProps {
   data: Visa[]
   loading?: boolean
   onEdit: (visa: Visa) => void
-  onDelete: (id: string) => void
 }
 
-const VisaTable: React.FC<VisaTableProps> = ({ data, loading = false, onEdit, onDelete }) => {
+const VisaTable: React.FC<VisaTableProps> = ({ data, loading = false, onEdit }) => {
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -102,22 +101,13 @@ const VisaTable: React.FC<VisaTableProps> = ({ data, loading = false, onEdit, on
                   0 décision(s)
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => onEdit(visa)}
-                      className="text-blue-600 hover:text-blue-900 p-1"
-                      title="Modifier"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(visa.id)}
-                      className="text-red-600 hover:text-red-900 p-1"
-                      title="Supprimer"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => onEdit(visa)}
+                    className="text-blue-600 hover:text-blue-900 p-1"
+                    title="Modifier le texte"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                  </button>
                 </td>
               </tr>
             ))}

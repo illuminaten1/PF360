@@ -72,20 +72,16 @@ const VisaModal: React.FC<VisaModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
             <label htmlFor="typeVisa" className="block text-sm font-medium text-gray-700 mb-2">
-              Type de Visa <span className="text-red-500">*</span>
+              Type de Visa
             </label>
-            <select
+            <input
               id="typeVisa"
               name="typeVisa"
+              type="text"
               value={formData.typeVisa}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Sélectionnez un type</option>
-              <option value="MILITAIRE">Militaire</option>
-              <option value="CIVIL">Civil</option>
-            </select>
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
+            />
           </div>
 
           <div>

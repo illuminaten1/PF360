@@ -11,6 +11,11 @@ router.use(authMiddleware);
 router.get('/', async (req, res) => {
   try {
     const visas = await prisma.visa.findMany({
+      where: {
+        typeVisa: {
+          in: ['CIVIL', 'MILITAIRE']
+        }
+      },
       orderBy: [
         { typeVisa: 'asc' }
       ]
@@ -30,7 +35,10 @@ router.get('/options', async (req, res) => {
   try {
     const visas = await prisma.visa.findMany({
       where: {
-        active: true
+        active: true,
+        typeVisa: {
+          in: ['CIVIL', 'MILITAIRE']
+        }
       },
       select: {
         id: true,
@@ -52,9 +60,20 @@ router.get('/options', async (req, res) => {
 // Récupérer les statistiques des visas
 router.get('/stats', async (req, res) => {
   try {
-    const totalVisas = await prisma.visa.count();
+    const totalVisas = await prisma.visa.count({
+      where: {
+        typeVisa: {
+          in: ['CIVIL', 'MILITAIRE']
+        }
+      }
+    });
     const visasActifs = await prisma.visa.count({
-      where: { active: true }
+      where: { 
+        active: true,
+        typeVisa: {
+          in: ['CIVIL', 'MILITAIRE']
+        }
+      }
     });
     
     const stats = {
@@ -70,10 +89,8 @@ router.get('/stats', async (req, res) => {
 });
 
 // Récupérer l'utilisation d'un visa (nombre de décisions qui l'utilisent)
-router.get('/:id/usage', async (req, res) => {
+router.get('/:id/usage', async (_req, res) => {
   try {
-    const { id } = req.params;
-    
     // Pour l'instant, simulons le comptage d'utilisation
     // Dans le futur, il faudrait ajouter une relation avec les décisions
     const usage = 0;
@@ -85,60 +102,32 @@ router.get('/:id/usage', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
-  try {
-    const { typeVisa, texteVisa, active = true } = req.body;
-    
-    if (!typeVisa || !texteVisa) {
-      return res.status(400).json({ error: 'Le type et le texte du visa sont requis' });
-    }
-
-    const existingVisa = await prisma.visa.findUnique({
-      where: { typeVisa }
-    });
-
-    if (existingVisa) {
-      return res.status(400).json({ error: 'Un visa avec ce type existe déjà' });
-    }
-
-    const visa = await prisma.visa.create({
-      data: { 
-        typeVisa,
-        texteVisa,
-        active
-      }
-    });
-
-    await logAction(req.user.id, 'CREATE_VISA', `Création visa ${visa.typeVisa}`, 'Visa', visa.id);
-
-    res.status(201).json(visa);
-  } catch (error) {
-    console.error('Create Visa error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
-});
 
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { typeVisa, texteVisa, active } = req.body;
+    const { texteVisa, active } = req.body;
     
-    if (!typeVisa || !texteVisa) {
-      return res.status(400).json({ error: 'Le type et le texte du visa sont requis' });
+    if (!texteVisa) {
+      return res.status(400).json({ error: 'Le texte du visa est requis' });
     }
 
-    const existingVisa = await prisma.visa.findFirst({
-      where: { typeVisa, NOT: { id } }
+    // Vérifier que le visa existe et est l'un des deux visas autorisés
+    const currentVisa = await prisma.visa.findUnique({
+      where: { id }
     });
 
-    if (existingVisa) {
-      return res.status(400).json({ error: 'Un visa avec ce type existe déjà' });
+    if (!currentVisa) {
+      return res.status(404).json({ error: 'Visa introuvable' });
+    }
+
+    if (!['CIVIL', 'MILITAIRE'].includes(currentVisa.typeVisa)) {
+      return res.status(403).json({ error: 'Ce visa ne peut pas être modifié' });
     }
 
     const visa = await prisma.visa.update({
       where: { id },
       data: { 
-        typeVisa,
         texteVisa,
         active: active !== undefined ? active : true
       }
@@ -156,38 +145,5 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Vérifier si le visa est utilisé dans des décisions
-    // Note: Il faudrait avoir une relation entre les visas et les décisions
-    // Pour l'instant, on peut simuler cette vérification ou l'implémenter plus tard
-    
-    // Option 1: Suppression logique (recommandée)
-    const visa = await prisma.visa.update({
-      where: { id },
-      data: { active: false }
-    });
-
-    await logAction(req.user.id, 'DELETE_VISA', `Désactivation visa ${visa.typeVisa}`, 'Visa', id);
-
-    res.json({ message: 'Visa désactivé avec succès' });
-    
-    // Option 2: Suppression physique (décommentez si vous préférez)
-    /*
-    await prisma.visa.delete({
-      where: { id }
-    });
-    res.json({ message: 'Visa supprimé avec succès' });
-    */
-  } catch (error) {
-    console.error('Delete Visa error:', error);
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Visa introuvable' });
-    }
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
-});
 
 module.exports = router;

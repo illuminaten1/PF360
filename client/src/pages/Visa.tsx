@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { PlusIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { EyeIcon } from '@heroicons/react/24/outline'
 import { Visa } from '@/types'
 import api from '@/utils/api'
 import VisaTable from '@/components/tables/VisaTable'
@@ -34,22 +34,6 @@ const VisaPage: React.FC = () => {
     }
   })
 
-  const createVisaMutation = useMutation({
-    mutationFn: async (visaData: Partial<Visa>) => {
-      const response = await api.post('/visa', visaData)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['visa-all'] })
-      queryClient.invalidateQueries({ queryKey: ['visa-stats'] })
-      setIsModalOpen(false)
-      setSelectedVisa(null)
-      toast.success('Visa créé avec succès')
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la création du visa')
-    }
-  })
 
   const updateVisaMutation = useMutation({
     mutationFn: async ({ id, ...visaData }: Partial<Visa> & { id: string }) => {
@@ -68,41 +52,17 @@ const VisaPage: React.FC = () => {
     }
   })
 
-  const deleteVisaMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/visa/${id}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['visa-all'] })
-      queryClient.invalidateQueries({ queryKey: ['visa-stats'] })
-      toast.success('Visa supprimé avec succès')
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la suppression du visa')
-    }
-  })
 
-  const handleCreateVisa = () => {
-    setSelectedVisa(null)
-    setIsModalOpen(true)
-  }
 
   const handleEditVisa = (visa: Visa) => {
     setSelectedVisa(visa)
     setIsModalOpen(true)
   }
 
-  const handleDeleteVisa = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce visa ? Cette action est irréversible.')) {
-      deleteVisaMutation.mutate(id)
-    }
-  }
 
   const handleSubmit = (visaData: Partial<Visa>) => {
     if (selectedVisa) {
       updateVisaMutation.mutate({ ...visaData, id: selectedVisa.id })
-    } else {
-      createVisaMutation.mutate(visaData)
     }
   }
 
@@ -116,15 +76,8 @@ const VisaPage: React.FC = () => {
             <EyeIcon className="w-7 h-7 mr-3 text-blue-600" />
             Gestion des Visas
           </h1>
-          <p className="text-gray-600 mt-1">Gérez les visas pour les décisions</p>
+          <p className="text-gray-600 mt-1">Modifiez le texte des visas CIVIL et MILITAIRE</p>
         </div>
-        <button
-          onClick={handleCreateVisa}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          <span>Nouveau Visa</span>
-        </button>
       </div>
 
       {stats && (
@@ -158,7 +111,6 @@ const VisaPage: React.FC = () => {
         data={visaList}
         loading={isLoading}
         onEdit={handleEditVisa}
-        onDelete={handleDeleteVisa}
       />
 
       {isModalOpen && (
@@ -170,7 +122,7 @@ const VisaPage: React.FC = () => {
             setSelectedVisa(null)
           }}
           onSubmit={handleSubmit}
-          isSubmitting={createVisaMutation.isPending || updateVisaMutation.isPending}
+          isSubmitting={updateVisaMutation.isPending}
         />
       )}
     </div>

@@ -109,6 +109,7 @@ model Demande {
   decisions              DecisionDemande[]
   conventions            ConventionDemande[]
   badges                 DemandeBadge[]
+  baps                   DemandeBAP[]
   
   @@map("demandes")
 }
@@ -124,6 +125,7 @@ model Dossier {
   sgami               Sgami?    @relation(fields: [sgamiId], references: [id])
   sgamiId             String?
   badges              DossierBadge[]
+  baps                DossierBAP[]
   attendus            DossierAttendu[]
   assigneA            User?     @relation(fields: [assigneAId], references: [id])
   assigneAId          String?
@@ -327,6 +329,24 @@ model Badge {
   @@map("badges")
 }
 
+model BAP {
+  id       String         @id @default(cuid())
+  nomBAP   String         @unique // Ex: RGARA, RGBRET, RGOCC, etc.
+  mail1    String?
+  mail2    String?
+  mail3    String?
+  mail4    String?
+  
+  // Relations
+  dossiers DossierBAP[]
+  demandes DemandeBAP[]
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  @@map("bap")
+}
+
 model DossierAttendu {
   id          String  @id @default(cuid())
   nomOuNigend String
@@ -361,6 +381,26 @@ model DemandeBadge {
   
   @@id([demandeId, badgeId])
   @@map("demandes_badges")
+}
+
+model DossierBAP {
+  dossier   Dossier @relation(fields: [dossierId], references: [id])
+  dossierId String
+  bap       BAP     @relation(fields: [bapId], references: [id])
+  bapId     String
+  
+  @@id([dossierId, bapId])
+  @@map("dossiers_bap")
+}
+
+model DemandeBAP {
+  demande   Demande @relation(fields: [demandeId], references: [id])
+  demandeId String
+  bap       BAP     @relation(fields: [bapId], references: [id])
+  bapId     String
+  
+  @@id([demandeId, bapId])
+  @@map("demandes_bap")
 }
 
 model DecisionDemande {

@@ -810,7 +810,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium text-gray-900 text-sm">
-                                        {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
+                                        {demandeRel.demande.grade?.gradeAbrege && `${demandeRel.demande.grade.gradeAbrege} `}
                                         {demandeRel.demande.prenom} {demandeRel.demande.nom}
                                       </span>
                                       {demandeRel.demande.numeroDS && (

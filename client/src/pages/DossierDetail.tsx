@@ -35,7 +35,8 @@ import DecisionViewModal from '@/components/forms/DecisionViewModal'
 import DecisionEditModal from '@/components/forms/DecisionEditModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import CreateConventionModal from '@/components/forms/CreateConventionModal'
-import PaiementModal from '@/components/forms/PaiementModal'
+// import PaiementModal from '@/components/forms/PaiementModal'
+import PaiementModal from '@/components/forms/PaiementModal.refactored'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 dayjs.extend(relativeTime)

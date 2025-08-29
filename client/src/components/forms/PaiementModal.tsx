@@ -48,6 +48,8 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
   const [selectedSgami, setSelectedSgami] = useState<any>(null)
   const [selectedAvocat, setSelectedAvocat] = useState<any>(null)
   const [selectedPce, setSelectedPce] = useState<any>(null)
+  const [avocatSearchQuery, setAvocatSearchQuery] = useState('')
+  const [showAvocatDropdown, setShowAvocatDropdown] = useState(false)
 
   // Fetch SGAMIS
   const { data: sgamis = [] } = useQuery({
@@ -160,6 +162,12 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     setErrors({})
   }, [isOpen, paiement, sgamis, avocats, pces])
 
+  // Filter avocats based on search query
+  const filteredAvocats = avocats.filter((avocat: any) =>
+    `${avocat.prenom} ${avocat.nom}`.toLowerCase().includes(avocatSearchQuery.toLowerCase()) ||
+    avocat.nom.toLowerCase().includes(avocatSearchQuery.toLowerCase())
+  )
+
   // Auto-fill when avocat is selected
   useEffect(() => {
     if (selectedAvocat) {
@@ -174,8 +182,17 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         numeroCompte: selectedAvocat.numeroDeCompte || '',
         cleRIB: selectedAvocat.cle || ''
       }))
+      setAvocatSearchQuery(`${selectedAvocat.prenom} ${selectedAvocat.nom}`)
     }
   }, [selectedAvocat])
+
+  // Update search query when form is reset
+  useEffect(() => {
+    if (isOpen && !selectedAvocat) {
+      setAvocatSearchQuery('')
+      setShowAvocatDropdown(false)
+    }
+  }, [isOpen, selectedAvocat])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -625,88 +642,70 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Avocat *
                 </label>
-                <Listbox 
-                  value={selectedAvocat} 
-                  onChange={(avocat) => {
-                    setSelectedAvocat(avocat)
-                    setFormData(prev => ({ ...prev, avocatId: avocat?.id || '' }))
-                  }}
-                >
-                  <div className="relative">
-                    <Listbox.Button className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={avocatSearchQuery}
+                    onChange={(e) => {
+                      setAvocatSearchQuery(e.target.value)
+                      setShowAvocatDropdown(true)
+                      if (!e.target.value) {
+                        setSelectedAvocat(null)
+                        setFormData(prev => ({ ...prev, avocatId: '' }))
+                      }
+                    }}
+                    onFocus={() => setShowAvocatDropdown(true)}
+                    onBlur={() => {
+                      setTimeout(() => setShowAvocatDropdown(false), 200)
+                    }}
+                    placeholder="Rechercher un avocat par nom..."
+                    className={`block w-full h-12 px-4 pr-10 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
                       errors.avocatId ? 'border-red-300' : 'border-gray-200'
-                    }`}>
-                      <span className="block truncate">
-                        {selectedAvocat ? (
-                          `${selectedAvocat.prenom} ${selectedAvocat.nom} ${selectedAvocat.region ? `(${selectedAvocat.region})` : ''}`
-                        ) : (
-                          'Sélectionner un avocat'
-                        )}
-                      </span>
-                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                        <ChevronUpDownIcon
-                          className="h-5 w-5 text-gray-400"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </Listbox.Button>
-                    <Transition
-                      as={React.Fragment}
-                      leave="transition ease-in duration-100"
-                      leaveFrom="opacity-100"
-                      leaveTo="opacity-0"
-                    >
-                      <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                        <Listbox.Option
-                          value={null}
-                          className={({ active }) =>
-                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                              active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
-                            }`
-                          }
-                        >
-                          {({ selected }) => (
-                            <>
-                              <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                                Sélectionner un avocat
-                              </span>
-                              {selected ? (
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
-                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Listbox.Option>
-                        {avocats.map((avocat: any) => (
-                          <Listbox.Option
-                            key={avocat.id}
-                            value={avocat}
-                            className={({ active }) =>
-                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
-                              }`
-                            }
-                          >
-                            {({ selected }) => (
-                              <>
-                                <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                                  {avocat.prenom} {avocat.nom} {avocat.region && `(${avocat.region})`}
-                                </span>
-                                {selected ? (
-                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
-                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                  </span>
-                                ) : null}
-                              </>
-                            )}
-                          </Listbox.Option>
-                        ))}
-                      </Listbox.Options>
-                    </Transition>
+                    }`}
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                </Listbox>
+                  
+                  {showAvocatDropdown && avocatSearchQuery && (
+                    <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {filteredAvocats.length > 0 ? (
+                        filteredAvocats.map((avocat: any) => (
+                          <div
+                            key={avocat.id}
+                            onClick={() => {
+                              setSelectedAvocat(avocat)
+                              setFormData(prev => ({ ...prev, avocatId: avocat.id }))
+                              setShowAvocatDropdown(false)
+                            }}
+                            className="cursor-pointer select-none py-2 pl-3 pr-4 hover:bg-blue-100 hover:text-blue-900 text-gray-900"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="block truncate">
+                                {avocat.prenom} {avocat.nom}
+                              </span>
+                              {avocat.region && (
+                                <span className="text-sm text-gray-500">
+                                  ({avocat.region})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-2 pl-3 pr-4 text-gray-500">
+                          Aucun avocat trouvé
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 {errors.avocatId && <p className="text-red-500 text-xs mt-1">{errors.avocatId}</p>}
+                {selectedAvocat && (
+                  <p className="text-sm text-green-600 mt-1">
+                    ✓ {selectedAvocat.prenom} {selectedAvocat.nom} {selectedAvocat.region && `(${selectedAvocat.region})`}
+                  </p>
+                )}
               </div>
             )}
 

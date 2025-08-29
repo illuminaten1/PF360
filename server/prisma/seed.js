@@ -471,22 +471,22 @@ async function main() {
   console.log('🌱 Starting BAP seeding...')
 
   const bapData = [
-    { nom: 'RGIF' },
-    { nom: 'RGBRET' },
-    { nom: 'RGNORM' },
-    { nom: 'RGCVL' },
-    { nom: 'RGNA' },
-    { nom: 'RGPDL' },
-    { nom: 'RGARA' },
-    { nom: 'RGPACA' },
-    { nom: 'RGOCC' },
-    { nom: 'RGCOR' },
-    { nom: 'RGGE' },
-    { nom: 'RGBFC' },
-    { nom: 'RGHF' },
-    { nom: 'GR' },
-    { nom: 'CRJ' },
-    { nom: 'CGOM' }
+    { nomBAP: 'RGIF' },
+    { nomBAP: 'RGBRET' },
+    { nomBAP: 'RGNORM' },
+    { nomBAP: 'RGCVL' },
+    { nomBAP: 'RGNA' },
+    { nomBAP: 'RGPDL' },
+    { nomBAP: 'RGARA' },
+    { nomBAP: 'RGPACA' },
+    { nomBAP: 'RGOCC' },
+    { nomBAP: 'RGCOR' },
+    { nomBAP: 'RGGE' },
+    { nomBAP: 'RGBFC' },
+    { nomBAP: 'RGHF' },
+    { nomBAP: 'GR' },
+    { nomBAP: 'CRJ' },
+    { nomBAP: 'CGOM' }
   ]
 
   console.log(`📋 ${bapData.length} BAP à insérer...`)
@@ -502,7 +502,7 @@ async function main() {
         data: bap
       })
     } catch (error) {
-      console.error(`❌ Erreur lors de l'insertion du BAP: ${bap.nom}`, error.message)
+      console.error(`❌ Erreur lors de l'insertion du BAP: ${bap.nomBAP}`, error.message)
     }
   }
 

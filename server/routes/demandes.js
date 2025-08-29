@@ -8,7 +8,8 @@ const {
   deleteDemande,
   getUsers,
   getStats,
-  getMyAudiences
+  getMyAudiences,
+  updateDemandeBAPs
 } = require('../controllers/demandeController');
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.get('/', getAllDemandes);
 router.post('/', createDemande);
 router.get('/:id', getDemandeById);
 router.put('/:id', updateDemande);
+router.put('/:id/baps', updateDemandeBAPs);
 router.delete('/:id', deleteDemande);
 
 module.exports = router;

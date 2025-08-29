@@ -31,10 +31,12 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
 import AssignerDemandeModal from '../forms/AssignerDemandeModal'
+import AssignerBAPModal from '../forms/AssignerBAPModal'
 import { useAuth } from '@/contexts/AuthContext'
 
 dayjs.locale('fr')
@@ -702,6 +704,8 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   const [selectedDemandeId, setSelectedDemandeId] = useState<string>('')
   const [selectedDemandeNumeroDS, setSelectedDemandeNumeroDS] = useState<string>('')
   const [currentAssignee, setCurrentAssignee] = useState<any>(null)
+  const [showBAPModal, setShowBAPModal] = useState(false)
+  const [currentBAPs, setCurrentBAPs] = useState<any[]>([])
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
@@ -1015,24 +1019,60 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
           const demande = row.original
           const baps = demande.baps || []
           
-          if (baps.length === 0) {
-            return <span className="text-gray-400 text-xs">-</span>
-          }
-          
           return (
-            <div className="flex flex-wrap gap-1">
-              {baps.slice(0, 2).map((bapRel: any) => (
-                <span
-                  key={bapRel.bap.id}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                >
-                  {bapRel.bap.nomBAP}
-                </span>
-              ))}
-              {baps.length > 2 && (
-                <span className="text-xs text-gray-500">
-                  +{baps.length - 2}
-                </span>
+            <div className="text-sm">
+              {baps.length === 0 ? (
+                <div className="flex items-center">
+                  <span className="text-gray-400 italic">Aucun BAP</span>
+                  {user?.role === 'ADMIN' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedDemandeId(demande.id)
+                        setSelectedDemandeNumeroDS(demande.numeroDS)
+                        setCurrentBAPs([])
+                        setShowBAPModal(true)
+                      }}
+                      className="ml-2 text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
+                    >
+                      <PlusIcon className="h-4 w-4 mr-1" />
+                      Assigner
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {baps.slice(0, 2).map((bapRel: any) => (
+                      <span
+                        key={bapRel.bap.id}
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                      >
+                        {bapRel.bap.nomBAP}
+                      </span>
+                    ))}
+                    {baps.length > 2 && (
+                      <span className="text-xs text-gray-500">
+                        +{baps.length - 2}
+                      </span>
+                    )}
+                  </div>
+                  {user?.role === 'ADMIN' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedDemandeId(demande.id)
+                        setSelectedDemandeNumeroDS(demande.numeroDS)
+                        setCurrentBAPs(baps.map((bapRel: any) => bapRel.bap))
+                        setShowBAPModal(true)
+                      }}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center"
+                    >
+                      <PencilIcon className="h-3 w-3 mr-1" />
+                      Modifier
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )
@@ -1485,6 +1525,15 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         demandeId={selectedDemandeId}
         demandeNumeroDS={selectedDemandeNumeroDS}
         currentAssignee={currentAssignee}
+      />
+      
+      {/* Modal pour assigner des BAP */}
+      <AssignerBAPModal
+        isOpen={showBAPModal}
+        onClose={() => setShowBAPModal(false)}
+        demandeId={selectedDemandeId}
+        demandeNumeroDS={selectedDemandeNumeroDS}
+        currentBAPs={currentBAPs}
       />
     </div>
   )

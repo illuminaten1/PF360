@@ -944,6 +944,77 @@ const getMyAudiences = async (req, res) => {
   }
 };
 
+const updateDemandeBAPs = async (req, res) => {
+  try {
+    const demandeId = req.params.id;
+    const { bapIds } = req.body;
+    
+    // Vérifier que la demande existe
+    const demande = await prisma.demande.findUnique({
+      where: { id: demandeId }
+    });
+    
+    if (!demande) {
+      return res.status(404).json({ error: 'Demande non trouvée' });
+    }
+    
+    // Vérifier que tous les BAP existent si des IDs sont fournis
+    if (bapIds && bapIds.length > 0) {
+      const existingBAPs = await prisma.bAP.findMany({
+        where: {
+          id: {
+            in: bapIds
+          }
+        }
+      });
+      
+      if (existingBAPs.length !== bapIds.length) {
+        return res.status(400).json({ error: 'Un ou plusieurs BAP sélectionnés n\'existent pas' });
+      }
+    }
+    
+    // Supprimer toutes les relations BAP existantes pour cette demande
+    await prisma.demandeBAP.deleteMany({
+      where: { demandeId }
+    });
+    
+    // Créer les nouvelles relations si des BAP sont fournis
+    if (bapIds && bapIds.length > 0) {
+      await prisma.demandeBAP.createMany({
+        data: bapIds.map(bapId => ({
+          demandeId,
+          bapId
+        }))
+      });
+    }
+    
+    // Récupérer la demande mise à jour avec les BAP
+    const updatedDemande = await prisma.demande.findUnique({
+      where: { id: demandeId },
+      include: {
+        baps: {
+          include: {
+            bap: true
+          }
+        }
+      }
+    });
+    
+    await logAction(
+      req.user.id, 
+      'UPDATE_DEMANDE_BAPS', 
+      `Mise à jour des BAP pour la demande ${demande.numeroDS} - ${bapIds.length} BAP(s) assigné(s)`, 
+      'Demande', 
+      demandeId
+    );
+    
+    res.json(updatedDemande);
+  } catch (error) {
+    console.error('Update demande BAPs error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
 module.exports = {
   getAllDemandes,
   getDemandeById,
@@ -954,5 +1025,6 @@ module.exports = {
   getStats,
   getMyAudiences,
   syncDemandeBadgesFromDossier,
-  syncSingleDemandeBadges
+  syncSingleDemandeBadges,
+  updateDemandeBAPs
 };

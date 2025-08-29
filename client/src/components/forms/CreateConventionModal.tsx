@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import React, { useEffect, useState } from 'react'
+import { Dialog, Transition, Listbox } from '@headlessui/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
-import { XMarkIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, DocumentTextIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
 
@@ -68,6 +68,13 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
   const selectedDecisionIds = watch('decisionIds') || []
   const selectedDemandeIds = watch('demandeIds') || []
 
+  // States for Listbox selections
+  const [selectedInstance, setSelectedInstance] = useState<string>('')
+  const [selectedAvocat, setSelectedAvocat] = useState<any>(null)
+  const [selectedDiligence, setSelectedDiligence] = useState<any>(null)
+  const [avocatSearchQuery, setAvocatSearchQuery] = useState('')
+  const [showAvocatDropdown, setShowAvocatDropdown] = useState(false)
+
   // Fetch avocats
   const { data: avocats = [] } = useQuery({
     queryKey: ['avocats-active'],
@@ -86,6 +93,27 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
     }
   })
 
+  // Filter avocats based on search query
+  const filteredAvocats = avocats.filter((avocat: any) =>
+    `${avocat.prenom} ${avocat.nom}`.toLowerCase().includes(avocatSearchQuery.toLowerCase()) ||
+    avocat.nom.toLowerCase().includes(avocatSearchQuery.toLowerCase())
+  )
+
+  // Update search query when form is reset
+  useEffect(() => {
+    if (isOpen && !selectedAvocat) {
+      setAvocatSearchQuery('')
+      setShowAvocatDropdown(false)
+    }
+  }, [isOpen, selectedAvocat])
+
+  // Auto-fill when avocat is selected
+  useEffect(() => {
+    if (selectedAvocat) {
+      setAvocatSearchQuery(`${selectedAvocat.prenom} ${selectedAvocat.nom}`)
+    }
+  }, [selectedAvocat])
+
   useEffect(() => {
     if (isOpen && dossier) {
       // Initialize form with default values
@@ -102,6 +130,12 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
           decisionIds: [],
           demandeIds: []
         })
+        // Reset Listbox values
+        setSelectedInstance('')
+        setSelectedAvocat(null)
+        setSelectedDiligence(null)
+        setAvocatSearchQuery('')
+        setShowAvocatDropdown(false)
       }, 0)
     }
   }, [isOpen, dossier, reset])
@@ -294,6 +328,10 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+                  {/* Informations générales */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Informations générales</h3>
+                  </div>
                   {/* Première ligne : Type de convention et Type de partie */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Type de convention */}
@@ -319,9 +357,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                           </button>
                         ))}
                       </div>
-                      {errors.type && (
-                        <p className="mt-2 text-sm text-red-600">{errors.type.message}</p>
-                      )}
+                      {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>}
                     </div>
 
                     {/* Type de partie */}
@@ -347,9 +383,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                           </button>
                         ))}
                       </div>
-                      {errors.victimeOuMisEnCause && (
-                        <p className="mt-2 text-sm text-red-600">{errors.victimeOuMisEnCause.message}</p>
-                      )}
+                      {errors.victimeOuMisEnCause && <p className="text-red-500 text-xs mt-1">{errors.victimeOuMisEnCause.message}</p>}
                     </div>
                   </div>
 
@@ -360,20 +394,84 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Instance judiciaire *
                       </label>
-                      <select
-                        {...register('instance')}
-                        className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
+                      <Listbox 
+                        value={selectedInstance} 
+                        onChange={(instance) => {
+                          setSelectedInstance(instance)
+                          setValue('instance', instance as any)
+                        }}
                       >
-                        <option value="">Sélectionner une instance</option>
-                        {instances.map((instance) => (
-                          <option key={instance} value={instance}>
-                            {instance}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.instance && (
-                        <p className="mt-1 text-sm text-red-600">{errors.instance.message}</p>
-                      )}
+                        <div className="relative">
+                          <Listbox.Button className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                            errors.instance ? 'border-red-300' : 'border-gray-200'
+                          }`}>
+                            <span className="block truncate">
+                              {selectedInstance || 'Sélectionner une instance'}
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <ChevronUpDownIcon
+                                className="h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </Listbox.Button>
+                          <Transition
+                            as={React.Fragment}
+                            leave="transition ease-in duration-100"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                          >
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                              <Listbox.Option
+                                value=""
+                                className={({ active }) =>
+                                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                    active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                  }`
+                                }
+                              >
+                                {({ selected }) => (
+                                  <>
+                                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                      Sélectionner une instance
+                                    </span>
+                                    {selected ? (
+                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                              {instances.map((instance) => (
+                                <Listbox.Option
+                                  key={instance}
+                                  value={instance}
+                                  className={({ active }) =>
+                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                      active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                    }`
+                                  }
+                                >
+                                  {({ selected }) => (
+                                    <>
+                                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                        {instance}
+                                      </span>
+                                      {selected ? (
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      </Listbox>
+                      {errors.instance && <p className="text-red-500 text-xs mt-1">{errors.instance.message}</p>}
                     </div>
 
                     {/* Montant HT */}
@@ -394,9 +492,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                           <span className="text-gray-400 text-sm font-medium">€</span>
                         </div>
                       </div>
-                      {errors.montantHT && (
-                        <p className="mt-1 text-sm text-red-600">{errors.montantHT.message}</p>
-                      )}
+                      {errors.montantHT && <p className="text-red-500 text-xs mt-1">{errors.montantHT.message}</p>}
                     </div>
 
                     {/* Montant HT gagé précédemment (si avenant) */}
@@ -418,11 +514,14 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                             <span className="text-gray-400 text-sm font-medium">€</span>
                           </div>
                         </div>
-                        {errors.montantHTGagePrecedemment && (
-                          <p className="mt-1 text-sm text-red-600">{errors.montantHTGagePrecedemment.message}</p>
-                        )}
+                        {errors.montantHTGagePrecedemment && <p className="text-red-500 text-xs mt-1">{errors.montantHTGagePrecedemment.message}</p>}
                       </div>
                     )}
+                  </div>
+
+                  {/* Bénéficiaire */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Bénéficiaire</h3>
                   </div>
 
                   {/* Troisième ligne : Avocat et Diligences */}
@@ -432,19 +531,69 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Avocat *
                       </label>
-                      <select
-                        {...register('avocatId')}
-                        className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
-                      >
-                        <option value="">Sélectionner un avocat</option>
-                        {avocats.map((avocat: any) => (
-                          <option key={avocat.id} value={avocat.id}>
-                            {avocat.prenom} {avocat.nom} - {avocat.region}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.avocatId && (
-                        <p className="mt-1 text-sm text-red-600">{errors.avocatId.message}</p>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={avocatSearchQuery}
+                          onChange={(e) => {
+                            setAvocatSearchQuery(e.target.value)
+                            setShowAvocatDropdown(true)
+                            if (!e.target.value) {
+                              setSelectedAvocat(null)
+                              setValue('avocatId', '')
+                            }
+                          }}
+                          onFocus={() => setShowAvocatDropdown(true)}
+                          onBlur={() => {
+                            setTimeout(() => setShowAvocatDropdown(false), 200)
+                          }}
+                          placeholder="Rechercher un avocat par nom..."
+                          className={`block w-full h-12 px-4 pr-10 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                            errors.avocatId ? 'border-red-300' : 'border-gray-200'
+                          }`}
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                          <ChevronUpDownIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        
+                        {showAvocatDropdown && avocatSearchQuery && (
+                          <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            {filteredAvocats.length > 0 ? (
+                              filteredAvocats.map((avocat: any) => (
+                                <div
+                                  key={avocat.id}
+                                  onClick={() => {
+                                    setSelectedAvocat(avocat)
+                                    setValue('avocatId', avocat.id)
+                                    setShowAvocatDropdown(false)
+                                  }}
+                                  className="cursor-pointer select-none py-2 pl-3 pr-4 hover:bg-blue-100 hover:text-blue-900 text-gray-900"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="block truncate">
+                                      {avocat.prenom} {avocat.nom}
+                                    </span>
+                                    {avocat.region && (
+                                      <span className="text-sm text-gray-500">
+                                        ({avocat.region})
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="py-2 pl-3 pr-4 text-gray-500">
+                                Aucun avocat trouvé
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {errors.avocatId && <p className="text-red-500 text-xs mt-1">{errors.avocatId.message}</p>}
+                      {selectedAvocat && (
+                        <p className="text-sm text-green-600 mt-1">
+                          ✓ {selectedAvocat.prenom} {selectedAvocat.nom} {selectedAvocat.region && `(${selectedAvocat.region})`}
+                        </p>
                       )}
                     </div>
 
@@ -453,18 +602,87 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Diligence
                       </label>
-                      <select
-                        {...register('diligenceId')}
-                        className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
+                      <Listbox 
+                        value={selectedDiligence} 
+                        onChange={(diligence) => {
+                          setSelectedDiligence(diligence)
+                          setValue('diligenceId', diligence?.id || '')
+                        }}
                       >
-                        <option value="">Aucune diligence spécifique</option>
-                        {diligences.map((diligence: any) => (
-                          <option key={diligence.id} value={diligence.id}>
-                            {diligence.nom}
-                          </option>
-                        ))}
-                      </select>
+                        <div className="relative">
+                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200">
+                            <span className="block truncate">
+                              {selectedDiligence ? selectedDiligence.nom : 'Aucune diligence spécifique'}
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <ChevronUpDownIcon
+                                className="h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </Listbox.Button>
+                          <Transition
+                            as={React.Fragment}
+                            leave="transition ease-in duration-100"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                          >
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                              <Listbox.Option
+                                value={null}
+                                className={({ active }) =>
+                                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                    active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                  }`
+                                }
+                              >
+                                {({ selected }) => (
+                                  <>
+                                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                      Aucune diligence spécifique
+                                    </span>
+                                    {selected ? (
+                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                              {diligences.map((diligence: any) => (
+                                <Listbox.Option
+                                  key={diligence.id}
+                                  value={diligence}
+                                  className={({ active }) =>
+                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                      active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                    }`
+                                  }
+                                >
+                                  {({ selected }) => (
+                                    <>
+                                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                        {diligence.nom}
+                                      </span>
+                                      {selected ? (
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      </Listbox>
                     </div>
+                  </div>
+
+                  {/* Décisions */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Décisions associées</h3>
                   </div>
 
                   {/* Quatrième ligne : Décisions */}
@@ -533,14 +751,19 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                         </div>
                       </div>
                       
-                      {errors.decisionIds && (
-                        <p className="mt-1 text-sm text-red-600">{errors.decisionIds.message}</p>
-                      )}
+                      {errors.decisionIds && <p className="text-red-500 text-xs mt-1">{errors.decisionIds.message}</p>}
                       <p className="mt-2 text-xs text-gray-500">
                         {selectedDecisionIds.length} décision(s) sélectionnée(s) sur {dossier.decisions.length} dans le dossier
                       </p>
                     </div>
                   </div>
+
+                  {/* Demandeurs */}
+                  {selectedDecisionIds.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Demandeurs concernés</h3>
+                    </div>
+                  )}
 
                   {/* Cinquième ligne : Demandeurs concernés */}
                   {selectedDecisionIds.length > 0 && (
@@ -607,14 +830,17 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                         </div>
                       </div>
                       
-                      {errors.demandeIds && (
-                        <p className="mt-1 text-sm text-red-600">{errors.demandeIds.message}</p>
-                      )}
+                      {errors.demandeIds && <p className="text-red-500 text-xs mt-1">{errors.demandeIds.message}</p>}
                       <p className="mt-2 text-xs text-gray-500">
                         {selectedDemandeIds.length} demandeur(s) sélectionné(s) sur {availableDemandeurs.length} disponible(s)
                       </p>
                     </div>
                   )}
+
+                  {/* Options */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Options</h3>
+                  </div>
 
                   {/* Sixième ligne : Date de retour signée */}
                   <div>
@@ -624,7 +850,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                     <input
                       type="date"
                       {...register('dateRetourSigne')}
-                      className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
+                      className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all flex items-center"
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       Laissez vide si pas encore signée

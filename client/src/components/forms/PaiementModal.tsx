@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Dialog, Transition, Listbox } from '@headlessui/react'
 import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, BanknotesIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
@@ -138,6 +138,22 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     }
   }
 
+  // Memoize found objects to avoid recalculations
+  const foundSgami = useMemo(() => {
+    if (!paiement || sgamis.length === 0) return null
+    return sgamis.find((s: any) => s.id === paiement.sgami?.id) || paiement.sgami || null
+  }, [paiement?.sgami?.id, sgamis])
+
+  const foundAvocat = useMemo(() => {
+    if (!paiement || avocats.length === 0) return null
+    return avocats.find((a: any) => a.id === paiement.avocat?.id) || paiement.avocat || null
+  }, [paiement?.avocat?.id, avocats])
+
+  const foundPce = useMemo(() => {
+    if (!paiement || pces.length === 0) return null
+    return pces.find((p: any) => p.id === paiement.pce?.id) || paiement.pce || null
+  }, [paiement?.pce?.id, pces])
+
   useEffect(() => {
     if (isOpen && paiement) {
       setFormData({
@@ -147,7 +163,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         emissionTitrePerception: paiement.emissionTitrePerception,
         qualiteBeneficiaire: paiement.qualiteBeneficiaire,
         identiteBeneficiaire: paiement.identiteBeneficiaire,
-        dateServiceFait: paiement.dateServiceFait || '',
+        dateServiceFait: paiement.dateServiceFait ? new Date(paiement.dateServiceFait).toISOString().split('T')[0] : '',
         conventionJointeFRI: paiement.conventionJointeFRI,
         adresseBeneficiaire: paiement.adresseBeneficiaire || '',
         siretOuRidet: paiement.siretOuRidet || '',
@@ -159,13 +175,10 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
         sgamiId: paiement.sgami.id,
         avocatId: paiement.avocat?.id || '',
         pceId: paiement.pce?.id || '',
-        decisions: paiement.decisions?.map(d => d.decision.id) || []
+        decisions: paiement.decisions?.map(d => d.decision.id).filter(Boolean) || []
       })
-      // Set selected objects from loaded data
-      const foundSgami = sgamis.find((s: any) => s.id === paiement.sgami?.id) || paiement.sgami || null
-      const foundAvocat = avocats.find((a: any) => a.id === paiement.avocat?.id) || paiement.avocat || null
-      const foundPce = pces.find((p: any) => p.id === paiement.pce?.id) || paiement.pce || null
       
+      // Set selected objects
       setSelectedSgami(foundSgami)
       setSelectedAvocat(foundAvocat)
       setSelectedPce(foundPce)
@@ -198,7 +211,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
       setSelectedPce(null)
     }
     setErrors({})
-  }, [isOpen, paiement, sgamis, avocats, pces])
+  }, [isOpen, paiement, foundSgami, foundAvocat, foundPce])
 
   // Filter avocats based on search query
   const filteredAvocats = avocats.filter((avocat: any) =>

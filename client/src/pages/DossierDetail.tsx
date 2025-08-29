@@ -334,9 +334,16 @@ const DossierDetail: React.FC = () => {
     setIsPaiementModalOpen(true)
   }
 
-  const handleEditPaiement = (paiement: any) => {
-    setSelectedPaiement(paiement)
-    setIsPaiementModalOpen(true)
+  const handleEditPaiement = async (paiement: any) => {
+    try {
+      // Fetch full paiement data including decisions
+      const response = await api.get(`/paiements/${paiement.id}`)
+      setSelectedPaiement(response.data)
+      setIsPaiementModalOpen(true)
+    } catch (error) {
+      console.error('Erreur lors de la récupération du paiement:', error)
+      toast.error('Erreur lors de la récupération du paiement')
+    }
   }
 
   const handleDeletePaiement = (paiement: any) => {

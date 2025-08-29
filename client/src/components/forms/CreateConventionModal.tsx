@@ -275,6 +275,36 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
     }
   }
 
+  const getSelectedButtonStyle = (type: string) => {
+    switch (type) {
+      case 'CONVENTION':
+        return 'border-blue-500 bg-blue-100 hover:bg-blue-200 text-blue-900'
+      case 'AVENANT':
+        return 'border-orange-500 bg-orange-100 hover:bg-orange-200 text-orange-900'
+      case 'VICTIME':
+        return 'border-sky-500 bg-sky-100 hover:bg-sky-200 text-sky-900'
+      case 'MIS_EN_CAUSE':
+        return 'border-amber-500 bg-amber-100 hover:bg-amber-200 text-amber-900'
+      default:
+        return 'border-blue-500 bg-blue-100 hover:bg-blue-200 text-blue-900'
+    }
+  }
+
+  const getUnselectedButtonStyle = (type: string) => {
+    switch (type) {
+      case 'CONVENTION':
+        return 'border-blue-200 bg-blue-100 hover:bg-blue-200 text-blue-800'
+      case 'AVENANT':
+        return 'border-orange-200 bg-orange-100 hover:bg-orange-200 text-orange-800'
+      case 'VICTIME':
+        return 'border-sky-200 bg-sky-100 hover:bg-sky-200 text-sky-800'
+      case 'MIS_EN_CAUSE':
+        return 'border-amber-200 bg-amber-100 hover:bg-amber-200 text-amber-800'
+      default:
+        return 'border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700'
+    }
+  }
+
   const instances = [
     'enquête',
     'information judiciaire', 
@@ -345,13 +375,13 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                             key={type}
                             type="button"
                             onClick={() => setValue('type', type)}
-                            className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                            className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all min-h-[4rem] flex items-center justify-center shadow-sm ${
                               selectedType === type
-                                ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
-                                : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                                ? getSelectedButtonStyle(type)
+                                : getUnselectedButtonStyle(type)
                             }`}
                           >
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadge(type)}`}>
+                            <span className="text-sm font-medium leading-tight">
                               {type}
                             </span>
                           </button>
@@ -371,13 +401,13 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                             key={type}
                             type="button"
                             onClick={() => setValue('victimeOuMisEnCause', type)}
-                            className={`rounded-lg border-2 p-4 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                            className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all min-h-[4rem] flex items-center justify-center shadow-sm ${
                               selectedVictimeOuMisEnCause === type
-                                ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
-                                : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                                ? getSelectedButtonStyle(type)
+                                : getUnselectedButtonStyle(type)
                             }`}
                           >
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(type)}`}>
+                            <span className="text-sm font-medium leading-tight">
                               {getVictimeMecLabel(type)}
                             </span>
                           </button>

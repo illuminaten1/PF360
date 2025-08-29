@@ -6,8 +6,7 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   BuildingOfficeIcon,
-  CheckIcon,
-  PlusIcon
+  CheckIcon
 } from '@heroicons/react/24/outline'
 import api from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -53,7 +52,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
   })
   
   // Extract baps array from response
-  const baps = bapsData?.baps || []
+  const baps: BAP[] = bapsData?.baps || []
 
   // Filtrer les BAPs basé sur la recherche
   const filteredBAPs = baps.filter((bap: BAP) => {
@@ -86,7 +85,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
       
       if (selectedBAPIds.length > 0) {
-        const selectedBAPs = baps.filter((b: BAP) => selectedBAPIds.includes(b.id))
+        const selectedBAPs = baps.filter((b) => selectedBAPIds.includes(b.id))
         const bapNames = selectedBAPs.map(b => b.nomBAP).join(', ')
         toast.success(`BAP(s) ${bapNames} assigné(s) à la demande ${demandeNumeroDS}`)
       } else {
@@ -96,8 +95,11 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
       resetModal()
       onClose()
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de l\'assignation')
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Erreur lors de l\'assignation'
+      toast.error(errorMessage)
     }
   })
 
@@ -126,13 +128,15 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
 
   // Initialiser la sélection avec les BAPs actuels quand le modal s'ouvre
   React.useEffect(() => {
-    if (isOpen && currentBAPs) {
+    if (isOpen && currentBAPs && currentBAPs.length > 0) {
       setSelectedBAPIds(currentBAPs.map(bap => bap.id))
+    } else if (isOpen) {
+      setSelectedBAPIds([])
     }
   }, [isOpen, currentBAPs])
 
   const isCurrentlyAssigned = (bapId: string) => {
-    return currentBAPs.some(bap => bap.id === bapId)
+    return currentBAPs?.some(bap => bap.id === bapId) ?? false
   }
 
   return (
@@ -169,7 +173,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                       Assigner des BAP à la demande {demandeNumeroDS}
                     </Dialog.Title>
                     <p className="mt-1 text-sm text-gray-600">
-                      {currentBAPs.length > 0 
+                      {currentBAPs && currentBAPs.length > 0 
                         ? `Actuellement assigné(e) à : ${currentBAPs.map(bap => bap.nomBAP).join(', ')}`
                         : 'Sélectionnez un ou plusieurs BAP pour cette demande'
                       }
@@ -276,7 +280,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                 {/* Actions */}
                 <div className="flex justify-between pt-6 border-t border-gray-200">
                   <div>
-                    {currentBAPs.length > 0 && (
+                    {currentBAPs && currentBAPs.length > 0 && (
                       <button
                         type="button"
                         onClick={handleRemoveAllBAPs}

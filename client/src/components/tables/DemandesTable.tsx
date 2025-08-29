@@ -456,6 +456,101 @@ function BadgesMultiSelectFilter({ column }: { column: any }) {
   )
 }
 
+function BAPMultiSelectFilter({ column }: { column: any }) {
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+  const [isOpen, setIsOpen] = React.useState(false)
+  
+  // Utiliser getFacetedUniqueValues() pour récupérer les BAP
+  const uniqueBAPs = useMemo(() => {
+    const uniqueValues = Array.from(column.getFacetedUniqueValues().keys())
+    return uniqueValues.filter(Boolean).sort()
+  }, [column])
+  
+  const handleToggleBAP = (bapName: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(bapName)
+    
+    if (index > -1) {
+      currentFilters.splice(index, 1)
+    } else {
+      currentFilters.push(bapName)
+    }
+    
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+  
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+  
+  const selectAll = () => {
+    column.setFilterValue([...uniqueBAPs])
+  }
+  
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0 
+            ? 'Tous' 
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-1">
+            {uniqueBAPs.map(bapName => (
+              <label key={String(bapName)} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(String(bapName))}
+                  onChange={() => handleToggleBAP(String(bapName))}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs truncate">{String(bapName)}</span>
+              </label>
+            ))}
+            {uniqueBAPs.length === 0 && (
+              <div className="px-2 py-1 text-xs text-gray-500">Aucun BAP disponible</div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Overlay pour fermer le dropdown */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 function DateRangeFilter({ column }: { column: any }) {
   const columnFilterValue = column.getFilterValue() as { from?: string; to?: string } | undefined
   const [isOpen, setIsOpen] = React.useState(false)
@@ -594,6 +689,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     dateFaits: true,
     dossier: true,
     assigneA: true,
+    baps: true,
     dateAudience: true,
     actions: true,
     // Colonnes masquées mais searchables
@@ -907,7 +1003,52 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
           return filterValue.includes(assigneString)
         }
       },
-      // 10. dateAudience
+      // 10. baps
+      {
+        id: 'baps',
+        header: 'BAP',
+        accessorFn: (row) => {
+          const baps = row.baps || []
+          return baps.map((bapRel: any) => bapRel.bap?.nomBAP).filter(Boolean).join(', ')
+        },
+        cell: ({ row }) => {
+          const demande = row.original
+          const baps = demande.baps || []
+          
+          if (baps.length === 0) {
+            return <span className="text-gray-400 text-xs">-</span>
+          }
+          
+          return (
+            <div className="flex flex-wrap gap-1">
+              {baps.slice(0, 2).map((bapRel: any) => (
+                <span
+                  key={bapRel.bap.id}
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                >
+                  {bapRel.bap.nomBAP}
+                </span>
+              ))}
+              {baps.length > 2 && (
+                <span className="text-xs text-gray-500">
+                  +{baps.length - 2}
+                </span>
+              )}
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+          
+          const demande = row.original
+          const baps = demande.baps || []
+          const bapNames = baps.map((bapRel: any) => bapRel.bap?.nomBAP).filter(Boolean)
+          
+          return filterValue.some(selectedBAP => bapNames.includes(selectedBAP))
+        }
+      },
+      // 11. dateAudience
       {
         accessorKey: 'dateAudience',
         header: 'Date audience',
@@ -968,7 +1109,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
           return true
         }
       },
-      // 11. actions
+      // 12. actions
       {
         id: 'actions',
         header: 'Actions',
@@ -1208,6 +1349,8 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                             <TypeMultiSelectFilter column={header.column} />
                           ) : header.column.id === 'badges' ? (
                             <BadgesMultiSelectFilter column={header.column} />
+                          ) : header.column.id === 'baps' ? (
+                            <BAPMultiSelectFilter column={header.column} />
                           ) : header.column.id === 'grade' ? (
                             <GradeMultiSelectFilter column={header.column} />
                           ) : header.column.id === 'assigneA' ? (

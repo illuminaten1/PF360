@@ -345,6 +345,11 @@ const getAllDemandes = async (req, res) => {
             include: {
               badge: true
             }
+          },
+          baps: {
+            include: {
+              bap: true
+            }
           }
         },
         orderBy,
@@ -453,6 +458,11 @@ const getDemandeById = async (req, res) => {
         badges: {
           include: {
             badge: true
+          }
+        },
+        baps: {
+          include: {
+            bap: true
           }
         }
       }

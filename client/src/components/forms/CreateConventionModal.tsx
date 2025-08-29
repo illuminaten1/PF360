@@ -227,27 +227,6 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
     }
   }, [selectedDecisionIds, setValue, availableDemandeurs])
 
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case 'CONVENTION':
-        return 'bg-blue-100 text-blue-800'
-      case 'AVENANT':
-        return 'bg-orange-100 text-orange-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getVictimeMecBadge = (type: string) => {
-    switch (type) {
-      case 'VICTIME':
-        return 'bg-sky-100 text-sky-800'
-      case 'MIS_EN_CAUSE':
-        return 'bg-amber-100 text-amber-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
 
   const getVictimeMecLabel = (type: string) => {
     switch (type) {

@@ -25,7 +25,7 @@ interface AssignerBAPModalProps {
   onClose: () => void
   demandeId: string
   demandeNumeroDS: string
-  currentBAPs: BAP[]
+  currentBAP?: BAP
 }
 
 const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
@@ -33,11 +33,11 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
   onClose,
   demandeId,
   demandeNumeroDS,
-  currentBAPs
+  currentBAP
 }) => {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedBAPIds, setSelectedBAPIds] = useState<string[]>([])
+  const [selectedBAPId, setSelectedBAPId] = useState<string>('')
   const [isAssigning, setIsAssigning] = useState(false)
 
   // Fetch BAPs
@@ -60,36 +60,31 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
     return bap.nomBAP.toLowerCase().includes(searchTerm.toLowerCase())
   })
 
-  const handleToggleBAP = useCallback((bapId: string) => {
-    setSelectedBAPIds(prev => {
-      if (prev.includes(bapId)) {
-        return prev.filter(id => id !== bapId)
-      } else {
-        return [...prev, bapId]
-      }
-    })
+  const handleSelectBAP = useCallback((bapId: string) => {
+    setSelectedBAPId(prev => prev === bapId ? '' : bapId)
   }, [])
 
   const resetModal = useCallback(() => {
     setSearchTerm('')
-    setSelectedBAPIds([])
+    setSelectedBAPId('')
   }, [])
 
-  // Mutation pour assigner les BAPs
+  // Mutation pour assigner le BAP
   const assignerBAPMutation = useMutation({
-    mutationFn: async (bapIds: string[]) => {
-      return api.put(`/demandes/${demandeId}/baps`, { bapIds })
+    mutationFn: async (bapId: string | null) => {
+      return api.put(`/demandes/${demandeId}/baps`, { bapIds: bapId ? [bapId] : [] })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
       
-      if (selectedBAPIds.length > 0) {
-        const selectedBAPs = baps.filter((b) => selectedBAPIds.includes(b.id))
-        const bapNames = selectedBAPs.map(b => b.nomBAP).join(', ')
-        toast.success(`BAP(s) ${bapNames} assigné(s) à la demande ${demandeNumeroDS}`)
+      if (selectedBAPId) {
+        const selectedBAP = baps.find((b) => b.id === selectedBAPId)
+        if (selectedBAP) {
+          toast.success(`BAP ${selectedBAP.nomBAP} assigné à la demande ${demandeNumeroDS}`)
+        }
       } else {
-        toast.success(`Tous les BAP ont été supprimés de la demande ${demandeNumeroDS}`)
+        toast.success(`Le BAP a été supprimé de la demande ${demandeNumeroDS}`)
       }
       
       resetModal()
@@ -103,19 +98,19 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
     }
   })
 
-  const handleAssignerBAPs = async () => {
+  const handleAssignerBAP = async () => {
     setIsAssigning(true)
     try {
-      await assignerBAPMutation.mutateAsync(selectedBAPIds)
+      await assignerBAPMutation.mutateAsync(selectedBAPId || null)
     } finally {
       setIsAssigning(false)
     }
   }
 
-  const handleRemoveAllBAPs = async () => {
+  const handleRemoveBAP = async () => {
     setIsAssigning(true)
     try {
-      await assignerBAPMutation.mutateAsync([])
+      await assignerBAPMutation.mutateAsync(null)
     } finally {
       setIsAssigning(false)
     }
@@ -126,17 +121,17 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
     onClose()
   }
 
-  // Initialiser la sélection avec les BAPs actuels quand le modal s'ouvre
+  // Initialiser la sélection avec le BAP actuel quand le modal s'ouvre
   React.useEffect(() => {
-    if (isOpen && currentBAPs && currentBAPs.length > 0) {
-      setSelectedBAPIds(currentBAPs.map(bap => bap.id))
+    if (isOpen && currentBAP) {
+      setSelectedBAPId(currentBAP.id)
     } else if (isOpen) {
-      setSelectedBAPIds([])
+      setSelectedBAPId('')
     }
-  }, [isOpen, currentBAPs])
+  }, [isOpen, currentBAP])
 
   const isCurrentlyAssigned = (bapId: string) => {
-    return currentBAPs?.some(bap => bap.id === bapId) ?? false
+    return currentBAP?.id === bapId
   }
 
   return (
@@ -170,12 +165,12 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                   <div>
                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
                       <BuildingOfficeIcon className="h-6 w-6 mr-2 text-indigo-600" />
-                      Assigner des BAP à la demande {demandeNumeroDS}
+                      Assigner un BAP à la demande {demandeNumeroDS}
                     </Dialog.Title>
                     <p className="mt-1 text-sm text-gray-600">
-                      {currentBAPs && currentBAPs.length > 0 
-                        ? `Actuellement assigné(e) à : ${currentBAPs.map(bap => bap.nomBAP).join(', ')}`
-                        : 'Sélectionnez un ou plusieurs BAP pour cette demande'
+                      {currentBAP 
+                        ? `Actuellement assigné à : ${currentBAP.nomBAP}`
+                        : 'Sélectionnez un BAP pour cette demande'
                       }
                     </p>
                   </div>
@@ -229,21 +224,22 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                           <div
                             key={bap.id}
                             className={`px-4 py-3 border rounded-lg cursor-pointer transition-colors ${
-                              selectedBAPIds.includes(bap.id)
+                              selectedBAPId === bap.id
                                 ? 'border-indigo-500 bg-indigo-50'
                                 : isCurrentlyAssigned(bap.id)
                                 ? 'border-green-500 bg-green-50'
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                             }`}
-                            onClick={() => handleToggleBAP(bap.id)}
+                            onClick={() => handleSelectBAP(bap.id)}
                           >
                             <div className="flex items-center">
                               <div className="flex-shrink-0">
                                 <input
-                                  type="checkbox"
-                                  checked={selectedBAPIds.includes(bap.id)}
-                                  onChange={() => handleToggleBAP(bap.id)}
-                                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                  type="radio"
+                                  name="bap-selection"
+                                  checked={selectedBAPId === bap.id}
+                                  onChange={() => handleSelectBAP(bap.id)}
+                                  className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                                 />
                               </div>
                               <div className="flex-1 min-w-0 ml-3">
@@ -280,14 +276,14 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                 {/* Actions */}
                 <div className="flex justify-between pt-6 border-t border-gray-200">
                   <div>
-                    {currentBAPs && currentBAPs.length > 0 && (
+                    {currentBAP && (
                       <button
                         type="button"
-                        onClick={handleRemoveAllBAPs}
+                        onClick={handleRemoveBAP}
                         className="btn-secondary text-red-600 hover:bg-red-50"
                         disabled={isAssigning}
                       >
-                        Supprimer tous les BAP
+                        Supprimer le BAP
                       </button>
                     )}
                   </div>
@@ -303,9 +299,9 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={handleAssignerBAPs}
+                      onClick={handleAssignerBAP}
                       className="btn-primary flex items-center"
-                      disabled={isAssigning}
+                      disabled={isAssigning || !selectedBAPId}
                     >
                       {isAssigning ? (
                         <>
@@ -315,7 +311,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
                       ) : (
                         <>
                           <CheckIcon className="h-4 w-4 mr-2" />
-                          Assigner ({selectedBAPIds.length})
+                          Assigner
                         </>
                       )}
                     </button>

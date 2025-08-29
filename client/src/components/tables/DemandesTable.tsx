@@ -705,7 +705,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   const [selectedDemandeNumeroDS, setSelectedDemandeNumeroDS] = useState<string>('')
   const [currentAssignee, setCurrentAssignee] = useState<any>(null)
   const [showBAPModal, setShowBAPModal] = useState(false)
-  const [currentBAPs, setCurrentBAPs] = useState<any[]>([])
+  const [currentBAP, setCurrentBAP] = useState<any>(null)
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
@@ -1030,7 +1030,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                         e.stopPropagation()
                         setSelectedDemandeId(demande.id)
                         setSelectedDemandeNumeroDS(demande.numeroDS)
-                        setCurrentBAPs([])
+                        setCurrentBAP(null)
                         setShowBAPModal(true)
                       }}
                       className="ml-2 text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
@@ -1063,7 +1063,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                         e.stopPropagation()
                         setSelectedDemandeId(demande.id)
                         setSelectedDemandeNumeroDS(demande.numeroDS)
-                        setCurrentBAPs(baps.map((bapRel: any) => bapRel.bap))
+                        setCurrentBAP(baps.length > 0 ? baps[0].bap : null)
                         setShowBAPModal(true)
                       }}
                       className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center"
@@ -1533,7 +1533,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         onClose={() => setShowBAPModal(false)}
         demandeId={selectedDemandeId}
         demandeNumeroDS={selectedDemandeNumeroDS}
-        currentBAPs={currentBAPs}
+        currentBAP={currentBAP}
       />
     </div>
   )

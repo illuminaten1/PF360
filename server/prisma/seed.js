@@ -467,6 +467,48 @@ async function main() {
   const gradeCount = await prisma.grade.count()
   console.log(`✅ ${gradeCount} grades insérés avec succès!`)
 
+  // Seed BAP data
+  console.log('🌱 Starting BAP seeding...')
+
+  const bapData = [
+    { nom: 'RGIF' },
+    { nom: 'RGBRET' },
+    { nom: 'RGNORM' },
+    { nom: 'RGCVL' },
+    { nom: 'RGNA' },
+    { nom: 'RGPDL' },
+    { nom: 'RGARA' },
+    { nom: 'RGPACA' },
+    { nom: 'RGOCC' },
+    { nom: 'RGCOR' },
+    { nom: 'RGGE' },
+    { nom: 'RGBFC' },
+    { nom: 'RGHF' },
+    { nom: 'GR' },
+    { nom: 'CRJ' },
+    { nom: 'CGOM' }
+  ]
+
+  console.log(`📋 ${bapData.length} BAP à insérer...`)
+
+  // Supprimer les BAP existants
+  await prisma.bAP.deleteMany({})
+  console.log('🗑️  BAP existants supprimés')
+
+  // Insérer les nouveaux BAP
+  for (const bap of bapData) {
+    try {
+      await prisma.bAP.create({
+        data: bap
+      })
+    } catch (error) {
+      console.error(`❌ Erreur lors de l'insertion du BAP: ${bap.nom}`, error.message)
+    }
+  }
+
+  const bapCount = await prisma.bAP.count()
+  console.log(`✅ ${bapCount} BAP insérés avec succès!`)
+
   console.log('🎉 Database seeding completed!')
   console.log('')
   console.log('Login credentials:')

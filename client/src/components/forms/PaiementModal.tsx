@@ -100,6 +100,44 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     'Victime'
   ]
 
+  const getSelectedButtonStyle = (qualite: string) => {
+    switch (qualite) {
+      case 'Avocat':
+        return 'border-blue-500 bg-blue-100 hover:bg-blue-200 text-blue-900'
+      case 'Commissaire de justice':
+        return 'border-purple-500 bg-purple-100 hover:bg-purple-200 text-purple-900'
+      case 'Militaire de la gendarmerie nationale':
+        return 'border-green-500 bg-green-100 hover:bg-green-200 text-green-900'
+      case 'Régisseur du tribunal judiciaire':
+        return 'border-amber-500 bg-amber-100 hover:bg-amber-200 text-amber-900'
+      case 'Médecin':
+        return 'border-red-500 bg-red-100 hover:bg-red-200 text-red-900'
+      case 'Victime':
+        return 'border-sky-500 bg-sky-100 hover:bg-sky-200 text-sky-900'
+      default:
+        return 'border-blue-500 bg-blue-100 hover:bg-blue-200 text-blue-900'
+    }
+  }
+
+  const getUnselectedButtonStyle = (qualite: string) => {
+    switch (qualite) {
+      case 'Avocat':
+        return 'border-blue-200 bg-blue-100 hover:bg-blue-200 text-blue-800'
+      case 'Commissaire de justice':
+        return 'border-purple-200 bg-purple-100 hover:bg-purple-200 text-purple-800'
+      case 'Militaire de la gendarmerie nationale':
+        return 'border-green-200 bg-green-100 hover:bg-green-200 text-green-800'
+      case 'Régisseur du tribunal judiciaire':
+        return 'border-amber-200 bg-amber-100 hover:bg-amber-200 text-amber-800'
+      case 'Médecin':
+        return 'border-red-200 bg-red-100 hover:bg-red-200 text-red-800'
+      case 'Victime':
+        return 'border-sky-200 bg-sky-100 hover:bg-sky-200 text-sky-800'
+      default:
+        return 'border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700'
+    }
+  }
+
   useEffect(() => {
     if (isOpen && paiement) {
       setFormData({
@@ -615,20 +653,12 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                     key={qualite}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, qualiteBeneficiaire: qualite }))}
-                    className={`cursor-pointer rounded-lg border-2 p-3 text-center transition-all h-16 flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                    className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all min-h-[4rem] flex items-center justify-center shadow-sm ${
                       formData.qualiteBeneficiaire === qualite
-                        ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
-                        : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                        ? getSelectedButtonStyle(qualite)
+                        : getUnselectedButtonStyle(qualite)
                     }`}>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      qualite === 'Avocat' ? 'bg-blue-100 text-blue-800' :
-                      qualite === 'Commissaire de justice' ? 'bg-purple-100 text-purple-800' :
-                      qualite === 'Militaire de la gendarmerie nationale' ? 'bg-green-100 text-green-800' :
-                      qualite === 'Régisseur du tribunal judiciaire' ? 'bg-amber-100 text-amber-800' :
-                      qualite === 'Médecin' ? 'bg-red-100 text-red-800' :
-                      qualite === 'Victime' ? 'bg-sky-100 text-sky-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className="text-sm font-medium leading-tight">
                       {qualite}
                     </span>
                   </button>

@@ -255,7 +255,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       
       await onSubmit(cleanedData)
       onClose()
-    } catch (error) {
+    } catch {
       // L'erreur sera gérée par la mutation dans le parent
       // Ne pas fermer le modal en cas d'erreur
     }
@@ -375,7 +375,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                     {!demande && (
                       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
                         <p className="text-sm text-blue-700">
-                          La demande sera créée sans dossier. Vous pourrez l'associer à un dossier ultérieurement depuis la liste des demandes.
+                          La demande sera créée sans dossier. Vous pourrez l&apos;associer à un dossier ultérieurement depuis la liste des demandes.
                         </p>
                       </div>
                     )}
@@ -481,7 +481,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           <option value="Normandie">Normandie</option>
                           <option value="Occitanie">Occitanie</option>
                           <option value="Pays-de-la-Loire">Pays-de-la-Loire</option>
-                          <option value="Provence-Alpes-Côte-d'Azur">Provence-Alpes-Côte-d'Azur</option>
+                          <option value="Provence-Alpes-Côte-d'Azur">Provence-Alpes-Côte-d&apos;Azur</option>
                           <option value="Guadeloupe">Guadeloupe</option>
                           <option value="Guyane">Guyane</option>
                           <option value="Martinique">Martinique</option>
@@ -519,7 +519,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Département d'affectation
+                          Département d&apos;affectation
                         </label>
                         <select
                           {...register('departement')}
@@ -835,8 +835,8 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           <option value="Police route">Police route</option>
                           <option value="MO/RO">MO/RO</option>
                           <option value="Police judiciaire">Police judiciaire</option>
-                          <option value="Chargé d'accueil">Chargé d'accueil</option>
-                          <option value="Sécurisation d'événement">Sécurisation d'événement</option>
+                          <option value="Chargé d'accueil">Chargé d&apos;accueil</option>
+                          <option value="Sécurisation d'événement">Sécurisation d&apos;événement</option>
                           <option value="Intervention spécialisée">Intervention spécialisée</option>
                           <option value="Surveillance particulière">Surveillance particulière</option>
                           <option value="Escorte/Transfèrement">Escorte/Transfèrement</option>
@@ -849,7 +849,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Qualification de l'infraction
+                          Qualification de l&apos;infraction
                         </label>
                         <select
                           {...register('qualificationInfraction')}
@@ -860,13 +860,13 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           <option value="OUTRAGE / MENACES">OUTRAGE / MENACES</option>
                           <option value="RÉBELLION avec ou sans outrage">RÉBELLION avec ou sans outrage</option>
                           <option value="VIOLENCES hors rébellion">VIOLENCES hors rébellion</option>
-                          <option value="REFUS D'OBTEMPÉRER / Mise en danger de la vie d'autrui">REFUS D'OBTEMPÉRER / Mise en danger de la vie d'autrui</option>
+                          <option value="REFUS D'OBTEMPÉRER / Mise en danger de la vie d'autrui">REFUS D&apos;OBTEMPÉRER / Mise en danger de la vie d&apos;autrui</option>
                           <option value="HARCÈLEMENT MORAL AU TRAVAIL / DISCRIMINATION">HARCÈLEMENT MORAL AU TRAVAIL / DISCRIMINATION</option>
                           <option value="VIOLENCES SEXUELLES ET SEXISTES">VIOLENCES SEXUELLES ET SEXISTES</option>
                           <option value="DÉFENSEUR DES DROITS">DÉFENSEUR DES DROITS</option>
                           <option value="ACCIDENT DE LA CIRC. ROUTIÈRE">ACCIDENT DE LA CIRC. ROUTIÈRE</option>
                           <option value="DIFFAMATION / INJURES">DIFFAMATION / INJURES</option>
-                          <option value="TENTATIVE D'HOMICIDE">TENTATIVE D'HOMICIDE</option>
+                          <option value="TENTATIVE D'HOMICIDE">TENTATIVE D&apos;HOMICIDE</option>
                           <option value="INFRACTION INVOLONTAIRE HORS ACCIDENT CIRC. ROUTIÈRE">INFRACTION INVOLONTAIRE HORS ACCIDENT CIRC. ROUTIÈRE</option>
                           <option value="AUTRE">AUTRE</option>
                         </select>
@@ -907,7 +907,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div className="md:col-span-2">
                         <label className="label block text-gray-700 mb-2">
-                          Blessures (nombre de jours d'ITT et détail)
+                          Blessures (nombre de jours d&apos;ITT et détail)
                         </label>
                         <textarea
                           {...register('blessures')}
@@ -918,7 +918,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div className="md:col-span-2">
                         <label className="label block text-gray-700 mb-2">
-                          Qualifications pénales susceptibles d'être retenues
+                          Qualifications pénales susceptibles d&apos;être retenues
                         </label>
                         <input
                           {...register('qualificationsPenales')}
@@ -929,7 +929,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
 
                       <div>
                         <label className="label block text-gray-700 mb-2">
-                          Date d'audience
+                          Date d&apos;audience
                         </label>
                         <input
                           {...register('dateAudience')}

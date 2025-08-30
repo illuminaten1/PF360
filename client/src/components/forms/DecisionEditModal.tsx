@@ -485,7 +485,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
 
                     <div>
                       <label htmlFor="dateEnvoi" className="block text-sm font-medium text-gray-700 mb-2">
-                        Date d'envoi
+                        Date d&apos;envoi
                       </label>
                       <input
                         type="date"

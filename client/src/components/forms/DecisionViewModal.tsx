@@ -286,7 +286,7 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
 
                         {decision.dateEnvoi && (
                           <div>
-                            <span className="block text-sm font-medium text-gray-600 mb-1">Date d'envoi</span>
+                            <span className="block text-sm font-medium text-gray-600 mb-1">Date d&apos;envoi</span>
                             <p className="text-gray-900 font-medium">{formatDate(decision.dateEnvoi)}</p>
                           </div>
                         )}

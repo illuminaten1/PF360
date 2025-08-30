@@ -69,7 +69,7 @@ interface Decision {
 interface DecisionEditModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: any) => Promise<void>
+  onSubmit: (data: Record<string, unknown>) => Promise<void>
   decision: Decision | null
 }
 

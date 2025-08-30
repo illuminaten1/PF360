@@ -377,7 +377,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
                     <PencilIcon className="h-6 w-6 mr-2 text-blue-600" />
-                    Modifier la convention d'honoraires - Dossier {dossier.numero}
+                    Modifier la convention d&apos;honoraires - Dossier {dossier.numero}
                   </Dialog.Title>
                   <button
                     type="button"
@@ -878,7 +878,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                         <div className="h-full overflow-y-auto">
                           {availableDemandeurs.length === 0 ? (
                             <p className="text-gray-500 text-sm text-center py-4">
-                              Sélectionnez d'abord une ou plusieurs décisions
+                              Sélectionnez d&apos;abord une ou plusieurs décisions
                             </p>
                           ) : (
                             <div className="space-y-2">

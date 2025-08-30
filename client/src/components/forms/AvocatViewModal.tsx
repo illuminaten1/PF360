@@ -246,7 +246,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                           <div className="bg-yellow-100 p-2 rounded-lg mr-3">
                             <MapPinIcon className="h-5 w-5 text-yellow-600" />
                           </div>
-                          <h4 className="text-lg font-semibold text-gray-900">Villes d'intervention</h4>
+                          <h4 className="text-lg font-semibold text-gray-900">Villes d&apos;intervention</h4>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {avocat.villesIntervention.map((ville, index) => (

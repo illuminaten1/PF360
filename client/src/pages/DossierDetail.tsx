@@ -35,6 +35,7 @@ import DecisionViewModal from '@/components/forms/DecisionViewModal'
 import DecisionEditModal from '@/components/forms/DecisionEditModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import CreateConventionModal from '@/components/forms/CreateConventionModal'
+import EditConventionModal from '@/components/forms/EditConventionModal'
 import PaiementModal from '@/components/forms/PaiementModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
@@ -53,9 +54,11 @@ const DossierDetail: React.FC = () => {
   const [isDecisionEditModalOpen, setIsDecisionEditModalOpen] = useState(false)
   const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
   const [isCreateConventionModalOpen, setIsCreateConventionModalOpen] = useState(false)
+  const [isEditConventionModalOpen, setIsEditConventionModalOpen] = useState(false)
   const [isPaiementModalOpen, setIsPaiementModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<any>(null)
   const [selectedDecision, setSelectedDecision] = useState<any>(null)
+  const [selectedConvention, setSelectedConvention] = useState<any>(null)
   const [selectedPaiement, setSelectedPaiement] = useState<any>(null)
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
@@ -197,6 +200,25 @@ const DossierDetail: React.FC = () => {
     }
   })
 
+  // Update convention mutation
+  const updateConventionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.put(`/conventions/${data.id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['conventions-all'] })
+      toast.success('Convention modifiée avec succès')
+      setIsEditConventionModalOpen(false)
+      setSelectedConvention(null)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la modification de la convention')
+    }
+  })
+
   // Create paiement mutation
   const createPaiementMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -327,6 +349,27 @@ const DossierDetail: React.FC = () => {
 
   const handleSubmitConvention = async (data: any) => {
     await createConventionMutation.mutateAsync(data)
+  }
+
+  const handleEditConvention = async (convention: any) => {
+    try {
+      // Fetch full convention data
+      const response = await api.get(`/conventions/${convention.id}`)
+      setSelectedConvention(response.data)
+      setIsEditConventionModalOpen(true)
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la convention:', error)
+      toast.error('Erreur lors de la récupération de la convention')
+    }
+  }
+
+  const handleSubmitConventionEdit = async (data: any) => {
+    await updateConventionMutation.mutateAsync(data)
+  }
+
+  const handleCloseConventionEditModal = () => {
+    setIsEditConventionModalOpen(false)
+    setSelectedConvention(null)
   }
 
   const handleCreatePaiement = () => {
@@ -1004,9 +1047,8 @@ const DossierDetail: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             <button 
+                              onClick={() => handleEditConvention(convention)}
                               className="text-blue-600 hover:text-blue-800 text-sm"
-                              disabled={true}
-                              title="Modification - À venir"
                             >
                               Modifier
                             </button>
@@ -1278,6 +1320,17 @@ const DossierDetail: React.FC = () => {
           isOpen={isCreateConventionModalOpen}
           onClose={() => setIsCreateConventionModalOpen(false)}
           onSubmit={handleSubmitConvention}
+          dossier={dossier}
+        />
+      )}
+
+      {/* Edit Convention Modal */}
+      {dossier && selectedConvention && (
+        <EditConventionModal
+          isOpen={isEditConventionModalOpen}
+          onClose={handleCloseConventionEditModal}
+          onSubmit={handleSubmitConventionEdit}
+          convention={selectedConvention}
           dossier={dossier}
         />
       )}

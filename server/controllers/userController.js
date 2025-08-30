@@ -441,9 +441,22 @@ const transferAssignments = async (req, res) => {
         data: { assigneAId: targetUserId }
       });
 
+      // Enregistrer le transfert dans l'historique
+      const transferHistory = await prisma.transferHistory.create({
+        data: {
+          sourceUserId,
+          targetUserId,
+          demandesTransferred: demandesUpdated.count,
+          dossiersTransferred: dossiersUpdated.count,
+          transferredByUserId: req.user.id,
+          status: 'ACTIVE'
+        }
+      });
+
       return {
         demandesTransferred: demandesUpdated.count,
-        dossiersTransferred: dossiersUpdated.count
+        dossiersTransferred: dossiersUpdated.count,
+        transferHistoryId: transferHistory.id
       };
     });
 
@@ -473,10 +486,149 @@ const transferAssignments = async (req, res) => {
         demandes: result.demandesTransferred,
         dossiers: result.dossiersTransferred,
         total: result.demandesTransferred + result.dossiersTransferred
-      }
+      },
+      transferHistoryId: result.transferHistoryId
     });
   } catch (error) {
     console.error('Erreur lors du transfert des assignations:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Récupérer l'historique des transferts
+const getTransferHistory = async (req, res) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+
+    const transfers = await prisma.transferHistory.findMany({
+      include: {
+        sourceUser: {
+          select: { id: true, nom: true, prenom: true, identifiant: true, role: true }
+        },
+        targetUser: {
+          select: { id: true, nom: true, prenom: true, identifiant: true, role: true }
+        },
+        transferredBy: {
+          select: { id: true, nom: true, prenom: true, identifiant: true }
+        },
+        rolledBackBy: {
+          select: { id: true, nom: true, prenom: true, identifiant: true }
+        }
+      },
+      orderBy: { transferredAt: 'desc' },
+      take: parseInt(limit),
+      skip: parseInt(offset)
+    });
+
+    const totalCount = await prisma.transferHistory.count();
+
+    res.json({
+      transfers,
+      totalCount,
+      hasMore: (parseInt(offset) + parseInt(limit)) < totalCount
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'historique des transferts:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Annuler un transfert (rollback)
+const rollbackTransfer = async (req, res) => {
+  try {
+    const { transferId } = req.params;
+
+    // Vérifier que le transfert existe et qu'il est actif
+    const transfer = await prisma.transferHistory.findUnique({
+      where: { id: transferId },
+      include: {
+        sourceUser: { select: { id: true, nom: true, prenom: true, identifiant: true } },
+        targetUser: { select: { id: true, nom: true, prenom: true, identifiant: true } }
+      }
+    });
+
+    if (!transfer) {
+      return res.status(404).json({ message: 'Transfert introuvable' });
+    }
+
+    if (transfer.status !== 'ACTIVE') {
+      return res.status(400).json({ message: 'Ce transfert a déjà été annulé' });
+    }
+
+    // Vérifier que les utilisateurs existent toujours
+    const [sourceUser, targetUser] = await Promise.all([
+      prisma.user.findUnique({ where: { id: transfer.sourceUserId } }),
+      prisma.user.findUnique({ where: { id: transfer.targetUserId } })
+    ]);
+
+    if (!sourceUser || !targetUser) {
+      return res.status(400).json({ message: 'Un des utilisateurs du transfert n\'existe plus' });
+    }
+
+    // Effectuer le rollback dans une transaction
+    const rollbackResult = await prisma.$transaction(async (prisma) => {
+      // Compter combien d'éléments sont actuellement assignés à l'utilisateur cible
+      const [currentDemandesCount, currentDossiersCount] = await Promise.all([
+        prisma.demande.count({ where: { assigneAId: transfer.targetUserId } }),
+        prisma.dossier.count({ where: { assigneAId: transfer.targetUserId } })
+      ]);
+
+      // Retransférer les demandes vers l'utilisateur source (dans la limite du transfert initial)
+      const demandesRollback = await prisma.demande.updateMany({
+        where: { 
+          assigneAId: transfer.targetUserId,
+          // On peut ajouter d'autres conditions si nécessaire pour s'assurer qu'on ne retransfère que les bons éléments
+        },
+        data: { assigneAId: transfer.sourceUserId }
+      });
+
+      // Retransférer les dossiers vers l'utilisateur source (dans la limite du transfert initial)  
+      const dossiersRollback = await prisma.dossier.updateMany({
+        where: { 
+          assigneAId: transfer.targetUserId,
+          // On peut ajouter d'autres conditions si nécessaire
+        },
+        data: { assigneAId: transfer.sourceUserId }
+      });
+
+      // Marquer le transfert comme annulé
+      const updatedTransfer = await prisma.transferHistory.update({
+        where: { id: transferId },
+        data: {
+          status: 'ROLLED_BACK',
+          rolledBackAt: new Date(),
+          rolledBackByUserId: req.user.id
+        }
+      });
+
+      return {
+        demandesRolledBack: demandesRollback.count,
+        dossiersRolledBack: dossiersRollback.count,
+        transfer: updatedTransfer
+      };
+    });
+
+    await logAction(
+      req.user.id,
+      'ROLLBACK_TRANSFER',
+      'TRANSFER_HISTORY',
+      transferId,
+      `Annulé le transfert: ${rollbackResult.demandesRolledBack} demandes et ${rollbackResult.dossiersRolledBack} dossiers retournés de ${transfer.targetUser.identifiant} vers ${transfer.sourceUser.identifiant}`
+    );
+
+    res.json({
+      message: 'Transfert annulé avec succès',
+      rollback: {
+        demandesRolledBack: rollbackResult.demandesRolledBack,
+        dossiersRolledBack: rollbackResult.dossiersRolledBack,
+        originalTransfer: {
+          demandes: transfer.demandesTransferred,
+          dossiers: transfer.dossiersTransferred
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'annulation du transfert:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
@@ -488,5 +640,7 @@ module.exports = {
   updateUser,
   deactivateUser,
   reactivateUser,
-  transferAssignments
+  transferAssignments,
+  getTransferHistory,
+  rollbackTransfer
 };

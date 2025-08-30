@@ -1,18 +1,20 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { PlusIcon, UserGroupIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, UserGroupIcon, ArrowPathIcon, ClockIcon } from '@heroicons/react/24/outline'
 import { User } from '@/types'
 import api from '@/utils/api'
 import UsersTable from '@/components/tables/UsersTable'
 import UserModal from '@/components/forms/UserModal'
 import TransferModal from '@/components/forms/TransferModal'
+import TransferHistoryModal from '@/components/forms/TransferHistoryModal'
 
 
 const Users: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -160,6 +162,13 @@ const Users: React.FC = () => {
         </div>
         <div className="flex space-x-3">
           <button
+            onClick={() => setIsHistoryModalOpen(true)}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <ClockIcon className="w-5 h-5" />
+            <span>Historique transferts</span>
+          </button>
+          <button
             onClick={() => setIsTransferModalOpen(true)}
             className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
           >
@@ -268,6 +277,13 @@ const Users: React.FC = () => {
           onSubmit={handleTransferSubmit}
           isSubmitting={transferAssignmentsMutation.isPending}
           users={users}
+        />
+      )}
+
+      {isHistoryModalOpen && (
+        <TransferHistoryModal
+          isOpen={isHistoryModalOpen}
+          onClose={() => setIsHistoryModalOpen(false)}
         />
       )}
     </div>

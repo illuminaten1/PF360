@@ -43,6 +43,10 @@ model User {
   diligencesCrees  Diligence[] @relation("DiligenceCreateur")
   diligencesModifiees Diligence[] @relation("DiligenceModificateur")
   templatesUploadees TemplateVersion[] @relation("TemplateVersionUploader")
+  transfersAsSource  TransferHistory[] @relation("TransferHistorySource")
+  transfersAsTarget  TransferHistory[] @relation("TransferHistoryTarget")
+  transfersInitiated TransferHistory[] @relation("TransferHistoryTransferrer")
+  transfersRolledBack TransferHistory[] @relation("TransferHistoryRollbacker")
 
   @@map("users")
 }
@@ -528,6 +532,30 @@ model TemplateVersion {
   
   @@unique([templateType, versionNumber])
   @@map("template_versions")
+}
+
+model TransferHistory {
+  id                    String   @id @default(cuid())
+  sourceUserId          String
+  targetUserId          String
+  demandesTransferred   Int
+  dossiersTransferred   Int
+  transferredAt         DateTime @default(now())
+  transferredByUserId   String
+  rolledBackAt          DateTime?
+  rolledBackByUserId    String?
+  status                String   @default("ACTIVE") // ACTIVE | ROLLED_BACK
+  
+  // Relations
+  sourceUser            User     @relation("TransferHistorySource", fields: [sourceUserId], references: [id])
+  targetUser            User     @relation("TransferHistoryTarget", fields: [targetUserId], references: [id])
+  transferredBy         User     @relation("TransferHistoryTransferrer", fields: [transferredByUserId], references: [id])
+  rolledBackBy          User?    @relation("TransferHistoryRollbacker", fields: [rolledBackByUserId], references: [id])
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("transfer_history")
 }
 
 // Note: Using strings instead of enums for SQLite compatibility

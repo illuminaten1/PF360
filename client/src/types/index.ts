@@ -446,6 +446,47 @@ export interface Diligence {
   }
 }
 
+export interface TransferHistory {
+  id: string
+  sourceUserId: string
+  targetUserId: string
+  demandesTransferred: number
+  dossiersTransferred: number
+  transferredAt: string
+  transferredByUserId: string
+  rolledBackAt?: string
+  rolledBackByUserId?: string
+  status: 'ACTIVE' | 'ROLLED_BACK'
+  sourceUser: {
+    id: string
+    nom: string
+    prenom: string
+    identifiant: string
+    role: string
+  }
+  targetUser: {
+    id: string
+    nom: string
+    prenom: string
+    identifiant: string
+    role: string
+  }
+  transferredBy: {
+    id: string
+    nom: string
+    prenom: string
+    identifiant: string
+  }
+  rolledBackBy?: {
+    id: string
+    nom: string
+    prenom: string
+    identifiant: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Decision {
   id: string
   type: 'AJ' | 'AJE' | 'PJ' | 'REJET'

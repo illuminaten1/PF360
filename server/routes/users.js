@@ -7,7 +7,9 @@ const {
   updateUser,
   deactivateUser,
   reactivateUser,
-  transferAssignments
+  transferAssignments,
+  getTransferHistory,
+  rollbackTransfer
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -32,7 +34,13 @@ router.put('/:id/deactivate', adminMiddleware, deactivateUser);
 // Réactiver un utilisateur
 router.put('/:id/reactivate', adminMiddleware, reactivateUser);
 
-// Transférer les assignations entre rédacteurs
+// Transférer les assignations entre utilisateurs
 router.post('/transfer-assignments', adminMiddleware, transferAssignments);
+
+// Récupérer l'historique des transferts
+router.get('/transfer-history', adminMiddleware, getTransferHistory);
+
+// Annuler un transfert
+router.post('/transfer-history/:transferId/rollback', adminMiddleware, rollbackTransfer);
 
 module.exports = router;

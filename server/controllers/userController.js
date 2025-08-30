@@ -411,20 +411,21 @@ const transferAssignments = async (req, res) => {
       return res.status(400).json({ message: 'L\'utilisateur destination doit être actif' });
     }
 
-    // Vérifier que les deux utilisateurs sont des rédacteurs
-    if (sourceUser.role !== 'REDACTEUR') {
-      return res.status(400).json({ message: 'L\'utilisateur source doit être un rédacteur' });
+    // Vérifier que les deux utilisateurs ont des rôles valides
+    const validRoles = ['ADMIN', 'REDACTEUR', 'GREFFIER'];
+    if (!validRoles.includes(sourceUser.role)) {
+      return res.status(400).json({ message: 'L\'utilisateur source doit avoir un rôle valide' });
     }
 
-    if (targetUser.role !== 'REDACTEUR') {
-      return res.status(400).json({ message: 'L\'utilisateur destination doit être un rédacteur' });
+    if (!validRoles.includes(targetUser.role)) {
+      return res.status(400).json({ message: 'L\'utilisateur destination doit avoir un rôle valide' });
     }
 
-    // Compter les éléments à transférer
-    const [demandesCount, dossiersCount] = await Promise.all([
-      prisma.demande.count({ where: { assigneAId: sourceUserId } }),
-      prisma.dossier.count({ where: { assigneAId: sourceUserId } })
-    ]);
+    // Compter les éléments à transférer (pour information, pas utilisé dans la logique)
+    // const [demandesCount, dossiersCount] = await Promise.all([
+    //   prisma.demande.count({ where: { assigneAId: sourceUserId } }),
+    //   prisma.dossier.count({ where: { assigneAId: sourceUserId } })
+    // ]);
 
     // Effectuer le transfert dans une transaction
     const result = await prisma.$transaction(async (prisma) => {

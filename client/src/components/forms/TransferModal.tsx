@@ -21,8 +21,8 @@ const TransferModal: React.FC<TransferModalProps> = ({
   const [targetUserId, setTargetUserId] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Filtrer pour ne garder que les rédacteurs actifs
-  const redacteurs = users.filter(user => user.role === 'REDACTEUR' && user.active)
+  // Filtrer pour ne garder que les utilisateurs actifs
+  const utilisateursActifs = users.filter(user => user.active)
 
   useEffect(() => {
     if (!isOpen) {
@@ -56,15 +56,15 @@ const TransferModal: React.FC<TransferModalProps> = ({
     const newErrors: Record<string, string> = {}
 
     if (!sourceUserId) {
-      newErrors.sourceUserId = 'Sélectionnez le rédacteur source'
+      newErrors.sourceUserId = 'Sélectionnez l\'utilisateur source'
     }
 
     if (!targetUserId) {
-      newErrors.targetUserId = 'Sélectionnez le rédacteur destination'
+      newErrors.targetUserId = 'Sélectionnez l\'utilisateur destination'
     }
 
     if (sourceUserId && targetUserId && sourceUserId === targetUserId) {
-      newErrors.targetUserId = 'Le rédacteur source et destination doivent être différents'
+      newErrors.targetUserId = 'L\'utilisateur source et destination doivent être différents'
     }
 
     setErrors(newErrors)
@@ -79,8 +79,8 @@ const TransferModal: React.FC<TransferModalProps> = ({
     onSubmit(sourceUserId, targetUserId)
   }
 
-  const getSourceUser = () => redacteurs.find(user => user.id === sourceUserId)
-  const getTargetUser = () => redacteurs.find(user => user.id === targetUserId)
+  const getSourceUser = () => utilisateursActifs.find(user => user.id === sourceUserId)
+  const getTargetUser = () => utilisateursActifs.find(user => user.id === targetUserId)
 
   if (!isOpen) return null
 
@@ -112,7 +112,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
           {/* Rédacteur source */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rédacteur source (transférer DE) *
+              Utilisateur source (transférer DE) *
             </label>
             <select
               value={sourceUserId}
@@ -122,10 +122,10 @@ const TransferModal: React.FC<TransferModalProps> = ({
               }`}
               disabled={isSubmitting}
             >
-              <option value="">Sélectionnez un rédacteur</option>
-              {redacteurs.map(user => (
+              <option value="">Sélectionnez un utilisateur</option>
+              {utilisateursActifs.map(user => (
                 <option key={user.id} value={user.id} disabled={user.id === targetUserId}>
-                  {user.nom} {user.prenom} ({user.identifiant})
+                  {user.nom} {user.prenom} ({user.identifiant}) - {user.role}
                 </option>
               ))}
             </select>
@@ -134,10 +134,10 @@ const TransferModal: React.FC<TransferModalProps> = ({
             )}
           </div>
 
-          {/* Rédacteur destination */}
+          {/* Utilisateur destination */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rédacteur destination (transférer VERS) *
+              Utilisateur destination (transférer VERS) *
             </label>
             <select
               value={targetUserId}
@@ -147,10 +147,10 @@ const TransferModal: React.FC<TransferModalProps> = ({
               }`}
               disabled={isSubmitting}
             >
-              <option value="">Sélectionnez un rédacteur</option>
-              {redacteurs.map(user => (
+              <option value="">Sélectionnez un utilisateur</option>
+              {utilisateursActifs.map(user => (
                 <option key={user.id} value={user.id} disabled={user.id === sourceUserId}>
-                  {user.nom} {user.prenom} ({user.identifiant})
+                  {user.nom} {user.prenom} ({user.identifiant}) - {user.role}
                 </option>
               ))}
             </select>

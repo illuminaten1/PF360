@@ -22,7 +22,7 @@ const DebouncedInput: React.FC<DebouncedInputProps> = ({
     if (initialValue !== value) {
       setValue(initialValue)
     }
-  }, [initialValue])
+  }, [initialValue, value])
 
   // Debounce l'appel au callback parent
   useEffect(() => {

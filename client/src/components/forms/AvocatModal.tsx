@@ -8,7 +8,7 @@ import api from '@/utils/api'
 interface AvocatModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: any) => Promise<void>
+  onSubmit: (data: Record<string, unknown>) => Promise<void>
   avocat?: Avocat | null
   title: string
 }
@@ -174,7 +174,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
     try {
       await onSubmit(formData)
       onClose()
-    } catch (error) {
+    } catch {
       // L'erreur sera gérée par la mutation dans le parent
     } finally {
       setIsSubmitting(false)
@@ -414,7 +414,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
 
                   {/* Villes d'intervention */}
                   <div className="bg-yellow-50 p-4 rounded-lg">
-                    <h4 className="text-md font-medium text-gray-900 mb-4">Villes d'intervention</h4>
+                    <h4 className="text-md font-medium text-gray-900 mb-4">Villes d&apos;intervention</h4>
                     
                     <div className="flex gap-2 mb-4">
                       <div className="relative flex-1">
@@ -461,7 +461,7 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
 
                     <div className="flex flex-wrap gap-2 min-h-[40px] p-3 border border-gray-200 rounded-md bg-white">
                       {formData.villesIntervention.length === 0 ? (
-                        <span className="text-gray-500 italic">Aucune ville d'intervention ajoutée</span>
+                        <span className="text-gray-500 italic">Aucune ville d&apos;intervention ajoutée</span>
                       ) : (
                         formData.villesIntervention.map((ville, index) => (
                           <span

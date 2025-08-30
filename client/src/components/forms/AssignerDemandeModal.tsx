@@ -91,8 +91,13 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
       resetModal()
       onClose()
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de l\'assignation')
+    onError: (error: unknown) => {
+      const errorMessage = error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'data' in error.response &&
+        error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
+        ? String(error.response.data.error)
+        : 'Erreur lors de l\'assignation'
+      toast.error(errorMessage)
     }
   })
 
@@ -256,7 +261,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                         className="btn-secondary text-red-600 hover:bg-red-50"
                         disabled={isAssigning}
                       >
-                        Supprimer l'assignation
+                        Supprimer l&apos;assignation
                       </button>
                     )}
                   </div>

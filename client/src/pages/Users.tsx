@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { PlusIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, UserGroupIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 import { User } from '@/types'
 import api from '@/utils/api'
 import UsersTable from '@/components/tables/UsersTable'
 import UserModal from '@/components/forms/UserModal'
+import TransferModal from '@/components/forms/TransferModal'
 
 
 const Users: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -93,6 +95,23 @@ const Users: React.FC = () => {
     }
   })
 
+  const transferAssignmentsMutation = useMutation({
+    mutationFn: async ({ sourceUserId, targetUserId }: { sourceUserId: string, targetUserId: string }) => {
+      const response = await api.post('/users/transfer-assignments', { sourceUserId, targetUserId })
+      return response.data
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['users-all'] })
+      setIsTransferModalOpen(false)
+      toast.success(
+        `Transfert réussi : ${data.transferred.demandes} demandes et ${data.transferred.dossiers} dossiers transférés`
+      )
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Erreur lors du transfert des assignations')
+    }
+  })
+
   const handleCreateUser = () => {
     setSelectedUser(null)
     setIsModalOpen(true)
@@ -123,6 +142,10 @@ const Users: React.FC = () => {
     }
   }
 
+  const handleTransferSubmit = (sourceUserId: string, targetUserId: string) => {
+    transferAssignmentsMutation.mutate({ sourceUserId, targetUserId })
+  }
+
   const users = usersData?.users || []
 
   return (
@@ -135,13 +158,22 @@ const Users: React.FC = () => {
           </h1>
           <p className="text-gray-600 mt-1">Gérez les comptes utilisateurs et leurs permissions</p>
         </div>
-        <button
-          onClick={handleCreateUser}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          <span>Nouvel utilisateur</span>
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setIsTransferModalOpen(true)}
+            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <ArrowPathIcon className="w-5 h-5" />
+            <span>Transférer assignations</span>
+          </button>
+          <button
+            onClick={handleCreateUser}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <PlusIcon className="w-5 h-5" />
+            <span>Nouvel utilisateur</span>
+          </button>
+        </div>
       </div>
 
       {stats && (
@@ -226,6 +258,16 @@ const Users: React.FC = () => {
           }}
           onSubmit={handleSubmit}
           isSubmitting={createUserMutation.isPending || updateUserMutation.isPending}
+        />
+      )}
+
+      {isTransferModalOpen && (
+        <TransferModal
+          isOpen={isTransferModalOpen}
+          onClose={() => setIsTransferModalOpen(false)}
+          onSubmit={handleTransferSubmit}
+          isSubmitting={transferAssignmentsMutation.isPending}
+          users={users}
         />
       )}
     </div>

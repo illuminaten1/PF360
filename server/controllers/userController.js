@@ -369,11 +369,123 @@ const reactivateUser = async (req, res) => {
   }
 };
 
+// Transférer les assignations d'un rédacteur vers un autre
+const transferAssignments = async (req, res) => {
+  try {
+    const { sourceUserId, targetUserId } = req.body;
+
+    // Validation des paramètres
+    if (!sourceUserId || !targetUserId) {
+      return res.status(400).json({ message: 'Les IDs des utilisateurs source et destination sont requis' });
+    }
+
+    if (sourceUserId === targetUserId) {
+      return res.status(400).json({ message: 'L\'utilisateur source et destination doivent être différents' });
+    }
+
+    // Vérifier que les deux utilisateurs existent et sont actifs
+    const [sourceUser, targetUser] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: sourceUserId },
+        select: { id: true, identifiant: true, nom: true, prenom: true, role: true, active: true }
+      }),
+      prisma.user.findUnique({
+        where: { id: targetUserId },
+        select: { id: true, identifiant: true, nom: true, prenom: true, role: true, active: true }
+      })
+    ]);
+
+    if (!sourceUser) {
+      return res.status(404).json({ message: 'Utilisateur source introuvable' });
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({ message: 'Utilisateur destination introuvable' });
+    }
+
+    if (!sourceUser.active) {
+      return res.status(400).json({ message: 'L\'utilisateur source doit être actif' });
+    }
+
+    if (!targetUser.active) {
+      return res.status(400).json({ message: 'L\'utilisateur destination doit être actif' });
+    }
+
+    // Vérifier que les deux utilisateurs sont des rédacteurs
+    if (sourceUser.role !== 'REDACTEUR') {
+      return res.status(400).json({ message: 'L\'utilisateur source doit être un rédacteur' });
+    }
+
+    if (targetUser.role !== 'REDACTEUR') {
+      return res.status(400).json({ message: 'L\'utilisateur destination doit être un rédacteur' });
+    }
+
+    // Compter les éléments à transférer
+    const [demandesCount, dossiersCount] = await Promise.all([
+      prisma.demande.count({ where: { assigneAId: sourceUserId } }),
+      prisma.dossier.count({ where: { assigneAId: sourceUserId } })
+    ]);
+
+    // Effectuer le transfert dans une transaction
+    const result = await prisma.$transaction(async (prisma) => {
+      // Transférer les demandes assignées
+      const demandesUpdated = await prisma.demande.updateMany({
+        where: { assigneAId: sourceUserId },
+        data: { assigneAId: targetUserId }
+      });
+
+      // Transférer les dossiers assignés
+      const dossiersUpdated = await prisma.dossier.updateMany({
+        where: { assigneAId: sourceUserId },
+        data: { assigneAId: targetUserId }
+      });
+
+      return {
+        demandesTransferred: demandesUpdated.count,
+        dossiersTransferred: dossiersUpdated.count
+      };
+    });
+
+    await logAction(
+      req.user.id, 
+      'TRANSFER_ASSIGNMENTS', 
+      'USER', 
+      sourceUserId, 
+      `Transféré ${result.demandesTransferred} demandes et ${result.dossiersTransferred} dossiers de ${sourceUser.identifiant} vers ${targetUser.identifiant}`
+    );
+
+    res.json({
+      message: 'Transfert effectué avec succès',
+      sourceUser: {
+        id: sourceUser.id,
+        identifiant: sourceUser.identifiant,
+        nom: sourceUser.nom,
+        prenom: sourceUser.prenom
+      },
+      targetUser: {
+        id: targetUser.id,
+        identifiant: targetUser.identifiant,
+        nom: targetUser.nom,
+        prenom: targetUser.prenom
+      },
+      transferred: {
+        demandes: result.demandesTransferred,
+        dossiers: result.dossiersTransferred,
+        total: result.demandesTransferred + result.dossiersTransferred
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors du transfert des assignations:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 module.exports = {
   getUsers,
   getUsersStats,
   createUser,
   updateUser,
   deactivateUser,
-  reactivateUser
+  reactivateUser,
+  transferAssignments
 };

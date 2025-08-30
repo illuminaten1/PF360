@@ -6,7 +6,8 @@ const {
   createUser,
   updateUser,
   deactivateUser,
-  reactivateUser
+  reactivateUser,
+  transferAssignments
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -30,5 +31,8 @@ router.put('/:id/deactivate', adminMiddleware, deactivateUser);
 
 // Réactiver un utilisateur
 router.put('/:id/reactivate', adminMiddleware, reactivateUser);
+
+// Transférer les assignations entre rédacteurs
+router.post('/transfer-assignments', adminMiddleware, transferAssignments);
 
 module.exports = router;

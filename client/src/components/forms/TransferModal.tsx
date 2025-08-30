@@ -117,7 +117,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                 <div className="bg-gradient-to-r from-orange-50 to-red-50 px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900 flex items-center">
@@ -135,7 +135,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
                   </div>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 pb-8">
                   <div className="mb-6">
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                       <p className="text-sm text-orange-800 mb-2">
@@ -148,7 +148,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
                     </div>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Utilisateur source */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -187,7 +187,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
                           >
-                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            <Listbox.Options className="absolute z-[60] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                               {utilisateursActifs.map(user => (
                                 <Listbox.Option
                                   key={user.id}
@@ -269,7 +269,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
                           >
-                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            <Listbox.Options className="absolute z-[60] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                               {utilisateursActifs.map(user => (
                                 <Listbox.Option
                                   key={user.id}

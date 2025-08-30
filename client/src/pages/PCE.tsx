@@ -8,9 +8,6 @@ import PCETable from '@/components/tables/PCETable'
 import DraggablePCETable from '@/components/tables/DraggablePCETable'
 import PCEModal from '@/components/forms/PCEModal'
 
-interface PCEStats {
-  totalPCE: number
-}
 
 const PCEPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

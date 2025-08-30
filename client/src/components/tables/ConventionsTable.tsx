@@ -25,7 +25,6 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  DocumentIcon,
   BanknotesIcon,
   ScaleIcon,
   CheckCircleIcon,

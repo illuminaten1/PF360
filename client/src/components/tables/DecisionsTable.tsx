@@ -27,7 +27,6 @@ import {
   ChevronRightIcon,
   DocumentIcon,
   PaperAirplaneIcon,
-  ClockIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
 import DatePickerModal from '../common/DatePickerModal'

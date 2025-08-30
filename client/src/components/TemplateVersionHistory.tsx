@@ -89,7 +89,7 @@ const TemplateVersionHistory: React.FC<TemplateVersionHistoryProps> = ({
     onSuccess: (version) => {
       toast.success(`Version ${version.versionNumber} téléchargée avec succès`)
     },
-    onError: (error: any) => {
+    onError: () => {
       toast.error(`Impossible de télécharger la version`)
     }
   })

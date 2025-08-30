@@ -7,11 +7,6 @@ import api from '@/utils/api'
 import BAPTable from '@/components/tables/BAPTable'
 import BAPModal from '@/components/forms/BAPModal'
 
-interface BAPStats {
-  totalBAP: number
-  usedBAP: number
-  unusedBAP: number
-}
 
 const BAPPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

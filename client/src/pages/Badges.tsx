@@ -7,11 +7,6 @@ import api from '@/utils/api'
 import BadgesTable from '@/components/tables/BadgesTable'
 import BadgeModal from '@/components/forms/BadgeModal'
 
-interface BadgesStats {
-  totalBadges: number
-  usedBadges: number
-  unusedBadges: number
-}
 
 const Badges: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

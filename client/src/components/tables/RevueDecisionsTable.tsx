@@ -23,7 +23,6 @@ import {
   PencilIcon,
   CheckIcon,
   XMarkIcon,
-  FolderIcon,
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/common/LoadingSpinner'

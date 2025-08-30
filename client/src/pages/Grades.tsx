@@ -8,9 +8,6 @@ import GradesTable from '@/components/tables/GradesTable'
 import DraggableGradesTable from '@/components/tables/DraggableGradesTable'
 import GradeModal from '@/components/forms/GradeModal'
 
-interface GradeStats {
-  totalGrades: number
-}
 
 const GradesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

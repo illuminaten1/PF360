@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
-import { XMarkIcon, DocumentIcon, ScaleIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ScaleIcon } from '@heroicons/react/24/outline'
 import { Dossier, Visa } from '@/types'
 import api from '@/utils/api'
 

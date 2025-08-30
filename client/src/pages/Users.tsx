@@ -7,13 +7,6 @@ import api from '@/utils/api'
 import UsersTable from '@/components/tables/UsersTable'
 import UserModal from '@/components/forms/UserModal'
 
-interface UsersStats {
-  totalUsers: number
-  adminUsers: number
-  redactorUsers: number
-  clerkUsers: number
-  activeUsers: number
-}
 
 const Users: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

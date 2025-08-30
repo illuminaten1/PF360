@@ -17,7 +17,6 @@ import { Avocat } from '@/types'
 import {
   EyeIcon,
   PencilIcon,
-  TrashIcon,
   XMarkIcon,
   CheckIcon,
   ChevronUpIcon,
@@ -313,7 +312,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
+    globalFilterFn: (row, _columnId, filterValue) => {
       if (!filterValue) return true
       
       const searchTerm = filterValue.toLowerCase().trim()

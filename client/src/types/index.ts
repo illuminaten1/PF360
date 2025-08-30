@@ -503,6 +503,7 @@ export interface Convention {
   dateRetourSigne?: string
   documentGenere?: string
   dossier: {
+    id: string
     numero: string
     nomDossier?: string
     notes?: string

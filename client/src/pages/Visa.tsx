@@ -7,10 +7,6 @@ import api from '@/utils/api'
 import VisaTable from '@/components/tables/VisaTable'
 import VisaModal from '@/components/forms/VisaModal'
 
-interface VisaStats {
-  totalVisas: number
-  visasActifs: number
-}
 
 const VisaPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

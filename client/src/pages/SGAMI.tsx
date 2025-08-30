@@ -7,11 +7,6 @@ import api from '@/utils/api'
 import SGAMITable from '@/components/tables/SGAMITable'
 import SGAMIModal from '@/components/forms/SGAMIModal'
 
-interface SGAMIStats {
-  totalSGAMI: number
-  activeSGAMI: number
-  inactiveSGAMI: number
-}
 
 const SGAMIPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

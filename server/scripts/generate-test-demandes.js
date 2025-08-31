@@ -49,7 +49,7 @@ const communes = [
 // Fonction utilitaire pour choisir un élément aléatoire
 const randomChoice = (array) => array[Math.floor(Math.random() * array.length)]
 
-// Fonction pour éviter les week-ends (samedi = 6, dimanche = 0)
+// Fonction pour éviter les week-ends et définir des heures d'audience réalistes
 const avoidWeekend = (date) => {
   const day = date.getDay()
   if (day === 0) { // Dimanche -> Lundi
@@ -57,6 +57,16 @@ const avoidWeekend = (date) => {
   } else if (day === 6) { // Samedi -> Lundi
     date.setDate(date.getDate() + 2)
   }
+  
+  // Définir des heures d'audience réalistes : 8h, 9h, 10h, 13h30, 14h, 15h, 16h
+  const heuresAudience = [8, 9, 10, 13.5, 14, 15, 16]
+  const heureChoisie = randomChoice(heuresAudience)
+  
+  // Convertir en heures et minutes
+  const heures = Math.floor(heureChoisie)
+  const minutes = (heureChoisie % 1) * 60
+  
+  date.setHours(heures, minutes, 0, 0)
   return date
 }
 

@@ -26,6 +26,9 @@ interface Audience {
   dossier?: {
     numero: string
   }
+  grade?: {
+    gradeAbrege: string
+  }
 }
 
 interface CalendrierAudiencesProps {
@@ -165,7 +168,7 @@ const CalendrierAudiences: React.FC<CalendrierAudiencesProps> = ({ className = '
                         )}
                       </div>
                       <div className="text-sm text-gray-600">
-                        {audience.prenom} {audience.nom}
+                        {audience.grade?.gradeAbrege && `${audience.grade.gradeAbrege} `}{audience.prenom} {audience.nom}
                         {audience.commune && ` - ${audience.commune}`}
                       </div>
                       <div className="text-xs text-gray-500 mt-1">

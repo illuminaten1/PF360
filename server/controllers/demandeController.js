@@ -928,6 +928,11 @@ const getMyAudiences = async (req, res) => {
           select: {
             numero: true
           }
+        },
+        grade: {
+          select: {
+            gradeAbrege: true
+          }
         }
       },
       orderBy: {

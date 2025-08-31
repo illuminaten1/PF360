@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import CalendrierAudiences from '@/components/CalendrierAudiences'
+import EncartStatistiquesHebdomadaires from '@/components/EncartStatistiquesHebdomadaires'
 import {
   FolderIcon,
   DocumentTextIcon,
@@ -179,21 +180,7 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CalendrierAudiences />
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Actions rapides</h3>
-          <div className="space-y-3">
-            <button className="w-full btn-primary text-left justify-start">
-              Créer un nouveau dossier
-            </button>
-            <button className="w-full btn-secondary text-left justify-start">
-              Ajouter une demande
-            </button>
-            <button className="w-full btn-secondary text-left justify-start">
-              Voir les demandes en attente
-            </button>
-          </div>
-        </div>
+        <EncartStatistiquesHebdomadaires />
       </div>
     </div>
   )

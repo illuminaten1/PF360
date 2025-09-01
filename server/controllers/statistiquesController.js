@@ -57,23 +57,37 @@ const getWeeklyStats = async (req, res) => {
 
     // Fonction pour obtenir le numéro de semaine ISO et les dates de début/fin
     const getISOWeekWithDates = (date) => {
-      const d = new Date(date);
-      d.setHours(0, 0, 0, 0);
-      d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
-      const week1 = new Date(d.getFullYear(), 0, 4);
-      const weekNum = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+      const target = new Date(date);
       
-      // Calculer les dates de début et fin de la semaine
-      const mondayOfWeek = new Date(d);
-      mondayOfWeek.setDate(mondayOfWeek.getDate() - (mondayOfWeek.getDay() + 6) % 7);
+      // Trouver le jeudi de cette semaine (ISO week date)
+      const dayOfWeek = target.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const thursday = new Date(target);
+      thursday.setDate(target.getDate() - dayOfWeek + (dayOfWeek === 0 ? -3 : 4));
+      
+      // L'année ISO est l'année du jeudi de cette semaine
+      const isoYear = thursday.getFullYear();
+      
+      // Trouver le premier jeudi de l'année ISO
+      const jan4 = new Date(isoYear, 0, 4); // 4 janvier est toujours dans la semaine 1
+      const jan4DayOfWeek = jan4.getDay();
+      const firstThursday = new Date(jan4);
+      firstThursday.setDate(jan4.getDate() - jan4DayOfWeek + (jan4DayOfWeek === 0 ? -3 : 4));
+      
+      // Calculer le numéro de semaine
+      const weekNum = Math.floor((thursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+      
+      // Calculer les dates de début (lundi) et fin (dimanche) de la semaine
+      const mondayOfWeek = new Date(target);
+      mondayOfWeek.setDate(target.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
       
       const sundayOfWeek = new Date(mondayOfWeek);
-      sundayOfWeek.setDate(sundayOfWeek.getDate() + 6);
+      sundayOfWeek.setDate(mondayOfWeek.getDate() + 6);
       
       return {
         weekNum,
         startDate: mondayOfWeek,
-        endDate: sundayOfWeek
+        endDate: sundayOfWeek,
+        isoYear // Ajouter l'année ISO pour le debug
       };
     };
 
@@ -112,15 +126,12 @@ const getWeeklyStats = async (req, res) => {
       const weekInfo = getISOWeekWithDates(demande.dateReception);
       const weekNum = weekInfo.weekNum;
       
-      // Vérifier si la semaine appartient vraiment à l'année ISO demandée
-      const dateYear = demande.dateReception.getFullYear();
-      const weekBelongsToYear = (dateYear === year) || 
-        (dateYear === year - 1 && weekNum >= 52) || // Dernières semaines de l'année précédente
-        (dateYear === year + 1 && weekNum === 1);   // Première semaine de l'année suivante
+      // Vérifier si la semaine appartient à l'année ISO demandée
+      const weekBelongsToYear = weekInfo.isoYear === year;
       
       // Debug: Log pour comprendre les calculs
       if (year === 2025 && weekNum <= 2) {
-        console.log(`Debug: Demande ${demande.id}, Date: ${demande.dateReception}, Semaine ISO: ${weekNum}, Année date: ${dateYear}, Appartient à ${year}: ${weekBelongsToYear}`);
+        console.log(`Debug: Demande ${demande.id}, Date: ${demande.dateReception}, Semaine ISO: ${weekNum}, Année ISO: ${weekInfo.isoYear}, Appartient à ${year}: ${weekBelongsToYear}`);
       }
       
       if (weekNum >= 1 && weekNum <= 53 && weekBelongsToYear) {
@@ -183,11 +194,8 @@ const getWeeklyStats = async (req, res) => {
       const weekInfo = getISOWeekWithDates(item.premiere_decision_date);
       const weekNum = weekInfo.weekNum;
       
-      // Vérifier si la semaine appartient vraiment à l'année ISO demandée
-      const dateYear = item.premiere_decision_date.getFullYear();
-      const weekBelongsToYear = (dateYear === year) || 
-        (dateYear === year - 1 && weekNum >= 52) || // Dernières semaines de l'année précédente
-        (dateYear === year + 1 && weekNum === 1);   // Première semaine de l'année suivante
+      // Vérifier si la semaine appartient à l'année ISO demandée
+      const weekBelongsToYear = weekInfo.isoYear === year;
       
       if (weekNum >= 1 && weekNum <= 53 && weekBelongsToYear) {
         if (!weeklyStats.has(weekNum)) {

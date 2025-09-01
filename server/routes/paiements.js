@@ -150,64 +150,79 @@ router.post('/', async (req, res) => {
       }
     }
 
-    const paiement = await prisma.paiement.create({
-      data: {
-        facture,
-        montantHT,
-        montantTTC,
-        emissionTitrePerception,
-        qualiteBeneficiaire,
-        identiteBeneficiaire,
-        dateServiceFait: dateServiceFait ? new Date(dateServiceFait) : null,
-        conventionJointeFRI,
-        adresseBeneficiaire,
-        siretOuRidet,
-        titulaireCompteBancaire,
-        codeEtablissement,
-        codeGuichet,
-        numeroCompte,
-        cleRIB,
-        ficheReglement,
-        dossierId,
-        sgamiId,
-        avocatId,
-        pceId,
-        creeParId: req.user.id,
-        decisions: {
-          create: decisions.map(decisionId => ({
-            decisionId
-          }))
-        }
-      },
-      include: {
-        dossier: {
-          select: { id: true, numero: true, nomDossier: true }
+    const paiement = await prisma.$transaction(async (tx) => {
+      // Trouver le dernier numéro utilisé
+      const allPaiements = await tx.paiement.findMany({
+        select: { numero: true }
+      });
+      
+      const maxNumber = allPaiements.length > 0 
+        ? Math.max(...allPaiements.map(p => p.numero))
+        : 0;
+
+      // Calculer le prochain numéro séquentiel
+      const nextNumber = maxNumber + 1;
+
+      return await tx.paiement.create({
+        data: {
+          numero: nextNumber,
+          facture,
+          montantHT,
+          montantTTC,
+          emissionTitrePerception,
+          qualiteBeneficiaire,
+          identiteBeneficiaire,
+          dateServiceFait: dateServiceFait ? new Date(dateServiceFait) : null,
+          conventionJointeFRI,
+          adresseBeneficiaire,
+          siretOuRidet,
+          titulaireCompteBancaire,
+          codeEtablissement,
+          codeGuichet,
+          numeroCompte,
+          cleRIB,
+          ficheReglement,
+          dossierId,
+          sgamiId,
+          avocatId,
+          pceId,
+          creeParId: req.user.id,
+          decisions: {
+            create: decisions.map(decisionId => ({
+              decisionId
+            }))
+          }
         },
-        sgami: {
-          select: { id: true, nom: true, intituleFicheReglement: true }
-        },
-        avocat: {
-          select: { id: true, nom: true, prenom: true, region: true }
-        },
-        pce: {
-          select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
-        },
-        creePar: {
-          select: { id: true, nom: true, prenom: true, grade: true }
-        },
-        decisions: {
-          include: {
-            decision: {
-              select: {
-                id: true,
-                type: true,
-                numero: true,
-                dateSignature: true
+        include: {
+          dossier: {
+            select: { id: true, numero: true, nomDossier: true }
+          },
+          sgami: {
+            select: { id: true, nom: true, intituleFicheReglement: true }
+          },
+          avocat: {
+            select: { id: true, nom: true, prenom: true, region: true }
+          },
+          pce: {
+            select: { id: true, ordre: true, pceDetaille: true, pceNumerique: true, codeMarchandise: true }
+          },
+          creePar: {
+            select: { id: true, nom: true, prenom: true, grade: true }
+          },
+          decisions: {
+            include: {
+              decision: {
+                select: {
+                  id: true,
+                  type: true,
+                  numero: true,
+                  dateSignature: true
+                }
               }
             }
           }
         }
-      }
+      });
     });
 
     await logAction(req.user.id, 'CREATE_PAIEMENT', `Création paiement ${paiement.facture || 'sans facture'}`, 'Paiement', paiement.id);

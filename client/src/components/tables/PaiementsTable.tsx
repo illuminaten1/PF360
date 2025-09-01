@@ -100,6 +100,18 @@ const PaiementsTable: React.FC<PaiementsTableProps> = ({
   const columns = useMemo<ColumnDef<Paiement>[]>(
     () => [
       {
+        id: 'numero',
+        header: 'N° Paiement',
+        accessorKey: 'numero',
+        cell: ({ getValue }) => (
+          <div className="font-medium text-indigo-600">
+            {getValue<number>()}
+          </div>
+        ),
+        enableColumnFilter: false,
+        sortingFn: 'basic'
+      },
+      {
         id: 'dossier',
         header: 'Dossier',
         accessorFn: (row) => row.dossier.numero,

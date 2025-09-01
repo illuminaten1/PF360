@@ -345,6 +345,7 @@ export interface Avocat {
 
 export interface Paiement {
   id: string
+  numero: number
   facture?: string
   montantHT?: number
   montantTTC: number

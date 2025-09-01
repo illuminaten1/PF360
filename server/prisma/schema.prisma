@@ -208,6 +208,7 @@ model Convention {
 
 model Paiement {
   id                        String      @id @default(cuid())
+  numero                    Int         @unique // Auto-incrémenté à partir de 1
   facture                   String?     // Numéro de facture
   montantHT                 Float?
   montantTTC                Float

@@ -78,11 +78,27 @@ const getWeeklyStats = async (req, res) => {
     };
 
     // 1. Récupérer les demandes entrantes par semaine
+    // Pour les semaines ISO, on doit inclure les derniers jours de l'année précédente
+    // qui peuvent appartenir à la première semaine ISO de l'année demandée
+    // et exclure les premiers jours de l'année suivante qui appartiennent à l'année demandée
+    
+    // Calculer la plage de dates pour inclure toutes les dates possibles des semaines ISO de l'année
+    const startOfYearISO = new Date(`${year}-01-01`);
+    const endOfYearISO = new Date(`${year}-12-31`);
+    
+    // Étendre la plage pour inclure jusqu'à 6 jours avant le 1er janvier (pour couvrir la semaine 1)
+    const extendedStart = new Date(startOfYearISO);
+    extendedStart.setDate(extendedStart.getDate() - 6);
+    
+    // Étendre la plage pour inclure jusqu'à 6 jours après le 31 décembre (pour couvrir la semaine 52/53)
+    const extendedEnd = new Date(endOfYearISO);
+    extendedEnd.setDate(extendedEnd.getDate() + 6);
+    
     const demandesEntrantesRaw = await prisma.demande.findMany({
       where: {
         dateReception: {
-          gte: new Date(`${year}-01-01`),
-          lt: new Date(`${year + 1}-01-01`)
+          gte: extendedStart,
+          lt: extendedEnd
         }
       },
       select: {
@@ -96,12 +112,18 @@ const getWeeklyStats = async (req, res) => {
       const weekInfo = getISOWeekWithDates(demande.dateReception);
       const weekNum = weekInfo.weekNum;
       
+      // Vérifier si la semaine appartient vraiment à l'année ISO demandée
+      const dateYear = demande.dateReception.getFullYear();
+      const weekBelongsToYear = (dateYear === year) || 
+        (dateYear === year - 1 && weekNum >= 52) || // Dernières semaines de l'année précédente
+        (dateYear === year + 1 && weekNum === 1);   // Première semaine de l'année suivante
+      
       // Debug: Log pour comprendre les calculs
       if (year === 2025 && weekNum <= 2) {
-        console.log(`Debug: Demande ${demande.id}, Date: ${demande.dateReception}, Semaine ISO: ${weekNum}`);
+        console.log(`Debug: Demande ${demande.id}, Date: ${demande.dateReception}, Semaine ISO: ${weekNum}, Année date: ${dateYear}, Appartient à ${year}: ${weekBelongsToYear}`);
       }
       
-      if (weekNum >= 1 && weekNum <= 53) {
+      if (weekNum >= 1 && weekNum <= 53 && weekBelongsToYear) {
         if (!weeklyStats.has(weekNum)) {
           weeklyStats.set(weekNum, {
             semaine: weekNum,
@@ -120,8 +142,8 @@ const getWeeklyStats = async (req, res) => {
     const decisionsInYear = await prisma.decision.findMany({
       where: {
         dateSignature: {
-          gte: new Date(`${year}-01-01`),
-          lt: new Date(`${year + 1}-01-01`)
+          gte: extendedStart,
+          lt: extendedEnd
         },
         // Seules les décisions signées comptent comme "sortantes"
         NOT: {
@@ -161,7 +183,13 @@ const getWeeklyStats = async (req, res) => {
       const weekInfo = getISOWeekWithDates(item.premiere_decision_date);
       const weekNum = weekInfo.weekNum;
       
-      if (weekNum >= 1 && weekNum <= 53) {
+      // Vérifier si la semaine appartient vraiment à l'année ISO demandée
+      const dateYear = item.premiere_decision_date.getFullYear();
+      const weekBelongsToYear = (dateYear === year) || 
+        (dateYear === year - 1 && weekNum >= 52) || // Dernières semaines de l'année précédente
+        (dateYear === year + 1 && weekNum === 1);   // Première semaine de l'année suivante
+      
+      if (weekNum >= 1 && weekNum <= 53 && weekBelongsToYear) {
         if (!weeklyStats.has(weekNum)) {
           weeklyStats.set(weekNum, {
             semaine: weekNum,

@@ -513,7 +513,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
                                   />
                                   <div>
                                     <span className="text-sm font-medium text-gray-900">
-                                      📧 {bap.nomBAP}
+                                      {bap.nomBAP}
                                     </span>
                                     {(bap.mail1 || bap.mail2 || bap.mail3 || bap.mail4) && (
                                       <div className="text-xs text-gray-600 mt-1">

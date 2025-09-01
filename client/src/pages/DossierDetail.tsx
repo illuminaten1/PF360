@@ -568,7 +568,7 @@ const DossierDetail: React.FC = () => {
                       className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-blue-100 text-blue-800"
                       title={`BAP: ${dossier.bap.nomBAP}`}
                     >
-                      📧 {dossier.bap.nomBAP}
+                      {dossier.bap.nomBAP}
                     </span>
                   </div>
                 )}
@@ -774,7 +774,7 @@ const DossierDetail: React.FC = () => {
                                           className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                                           title={`BAP: ${(demande as any).baps[0].bap.nomBAP}`}
                                         >
-                                          📧 {(demande as any).baps[0].bap.nomBAP}
+                                          {(demande as any).baps[0].bap.nomBAP}
                                         </span>
                                       )}
                                       

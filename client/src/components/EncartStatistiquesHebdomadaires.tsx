@@ -1,6 +1,5 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline'
 import { api } from '@/utils/api'
 
 interface WeeklyStat {
@@ -29,11 +28,7 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
       </div>
     )
@@ -42,93 +37,69 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
   if (isError || !stats) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Statistiques hebdomadaires</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Flux Hebdomadaires</h3>
         <p className="text-sm text-red-600">Erreur lors du chargement des statistiques</p>
       </div>
     )
   }
 
-  // Calculer les totaux de l'année
-  const totaux = stats.weeks.reduce((acc, week) => ({
-    entrantes: acc.entrantes + week.entrantes,
-    sortantes: acc.sortantes + week.sortantes
-  }), { entrantes: 0, sortantes: 0 })
-
-  // Stock actuel (dernier stock de l'année)
-  const stockActuel = stats.weeks[stats.weeks.length - 1]?.stock || 0
-
-  // Moyennes par semaine
-  const moyenneEntrantes = Math.round(totaux.entrantes / 52 * 10) / 10
-  const moyenneSortantes = Math.round(totaux.sortantes / 52 * 10) / 10
-
-  // Calculer la tendance (comparaison 4 dernières semaines vs 4 précédentes)
-  const derniereSemaine = Math.max(...stats.weeks.map(w => w.semaine))
-  const dernieresSemaines = stats.weeks.filter(w => w.semaine > derniereSemaine - 4)
-  const semainesPrecedentes = stats.weeks.filter(w => w.semaine <= derniereSemaine - 4 && w.semaine > derniereSemaine - 8)
-  
-  const moyenneDernieres = dernieresSemaines.reduce((sum, w) => sum + (w.entrantes - w.sortantes), 0) / 4
-  const moyennePrecedentes = semainesPrecedentes.reduce((sum, w) => sum + (w.entrantes - w.sortantes), 0) / 4
-  const tendance = moyenneDernieres - moyennePrecedentes
+  // Trier les semaines par numéro de semaine
+  const semainesTriees = [...stats.weeks].sort((a, b) => a.semaine - b.semaine)
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Statistiques {stats.year}</h3>
-        <div className="flex items-center">
-          {tendance > 0 ? (
-            <ArrowTrendingUpIcon className="h-5 w-5 text-red-500 mr-1" />
-          ) : (
-            <ArrowTrendingDownIcon className="h-5 w-5 text-green-500 mr-1" />
-          )}
-          <span className={`text-sm font-medium ${tendance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-            {tendance > 0 ? '+' : ''}{Math.round(tendance * 10) / 10}/sem
-          </span>
-        </div>
-      </div>
+    <div className="bg-white rounded-lg shadow p-6 flex flex-col h-full">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">
+        Flux Hebdomadaires - {stats.year}
+      </h3>
       
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="text-center p-3 bg-blue-50 rounded-lg">
-          <div className="text-2xl font-bold text-blue-600">{totaux.entrantes}</div>
-          <div className="text-sm text-blue-600">Entrantes</div>
-          <div className="text-xs text-gray-500">{moyenneEntrantes}/sem</div>
+      <div className="flex flex-col flex-1 space-y-4">
+        <div className="flex-1 overflow-hidden border rounded-lg">
+          <div className="h-full overflow-y-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-2 text-left font-medium text-gray-900">Sem.</th>
+                  <th className="px-3 py-2 text-center font-medium text-gray-900">Ent.</th>
+                  <th className="px-3 py-2 text-center font-medium text-gray-900">Sort.</th>
+                  <th className="px-3 py-2 text-center font-medium text-gray-900">Diff.</th>
+                  <th className="px-3 py-2 text-center font-medium text-gray-900">Stock</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {semainesTriees.map((week) => {
+                  const difference = week.entrantes - week.sortantes
+                  return (
+                    <tr key={week.semaine} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 font-medium text-gray-900">{week.semaine}</td>
+                      <td className="px-3 py-2 text-center text-blue-600 font-medium">{week.entrantes}</td>
+                      <td className="px-3 py-2 text-center text-green-600 font-medium">{week.sortantes}</td>
+                      <td className="px-3 py-2 text-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          difference > 0 ? 'bg-red-100 text-red-700' : 
+                          difference < 0 ? 'bg-green-100 text-green-700' : 
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {difference > 0 ? '+' : ''}{difference}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-center font-medium text-gray-900">{week.stock}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="text-center p-3 bg-green-50 rounded-lg">
-          <div className="text-2xl font-bold text-green-600">{totaux.sortantes}</div>
-          <div className="text-sm text-green-600">Sortantes</div>
-          <div className="text-xs text-gray-500">{moyenneSortantes}/sem</div>
-        </div>
-      </div>
-
-      <div className="text-center p-3 bg-gray-50 rounded-lg mb-4">
-        <div className={`text-2xl font-bold ${stockActuel >= 0 ? 'text-orange-600' : 'text-purple-600'}`}>
-          {stockActuel}
-        </div>
-        <div className="text-sm text-gray-600">Stock actuel</div>
-      </div>
-
-      <div className="mt-4">
-        <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
-          <span>Sem. 1</span>
-          <span>Sem. 52</span>
-        </div>
-        <div className="h-16 bg-gray-100 rounded overflow-hidden flex items-end">
-          {stats.weeks.map((week) => {
-            const maxStock = Math.max(...stats.weeks.map(w => Math.abs(w.stock)))
-            const hauteur = maxStock === 0 ? 0 : Math.abs(week.stock) / maxStock * 100
-            
-            return (
-              <div
-                key={week.semaine}
-                className="flex-1 flex items-end"
-                title={`Semaine ${week.semaine}: Stock ${week.stock}`}
-              >
-                <div
-                  className={`w-full ${week.stock >= 0 ? 'bg-orange-400' : 'bg-purple-400'} opacity-70 hover:opacity-100 transition-opacity`}
-                  style={{ height: `${hauteur}%`, minHeight: week.stock !== 0 ? '2px' : '0px' }}
-                ></div>
-              </div>
-            )
-          })}
+        
+        <div className="text-xs text-gray-500 flex items-center gap-4 flex-shrink-0">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <span>Dossiers entrants</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span>Dossiers sortants</span>
+          </div>
         </div>
       </div>
     </div>

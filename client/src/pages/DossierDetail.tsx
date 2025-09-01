@@ -734,23 +734,13 @@ const DossierDetail: React.FC = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <div className="flex-shrink-0">
-                                <h3 className="font-medium text-gray-900 text-sm">
-                                  {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
-                                  {demande.prenom} {demande.nom}
-                                </h3>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
-                                    {getTypeLabel(demande.type)}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
-                                  </span>
-                                  {demande.dateFaits && (
-                                    <span className="text-xs text-gray-500">
-                                      • Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
-                                    </span>
-                                  )}
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-medium text-gray-900 text-sm">
+                                    {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
+                                    {demande.prenom} {demande.nom}
+                                  </h3>
                                   
+                                  {/* Badges et BAP directement à droite du nom */}
                                   {(((demande as any).badges && (demande as any).badges.length > 0) || ((demande as any).baps && (demande as any).baps.length > 0)) && (
                                     <div className="flex flex-wrap gap-1">
                                       {/* Badges */}
@@ -784,6 +774,20 @@ const DossierDetail: React.FC = () => {
                                         </span>
                                       )}
                                     </div>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
+                                    {getTypeLabel(demande.type)}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
+                                  </span>
+                                  {demande.dateFaits && (
+                                    <span className="text-xs text-gray-500">
+                                      • Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
+                                    </span>
                                   )}
                                 </div>
                               </div>

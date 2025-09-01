@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDownIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline'
 import { Listbox, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { api } from '@/utils/api'
@@ -149,10 +149,21 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {semainesTriees.map((week) => {
+                {semainesTriees.map((week, index) => {
                   const difference = week.entrantes - week.sortantes
                   const startDate = new Date(week.startDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
                   const endDate = new Date(week.endDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+                  
+                  // Calculer la tendance du stock par rapport à la semaine précédente
+                  let stockTrend = null
+                  if (index > 0) {
+                    const previousStock = semainesTriees[index - 1].stock
+                    if (week.stock > previousStock) {
+                      stockTrend = 'up'
+                    } else if (week.stock < previousStock) {
+                      stockTrend = 'down'
+                    }
+                  }
                   
                   return (
                     <tr key={week.semaine} className="hover:bg-gray-50">
@@ -171,7 +182,17 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
                           {difference > 0 ? '+' : ''}{difference}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-center font-medium text-gray-900">{week.stock}</td>
+                      <td className="px-3 py-2 text-center font-medium text-gray-900">
+                        <div className="flex items-center justify-center gap-1">
+                          <span>{week.stock}</span>
+                          {stockTrend === 'up' && (
+                            <ArrowTrendingUpIcon className="w-4 h-4 text-red-500" />
+                          )}
+                          {stockTrend === 'down' && (
+                            <ArrowTrendingDownIcon className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   )
                 })}

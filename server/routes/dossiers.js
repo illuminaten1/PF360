@@ -11,9 +11,9 @@ const prisma = new PrismaClient();
 router.use(authMiddleware);
 
 const createDossierSchema = z.object({
-  nomDossier: z.string().optional(),
-  notes: z.string().optional(),
-  sgamiId: z.string().optional(),
+  nomDossier: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  sgamiId: z.string().optional().nullable(),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional(),
   bapId: z.string().optional().nullable()
@@ -199,7 +199,7 @@ router.post('/', async (req, res) => {
               }))
             }
           }),
-          ...(bapId && {
+          ...(bapId && bapId.trim() !== '' && {
             baps: {
               create: {
                 bapId
@@ -245,7 +245,7 @@ router.post('/', async (req, res) => {
     if (badges.length > 0) {
       await syncDemandeBadgesFromDossier(dossier.id);
     }
-    if (bapId) {
+    if (bapId && bapId.trim() !== '') {
       await syncDemandeBAPsFromDossier(dossier.id);
     }
 
@@ -503,7 +503,7 @@ router.put('/:id', async (req, res) => {
           badgeId
         }))
       },
-      ...(bapId && {
+      ...(bapId && bapId.trim() !== '' && {
         baps: {
           create: {
             bapId
@@ -520,7 +520,7 @@ router.put('/:id', async (req, res) => {
       updateData.notes = notes;
     }
     if (sgamiId !== undefined) {
-      updateData.sgamiId = sgamiId;
+      updateData.sgamiId = sgamiId || null;
     }
     if (assigneAId !== undefined && assigneAId !== '') {
       updateData.assigneAId = assigneAId;

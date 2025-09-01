@@ -126,8 +126,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
       // Forcer l'inclusion de tous les champs, même s'ils sont vides
       const cleanedData = {
         nomDossier: data.nomDossier?.trim() || null,
-        sgamiId: data.sgamiId?.trim() || undefined,
-        assigneAId: data.assigneAId?.trim() || undefined,
+        sgamiId: data.sgamiId?.trim() || null,
+        assigneAId: data.assigneAId?.trim() || '',
         badges: data.badges || [],
         bapId: data.bapId?.trim() || null
       }

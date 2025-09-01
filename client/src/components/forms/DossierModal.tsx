@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 const dossierSchema = z.object({
   nomDossier: z.string().optional(),
-  sgamiId: z.string().min(1, "Le SGAMI est requis"),
+  sgamiId: z.string().optional(),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional(),
   bapId: z.string().optional()
@@ -122,7 +122,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
       // Forcer l'inclusion de tous les champs, même s'ils sont vides
       const cleanedData = {
         nomDossier: data.nomDossier?.trim() || null,
-        sgamiId: data.sgamiId?.trim() || undefined,
+        sgamiId: data.sgamiId?.trim() || null,
         assigneAId: data.assigneAId?.trim() || undefined,
         badges: data.badges || [],
         bapId: data.bapId?.trim() || null
@@ -226,6 +226,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
                     <div>
                       <label className="label block text-sm font-medium text-gray-700 mb-2">
                         SGAMI
+                        <span className="text-gray-500 font-normal ml-1">(optionnel)</span>
                       </label>
                       <Listbox 
                         value={selectedSgami} 

@@ -751,9 +751,10 @@ const DossierDetail: React.FC = () => {
                                     </span>
                                   )}
                                   
-                                  {(demande as any).badges && (demande as any).badges.length > 0 && (
+                                  {(((demande as any).badges && (demande as any).badges.length > 0) || ((demande as any).baps && (demande as any).baps.length > 0)) && (
                                     <div className="flex flex-wrap gap-1">
-                                      {(demande as any).badges.slice(0, 2).map((badgeRel: any) => (
+                                      {/* Badges */}
+                                      {(demande as any).badges && (demande as any).badges.slice(0, 2).map((badgeRel: any) => (
                                         <span
                                           key={badgeRel.badge.id}
                                           className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
@@ -765,7 +766,19 @@ const DossierDetail: React.FC = () => {
                                           {badgeRel.badge.nom}
                                         </span>
                                       ))}
-                                      {(demande as any).badges.length > 2 && (
+                                      
+                                      {/* BAP */}
+                                      {(demande as any).baps && (demande as any).baps.length > 0 && (
+                                        <span
+                                          key={`bap-${demande.id}`}
+                                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                          title={`BAP: ${(demande as any).baps[0].bap.nomBAP}`}
+                                        >
+                                          📧 {(demande as any).baps[0].bap.nomBAP}
+                                        </span>
+                                      )}
+                                      
+                                      {(demande as any).badges && (demande as any).badges.length > 2 && (
                                         <span key={`more-badges-${demande.id}`} className="text-xs text-gray-500">
                                           +{(demande as any).badges.length - 2}
                                         </span>

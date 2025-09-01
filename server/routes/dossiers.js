@@ -290,6 +290,11 @@ router.get('/:id', async (req, res) => {
               include: {
                 badge: true
               }
+            },
+            baps: {
+              include: {
+                bap: true
+              }
             }
           }
         },

@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
-const { syncDemandeBadgesFromDossier } = require('../controllers/demandeController');
+const { syncDemandeBadgesFromDossier, syncDemandeBAPsFromDossier } = require('../controllers/demandeController');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -15,7 +15,8 @@ const createDossierSchema = z.object({
   notes: z.string().optional(),
   sgamiId: z.string().min(1, "Le SGAMI est requis"),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
-  badges: z.array(z.string()).optional()
+  badges: z.array(z.string()).optional(),
+  bapId: z.string().optional().nullable()
 });
 
 const updateDossierSchema = z.object({
@@ -23,7 +24,8 @@ const updateDossierSchema = z.object({
   notes: z.string().optional().nullable(),
   sgamiId: z.string().optional(),
   assigneAId: z.string().optional(),
-  badges: z.array(z.string()).optional()
+  badges: z.array(z.string()).optional(),
+  bapId: z.string().optional().nullable()
 });
 
 router.get('/', async (req, res) => {
@@ -44,6 +46,11 @@ router.get('/', async (req, res) => {
         badges: {
           include: {
             badge: true
+          }
+        },
+        baps: {
+          include: {
+            bap: true
           }
         },
         assigneA: {
@@ -142,13 +149,14 @@ router.get('/', async (req, res) => {
 
     const dossiersWithStats = dossiers.map(dossier => ({
       ...dossier,
+      bap: dossier.baps && dossier.baps.length > 0 ? dossier.baps[0].bap : null,
       stats: {
         totalConventionsHT: dossier.conventions.reduce((sum, conv) => sum + conv.montantHT, 0),
         totalPaiementsTTC: dossier.paiements.reduce((sum, paie) => sum + paie.montantTTC, 0),
         nombreDemandes: dossier.demandes.length,
         nombreDecisions: dossier.decisions.length
       }
-    }));
+    })).map(({ baps, ...dossier }) => dossier); // Remove baps array
 
     res.json(dossiersWithStats);
   } catch (error) {
@@ -160,7 +168,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const validatedData = createDossierSchema.parse(req.body);
-    const { nomDossier, notes, sgamiId, assigneAId, badges = [] } = validatedData;
+    const { nomDossier, notes, sgamiId, assigneAId, badges = [], bapId } = validatedData;
 
     const dossier = await prisma.$transaction(async (tx) => {
       // Trouver le dernier numéro utilisé (tri numérique)
@@ -189,6 +197,13 @@ router.post('/', async (req, res) => {
               create: badges.map(badgeId => ({
                 badgeId
               }))
+            }
+          }),
+          ...(bapId && {
+            baps: {
+              create: {
+                bapId
+              }
             }
           })
         },
@@ -226,14 +241,24 @@ router.post('/', async (req, res) => {
       });
     });
 
-    // Sync badges to linked demandes if any badges were added
+    // Sync badges and BAP to linked demandes if any were added
     if (badges.length > 0) {
       await syncDemandeBadgesFromDossier(dossier.id);
     }
+    if (bapId) {
+      await syncDemandeBAPsFromDossier(dossier.id);
+    }
+
+    // Transform baps array to single bap object
+    const transformedDossier = {
+      ...dossier,
+      bap: dossier.baps && dossier.baps.length > 0 ? dossier.baps[0].bap : null
+    };
+    delete transformedDossier.baps;
 
     await logAction(req.user.id, 'CREATE_DOSSIER', `Création du dossier ${dossier.numero}`, 'Dossier', dossier.id);
 
-    res.status(201).json(dossier);
+    res.status(201).json(transformedDossier);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors[0].message });
@@ -272,6 +297,11 @@ router.get('/:id', async (req, res) => {
         badges: {
           include: {
             badge: true
+          }
+        },
+        baps: {
+          include: {
+            bap: true
           }
         },
         assigneA: {
@@ -424,7 +454,14 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Dossier non trouvé' });
     }
 
-    res.json(dossier);
+    // Transform baps array to single bap object
+    const transformedDossier = {
+      ...dossier,
+      bap: dossier.baps && dossier.baps.length > 0 ? dossier.baps[0].bap : null
+    };
+    delete transformedDossier.baps;
+
+    res.json(transformedDossier);
   } catch (error) {
     console.error('Get dossier error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
@@ -434,11 +471,11 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const validatedData = updateDossierSchema.parse(req.body);
-    const { nomDossier, notes, sgamiId, assigneAId, badges = [] } = validatedData;
+    const { nomDossier, notes, sgamiId, assigneAId, badges = [], bapId } = validatedData;
 
     const existingDossier = await prisma.dossier.findUnique({
       where: { id: req.params.id },
-      include: { badges: true }
+      include: { badges: true, baps: true }
     });
 
     if (!existingDossier) {
@@ -449,6 +486,10 @@ router.put('/:id', async (req, res) => {
       where: { dossierId: req.params.id }
     });
 
+    await prisma.dossierBAP.deleteMany({
+      where: { dossierId: req.params.id }
+    });
+
     // Construire l'objet de données en filtrant les valeurs undefined et chaînes vides
     const updateData = {
       modifieParId: req.user.id,
@@ -456,7 +497,14 @@ router.put('/:id', async (req, res) => {
         create: badges.map(badgeId => ({
           badgeId
         }))
-      }
+      },
+      ...(bapId && {
+        baps: {
+          create: {
+            bapId
+          }
+        }
+      })
     };
 
     // Ajouter seulement les champs qui ont une valeur définie
@@ -491,6 +539,11 @@ router.put('/:id', async (req, res) => {
         badges: {
           include: {
             badge: true
+          }
+        },
+        baps: {
+          include: {
+            bap: true
           }
         },
         assigneA: {
@@ -586,6 +639,7 @@ router.put('/:id', async (req, res) => {
 
     const dossierWithStats = {
       ...dossier,
+      bap: dossier.baps && dossier.baps.length > 0 ? dossier.baps[0].bap : null,
       stats: {
         totalConventionsHT: dossier.conventions.reduce((sum, conv) => sum + conv.montantHT, 0),
         totalPaiementsTTC: dossier.paiements.reduce((sum, paie) => sum + paie.montantTTC, 0),
@@ -593,9 +647,11 @@ router.put('/:id', async (req, res) => {
         nombreDecisions: dossier.decisions.length
       }
     };
+    delete dossierWithStats.baps;
 
-    // Sync badges to all linked demandes after badge changes
+    // Sync badges and BAP to all linked demandes after changes
     await syncDemandeBadgesFromDossier(req.params.id);
+    await syncDemandeBAPsFromDossier(req.params.id);
 
     await logAction(req.user.id, 'UPDATE_DOSSIER', `Modification du dossier ${dossier.numero}`, 'Dossier', dossier.id);
 
@@ -619,6 +675,7 @@ router.delete('/:id', async (req, res) => {
         conventions: true,
         paiements: true,
         badges: true,
+        baps: true,
         attendus: true
       }
     });
@@ -653,6 +710,10 @@ router.delete('/:id', async (req, res) => {
 
     // Supprimer les relations en premier
     await prisma.dossierBadge.deleteMany({
+      where: { dossierId: req.params.id }
+    });
+
+    await prisma.dossierBAP.deleteMany({
       where: { dossierId: req.params.id }
     });
 

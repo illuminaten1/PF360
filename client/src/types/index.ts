@@ -149,6 +149,14 @@ export interface Dossier {
       couleur?: string
     }
   }>
+  bap?: {
+    id: string
+    nomBAP: string
+    mail1?: string
+    mail2?: string
+    mail3?: string
+    mail4?: string
+  }
   assigneA?: {
     id: string
     nom: string

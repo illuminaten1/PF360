@@ -41,6 +41,43 @@ const syncDemandeBadgesFromDossier = async (dossierId) => {
   }
 };
 
+// Utility function to sync BAP from dossier to its demandes
+const syncDemandeBAPsFromDossier = async (dossierId) => {
+  try {
+    // Get the BAP of the dossier (should be only one)
+    const dossierBAP = await prisma.dossierBAP.findFirst({
+      where: { dossierId },
+      select: { bapId: true }
+    });
+    
+    // Get all demandes linked to this dossier
+    const demandes = await prisma.demande.findMany({
+      where: { dossierId },
+      select: { id: true }
+    });
+    
+    // For each demande, sync BAP
+    for (const demande of demandes) {
+      // Remove all current BAPs
+      await prisma.demandeBAP.deleteMany({
+        where: { demandeId: demande.id }
+      });
+      
+      // Add dossier BAP if it exists
+      if (dossierBAP) {
+        await prisma.demandeBAP.create({
+          data: {
+            demandeId: demande.id,
+            bapId: dossierBAP.bapId
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing demande BAPs:', error);
+  }
+};
+
 // Utility function to remove all badges from a demande
 const clearDemandeBadges = async (demandeId) => {
   try {
@@ -83,6 +120,42 @@ const syncSingleDemandeBadges = async (demandeId) => {
     }
   } catch (error) {
     console.error('Error syncing single demande badges:', error);
+  }
+};
+
+// Utility function to sync BAP for a specific demande based on its dossier
+const syncSingleDemandeBAPs = async (demandeId) => {
+  try {
+    const demande = await prisma.demande.findUnique({
+      where: { id: demandeId },
+      select: { dossierId: true }
+    });
+    
+    if (!demande) return;
+    
+    // Clear existing BAPs
+    await prisma.demandeBAP.deleteMany({
+      where: { demandeId }
+    });
+    
+    // If linked to a dossier, inherit its BAP
+    if (demande.dossierId) {
+      const dossierBAP = await prisma.dossierBAP.findFirst({
+        where: { dossierId: demande.dossierId },
+        select: { bapId: true }
+      });
+      
+      if (dossierBAP) {
+        await prisma.demandeBAP.create({
+          data: {
+            demandeId,
+            bapId: dossierBAP.bapId
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing single demande BAPs:', error);
   }
 };
 
@@ -700,9 +773,10 @@ const updateDemande = async (req, res) => {
       }
     });
 
-    // Sync badges if dossierId changed
+    // Sync badges and BAPs if dossierId changed
     if (dataToUpdate.hasOwnProperty('dossierId')) {
       await syncSingleDemandeBadges(req.params.id);
+      await syncSingleDemandeBAPs(req.params.id);
     }
 
     await logAction(req.user.id, 'UPDATE_DEMANDE', `Modification demande ${demande.numeroDS}`, 'Demande', demande.id);
@@ -952,7 +1026,7 @@ const getMyAudiences = async (req, res) => {
 const updateDemandeBAPs = async (req, res) => {
   try {
     const demandeId = req.params.id;
-    const { bapIds } = req.body;
+    const { bapId } = req.body;
     
     // Vérifier que la demande existe
     const demande = await prisma.demande.findUnique({
@@ -963,18 +1037,14 @@ const updateDemandeBAPs = async (req, res) => {
       return res.status(404).json({ error: 'Demande non trouvée' });
     }
     
-    // Vérifier que tous les BAP existent si des IDs sont fournis
-    if (bapIds && bapIds.length > 0) {
-      const existingBAPs = await prisma.bAP.findMany({
-        where: {
-          id: {
-            in: bapIds
-          }
-        }
+    // Vérifier que le BAP existe si un ID est fourni
+    if (bapId) {
+      const existingBAP = await prisma.bAP.findUnique({
+        where: { id: bapId }
       });
       
-      if (existingBAPs.length !== bapIds.length) {
-        return res.status(400).json({ error: 'Un ou plusieurs BAP sélectionnés n\'existent pas' });
+      if (!existingBAP) {
+        return res.status(400).json({ error: 'Le BAP sélectionné n\'existe pas' });
       }
     }
     
@@ -983,17 +1053,17 @@ const updateDemandeBAPs = async (req, res) => {
       where: { demandeId }
     });
     
-    // Créer les nouvelles relations si des BAP sont fournis
-    if (bapIds && bapIds.length > 0) {
-      await prisma.demandeBAP.createMany({
-        data: bapIds.map(bapId => ({
+    // Créer la nouvelle relation si un BAP est fourni
+    if (bapId) {
+      await prisma.demandeBAP.create({
+        data: {
           demandeId,
           bapId
-        }))
+        }
       });
     }
     
-    // Récupérer la demande mise à jour avec les BAP
+    // Récupérer la demande mise à jour avec le BAP
     const updatedDemande = await prisma.demande.findUnique({
       where: { id: demandeId },
       include: {
@@ -1007,15 +1077,15 @@ const updateDemandeBAPs = async (req, res) => {
     
     await logAction(
       req.user.id, 
-      'UPDATE_DEMANDE_BAPS', 
-      `Mise à jour des BAP pour la demande ${demande.numeroDS} - ${bapIds.length} BAP(s) assigné(s)`, 
+      'UPDATE_DEMANDE_BAP', 
+      `Mise à jour du BAP pour la demande ${demande.numeroDS}${bapId ? ' - BAP assigné' : ' - BAP supprimé'}`, 
       'Demande', 
       demandeId
     );
     
     res.json(updatedDemande);
   } catch (error) {
-    console.error('Update demande BAPs error:', error);
+    console.error('Update demande BAP error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
@@ -1030,6 +1100,8 @@ module.exports = {
   getStats,
   getMyAudiences,
   syncDemandeBadgesFromDossier,
+  syncDemandeBAPsFromDossier,
   syncSingleDemandeBadges,
+  syncSingleDemandeBAPs,
   updateDemandeBAPs
 };

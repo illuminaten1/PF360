@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
-import { Dossier, Badge, Sgami, User } from '@/types'
+import { Dossier, Badge, BAP, Sgami, User } from '@/types'
 import api from '@/utils/api'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -13,7 +13,8 @@ const dossierSchema = z.object({
   nomDossier: z.string().optional(),
   sgamiId: z.string().min(1, "Le SGAMI est requis"),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
-  badges: z.array(z.string()).optional()
+  badges: z.array(z.string()).optional(),
+  bapId: z.string().optional()
 })
 
 type DossierFormData = z.infer<typeof dossierSchema>
@@ -45,6 +46,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
   })
 
   const selectedBadges = watch('badges') || []
+  const selectedBapId = watch('bapId') || ''
   const [selectedSgami, setSelectedSgami] = useState<Sgami | null>(null)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   
@@ -57,6 +59,14 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/badges')
       return response.data.badges || response.data
+    }
+  })
+
+  const { data: baps = [] } = useQuery<BAP[]>({
+    queryKey: ['baps'],
+    queryFn: async () => {
+      const response = await api.get('/bap')
+      return response.data.baps || response.data
     }
   })
 
@@ -84,7 +94,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
           nomDossier: dossier.nomDossier || '',
           sgamiId: dossier.sgami?.id || '',
           assigneAId: dossier.assigneA?.id || '',
-          badges: dossier.badges.map(b => b.badge.id) || []
+          badges: dossier.badges.map(b => b.badge.id) || [],
+          bapId: dossier.bap?.id || ''
         })
         setSelectedSgami(dossier.sgami || null)
         // Trouver l'utilisateur complet dans la liste
@@ -97,7 +108,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
           nomDossier: '',
           sgamiId: '',
           assigneAId: defaultAssigneeId,
-          badges: []
+          badges: [],
+          bapId: ''
         })
         setSelectedSgami(null)
         setSelectedUser(currentUser || null)
@@ -112,7 +124,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
         nomDossier: data.nomDossier?.trim() || null,
         sgamiId: data.sgamiId?.trim() || undefined,
         assigneAId: data.assigneAId?.trim() || undefined,
-        badges: data.badges || []
+        badges: data.badges || [],
+        bapId: data.bapId?.trim() || null
       }
       
       await onSubmit(cleanedData)
@@ -128,6 +141,12 @@ const DossierModal: React.FC<DossierModalProps> = ({
       ? current.filter(id => id !== badgeId)
       : [...current, badgeId]
     setValue('badges', newBadges)
+  }
+
+  const handleBapSelect = (bapId: string) => {
+    // Si le même BAP est sélectionné, le désélectionner
+    const newBapId = selectedBapId === bapId ? '' : bapId
+    setValue('bapId', newBapId)
   }
 
   return (
@@ -435,6 +454,89 @@ const DossierModal: React.FC<DossierModalProps> = ({
                         >
                           Tout désélectionner
                         </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      BAP (Bureau d'Aide aux Prévenus)
+                      <span className="text-gray-500 font-normal ml-1">(sélection unique)</span>
+                    </label>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      {baps.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-8">
+                          Aucun BAP disponible
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          <div
+                            onClick={() => handleBapSelect('')}
+                            className={`cursor-pointer rounded-lg p-3 border-2 transition-all duration-200 hover:shadow-md ${
+                              selectedBapId === ''
+                                ? 'border-blue-500 shadow-sm bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                          >
+                            <div className="flex items-center">
+                              <input 
+                                type="radio" 
+                                checked={selectedBapId === ''} 
+                                onChange={() => {}} 
+                                className="mr-3 text-blue-600" 
+                              />
+                              <span className="text-sm font-medium text-gray-700">
+                                Aucun BAP assigné
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {baps.map((bap) => {
+                            const isSelected = selectedBapId === bap.id
+                            
+                            return (
+                              <div
+                                key={bap.id}
+                                onClick={() => handleBapSelect(bap.id)}
+                                className={`cursor-pointer rounded-lg p-3 border-2 transition-all duration-200 hover:shadow-md ${
+                                  isSelected
+                                    ? 'border-blue-500 shadow-sm bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                }`}
+                              >
+                                <div className="flex items-center">
+                                  <input 
+                                    type="radio" 
+                                    checked={isSelected} 
+                                    onChange={() => {}} 
+                                    className="mr-3 text-blue-600" 
+                                  />
+                                  <div>
+                                    <span className="text-sm font-medium text-gray-900">
+                                      📧 {bap.nomBAP}
+                                    </span>
+                                    {(bap.mail1 || bap.mail2 || bap.mail3 || bap.mail4) && (
+                                      <div className="text-xs text-gray-600 mt-1">
+                                        {[bap.mail1, bap.mail2, bap.mail3, bap.mail4]
+                                          .filter(Boolean)
+                                          .slice(0, 2)
+                                          .join(', ')}
+                                        {[bap.mail1, bap.mail2, bap.mail3, bap.mail4].filter(Boolean).length > 2 && '...'}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    {selectedBapId && (
+                      <div className="mt-3">
+                        <p className="text-sm text-blue-600 font-medium">
+                          BAP sélectionné : {baps.find(b => b.id === selectedBapId)?.nomBAP}
+                        </p>
                       </div>
                     )}
                   </div>

@@ -540,21 +540,38 @@ const DossierDetail: React.FC = () => {
               )}
             </h1>
             
-            {/* Badges */}
-            {dossier.badges.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {dossier.badges.map((badgeRel) => (
-                  <span
-                    key={badgeRel.badge.id}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
-                    style={badgeRel.badge.couleur ? {
-                      backgroundColor: `${badgeRel.badge.couleur}20`,
-                      color: badgeRel.badge.couleur
-                    } : {}}
-                  >
-                    {badgeRel.badge.nom}
-                  </span>
-                ))}
+            {/* Badges et BAP */}
+            {(dossier.badges.length > 0 || dossier.bap) && (
+              <div className="space-y-2">
+                {/* Badges */}
+                {dossier.badges.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {dossier.badges.map((badgeRel) => (
+                      <span
+                        key={badgeRel.badge.id}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
+                        style={badgeRel.badge.couleur ? {
+                          backgroundColor: `${badgeRel.badge.couleur}20`,
+                          color: badgeRel.badge.couleur
+                        } : {}}
+                      >
+                        {badgeRel.badge.nom}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                {/* BAP */}
+                {dossier.bap && (
+                  <div className="flex flex-wrap gap-2">
+                    <span
+                      className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-blue-100 text-blue-800"
+                      title={`BAP: ${dossier.bap.nomBAP}`}
+                    >
+                      📧 {dossier.bap.nomBAP}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>

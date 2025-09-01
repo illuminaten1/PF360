@@ -10,6 +10,8 @@ interface WeeklyStat {
   entrantes: number
   sortantes: number
   stock: number
+  startDate: string
+  endDate: string
 }
 
 interface WeeklyStatsResponse {
@@ -59,15 +61,22 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
     )
   }
 
+  // Fonction pour obtenir le numéro de semaine ISO (identique au serveur)
+  const getISOWeek = (date: Date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+    const week1 = new Date(d.getFullYear(), 0, 4);
+    return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  }
+
   // Obtenir la semaine courante pour l'année des statistiques
   const now = new Date()
-  let semaineCourante = 52 // Par défaut, afficher toutes les semaines pour les années passées
+  let semaineCourante = 53 // Par défaut, afficher toutes les semaines pour les années passées
   
-  // Si on affiche les statistiques de l'année courante, calculer la semaine actuelle
+  // Si on affiche les statistiques de l'année courante, calculer la semaine actuelle ISO
   if (selectedYear === currentYear) {
-    const startOfYear = new Date(currentYear, 0, 1)
-    const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)) + 1
-    semaineCourante = Math.ceil(dayOfYear / 7)
+    semaineCourante = getISOWeek(now)
   }
 
   // Trier les semaines par numéro de semaine et filtrer jusqu'à la semaine courante
@@ -132,7 +141,7 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 sticky top-0">
                 <tr className="border-b border-gray-200">
-                  <th className="px-3 py-2 text-left font-medium text-gray-900">Sem.</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-900">Semaine</th>
                   <th className="px-3 py-2 text-center font-medium text-gray-900">Ent.</th>
                   <th className="px-3 py-2 text-center font-medium text-gray-900">Sort.</th>
                   <th className="px-3 py-2 text-center font-medium text-gray-900">Diff.</th>
@@ -142,9 +151,15 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
               <tbody className="divide-y divide-gray-200">
                 {semainesTriees.map((week) => {
                   const difference = week.entrantes - week.sortantes
+                  const startDate = new Date(week.startDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+                  const endDate = new Date(week.endDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+                  
                   return (
                     <tr key={week.semaine} className="hover:bg-gray-50">
-                      <td className="px-3 py-2 font-medium text-gray-900">{week.semaine}</td>
+                      <td className="px-3 py-2 font-medium text-gray-900">
+                        <div className="font-semibold">{week.semaine}</div>
+                        <div className="text-xs text-gray-500">({startDate} - {endDate})</div>
+                      </td>
                       <td className="px-3 py-2 text-center text-blue-600 font-medium">{week.entrantes}</td>
                       <td className="px-3 py-2 text-center text-green-600 font-medium">{week.sortantes}</td>
                       <td className="px-3 py-2 text-center">

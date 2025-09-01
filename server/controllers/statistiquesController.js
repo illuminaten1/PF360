@@ -52,21 +52,29 @@ const getWeeklyStats = async (req, res) => {
   try {
     const year = parseInt(req.query.year) || new Date().getFullYear();
     
-    // Créer un tableau pour les 52 semaines avec des valeurs par défaut
-    const weeklyStats = Array.from({ length: 52 }, (_, i) => ({
-      semaine: i + 1,
-      entrantes: 0,
-      sortantes: 0,
-      stock: 0
-    }));
+    // Créer un objet pour stocker les stats par semaine (plus flexible que tableau fixe)
+    const weeklyStats = new Map();
 
-    // Fonction pour obtenir le numéro de semaine ISO
-    const getISOWeek = (date) => {
+    // Fonction pour obtenir le numéro de semaine ISO et les dates de début/fin
+    const getISOWeekWithDates = (date) => {
       const d = new Date(date);
       d.setHours(0, 0, 0, 0);
       d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
       const week1 = new Date(d.getFullYear(), 0, 4);
-      return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+      const weekNum = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+      
+      // Calculer les dates de début et fin de la semaine
+      const mondayOfWeek = new Date(d);
+      mondayOfWeek.setDate(mondayOfWeek.getDate() - (mondayOfWeek.getDay() + 6) % 7);
+      
+      const sundayOfWeek = new Date(mondayOfWeek);
+      sundayOfWeek.setDate(sundayOfWeek.getDate() + 6);
+      
+      return {
+        weekNum,
+        startDate: mondayOfWeek,
+        endDate: sundayOfWeek
+      };
     };
 
     // 1. Récupérer les demandes entrantes par semaine
@@ -85,23 +93,44 @@ const getWeeklyStats = async (req, res) => {
 
     // Grouper par semaine
     demandesEntrantesRaw.forEach(demande => {
-      const weekNum = getISOWeek(demande.dateReception);
-      if (weekNum >= 1 && weekNum <= 52) {
-        weeklyStats[weekNum - 1].entrantes++;
+      const weekInfo = getISOWeekWithDates(demande.dateReception);
+      const weekNum = weekInfo.weekNum;
+      
+      // Debug: Log pour comprendre les calculs
+      if (year === 2025 && weekNum <= 2) {
+        console.log(`Debug: Demande ${demande.id}, Date: ${demande.dateReception}, Semaine ISO: ${weekNum}`);
+      }
+      
+      if (weekNum >= 1 && weekNum <= 53) {
+        if (!weeklyStats.has(weekNum)) {
+          weeklyStats.set(weekNum, {
+            semaine: weekNum,
+            startDate: weekInfo.startDate,
+            endDate: weekInfo.endDate,
+            entrantes: 0,
+            sortantes: 0,
+            stock: 0
+          });
+        }
+        weeklyStats.get(weekNum).entrantes++;
       }
     });
 
-    // 2. Récupérer les demandes sortantes (première décision uniquement)
+    // 2. Récupérer les demandes sortantes (première décision signée uniquement)
     const decisionsInYear = await prisma.decision.findMany({
       where: {
-        createdAt: {
+        dateSignature: {
           gte: new Date(`${year}-01-01`),
           lt: new Date(`${year + 1}-01-01`)
+        },
+        // Seules les décisions signées comptent comme "sortantes"
+        NOT: {
+          dateSignature: null
         }
       },
       select: {
         id: true,
-        createdAt: true,
+        dateSignature: true,
         demandes: {
           select: {
             demandeId: true
@@ -110,14 +139,14 @@ const getWeeklyStats = async (req, res) => {
       }
     });
 
-    // Grouper par demande et trouver la première décision pour chaque demande
+    // Grouper par demande et trouver la première décision signée pour chaque demande
     const premiersDecisionsByDemande = new Map();
     
     decisionsInYear.forEach(decision => {
       decision.demandes.forEach(dd => {
         const currentFirst = premiersDecisionsByDemande.get(dd.demandeId);
-        if (!currentFirst || decision.createdAt < currentFirst) {
-          premiersDecisionsByDemande.set(dd.demandeId, decision.createdAt);
+        if (!currentFirst || decision.dateSignature < currentFirst) {
+          premiersDecisionsByDemande.set(dd.demandeId, decision.dateSignature);
         }
       });
     });
@@ -129,22 +158,36 @@ const getWeeklyStats = async (req, res) => {
 
     // Grouper les sorties par semaine
     demandesSortantesRaw.forEach(item => {
-      const weekNum = getISOWeek(item.premiere_decision_date);
-      if (weekNum >= 1 && weekNum <= 52) {
-        weeklyStats[weekNum - 1].sortantes++;
+      const weekInfo = getISOWeekWithDates(item.premiere_decision_date);
+      const weekNum = weekInfo.weekNum;
+      
+      if (weekNum >= 1 && weekNum <= 53) {
+        if (!weeklyStats.has(weekNum)) {
+          weeklyStats.set(weekNum, {
+            semaine: weekNum,
+            startDate: weekInfo.startDate,
+            endDate: weekInfo.endDate,
+            entrantes: 0,
+            sortantes: 0,
+            stock: 0
+          });
+        }
+        weeklyStats.get(weekNum).sortantes++;
       }
     });
 
-    // 3. Calculer le stock cumulé pour chaque semaine
+    // 3. Convertir en tableau trié et calculer le stock cumulé
+    const weeksArray = Array.from(weeklyStats.values()).sort((a, b) => a.semaine - b.semaine);
+    
     let stockCumule = 0;
-    weeklyStats.forEach(week => {
+    weeksArray.forEach(week => {
       stockCumule += (week.entrantes - week.sortantes);
       week.stock = stockCumule;
     });
 
     res.json({
       year,
-      weeks: weeklyStats
+      weeks: weeksArray
     });
 
   } catch (error) {

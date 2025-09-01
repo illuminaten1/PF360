@@ -2,6 +2,52 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+const getAvailableYears = async (req, res) => {
+  try {
+    // Récupérer les années distinctes où il y a des demandes
+    const demandesYears = await prisma.demande.findMany({
+      select: {
+        dateReception: true
+      },
+      distinct: ['dateReception']
+    });
+
+    // Récupérer les années distinctes où il y a des décisions
+    const decisionsYears = await prisma.decision.findMany({
+      select: {
+        createdAt: true
+      },
+      distinct: ['createdAt']
+    });
+
+    // Extraire les années et les combiner
+    const allYears = new Set();
+    
+    demandesYears.forEach(demande => {
+      if (demande.dateReception) {
+        allYears.add(demande.dateReception.getFullYear());
+      }
+    });
+
+    decisionsYears.forEach(decision => {
+      if (decision.createdAt) {
+        allYears.add(decision.createdAt.getFullYear());
+      }
+    });
+
+    // Convertir en tableau trié par ordre décroissant
+    const years = Array.from(allYears).sort((a, b) => b - a);
+
+    res.json(years);
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des années disponibles:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des années disponibles' 
+    });
+  }
+};
+
 const getWeeklyStats = async (req, res) => {
   try {
     const year = parseInt(req.query.year) || new Date().getFullYear();
@@ -110,5 +156,6 @@ const getWeeklyStats = async (req, res) => {
 };
 
 module.exports = {
-  getWeeklyStats
+  getWeeklyStats,
+  getAvailableYears
 };

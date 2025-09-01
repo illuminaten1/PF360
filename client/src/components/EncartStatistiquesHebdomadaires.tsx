@@ -1,5 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { ChevronDownIcon } from '@heroicons/react/24/outline'
+import { Listbox, Transition } from '@headlessui/react'
+import { Fragment } from 'react'
 import { api } from '@/utils/api'
 
 interface WeeklyStat {
@@ -15,12 +18,25 @@ interface WeeklyStatsResponse {
 }
 
 const EncartStatistiquesHebdomadaires: React.FC = () => {
-  const { data: stats, isLoading, isError } = useQuery<WeeklyStatsResponse>({
-    queryKey: ['weekly-stats'],
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState(currentYear)
+
+  // Récupérer les années disponibles depuis l'API
+  const { data: availableYears = [] } = useQuery<number[]>({
+    queryKey: ['available-years'],
     queryFn: async () => {
-      const response = await api.get('/statistiques/weekly')
+      const response = await api.get('/statistiques/years')
       return response.data
     }
+  })
+
+  const { data: stats, isLoading, isError } = useQuery<WeeklyStatsResponse>({
+    queryKey: ['weekly-stats', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/weekly?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: availableYears.length > 0
   })
 
   if (isLoading) {
@@ -43,14 +59,72 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
     )
   }
 
-  // Trier les semaines par numéro de semaine
-  const semainesTriees = [...stats.weeks].sort((a, b) => a.semaine - b.semaine)
+  // Obtenir la semaine courante pour l'année des statistiques
+  const now = new Date()
+  let semaineCourante = 52 // Par défaut, afficher toutes les semaines pour les années passées
+  
+  // Si on affiche les statistiques de l'année courante, calculer la semaine actuelle
+  if (selectedYear === currentYear) {
+    const startOfYear = new Date(currentYear, 0, 1)
+    const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)) + 1
+    semaineCourante = Math.ceil(dayOfYear / 7)
+  }
+
+  // Trier les semaines par numéro de semaine et filtrer jusqu'à la semaine courante
+  const semainesTriees = [...stats.weeks]
+    .filter(week => week.semaine <= semaineCourante)
+    .sort((a, b) => a.semaine - b.semaine)
 
   return (
     <div className="bg-white rounded-lg shadow p-6 flex flex-col h-full">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
-        Flux Hebdomadaires - {stats.year}
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-gray-900">
+          Flux Hebdomadaires
+        </h3>
+        <Listbox value={selectedYear} onChange={setSelectedYear}>
+          <div className="relative">
+            <Listbox.Button className="relative w-24 bg-white border border-gray-300 rounded-md pl-3 pr-8 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer text-left">
+              <span className="block truncate">{selectedYear}</span>
+              <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <ChevronDownIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              </span>
+            </Listbox.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Listbox.Options className="absolute z-10 mt-1 w-24 bg-white shadow-lg max-h-40 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                {availableYears.map((year) => (
+                  <Listbox.Option
+                    key={year}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 px-3 ${
+                        active ? 'text-blue-900 bg-blue-100' : 'text-gray-900'
+                      }`
+                    }
+                    value={year}
+                  >
+                    {({ selected }) => (
+                      <span
+                        className={`block truncate ${
+                          selected ? 'font-semibold' : 'font-normal'
+                        }`}
+                      >
+                        {year}
+                      </span>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+          </div>
+        </Listbox>
+      </div>
       
       <div className="flex flex-col flex-1 space-y-4">
         <div className="flex-1 overflow-hidden border rounded-lg">

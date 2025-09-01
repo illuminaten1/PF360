@@ -540,38 +540,23 @@ const DossierDetail: React.FC = () => {
               )}
             </h1>
             
-            {/* Badges et BAP */}
-            {(dossier.badges.length > 0 || dossier.bap) && (
+            {/* Badges */}
+            {dossier.badges.length > 0 && (
               <div className="space-y-2">
-                {/* Badges */}
-                {dossier.badges.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {dossier.badges.map((badgeRel) => (
-                      <span
-                        key={badgeRel.badge.id}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
-                        style={badgeRel.badge.couleur ? {
-                          backgroundColor: `${badgeRel.badge.couleur}20`,
-                          color: badgeRel.badge.couleur
-                        } : {}}
-                      >
-                        {badgeRel.badge.nom}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                {/* BAP */}
-                {dossier.bap && (
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {dossier.badges.map((badgeRel) => (
                     <span
-                      className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-blue-100 text-blue-800"
-                      title={`BAP: ${dossier.bap.nomBAP}`}
+                      key={badgeRel.badge.id}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
+                      style={badgeRel.badge.couleur ? {
+                        backgroundColor: `${badgeRel.badge.couleur}20`,
+                        color: badgeRel.badge.couleur
+                      } : {}}
                     >
-                      {dossier.bap.nomBAP}
+                      {badgeRel.badge.nom}
                     </span>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -642,15 +627,21 @@ const DossierDetail: React.FC = () => {
       {/* Informations générales */}
       <div className="mb-8 bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 gap-6 ${dossier.updatedAt !== dossier.createdAt ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Organisme payeur</label>
+            <label className="block text-sm font-bold text-gray-700">Organisme payeur</label>
             <p className="mt-1 text-sm text-gray-900">
               {dossier.sgami?.nom || 'Non assigné'}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Assigné à</label>
+            <label className="block text-sm font-bold text-gray-700">BAP</label>
+            <p className="mt-1 text-sm text-gray-900">
+              {dossier.bap?.nomBAP || 'Non assigné'}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700">Assigné à</label>
             <p className="mt-1 text-sm text-gray-900 flex items-center">
               <UserIcon className="h-4 w-4 mr-2 text-gray-400" />
               {dossier.assigneA ? (
@@ -661,7 +652,7 @@ const DossierDetail: React.FC = () => {
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Date de création</label>
+            <label className="block text-sm font-bold text-gray-700">Date de création</label>
             <div className="mt-1 text-sm text-gray-900">
               <div className="flex items-center">
                 <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
@@ -677,7 +668,7 @@ const DossierDetail: React.FC = () => {
           </div>
           {dossier.updatedAt !== dossier.createdAt && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Dernière modification</label>
+              <label className="block text-sm font-bold text-gray-700">Dernière modification</label>
               <div className="mt-1 text-sm text-gray-900">
                 <div className="flex items-center">
                   <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />

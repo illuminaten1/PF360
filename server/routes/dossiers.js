@@ -13,7 +13,7 @@ router.use(authMiddleware);
 const createDossierSchema = z.object({
   nomDossier: z.string().optional(),
   notes: z.string().optional(),
-  sgamiId: z.string().min(1, "Le SGAMI est requis"),
+  sgamiId: z.string().optional(),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional(),
   bapId: z.string().optional().nullable()
@@ -189,7 +189,7 @@ router.post('/', async (req, res) => {
           numero: nextNumber,
           nomDossier,
           notes,
-          sgamiId,
+          sgamiId: sgamiId || null,
           assigneAId,
           creeParId: req.user.id,
           ...(badges.length > 0 && {
@@ -519,7 +519,7 @@ router.put('/:id', async (req, res) => {
     if (notes !== undefined) {
       updateData.notes = notes;
     }
-    if (sgamiId !== undefined && sgamiId !== '') {
+    if (sgamiId !== undefined) {
       updateData.sgamiId = sgamiId;
     }
     if (assigneAId !== undefined && assigneAId !== '') {

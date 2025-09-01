@@ -106,7 +106,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
         const defaultAssigneeId = currentUser?.id || ''
         reset({
           nomDossier: '',
-          sgamiId: '',
+          sgamiId: undefined,
           assigneAId: defaultAssigneeId,
           badges: [],
           bapId: ''
@@ -122,7 +122,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
       // Forcer l'inclusion de tous les champs, même s'ils sont vides
       const cleanedData = {
         nomDossier: data.nomDossier?.trim() || null,
-        sgamiId: data.sgamiId?.trim() || null,
+        sgamiId: data.sgamiId?.trim() || undefined,
         assigneAId: data.assigneAId?.trim() || undefined,
         badges: data.badges || [],
         bapId: data.bapId?.trim() || null
@@ -232,7 +232,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
                         value={selectedSgami} 
                         onChange={(sgami) => {
                           setSelectedSgami(sgami)
-                          setValue('sgamiId', sgami?.id || '')
+                          setValue('sgamiId', sgami?.id || undefined)
                         }}
                         disabled={isSubmitting}
                       >

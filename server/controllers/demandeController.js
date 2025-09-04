@@ -488,7 +488,6 @@ const getAllDemandes = async (req, res) => {
       prisma.demande.count({ where })
     ]);
 
-    await logAction(req.user.id, 'LIST_DEMANDES', `Consultation des demandes (${demandes.length} résultats)`);
 
     res.json({
       demandes,

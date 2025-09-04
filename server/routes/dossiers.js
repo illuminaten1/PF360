@@ -466,6 +466,8 @@ router.get('/:id', async (req, res) => {
     };
     delete transformedDossier.baps;
 
+    await logAction(req.user.id, 'VIEW_DOSSIER', `Consultation du dossier ${transformedDossier.numero}`, 'Dossier', transformedDossier.id);
+
     res.json(transformedDossier);
   } catch (error) {
     console.error('Get dossier error:', error);

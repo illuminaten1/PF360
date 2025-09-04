@@ -59,7 +59,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/badges')
       return response.data.badges || response.data
-    }
+    },
+    enabled: isOpen
   })
 
   const { data: baps = [] } = useQuery<BAP[]>({
@@ -67,7 +68,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/bap')
       return response.data.baps || response.data
-    }
+    },
+    enabled: isOpen
   })
 
   const { data: sgamis = [] } = useQuery<Sgami[]>({
@@ -75,7 +77,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/sgami')
       return response.data
-    }
+    },
+    enabled: isOpen
   })
 
   const { data: users = [] } = useQuery<User[]>({
@@ -83,7 +86,8 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/demandes/users')
       return response.data
-    }
+    },
+    enabled: isOpen
   })
 
   useEffect(() => {

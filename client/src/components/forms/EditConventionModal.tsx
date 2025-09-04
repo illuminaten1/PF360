@@ -124,7 +124,8 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/avocats')
       return response.data.filter((avocat: any) => avocat.active)
-    }
+    },
+    enabled: isOpen
   })
 
   // Fetch diligences
@@ -133,7 +134,8 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
     queryFn: async () => {
       const response = await api.get('/diligences')
       return response.data.filter((diligence: any) => diligence.active)
-    }
+    },
+    enabled: isOpen
   })
 
   // Filter avocats based on search query

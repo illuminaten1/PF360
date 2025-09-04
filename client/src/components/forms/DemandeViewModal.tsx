@@ -1,7 +1,9 @@
 import React from 'react'
 import { Dialog, Transition } from '@headlessui/react'
+import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, UserIcon, MapPinIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ExclamationTriangleIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { Demande } from '@/types'
+import api from '@/utils/api'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
 
@@ -16,8 +18,20 @@ interface DemandeViewModalProps {
 const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
   isOpen,
   onClose,
-  demande
+  demande: initialDemande
 }) => {
+  // Fetch demande details when modal is opened to trigger log
+  const { data: demande } = useQuery({
+    queryKey: ['demande-detail', initialDemande?.id],
+    queryFn: async () => {
+      if (!initialDemande?.id) return null
+      const response = await api.get(`/demandes/${initialDemande.id}`)
+      return response.data
+    },
+    enabled: isOpen && !!initialDemande?.id,
+    initialData: initialDemande
+  })
+
   if (!demande) return null
 
   const getTypeColor = (type: string) => {

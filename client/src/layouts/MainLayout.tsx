@@ -22,7 +22,8 @@ import {
   BuildingOfficeIcon,
   CurrencyEuroIcon,
   ClipboardDocumentListIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  DocumentTextIcon as LogIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -47,6 +48,7 @@ const adminNavigation = [
   { name: 'Visas', href: '/visa', icon: EyeIcon },
   { name: 'Diligences', href: '/diligences', icon: ClipboardDocumentListIcon },
   { name: 'Templates', href: '/templates', icon: DocumentDuplicateIcon },
+  { name: 'Logs', href: '/logs', icon: LogIcon },
 ]
 
 const MainLayout: React.FC = () => {

@@ -22,6 +22,7 @@ import GradesPage from '@/pages/Grades'
 import Templates from '@/pages/Templates'
 import Revue from '@/pages/Revue'
 import Statistiques from '@/pages/Statistiques'
+import Logs from '@/pages/Logs'
 
 function App() {
   return (
@@ -120,6 +121,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <Templates />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="logs"
+            element={
+              <ProtectedRoute adminOnly>
+                <Logs />
               </ProtectedRoute>
             }
           />

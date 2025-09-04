@@ -1,4 +1,3 @@
-import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/common/ProtectedRoute'
@@ -23,16 +22,6 @@ import GradesPage from '@/pages/Grades'
 import Templates from '@/pages/Templates'
 import Revue from '@/pages/Revue'
 import Statistiques from '@/pages/Statistiques'
-
-// Placeholder components for other pages
-const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
-    <div className="bg-white rounded-lg shadow p-6">
-      <p className="text-gray-600">Cette page sera implémentée prochainement.</p>
-    </div>
-  </div>
-)
 
 function App() {
   return (

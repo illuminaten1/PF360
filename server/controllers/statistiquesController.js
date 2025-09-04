@@ -218,6 +218,17 @@ const getStatistiquesAdministratives = async (req, res) => {
       }
     });
     
+    // Nombre de demandes non affectées (sans assigneAId)
+    const demandesNonAffectees = await prisma.demande.count({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        assigneAId: null
+      }
+    });
+    
     // 2. Récupérer tous les utilisateurs avec leurs statistiques
     const users = await prisma.user.findMany({
       where: {
@@ -423,7 +434,8 @@ const getStatistiquesAdministratives = async (req, res) => {
       generales: {
         demandesTotal,
         demandesTraitees,
-        demandesEnInstance
+        demandesEnInstance,
+        demandesNonAffectees
       },
       utilisateurs: utilisateursStats
     });
@@ -920,7 +932,8 @@ const getAutoControle = async (req, res) => {
     }
     
     // 5. Délai de traitement moyen pour toutes les demandes traitées (en jours)
-    const demandesTraitees = await prisma.demande.findMany({
+    // Nous devons récupérer la première décision signée pour chaque demande
+    const demandesAvecPremiereDecision = await prisma.demande.findMany({
       where: {
         dateReception: {
           gte: startOfYear,
@@ -937,8 +950,16 @@ const getAutoControle = async (req, res) => {
         }
       },
       select: {
+        id: true,
         dateReception: true,
         decisions: {
+          where: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          },
           select: {
             decision: {
               select: {
@@ -950,27 +971,36 @@ const getAutoControle = async (req, res) => {
             decision: {
               dateSignature: 'asc'
             }
-          },
-          take: 1
+          }
         }
       }
     });
     
     let delaiTraitementMoyen = 0;
-    if (demandesTraitees.length > 0) {
-      const totalJours = demandesTraitees.reduce((sum, demande) => {
+    let nombreDemandesAvecDelaiValide = 0;
+    
+    if (demandesAvecPremiereDecision.length > 0) {
+      const totalJours = demandesAvecPremiereDecision.reduce((sum, demande) => {
         if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
           const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
           const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          return sum + diffJours;
+          
+          // Ne prendre en compte que les délais positifs (décision après réception)
+          if (diffJours >= 0) {
+            nombreDemandesAvecDelaiValide++;
+            return sum + diffJours;
+          }
         }
         return sum;
       }, 0);
-      delaiTraitementMoyen = totalJours / demandesTraitees.length;
+      
+      if (nombreDemandesAvecDelaiValide > 0) {
+        delaiTraitementMoyen = totalJours / nombreDemandesAvecDelaiValide;
+      }
     }
     
     // 6. Délai de traitement moyen pour les demandes BAP (demandes assignées à un BAP)
-    const demandesTraiteesBAP = await prisma.demande.findMany({
+    const demandesAvecPremiereDecisionBAP = await prisma.demande.findMany({
       where: {
         dateReception: {
           gte: startOfYear,
@@ -990,8 +1020,16 @@ const getAutoControle = async (req, res) => {
         }
       },
       select: {
+        id: true,
         dateReception: true,
         decisions: {
+          where: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          },
           select: {
             decision: {
               select: {
@@ -1003,27 +1041,36 @@ const getAutoControle = async (req, res) => {
             decision: {
               dateSignature: 'asc'
             }
-          },
-          take: 1
+          }
         }
       }
     });
     
     let delaiTraitementBAP = 0;
-    if (demandesTraiteesBAP.length > 0) {
-      const totalJours = demandesTraiteesBAP.reduce((sum, demande) => {
+    let nombreDemandesBAP = 0;
+    
+    if (demandesAvecPremiereDecisionBAP.length > 0) {
+      const totalJours = demandesAvecPremiereDecisionBAP.reduce((sum, demande) => {
         if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
           const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
           const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          return sum + diffJours;
+          
+          // Ne prendre en compte que les délais positifs
+          if (diffJours >= 0) {
+            nombreDemandesBAP++;
+            return sum + diffJours;
+          }
         }
         return sum;
       }, 0);
-      delaiTraitementBAP = totalJours / demandesTraiteesBAP.length;
+      
+      if (nombreDemandesBAP > 0) {
+        delaiTraitementBAP = totalJours / nombreDemandesBAP;
+      }
     }
     
     // 7. Délai de traitement moyen pour les demandes BRPF (demandes non assignées à un BAP)
-    const demandesTraiteesBRPF = await prisma.demande.findMany({
+    const demandesAvecPremiereDecisionBRPF = await prisma.demande.findMany({
       where: {
         dateReception: {
           gte: startOfYear,
@@ -1043,8 +1090,16 @@ const getAutoControle = async (req, res) => {
         }
       },
       select: {
+        id: true,
         dateReception: true,
         decisions: {
+          where: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          },
           select: {
             decision: {
               select: {
@@ -1056,23 +1111,32 @@ const getAutoControle = async (req, res) => {
             decision: {
               dateSignature: 'asc'
             }
-          },
-          take: 1
+          }
         }
       }
     });
     
     let delaiTraitementBRPF = 0;
-    if (demandesTraiteesBRPF.length > 0) {
-      const totalJours = demandesTraiteesBRPF.reduce((sum, demande) => {
+    let nombreDemandesBRPF = 0;
+    
+    if (demandesAvecPremiereDecisionBRPF.length > 0) {
+      const totalJours = demandesAvecPremiereDecisionBRPF.reduce((sum, demande) => {
         if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
           const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
           const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          return sum + diffJours;
+          
+          // Ne prendre en compte que les délais positifs
+          if (diffJours >= 0) {
+            nombreDemandesBRPF++;
+            return sum + diffJours;
+          }
         }
         return sum;
       }, 0);
-      delaiTraitementBRPF = totalJours / demandesTraiteesBRPF.length;
+      
+      if (nombreDemandesBRPF > 0) {
+        delaiTraitementBRPF = totalJours / nombreDemandesBRPF;
+      }
     }
     
     res.json({

@@ -11,6 +11,7 @@ interface StatistiquesGenerales {
   demandesTotal: number
   demandesTraitees: number
   demandesEnInstance: number
+  demandesNonAffectees: number
 }
 
 interface StatistiquesUtilisateur {
@@ -113,14 +114,10 @@ const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
 
 const StatistiquesGeneralesComponent: React.FC<{ 
   stats: StatistiquesGenerales | undefined
-  selectedYear: number 
-}> = ({ stats, selectedYear }) => (
+}> = ({ stats }) => (
   <div className="p-4 h-full overflow-auto">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-      Statistiques générales - {selectedYear}
-    </h2>
     {stats && (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="text-center p-4 bg-blue-50 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">
             {stats.demandesTotal}
@@ -145,6 +142,14 @@ const StatistiquesGeneralesComponent: React.FC<{
             Demandes en instance
           </div>
         </div>
+        <div className="text-center p-4 bg-red-50 rounded-lg">
+          <div className="text-2xl font-bold text-red-600">
+            {stats.demandesNonAffectees}
+          </div>
+          <div className="text-xs text-gray-600 mt-1">
+            Demandes non affectées
+          </div>
+        </div>
       </div>
     )}
   </div>
@@ -154,9 +159,6 @@ const StatistiquesUtilisateurComponent: React.FC<{
   users: StatistiquesUtilisateur[] | undefined 
 }> = ({ users }) => (
   <div className="p-4 h-full overflow-auto">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-      Statistiques par utilisateur
-    </h2>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <thead className="bg-gray-50">
@@ -237,9 +239,6 @@ const StatistiquesBAPComponent: React.FC<{
   statsBAP: StatistiqueBAP[] | undefined 
 }> = ({ statsBAP }) => (
   <div className="p-4 h-full overflow-auto">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-      Statistiques par BAP
-    </h2>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <thead className="bg-gray-50">
@@ -283,9 +282,6 @@ const AutoControleComponent: React.FC<{
   autoControle: StatistiquesAutoControle | undefined 
 }> = ({ autoControle }) => (
   <div className="p-4 h-full overflow-auto">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-      Auto-contrôle
-    </h2>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <tbody className="bg-white divide-y divide-gray-200">
@@ -370,9 +366,6 @@ const FluxMensuelsComponent: React.FC<{
   selectedYear: number 
 }> = ({ fluxMensuels, selectedYear }) => (
   <div className="p-4 h-full overflow-auto">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-      Flux Mensuels
-    </h2>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <thead className="bg-gray-50">
@@ -429,9 +422,6 @@ const FluxHebdomadairesComponent: React.FC<{
   selectedYear: number 
 }> = ({ fluxHebdomadaires, selectedYear }) => (
   <div className="p-4 h-full overflow-auto">
-    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-      Flux Hebdomadaires
-    </h2>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <thead className="bg-gray-50">
@@ -581,7 +571,6 @@ const Statistiques: React.FC = () => {
         return (
           <StatistiquesGeneralesComponent 
             stats={statsAdministratives?.generales} 
-            selectedYear={selectedYear}
           />
         )
       case 'users':

@@ -600,7 +600,8 @@ const getDemandeById = async (req, res) => {
       return res.status(404).json({ error: 'Demande non trouvée' });
     }
 
-    await logAction(req.user.id, 'VIEW_DEMANDE', `Consultation demande ${demande.numeroDS}`, 'Demande', demande.id);
+    const militaireInfo = `${demande.grade?.gradeAbrege || ''} ${demande.prenom || ''} ${demande.nom || ''}`.trim();
+    await logAction(req.user.id, 'VIEW_DEMANDE', `Consultation demande ${demande.numeroDS} (${militaireInfo})`, 'Demande', demande.id);
 
     res.json(demande);
   } catch (error) {
@@ -835,7 +836,8 @@ const updateDemande = async (req, res) => {
       await syncSingleDemandeAssignation(req.params.id);
     }
 
-    await logAction(req.user.id, 'UPDATE_DEMANDE', `Modification demande ${demande.numeroDS}`, 'Demande', demande.id);
+    const militaireInfo = `${demande.grade?.gradeAbrege || ''} ${demande.prenom || ''} ${demande.nom || ''}`.trim();
+    await logAction(req.user.id, 'UPDATE_DEMANDE', `Modification demande ${demande.numeroDS} (${militaireInfo})`, 'Demande', demande.id);
 
     res.json(demande);
   } catch (error) {
@@ -859,6 +861,13 @@ const deleteDemande = async (req, res) => {
       select: { 
         numeroDS: true, 
         dossierId: true,
+        nom: true,
+        prenom: true,
+        grade: {
+          select: {
+            gradeAbrege: true
+          }
+        },
         dossier: {
           select: { numero: true }
         }
@@ -880,7 +889,8 @@ const deleteDemande = async (req, res) => {
       where: { id: req.params.id }
     });
 
-    await logAction(req.user.id, 'DELETE_DEMANDE', `Suppression demande ${demande.numeroDS}`, 'Demande', req.params.id);
+    const militaireInfo = `${demande.grade?.gradeAbrege || ''} ${demande.prenom || ''} ${demande.nom || ''}`.trim();
+    await logAction(req.user.id, 'DELETE_DEMANDE', `Suppression demande ${demande.numeroDS} (${militaireInfo})`, 'Demande', req.params.id);
 
     res.json({ message: 'Demande supprimée avec succès' });
   } catch (error) {

@@ -618,7 +618,7 @@ const Statistiques: React.FC = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', overflow: 'auto' }}>
+    <div className="h-full flex flex-col" style={{ height: '100vh' }}>
       <div className="flex-shrink-0 p-6 bg-white border-b">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Statistiques</h1>
         
@@ -676,9 +676,9 @@ const Statistiques: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ minHeight: '100vh' }}>
+      <div className="flex-1 overflow-auto">
         {activeTab === 'administratif' ? (
-          <div style={{ height: '150vh' }}>
+          <div style={{ height: '100%', minHeight: '600px' }}>
             <Mosaic<MosaicKey>
               renderTile={(id, path) => (
                 <MosaicWindow<MosaicKey> 

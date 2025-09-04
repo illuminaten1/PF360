@@ -1070,7 +1070,6 @@ const getMyAudiences = async (req, res) => {
       }
     });
 
-    await logAction(req.user.id, 'LIST_MY_AUDIENCES', `Consultation de mes audiences (${audiences.length} résultats)`);
 
     res.json(audiences);
   } catch (error) {

@@ -44,7 +44,6 @@ router.get('/', async (req, res) => {
       }
     });
     
-    await logAction(req.user.id, 'LIST_PAIEMENTS', `Consultation des paiements (${paiements.length} résultats)`);
 
     res.json(paiements);
   } catch (error) {

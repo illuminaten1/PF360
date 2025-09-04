@@ -386,7 +386,7 @@ const getStatistiquesAdministratives = async (req, res) => {
         }
       });
       
-      // En cours (demandes reçues cette année sans décisions)
+      // En cours (demandes reçues cette année sans décisions signées)
       const enCours = await prisma.demande.count({
         where: {
           assigneAId: user.id,
@@ -395,12 +395,18 @@ const getStatistiquesAdministratives = async (req, res) => {
             lt: endOfYear
           },
           decisions: {
-            none: {}
+            none: {
+              decision: {
+                dateSignature: {
+                  not: null
+                }
+              }
+            }
           }
         }
       });
       
-      // En cours propre (pareil mais sans BAP)
+      // En cours propre (pareil mais sans BAP et sans décisions signées)
       const enCoursPropre = await prisma.demande.count({
         where: {
           assigneAId: user.id,
@@ -409,7 +415,13 @@ const getStatistiquesAdministratives = async (req, res) => {
             lt: endOfYear
           },
           decisions: {
-            none: {}
+            none: {
+              decision: {
+                dateSignature: {
+                  not: null
+                }
+              }
+            }
           },
           baps: {
             none: {}
@@ -417,7 +429,7 @@ const getStatistiquesAdministratives = async (req, res) => {
         }
       });
       
-      // En cours BAP (pareil mais avec un BAP)
+      // En cours BAP (pareil mais avec un BAP et sans décisions signées)
       const enCoursBAP = await prisma.demande.count({
         where: {
           assigneAId: user.id,
@@ -426,7 +438,13 @@ const getStatistiquesAdministratives = async (req, res) => {
             lt: endOfYear
           },
           decisions: {
-            none: {}
+            none: {
+              decision: {
+                dateSignature: {
+                  not: null
+                }
+              }
+            }
           },
           baps: {
             some: {}
@@ -802,11 +820,14 @@ const getStatistiquesBAP = async (req, res) => {
       }
     });
     
-    // Formater les résultats et trier par nombre de demandes décroissant
-    const statistiques = statsBAP.map(bap => ({
-      nomBAP: bap.nomBAP,
-      nombreDemandes: bap._count.demandes
-    })).sort((a, b) => b.nombreDemandes - a.nombreDemandes);
+    // Formater les résultats, filtrer ceux avec au moins une demande et trier par nombre de demandes décroissant
+    const statistiques = statsBAP
+      .filter(bap => bap._count.demandes > 0)
+      .map(bap => ({
+        nomBAP: bap.nomBAP,
+        nombreDemandes: bap._count.demandes
+      }))
+      .sort((a, b) => b.nombreDemandes - a.nombreDemandes);
     
     res.json(statistiques);
     

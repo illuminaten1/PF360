@@ -73,7 +73,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
   // Mutation pour assigner le BAP
   const assignerBAPMutation = useMutation({
     mutationFn: async (bapId: string | null) => {
-      return api.put(`/demandes/${demandeId}/baps`, { bapIds: bapId ? [bapId] : [] })
+      return api.put(`/demandes/${demandeId}/baps`, { bapId })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demandes-all'] })

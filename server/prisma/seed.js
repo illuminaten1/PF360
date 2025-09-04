@@ -179,6 +179,123 @@ async function main() {
 
   console.log('✅ Hervé LEGREFFIER user created:', herveUser.identifiant)
 
+  // Create 10 additional users
+  const additionalUsersData = [
+    // 8 REDACTEURS
+    {
+      identifiant: 'marie',
+      password: 'marie123',
+      nom: 'LEROY',
+      prenom: 'Marie',
+      mail: 'marie.leroy@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'CNE'
+    },
+    {
+      identifiant: 'jean',
+      password: 'jean123',
+      nom: 'MARTIN',
+      prenom: 'Jean',
+      mail: 'jean.martin@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'LTN'
+    },
+    {
+      identifiant: 'sophie',
+      password: 'sophie123',
+      nom: 'BERNARD',
+      prenom: 'Sophie',
+      mail: 'sophie.bernard@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'ADJ'
+    },
+    {
+      identifiant: 'paul',
+      password: 'paul123',
+      nom: 'DUBOIS',
+      prenom: 'Paul',
+      mail: 'paul.dubois@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'BRI'
+    },
+    {
+      identifiant: 'claire',
+      password: 'claire123',
+      nom: 'MOREAU',
+      prenom: 'Claire',
+      mail: 'claire.moreau@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'MDL'
+    },
+    {
+      identifiant: 'thomas',
+      password: 'thomas123',
+      nom: 'SIMON',
+      prenom: 'Thomas',
+      mail: 'thomas.simon@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'GND'
+    },
+    {
+      identifiant: 'julie',
+      password: 'julie123',
+      nom: 'PETIT',
+      prenom: 'Julie',
+      mail: 'julie.petit@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'GAV'
+    },
+    {
+      identifiant: 'olivier',
+      password: 'olivier123',
+      nom: 'VINCENT',
+      prenom: 'Olivier',
+      mail: 'olivier.vincent@interieur.gouv.fr',
+      role: 'REDACTEUR',
+      grade: 'BRC'
+    },
+    // 1 GREFFIER
+    {
+      identifiant: 'lucas',
+      password: 'lucas123',
+      nom: 'GARCIA',
+      prenom: 'Lucas',
+      mail: 'lucas.garcia@interieur.gouv.fr',
+      role: 'GREFFIER',
+      grade: 'ADC'
+    },
+    // 1 ADMIN
+    {
+      identifiant: 'nathalie',
+      password: 'nathalie123',
+      nom: 'ROUX',
+      prenom: 'Nathalie',
+      mail: 'nathalie.roux@interieur.gouv.fr',
+      role: 'ADMIN',
+      grade: 'COL'
+    }
+  ]
+
+  for (const userData of additionalUsersData) {
+    const hashedPassword = await bcrypt.hash(userData.password, 12)
+    
+    const user = await prisma.user.upsert({
+      where: { identifiant: userData.identifiant },
+      update: {},
+      create: {
+        identifiant: userData.identifiant,
+        password: hashedPassword,
+        nom: userData.nom,
+        prenom: userData.prenom,
+        mail: userData.mail,
+        role: userData.role,
+        grade: userData.grade
+      }
+    })
+    
+    console.log(`✅ User created: ${user.identifiant} (${user.role})`)
+  }
+
   // Create default visas
   const visasData = [
     {

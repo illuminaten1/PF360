@@ -783,10 +783,319 @@ const getStatistiquesBAP = async (req, res) => {
   }
 };
 
+const getAutoControle = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    const now = new Date();
+    
+    // 1. PJ en attente de convention (décisions PJ signées sans convention liée)
+    // Nous récupérons les dossiers avec décision PJ mais sans convention
+    const dossiersAvecPJ = await prisma.decision.findMany({
+      where: {
+        type: 'PJ',
+        dateSignature: {
+          not: null,
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        dossierId: true
+      }
+    });
+
+    const dossiersAvecConvention = await prisma.convention.findMany({
+      where: {
+        dossier: {
+          decisions: {
+            some: {
+              type: 'PJ',
+              dateSignature: {
+                not: null,
+                gte: startOfYear,
+                lt: endOfYear
+              }
+            }
+          }
+        }
+      },
+      select: {
+        dossierId: true
+      }
+    });
+
+    const dossierIdsAvecPJ = new Set(dossiersAvecPJ.map(d => d.dossierId));
+    const dossierIdsAvecConvention = new Set(dossiersAvecConvention.map(d => d.dossierId));
+    
+    const pjEnAttenteConvention = [...dossierIdsAvecPJ].filter(id => !dossierIdsAvecConvention.has(id)).length;
+    
+    // 2. Ancienneté moyenne des demandes non traitées (en jours)
+    const demandesNonTraitees = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          none: {}
+        }
+      },
+      select: {
+        dateReception: true
+      }
+    });
+    
+    let ancienneteMoyenneNonTraites = 0;
+    if (demandesNonTraitees.length > 0) {
+      const totalJours = demandesNonTraitees.reduce((sum, demande) => {
+        const diffTime = now.getTime() - demande.dateReception.getTime();
+        const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return sum + diffJours;
+      }, 0);
+      ancienneteMoyenneNonTraites = totalJours / demandesNonTraitees.length;
+    }
+    
+    // 3. Ancienneté moyenne des demandes BAP non traitées
+    const demandesNonTraiteesBAP = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          none: {}
+        },
+        baps: {
+          some: {}
+        }
+      },
+      select: {
+        dateReception: true
+      }
+    });
+    
+    let ancienneteMoyenneBAP = 0;
+    if (demandesNonTraiteesBAP.length > 0) {
+      const totalJours = demandesNonTraiteesBAP.reduce((sum, demande) => {
+        const diffTime = now.getTime() - demande.dateReception.getTime();
+        const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return sum + diffJours;
+      }, 0);
+      ancienneteMoyenneBAP = totalJours / demandesNonTraiteesBAP.length;
+    }
+    
+    // 4. Ancienneté moyenne des demandes BRP non traitées (demandes propres)
+    const demandesNonTraiteesBRP = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          none: {}
+        },
+        baps: {
+          none: {}
+        }
+      },
+      select: {
+        dateReception: true
+      }
+    });
+    
+    let ancienneteMoyenneBRP = 0;
+    if (demandesNonTraiteesBRP.length > 0) {
+      const totalJours = demandesNonTraiteesBRP.reduce((sum, demande) => {
+        const diffTime = now.getTime() - demande.dateReception.getTime();
+        const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return sum + diffJours;
+      }, 0);
+      ancienneteMoyenneBRP = totalJours / demandesNonTraiteesBRP.length;
+    }
+    
+    // 5. Délai de traitement moyen pour toutes les demandes traitées (en jours)
+    const demandesTraitees = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          some: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
+        }
+      },
+      select: {
+        dateReception: true,
+        decisions: {
+          select: {
+            decision: {
+              select: {
+                dateSignature: true
+              }
+            }
+          },
+          orderBy: {
+            decision: {
+              dateSignature: 'asc'
+            }
+          },
+          take: 1
+        }
+      }
+    });
+    
+    let delaiTraitementMoyen = 0;
+    if (demandesTraitees.length > 0) {
+      const totalJours = demandesTraitees.reduce((sum, demande) => {
+        if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
+          const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
+          const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          return sum + diffJours;
+        }
+        return sum;
+      }, 0);
+      delaiTraitementMoyen = totalJours / demandesTraitees.length;
+    }
+    
+    // 6. Délai de traitement moyen pour les demandes BAP
+    const demandesTraiteesBAP = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          some: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
+        },
+        baps: {
+          some: {}
+        }
+      },
+      select: {
+        dateReception: true,
+        decisions: {
+          select: {
+            decision: {
+              select: {
+                dateSignature: true
+              }
+            }
+          },
+          orderBy: {
+            decision: {
+              dateSignature: 'asc'
+            }
+          },
+          take: 1
+        }
+      }
+    });
+    
+    let delaiTraitementBAP = 0;
+    if (demandesTraiteesBAP.length > 0) {
+      const totalJours = demandesTraiteesBAP.reduce((sum, demande) => {
+        if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
+          const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
+          const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          return sum + diffJours;
+        }
+        return sum;
+      }, 0);
+      delaiTraitementBAP = totalJours / demandesTraiteesBAP.length;
+    }
+    
+    // 7. Délai de traitement moyen pour les demandes BRP (demandes propres)
+    const demandesTraiteesBRP = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          some: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
+        },
+        baps: {
+          none: {}
+        }
+      },
+      select: {
+        dateReception: true,
+        decisions: {
+          select: {
+            decision: {
+              select: {
+                dateSignature: true
+              }
+            }
+          },
+          orderBy: {
+            decision: {
+              dateSignature: 'asc'
+            }
+          },
+          take: 1
+        }
+      }
+    });
+    
+    let delaiTraitementBRP = 0;
+    if (demandesTraiteesBRP.length > 0) {
+      const totalJours = demandesTraiteesBRP.reduce((sum, demande) => {
+        if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
+          const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
+          const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          return sum + diffJours;
+        }
+        return sum;
+      }, 0);
+      delaiTraitementBRP = totalJours / demandesTraiteesBRP.length;
+    }
+    
+    res.json({
+      pjEnAttenteConvention,
+      ancienneteMoyenneNonTraites: Math.round(ancienneteMoyenneNonTraites * 100) / 100,
+      ancienneteMoyenneBAP: Math.round(ancienneteMoyenneBAP * 100) / 100,
+      ancienneteMoyenneBRP: Math.round(ancienneteMoyenneBRP * 100) / 100,
+      delaiTraitementMoyen: Math.round(delaiTraitementMoyen * 100) / 100,
+      delaiTraitementBAP: Math.round(delaiTraitementBAP * 100) / 100,
+      delaiTraitementBRP: Math.round(delaiTraitementBRP * 100) / 100
+    });
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques auto-contrôle:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques auto-contrôle' 
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
   getStatistiquesBAP,
   getFluxMensuels,
-  getFluxHebdomadaires
+  getFluxHebdomadaires,
+  getAutoControle
 };

@@ -618,7 +618,7 @@ const Statistiques: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div style={{ minHeight: '100vh', overflow: 'auto' }}>
       <div className="flex-shrink-0 p-6 bg-white border-b">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Statistiques</h1>
         
@@ -676,31 +676,33 @@ const Statistiques: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div style={{ minHeight: '100vh' }}>
         {activeTab === 'administratif' ? (
-          <Mosaic<MosaicKey>
-            renderTile={(id, path) => (
-              <MosaicWindow<MosaicKey> 
-                path={path}
-                createNode={() => 'general'}
-                title={
-                  id === 'general' ? 'Statistiques générales' :
-                  id === 'users' ? 'Utilisateurs' :
-                  id === 'bap' ? 'BAP' :
-                  id === 'autocontrole' ? 'Auto-contrôle' :
-                  id === 'fluxmensuels' ? 'Flux mensuels' :
-                  id === 'fluxhebdo' ? 'Flux hebdomadaires' :
-                  'Panneau'
-                }
-                toolbarControls={[]}
-              >
-                {renderTile(id)}
-              </MosaicWindow>
-            )}
-            value={mosaicValue}
-            onChange={handleMosaicChange}
-            className="bg-gray-100"
-          />
+          <div style={{ height: '150vh' }}>
+            <Mosaic<MosaicKey>
+              renderTile={(id, path) => (
+                <MosaicWindow<MosaicKey> 
+                  path={path}
+                  createNode={() => 'general'}
+                  title={
+                    id === 'general' ? 'Statistiques générales' :
+                    id === 'users' ? 'Utilisateurs' :
+                    id === 'bap' ? 'BAP' :
+                    id === 'autocontrole' ? 'Auto-contrôle' :
+                    id === 'fluxmensuels' ? 'Flux mensuels' :
+                    id === 'fluxhebdo' ? 'Flux hebdomadaires' :
+                    'Panneau'
+                  }
+                  toolbarControls={[]}
+                >
+                  {renderTile(id)}
+                </MosaicWindow>
+              )}
+              value={mosaicValue}
+              onChange={handleMosaicChange}
+              className="bg-gray-100"
+            />
+          </div>
         ) : (
           <div className="p-6 space-y-8 h-full overflow-auto">
             <div className="bg-white rounded-lg shadow p-6">

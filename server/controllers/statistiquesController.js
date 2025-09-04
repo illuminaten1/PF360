@@ -792,46 +792,48 @@ const getAutoControle = async (req, res) => {
     const endOfYear = new Date(year + 1, 0, 1);
     const now = new Date();
     
-    // 1. PJ en attente de convention (décisions PJ signées sans convention liée)
-    // Nous récupérons les dossiers avec décision PJ mais sans convention
-    const dossiersAvecPJ = await prisma.decision.findMany({
+    // 1. PJ en attente de convention (demandes de l'année sélectionnée visées par une décision PJ mais pas par une convention)
+    const demandesAvecPJ = await prisma.demande.findMany({
       where: {
-        type: 'PJ',
-        dateSignature: {
-          not: null,
+        dateReception: {
           gte: startOfYear,
           lt: endOfYear
-        }
-      },
-      select: {
-        dossierId: true
-      }
-    });
-
-    const dossiersAvecConvention = await prisma.convention.findMany({
-      where: {
-        dossier: {
-          decisions: {
-            some: {
+        },
+        decisions: {
+          some: {
+            decision: {
               type: 'PJ',
               dateSignature: {
-                not: null,
-                gte: startOfYear,
-                lt: endOfYear
+                not: null
               }
             }
           }
         }
       },
       select: {
-        dossierId: true
+        id: true
       }
     });
 
-    const dossierIdsAvecPJ = new Set(dossiersAvecPJ.map(d => d.dossierId));
-    const dossierIdsAvecConvention = new Set(dossiersAvecConvention.map(d => d.dossierId));
+    const demandesAvecConvention = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        conventions: {
+          some: {}
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    const demandeIdsAvecPJ = new Set(demandesAvecPJ.map(d => d.id));
+    const demandeIdsAvecConvention = new Set(demandesAvecConvention.map(d => d.id));
     
-    const pjEnAttenteConvention = [...dossierIdsAvecPJ].filter(id => !dossierIdsAvecConvention.has(id)).length;
+    const pjEnAttenteConvention = [...demandeIdsAvecPJ].filter(id => !demandeIdsAvecConvention.has(id)).length;
     
     // 2. Ancienneté moyenne des demandes non traitées (en jours)
     const demandesNonTraitees = await prisma.demande.findMany({
@@ -859,7 +861,7 @@ const getAutoControle = async (req, res) => {
       ancienneteMoyenneNonTraites = totalJours / demandesNonTraitees.length;
     }
     
-    // 3. Ancienneté moyenne des demandes BAP non traitées
+    // 3. Ancienneté moyenne des demandes BAP non traitées (demandes assignées à un BAP)
     const demandesNonTraiteesBAP = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -888,8 +890,8 @@ const getAutoControle = async (req, res) => {
       ancienneteMoyenneBAP = totalJours / demandesNonTraiteesBAP.length;
     }
     
-    // 4. Ancienneté moyenne des demandes BRP non traitées (demandes propres)
-    const demandesNonTraiteesBRP = await prisma.demande.findMany({
+    // 4. Ancienneté moyenne des demandes BRPF non traitées (demandes non assignées à un BAP)
+    const demandesNonTraiteesBRPF = await prisma.demande.findMany({
       where: {
         dateReception: {
           gte: startOfYear,
@@ -907,14 +909,14 @@ const getAutoControle = async (req, res) => {
       }
     });
     
-    let ancienneteMoyenneBRP = 0;
-    if (demandesNonTraiteesBRP.length > 0) {
-      const totalJours = demandesNonTraiteesBRP.reduce((sum, demande) => {
+    let ancienneteMoyenneBRPF = 0;
+    if (demandesNonTraiteesBRPF.length > 0) {
+      const totalJours = demandesNonTraiteesBRPF.reduce((sum, demande) => {
         const diffTime = now.getTime() - demande.dateReception.getTime();
         const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         return sum + diffJours;
       }, 0);
-      ancienneteMoyenneBRP = totalJours / demandesNonTraiteesBRP.length;
+      ancienneteMoyenneBRPF = totalJours / demandesNonTraiteesBRPF.length;
     }
     
     // 5. Délai de traitement moyen pour toutes les demandes traitées (en jours)
@@ -967,7 +969,7 @@ const getAutoControle = async (req, res) => {
       delaiTraitementMoyen = totalJours / demandesTraitees.length;
     }
     
-    // 6. Délai de traitement moyen pour les demandes BAP
+    // 6. Délai de traitement moyen pour les demandes BAP (demandes assignées à un BAP)
     const demandesTraiteesBAP = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -1020,8 +1022,8 @@ const getAutoControle = async (req, res) => {
       delaiTraitementBAP = totalJours / demandesTraiteesBAP.length;
     }
     
-    // 7. Délai de traitement moyen pour les demandes BRP (demandes propres)
-    const demandesTraiteesBRP = await prisma.demande.findMany({
+    // 7. Délai de traitement moyen pour les demandes BRPF (demandes non assignées à un BAP)
+    const demandesTraiteesBRPF = await prisma.demande.findMany({
       where: {
         dateReception: {
           gte: startOfYear,
@@ -1060,9 +1062,9 @@ const getAutoControle = async (req, res) => {
       }
     });
     
-    let delaiTraitementBRP = 0;
-    if (demandesTraiteesBRP.length > 0) {
-      const totalJours = demandesTraiteesBRP.reduce((sum, demande) => {
+    let delaiTraitementBRPF = 0;
+    if (demandesTraiteesBRPF.length > 0) {
+      const totalJours = demandesTraiteesBRPF.reduce((sum, demande) => {
         if (demande.decisions.length > 0 && demande.decisions[0].decision.dateSignature) {
           const diffTime = demande.decisions[0].decision.dateSignature.getTime() - demande.dateReception.getTime();
           const diffJours = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -1070,17 +1072,17 @@ const getAutoControle = async (req, res) => {
         }
         return sum;
       }, 0);
-      delaiTraitementBRP = totalJours / demandesTraiteesBRP.length;
+      delaiTraitementBRPF = totalJours / demandesTraiteesBRPF.length;
     }
     
     res.json({
       pjEnAttenteConvention,
       ancienneteMoyenneNonTraites: Math.round(ancienneteMoyenneNonTraites * 100) / 100,
       ancienneteMoyenneBAP: Math.round(ancienneteMoyenneBAP * 100) / 100,
-      ancienneteMoyenneBRP: Math.round(ancienneteMoyenneBRP * 100) / 100,
+      ancienneteMoyenneBRP: Math.round(ancienneteMoyenneBRPF * 100) / 100,
       delaiTraitementMoyen: Math.round(delaiTraitementMoyen * 100) / 100,
       delaiTraitementBAP: Math.round(delaiTraitementBAP * 100) / 100,
-      delaiTraitementBRP: Math.round(delaiTraitementBRP * 100) / 100
+      delaiTraitementBRP: Math.round(delaiTraitementBRPF * 100) / 100
     });
     
   } catch (error) {

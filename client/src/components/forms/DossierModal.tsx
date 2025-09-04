@@ -10,11 +10,11 @@ import api from '@/utils/api'
 import { useAuth } from '@/contexts/AuthContext'
 
 const dossierSchema = z.object({
-  nomDossier: z.string().optional(),
-  sgamiId: z.string().optional(),
+  nomDossier: z.string().nullable().optional(),
+  sgamiId: z.string().nullable().optional(),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional(),
-  bapId: z.string().optional()
+  bapId: z.string().nullable().optional()
 })
 
 type DossierFormData = z.infer<typeof dossierSchema>

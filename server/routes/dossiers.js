@@ -22,7 +22,7 @@ const createDossierSchema = z.object({
 const updateDossierSchema = z.object({
   nomDossier: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  sgamiId: z.string().optional(),
+  sgamiId: z.string().optional().nullable(),
   assigneAId: z.string().optional(),
   badges: z.array(z.string()).optional(),
   bapId: z.string().optional().nullable()

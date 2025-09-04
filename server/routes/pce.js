@@ -16,7 +16,6 @@ router.get('/', async (req, res) => {
       ]
     });
 
-    await logAction(req.user.id, 'LIST_PCE', `Consultation des PCE (${pce.length} résultats)`);
 
     res.json(pce);
   } catch (error) {

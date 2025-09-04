@@ -16,7 +16,6 @@ router.get('/', async (req, res) => {
       ]
     });
 
-    await logAction(req.user.id, 'LIST_GRADES', `Consultation des grades (${grades.length} résultats)`);
 
     res.json(grades);
   } catch (error) {

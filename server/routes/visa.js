@@ -21,7 +21,6 @@ router.get('/', async (req, res) => {
       ]
     });
 
-    await logAction(req.user.id, 'LIST_VISAS', `Consultation des visas (${visas.length} résultats)`);
 
     res.json(visas);
   } catch (error) {

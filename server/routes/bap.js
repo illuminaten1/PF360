@@ -33,7 +33,6 @@ router.get('/', adminMiddleware, async (req, res) => {
       demandesCount: bap._count.demandes
     }));
     
-    await logAction(req.user.id, 'VIEW_BAP', 'BAP', null, 'Consulté la liste des BAP');
     
     res.json({ baps: bapsWithUsage });
   } catch (error) {
@@ -63,7 +62,6 @@ router.get('/stats', adminMiddleware, async (req, res) => {
       unusedBAP: totalBAP - usedBAPCount
     };
 
-    await logAction(req.user.id, 'VIEW_BAP_STATS', 'BAP', null, 'Consulté les statistiques des BAP');
     
     res.json(stats);
   } catch (error) {

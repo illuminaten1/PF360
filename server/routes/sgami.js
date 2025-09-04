@@ -29,7 +29,6 @@ router.get('/', async (req, res) => {
       dossiersCount: item._count.dossiers
     }));
 
-    await logAction(req.user.id, 'LIST_SGAMI', `Consultation des SGAMI (${sgamiWithUsage.length} résultats)`);
 
     res.json(sgamiWithUsage);
   } catch (error) {

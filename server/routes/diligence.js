@@ -34,7 +34,6 @@ router.get('/', async (req, res) => {
       }
     });
 
-    await logAction(req.user.id, 'LIST_DILIGENCES', `Consultation des diligences (${diligences.length} résultats)`);
 
     res.json(diligences);
   } catch (error) {

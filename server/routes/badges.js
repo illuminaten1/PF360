@@ -33,7 +33,6 @@ router.get('/', adminMiddleware, async (req, res) => {
       demandesCount: badge._count.demandes
     }));
     
-    await logAction(req.user.id, 'VIEW_BADGES', 'BADGE', null, 'Consulté la liste des badges');
     
     res.json({ badges: badgesWithUsage });
   } catch (error) {
@@ -63,7 +62,6 @@ router.get('/stats', adminMiddleware, async (req, res) => {
       unusedBadges: totalBadges - usedBadgesCount
     };
 
-    await logAction(req.user.id, 'VIEW_BADGES_STATS', 'BADGE', null, 'Consulté les statistiques des badges');
     
     res.json(stats);
   } catch (error) {

@@ -192,7 +192,7 @@ const getStatistiquesAdministratives = async (req, res) => {
       }
     });
     
-    // Nombre de demandes traitées (avec au moins une décision liée)
+    // Nombre de demandes traitées (avec au moins une décision signée)
     const demandesTraitees = await prisma.demande.count({
       where: {
         dateReception: {
@@ -200,20 +200,35 @@ const getStatistiquesAdministratives = async (req, res) => {
           lt: endOfYear
         },
         decisions: {
-          some: {}
+          some: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
         }
       }
     });
     
-    // Nombre de demandes en instance (sans décision liée)
+    // Nombre de demandes en instance (sans décision signée et assignées à un utilisateur)
     const demandesEnInstance = await prisma.demande.count({
       where: {
         dateReception: {
           gte: startOfYear,
           lt: endOfYear
         },
+        assigneAId: {
+          not: null
+        },
         decisions: {
-          none: {}
+          none: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
         }
       }
     });
@@ -261,6 +276,11 @@ const getStatistiquesAdministratives = async (req, res) => {
           }
         }
       });
+      
+      // Ne retourner que les utilisateurs ayant au moins une demande attribuée
+      if (demandesAttribuees === 0) {
+        return null;
+      }
       
       // Nombre de demandes propres (sans BAP lié)
       const demandesPropres = await prisma.demande.count({
@@ -430,6 +450,9 @@ const getStatistiquesAdministratives = async (req, res) => {
       };
     }));
     
+    // Filtrer les utilisateurs null (ceux sans demandes attribuées)
+    const utilisateursFiltres = utilisateursStats.filter(user => user !== null);
+    
     res.json({
       generales: {
         demandesTotal,
@@ -437,7 +460,7 @@ const getStatistiquesAdministratives = async (req, res) => {
         demandesEnInstance,
         demandesNonAffectees
       },
-      utilisateurs: utilisateursStats
+      utilisateurs: utilisateursFiltres
     });
     
   } catch (error) {
@@ -1157,11 +1180,42 @@ const getAutoControle = async (req, res) => {
   }
 };
 
+const getAnneesDisponibles = async (req, res) => {
+  try {
+    // Récupérer les années distinctes où il y a des demandes
+    const anneesAvecDemandes = await prisma.demande.findMany({
+      select: {
+        dateReception: true
+      },
+      orderBy: {
+        dateReception: 'desc'
+      }
+    });
+
+    // Extraire les années uniques
+    const anneesSet = new Set();
+    anneesAvecDemandes.forEach(demande => {
+      anneesSet.add(demande.dateReception.getFullYear());
+    });
+
+    // Convertir en tableau trié par ordre décroissant
+    const annees = Array.from(anneesSet).sort((a, b) => b - a);
+
+    res.json(annees);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des années disponibles:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des années disponibles' 
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
   getStatistiquesBAP,
   getFluxMensuels,
   getFluxHebdomadaires,
-  getAutoControle
+  getAutoControle,
+  getAnneesDisponibles
 };

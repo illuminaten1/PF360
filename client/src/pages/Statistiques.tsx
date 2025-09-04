@@ -317,7 +317,7 @@ const AutoControleComponent: React.FC<{
           </tr>
           <tr className="hover:bg-gray-50">
             <td className="px-6 py-2 whitespace-nowrap">
-              <div className="text-xs text-gray-900">Dont BRP</div>
+              <div className="text-xs text-gray-900">Dont BRPF</div>
             </td>
             <td className="px-4 py-2 whitespace-nowrap text-right">
               <div className="text-xs font-bold text-gray-900">
@@ -560,10 +560,15 @@ const Statistiques: React.FC = () => {
     enabled: activeTab === 'administratif'
   })
 
-  const yearOptions = Array.from(
-    { length: 5 }, 
-    (_, index) => currentYear - index
-  )
+  const { data: anneesDisponibles } = useQuery<number[]>({
+    queryKey: ['annees-disponibles'],
+    queryFn: async () => {
+      const response = await api.get('/statistiques/annees-disponibles')
+      return response.data
+    }
+  })
+
+  const yearOptions = anneesDisponibles || [currentYear]
 
   const renderTile = (id: MosaicKey) => {
     switch (id) {

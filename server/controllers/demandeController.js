@@ -159,6 +159,62 @@ const syncSingleDemandeBAPs = async (demandeId) => {
   }
 };
 
+// Utility function to sync assignation from dossier to its demandes
+const syncDemandeAssignationFromDossier = async (dossierId) => {
+  try {
+    // Get the dossier with its assignation
+    const dossier = await prisma.dossier.findUnique({
+      where: { id: dossierId },
+      select: { assigneAId: true }
+    });
+    
+    if (!dossier) return;
+    
+    // Get all demandes linked to this dossier
+    const demandes = await prisma.demande.findMany({
+      where: { dossierId },
+      select: { id: true }
+    });
+    
+    // For each demande, sync the assignation
+    for (const demande of demandes) {
+      await prisma.demande.update({
+        where: { id: demande.id },
+        data: { assigneAId: dossier.assigneAId }
+      });
+    }
+  } catch (error) {
+    console.error('Error syncing demande assignation:', error);
+  }
+};
+
+// Utility function to sync assignation for a specific demande based on its dossier
+const syncSingleDemandeAssignation = async (demandeId) => {
+  try {
+    const demande = await prisma.demande.findUnique({
+      where: { id: demandeId },
+      select: { dossierId: true }
+    });
+    
+    if (!demande || !demande.dossierId) return;
+    
+    // Get the dossier assignation
+    const dossier = await prisma.dossier.findUnique({
+      where: { id: demande.dossierId },
+      select: { assigneAId: true }
+    });
+    
+    if (dossier) {
+      await prisma.demande.update({
+        where: { id: demandeId },
+        data: { assigneAId: dossier.assigneAId }
+      });
+    }
+  } catch (error) {
+    console.error('Error syncing single demande assignation:', error);
+  }
+};
+
 // Utility function to clean empty strings from data
 const cleanEmptyStrings = (data) => {
   const cleaned = { ...data };
@@ -773,10 +829,11 @@ const updateDemande = async (req, res) => {
       }
     });
 
-    // Sync badges and BAPs if dossierId changed
+    // Sync badges, BAPs and assignation if dossierId changed
     if (dataToUpdate.hasOwnProperty('dossierId')) {
       await syncSingleDemandeBadges(req.params.id);
       await syncSingleDemandeBAPs(req.params.id);
+      await syncSingleDemandeAssignation(req.params.id);
     }
 
     await logAction(req.user.id, 'UPDATE_DEMANDE', `Modification demande ${demande.numeroDS}`, 'Demande', demande.id);
@@ -1103,5 +1160,7 @@ module.exports = {
   syncDemandeBAPsFromDossier,
   syncSingleDemandeBadges,
   syncSingleDemandeBAPs,
+  syncDemandeAssignationFromDossier,
+  syncSingleDemandeAssignation,
   updateDemandeBAPs
 };

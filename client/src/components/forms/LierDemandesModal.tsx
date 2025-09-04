@@ -39,6 +39,17 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
   const [page, setPage] = useState(1)
   const [limit] = useState(50) // Limite raisonnable par page
 
+  // Fetch dossier details to show assigned user
+  const { data: dossier } = useQuery({
+    queryKey: ['dossier', dossierId],
+    queryFn: async () => {
+      const response = await api.get(`/dossiers/${dossierId}`)
+      return response.data
+    },
+    enabled: isOpen,
+    staleTime: 60000 // Cache pendant 1 minute
+  })
+
   // Fetch demandes non liées à un dossier
   const { data: demandesData, isLoading, error } = useQuery({
     queryKey: ['demandes-non-liees', searchTerm, typeFilter, page],
@@ -187,6 +198,18 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                     <p className="mt-1 text-sm text-gray-600">
                       Sélectionnez les demandes à associer à ce dossier
                     </p>
+                    {dossier?.assigneA && (
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <p className="text-sm text-blue-700">
+                          <strong>ℹ️ Information :</strong> Les demandes liées seront automatiquement attribuées à{' '}
+                          <span className="font-semibold">
+                            {dossier.assigneA.grade && `${dossier.assigneA.grade} `}
+                            {dossier.assigneA.prenom} {dossier.assigneA.nom}
+                          </span>
+                          {' '}(utilisateur gestionnaire de ce dossier).
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={handleClose}
@@ -290,7 +313,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-3">
                                     <h4 className="text-sm font-medium text-gray-900">
-                                      {demande.grade && `${demande.grade} `}
+                                      {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
                                       {demande.prenom} {demande.nom}
                                       {demande.nigend && (
                                         <span className="ml-2 font-normal text-gray-600">NIGEND: {demande.nigend}</span>

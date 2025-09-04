@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDownIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline'
-import { Listbox, Transition } from '@headlessui/react'
-import { Fragment } from 'react'
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline'
 import { api } from '@/utils/api'
 
 interface WeeklyStat {
+  year: number
   semaine: number
   entrantes: number
   sortantes: number
@@ -14,32 +13,23 @@ interface WeeklyStat {
   endDate: string
 }
 
-interface WeeklyStatsResponse {
-  year: number
+interface RecentWeeklyStatsResponse {
   weeks: WeeklyStat[]
+  totalWeeks: number
 }
 
 const EncartStatistiquesHebdomadaires: React.FC = () => {
-  const currentYear = new Date().getFullYear()
-  const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [limit, setLimit] = useState(15)
+  const tableRef = useRef<HTMLDivElement>(null)
 
-  // Récupérer les années disponibles depuis l'API
-  const { data: availableYears = [] } = useQuery<number[]>({
-    queryKey: ['available-years'],
+  const { data: stats, isLoading, isError } = useQuery<RecentWeeklyStatsResponse>({
+    queryKey: ['recent-weekly-stats', limit],
     queryFn: async () => {
-      const response = await api.get('/statistiques/years')
+      const response = await api.get(`/statistiques/recent?limit=${limit}`)
       return response.data
     }
   })
 
-  const { data: stats, isLoading, isError } = useQuery<WeeklyStatsResponse>({
-    queryKey: ['weekly-stats', selectedYear],
-    queryFn: async () => {
-      const response = await api.get(`/statistiques/weekly?year=${selectedYear}`)
-      return response.data
-    },
-    enabled: availableYears.length > 0
-  })
 
   if (isLoading) {
     return (
@@ -61,28 +51,15 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
     )
   }
 
-  // Fonction pour obtenir le numéro de semaine ISO (identique au serveur)
-  const getISOWeek = (date: Date) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
-    const week1 = new Date(d.getFullYear(), 0, 4);
-    return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-  }
+  // Les semaines sont déjà triées avec les plus récentes en premier
+  const semainesTriees = stats.weeks
 
-  // Obtenir la semaine courante pour l'année des statistiques
-  const now = new Date()
-  let semaineCourante = 53 // Par défaut, afficher toutes les semaines pour les années passées
-  
-  // Si on affiche les statistiques de l'année courante, calculer la semaine actuelle ISO
-  if (selectedYear === currentYear) {
-    semaineCourante = getISOWeek(now)
+  // Fonction pour charger plus de données
+  const loadMore = () => {
+    if (stats.totalWeeks > limit) {
+      setLimit(prev => Math.min(prev + 15, stats.totalWeeks))
+    }
   }
-
-  // Trier les semaines par numéro de semaine et filtrer jusqu'à la semaine courante
-  const semainesTriees = [...stats.weeks]
-    .filter(week => week.semaine <= semaineCourante)
-    .sort((a, b) => a.semaine - b.semaine)
 
   return (
     <div className="bg-white rounded-lg shadow p-6 flex flex-col h-full">
@@ -90,54 +67,14 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900">
           Flux Hebdomadaires
         </h3>
-        <Listbox value={selectedYear} onChange={setSelectedYear}>
-          <div className="relative">
-            <Listbox.Button className="relative w-24 bg-white border border-gray-300 rounded-md pl-3 pr-8 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer text-left">
-              <span className="block truncate">{selectedYear}</span>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <ChevronDownIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
-              </span>
-            </Listbox.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Listbox.Options className="absolute z-10 mt-1 w-24 bg-white shadow-lg max-h-40 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                {availableYears.map((year) => (
-                  <Listbox.Option
-                    key={year}
-                    className={({ active }) =>
-                      `relative cursor-default select-none py-2 px-3 ${
-                        active ? 'text-blue-900 bg-blue-100' : 'text-gray-900'
-                      }`
-                    }
-                    value={year}
-                  >
-                    {({ selected }) => (
-                      <span
-                        className={`block truncate ${
-                          selected ? 'font-semibold' : 'font-normal'
-                        }`}
-                      >
-                        {year}
-                      </span>
-                    )}
-                  </Listbox.Option>
-                ))}
-              </Listbox.Options>
-            </Transition>
-          </div>
-        </Listbox>
+        <div className="text-sm text-gray-500">
+          {semainesTriees.length} / {stats.totalWeeks} semaines
+        </div>
       </div>
       
       <div className="flex flex-col flex-1 space-y-4">
         <div className="flex-1 overflow-hidden border rounded-lg">
-          <div className="h-full overflow-y-auto">
+          <div ref={tableRef} className="h-full overflow-y-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 sticky top-0">
                 <tr className="border-b border-gray-200">
@@ -154,21 +91,22 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
                   const startDate = new Date(week.startDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
                   const endDate = new Date(week.endDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
                   
-                  // Calculer la tendance du stock par rapport à la semaine précédente
+                  // Calculer la tendance du stock par rapport à la semaine précédente (chronologiquement)
+                  // Comme les données sont inversées, on compare avec l'index suivant pour la semaine précédente
                   let stockTrend = null
-                  if (index > 0) {
-                    const previousStock = semainesTriees[index - 1].stock
-                    if (week.stock > previousStock) {
+                  if (index < semainesTriees.length - 1) {
+                    const previousWeekStock = semainesTriees[index + 1].stock
+                    if (week.stock > previousWeekStock) {
                       stockTrend = 'up'
-                    } else if (week.stock < previousStock) {
+                    } else if (week.stock < previousWeekStock) {
                       stockTrend = 'down'
                     }
                   }
                   
                   return (
-                    <tr key={week.semaine} className="hover:bg-gray-50">
+                    <tr key={`${week.year}-${week.semaine}`} className="hover:bg-gray-50">
                       <td className="px-3 py-2 font-medium text-gray-900">
-                        <div className="font-semibold">{week.semaine}</div>
+                        <div className="font-semibold">{week.year} - S{week.semaine}</div>
                         <div className="text-xs text-gray-500">({startDate} - {endDate})</div>
                       </td>
                       <td className="px-3 py-2 text-center text-blue-600 font-medium">{week.entrantes}</td>
@@ -198,6 +136,18 @@ const EncartStatistiquesHebdomadaires: React.FC = () => {
                 })}
               </tbody>
             </table>
+            
+            {/* Bouton pour charger plus si il y a plus de données */}
+            {stats.totalWeeks > limit && (
+              <div className="p-4 text-center border-t border-gray-200">
+                <button
+                  onClick={loadMore}
+                  className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Charger 15 semaines supplémentaires ({stats.totalWeeks - limit} restantes)
+                </button>
+              </div>
+            )}
           </div>
         </div>
         

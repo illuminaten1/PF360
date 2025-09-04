@@ -1,12 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { getWeeklyStats, getAvailableYears } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getFluxMensuels, getFluxHebdomadaires } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
-// GET /api/statistiques/years - Récupérer les années disponibles
-router.get('/years', authMiddleware, getAvailableYears);
+// GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
+router.get('/recent', authMiddleware, getRecentWeeklyStats);
 
-// GET /api/statistiques/weekly - Récupérer les statistiques hebdomadaires
-router.get('/weekly', authMiddleware, getWeeklyStats);
+// GET /api/statistiques/administratives - Récupérer les statistiques administratives par année
+router.get('/administratives', authMiddleware, getStatistiquesAdministratives);
+
+// GET /api/statistiques/bap - Récupérer les statistiques BAP par année
+router.get('/bap', authMiddleware, getStatistiquesBAP);
+
+// GET /api/statistiques/flux-mensuels - Récupérer les flux mensuels par année
+router.get('/flux-mensuels', authMiddleware, getFluxMensuels);
+
+// GET /api/statistiques/flux-hebdomadaires - Récupérer les flux hebdomadaires par année
+router.get('/flux-hebdomadaires', authMiddleware, getFluxHebdomadaires);
 
 module.exports = router;

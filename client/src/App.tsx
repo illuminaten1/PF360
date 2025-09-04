@@ -22,6 +22,7 @@ import Paiements from '@/pages/Paiements'
 import GradesPage from '@/pages/Grades'
 import Templates from '@/pages/Templates'
 import Revue from '@/pages/Revue'
+import Statistiques from '@/pages/Statistiques'
 
 // Placeholder components for other pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -58,7 +59,7 @@ function App() {
           <Route path="paiements" element={<Paiements />} />
           <Route path="avocats" element={<Avocats />} />
           <Route path="revue" element={<Revue />} />
-          <Route path="statistiques" element={<PlaceholderPage title="Statistiques" />} />
+          <Route path="statistiques" element={<Statistiques />} />
           
           {/* Admin routes */}
           <Route

@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
-const { syncDemandeBadgesFromDossier, syncDemandeBAPsFromDossier } = require('../controllers/demandeController');
+const { syncDemandeBadgesFromDossier, syncDemandeBAPsFromDossier, syncDemandeAssignationFromDossier } = require('../controllers/demandeController');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -654,9 +654,10 @@ router.put('/:id', async (req, res) => {
     };
     delete dossierWithStats.baps;
 
-    // Sync badges and BAP to all linked demandes after changes
+    // Sync badges, BAP and assignation to all linked demandes after changes
     await syncDemandeBadgesFromDossier(req.params.id);
     await syncDemandeBAPsFromDossier(req.params.id);
+    await syncDemandeAssignationFromDossier(req.params.id);
 
     await logAction(req.user.id, 'UPDATE_DOSSIER', `Modification du dossier ${dossier.numero}`, 'Dossier', dossier.id);
 

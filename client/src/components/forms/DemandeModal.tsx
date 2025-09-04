@@ -139,6 +139,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
   })
 
   const partieCivile = watch('partieCivile')
+  const dossierId = watch('dossierId')
 
   // Nettoyer le montant quand partieCivile est décochée
   React.useEffect(() => {
@@ -367,6 +368,28 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                               </option>
                             ))}
                           </select>
+                          
+                          {/* Message d'information quand un dossier est sélectionné */}
+                          {dossierId && (
+                            (() => {
+                              const selectedDossier = dossiers.find(d => d.id === dossierId);
+                              if (selectedDossier?.assigneA) {
+                                return (
+                                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                    <p className="text-xs text-blue-700">
+                                      <strong>ℹ️ Information :</strong> La demande sera automatiquement attribuée à{' '}
+                                      <span className="font-semibold">
+                                        {selectedDossier.assigneA.grade && `${selectedDossier.assigneA.grade} `}
+                                        {selectedDossier.assigneA.prenom} {selectedDossier.assigneA.nom}
+                                      </span>
+                                      {' '}(utilisateur gestionnaire du dossier).
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()
+                          )}
                         </div>
                       )}
                     </div>

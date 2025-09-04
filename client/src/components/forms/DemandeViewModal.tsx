@@ -128,7 +128,7 @@ const DemandeViewModal: React.FC<DemandeViewModalProps> = ({
                           </span>
                           {demande.badges && demande.badges.length > 0 && (
                             <>
-                              {demande.badges.map((badgeRel) => (
+                              {demande.badges.map((badgeRel: any) => (
                                 <span
                                   key={badgeRel.badge.id}
                                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-gray-900 shadow-md"

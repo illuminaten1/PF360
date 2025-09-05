@@ -43,9 +43,9 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
 
   // Fetch BAPs
   const { data: bapsData, isLoading, error } = useQuery({
-    queryKey: ['baps-list'],
+    queryKey: ['baps'],
     queryFn: async () => {
-      const response = await api.get('/bap/list')
+      const response = await api.get('/bap')
       return response.data
     },
     enabled: isOpen,

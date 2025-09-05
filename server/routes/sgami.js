@@ -1,6 +1,6 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
 
 const router = express.Router();
@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // Récupérer les statistiques des SGAMI
-router.get('/stats', async (req, res) => {
+router.get('/stats', adminMiddleware, async (req, res) => {
   try {
     const totalSGAMI = await prisma.sgami.count();
     
@@ -60,7 +60,7 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', adminMiddleware, async (req, res) => {
   try {
     const { nom, formatCourtNommage, texteConvention, intituleFicheReglement } = req.body;
     
@@ -94,7 +94,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { nom, formatCourtNommage, texteConvention, intituleFicheReglement } = req.body;
@@ -133,7 +133,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     

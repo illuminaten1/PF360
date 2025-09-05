@@ -8,28 +8,9 @@ const prisma = new PrismaClient();
 
 router.use(authMiddleware);
 
-// Récupérer la liste simple des BAP pour tous les utilisateurs authentifiés (pour les modals)
-router.get('/list', async (req, res) => {
-  try {
-    const baps = await prisma.bAP.findMany({
-      select: {
-        id: true,
-        nomBAP: true
-      },
-      orderBy: {
-        nomBAP: 'asc'
-      }
-    });
-    
-    res.json({ baps });
-  } catch (error) {
-    console.error('Get BAP list error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
-});
 
-// Récupérer tous les BAP (admin seulement)
-router.get('/', adminMiddleware, async (req, res) => {
+// Récupérer tous les BAP
+router.get('/', async (req, res) => {
   try {
     const baps = await prisma.bAP.findMany({
       include: {

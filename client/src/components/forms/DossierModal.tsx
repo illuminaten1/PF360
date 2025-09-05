@@ -55,7 +55,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
 
   // Fetch options for selects
   const { data: badges = [] } = useQuery<Badge[]>({
-    queryKey: ['badges'],
+    queryKey: ['badges-for-dossier'],
     queryFn: async () => {
       const response = await api.get('/badges')
       return Array.isArray(response.data.badges) ? response.data.badges : []
@@ -64,7 +64,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
   })
 
   const { data: baps = [] } = useQuery<BAP[]>({
-    queryKey: ['baps'],
+    queryKey: ['baps-for-dossier'],
     queryFn: async () => {
       const response = await api.get('/bap')
       return Array.isArray(response.data.baps) ? response.data.baps : []

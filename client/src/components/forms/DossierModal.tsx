@@ -58,7 +58,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryKey: ['badges'],
     queryFn: async () => {
       const response = await api.get('/badges')
-      return response.data.badges || response.data
+      return Array.isArray(response.data.badges) ? response.data.badges : []
     },
     enabled: isOpen
   })
@@ -67,7 +67,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
     queryKey: ['baps'],
     queryFn: async () => {
       const response = await api.get('/bap')
-      return response.data.baps || response.data
+      return Array.isArray(response.data.baps) ? response.data.baps : []
     },
     enabled: isOpen
   })

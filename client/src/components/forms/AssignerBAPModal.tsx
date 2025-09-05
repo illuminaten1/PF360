@@ -52,8 +52,8 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
     staleTime: 30000
   })
   
-  // Extract baps array from response
-  const baps: BAP[] = bapsData?.baps || []
+  // Extract baps array from response - handle both success and error cases
+  const baps: BAP[] = Array.isArray(bapsData?.baps) ? bapsData.baps : []
 
   // Filtrer les BAPs basé sur la recherche
   const filteredBAPs = baps.filter((bap: BAP) => {

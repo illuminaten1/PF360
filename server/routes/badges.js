@@ -8,7 +8,28 @@ const prisma = new PrismaClient();
 
 router.use(authMiddleware);
 
-// Récupérer tous les badges
+// Récupérer la liste simple des badges pour tous les utilisateurs authentifiés (pour les modals)
+router.get('/list', async (req, res) => {
+  try {
+    const badges = await prisma.badge.findMany({
+      select: {
+        id: true,
+        nom: true,
+        couleur: true
+      },
+      orderBy: {
+        nom: 'asc'
+      }
+    });
+    
+    res.json({ badges });
+  } catch (error) {
+    console.error('Get badges list error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Récupérer tous les badges (admin seulement)
 router.get('/', adminMiddleware, async (req, res) => {
   try {
     const badges = await prisma.badge.findMany({

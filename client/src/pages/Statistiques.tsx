@@ -172,7 +172,7 @@ const StatistiquesUtilisateurComponent: React.FC<{
             <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
               Propres
             </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase border-r border-gray-300">
               BAP
             </th>
             <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
@@ -184,11 +184,17 @@ const StatistiquesUtilisateurComponent: React.FC<{
             <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
               AJE
             </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase border-r border-gray-300">
               REJET
             </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+            <th className="px-2 py-2 text-center text-xs font-bold text-gray-600 uppercase">
               En cours
+            </th>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              En propre
+            </th>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Suivis BAP
             </th>
           </tr>
         </thead>
@@ -209,7 +215,7 @@ const StatistiquesUtilisateurComponent: React.FC<{
               <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
                 {user.demandesPropres}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 border-r border-gray-200">
                 {user.demandesBAP}
               </td>
               <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-blue-600 font-medium">
@@ -221,11 +227,17 @@ const StatistiquesUtilisateurComponent: React.FC<{
               <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-green-600 font-medium">
                 {user.decisionsRepartition.AJE}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-red-600 font-medium">
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-red-600 font-medium border-r border-gray-200">
                 {user.decisionsRepartition.REJET}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
                 {user.enCours}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
+                {user.enCoursPropre}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
+                {user.enCoursBAP}
               </td>
             </tr>
           ))}

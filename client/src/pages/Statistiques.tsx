@@ -432,7 +432,21 @@ const FluxMensuelsComponent: React.FC<{
 const FluxHebdomadairesComponent: React.FC<{ 
   fluxHebdomadaires: StatistiquesFluxHebdomadaires | undefined
   selectedYear: number 
-}> = ({ fluxHebdomadaires, selectedYear }) => (
+}> = ({ fluxHebdomadaires, selectedYear }) => {
+  // Calculer le stock cumulé pour chaque semaine
+  const fluxAvecStock = fluxHebdomadaires?.fluxHebdomadaires ? 
+    fluxHebdomadaires.fluxHebdomadaires.reduce((acc, flux, index) => {
+      const difference = flux.entrantsAnnee - flux.sortantsAnnee;
+      const stock = index === 0 ? difference : acc[index - 1].stock + difference;
+      acc.push({
+        ...flux,
+        difference,
+        stock
+      });
+      return acc;
+    }, [] as Array<typeof fluxHebdomadaires.fluxHebdomadaires[0] & {difference: number, stock: number}>) : [];
+
+  return (
   <div className="p-4 h-full overflow-auto">
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -442,19 +456,22 @@ const FluxHebdomadairesComponent: React.FC<{
               Semaine
             </th>
             <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-green-50">
-              Entrants {selectedYear}
+              Entrants
             </th>
             <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-red-50">
-              Sortants {selectedYear}
+              Sortants
             </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-gray-100">
-              Entrants {selectedYear - 1}
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-blue-50">
+              Différence
+            </th>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-yellow-50">
+              Stock
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {fluxHebdomadaires && fluxHebdomadaires.fluxHebdomadaires.length > 0 ? (
-            fluxHebdomadaires.fluxHebdomadaires.map((flux) => (
+          {fluxAvecStock && fluxAvecStock.length > 0 ? (
+            fluxAvecStock.map((flux) => (
               <tr key={flux.numeroSemaine} className="hover:bg-gray-50">
                 <td className="px-2 py-1 whitespace-nowrap text-center">
                   <div className="text-xs font-medium text-gray-900">
@@ -470,14 +487,20 @@ const FluxHebdomadairesComponent: React.FC<{
                 <td className="px-2 py-1 whitespace-nowrap text-center text-xs text-gray-900">
                   {flux.sortantsAnnee}
                 </td>
-                <td className="px-2 py-1 whitespace-nowrap text-center text-xs text-gray-500">
-                  {flux.entrantsAnneePrecedente}
+                <td className={`px-2 py-1 whitespace-nowrap text-center text-xs font-medium ${
+                  flux.difference > 0 ? 'text-green-600' : 
+                  flux.difference < 0 ? 'text-red-600' : 'text-gray-900'
+                }`}>
+                  {flux.difference > 0 ? '+' : ''}{flux.difference}
+                </td>
+                <td className="px-2 py-1 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {flux.stock}
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="px-2 py-3 text-center text-xs text-gray-500">
+              <td colSpan={5} className="px-2 py-3 text-center text-xs text-gray-500">
                 Aucune donnée disponible
               </td>
             </tr>
@@ -486,7 +509,8 @@ const FluxHebdomadairesComponent: React.FC<{
       </table>
     </div>
   </div>
-)
+  )
+}
 
 const Statistiques: React.FC = () => {
   const currentYear = new Date().getFullYear()

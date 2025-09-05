@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getAnneesDisponibles } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getAnneesDisponibles } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
@@ -11,6 +11,9 @@ router.get('/administratives', authMiddleware, getStatistiquesAdministratives);
 
 // GET /api/statistiques/bap - Récupérer les statistiques BAP par année
 router.get('/bap', authMiddleware, getStatistiquesBAP);
+
+// GET /api/statistiques/qualite-demandeur - Récupérer les statistiques qualité demandeur par année
+router.get('/qualite-demandeur', authMiddleware, getStatistiquesQualiteDemandeur);
 
 // GET /api/statistiques/flux-mensuels - Récupérer les flux mensuels par année
 router.get('/flux-mensuels', authMiddleware, getFluxMensuels);

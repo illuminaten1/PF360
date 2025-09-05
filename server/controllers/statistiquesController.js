@@ -1201,6 +1201,64 @@ const getAutoControle = async (req, res) => {
   }
 };
 
+const getStatistiquesQualiteDemandeur = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Compter les demandes par type (VICTIME / MIS_EN_CAUSE)
+    const statsVictime = await prisma.demande.count({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        type: 'VICTIME'
+      }
+    });
+    
+    const statsMisEnCause = await prisma.demande.count({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        type: 'MIS_EN_CAUSE'
+      }
+    });
+    
+    const total = statsVictime + statsMisEnCause;
+    
+    // Calculer les pourcentages
+    const pourcentageVictime = total > 0 ? (statsVictime / total) * 100 : 0;
+    const pourcentageMisEnCause = total > 0 ? (statsMisEnCause / total) * 100 : 0;
+    
+    const statistiques = [
+      {
+        qualite: 'VICTIME',
+        nombreDemandes: statsVictime,
+        pourcentage: pourcentageVictime
+      },
+      {
+        qualite: 'MIS_EN_CAUSE',
+        nombreDemandes: statsMisEnCause,
+        pourcentage: pourcentageMisEnCause
+      }
+    ];
+    
+    res.json(statistiques);
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques qualité demandeur:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques qualité demandeur' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1235,6 +1293,7 @@ module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
   getStatistiquesBAP,
+  getStatistiquesQualiteDemandeur,
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,

@@ -83,7 +83,13 @@ interface StatistiquesAutoControle {
   delaiTraitementBRP: number
 }
 
-type MosaicKey = 'general' | 'users' | 'bap' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
+interface StatistiquesQualiteDemandeur {
+  qualite: 'VICTIME' | 'MIS_EN_CAUSE'
+  nombreDemandes: number
+  pourcentage: number
+}
+
+type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
 
 const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
   direction: 'column' as const,
@@ -93,8 +99,13 @@ const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
     second: {
       direction: 'row' as const,
       first: 'users' as MosaicKey,
-      second: 'bap' as MosaicKey,
-      splitPercentage: 75
+      second: {
+        direction: 'row' as const,
+        first: 'bap' as MosaicKey,
+        second: 'qualite' as MosaicKey,
+        splitPercentage: 50
+      },
+      splitPercentage: 60
     },
     splitPercentage: 30
   },
@@ -280,6 +291,55 @@ const StatistiquesBAPComponent: React.FC<{
           ) : (
             <tr>
               <td colSpan={2} className="px-4 py-3 text-center text-xs text-gray-500">
+                Aucune donnée disponible
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)
+
+const QualiteDemandeurComponent: React.FC<{ 
+  statsQualite: StatistiquesQualiteDemandeur[] | undefined 
+}> = ({ statsQualite }) => (
+  <div className="p-4 h-full overflow-auto">
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 text-sm">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Qualité
+            </th>
+            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Nbr demandes
+            </th>
+            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Pourcentage
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {statsQualite && statsQualite.length > 0 ? (
+            statsQualite.map((stat) => (
+              <tr key={stat.qualite} className="hover:bg-gray-50">
+                <td className="px-4 py-2 whitespace-nowrap">
+                  <div className="text-xs font-medium text-gray-900">
+                    {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+                  </div>
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {stat.nombreDemandes}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {stat.pourcentage.toFixed(1)}%
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
                 Aucune donnée disponible
               </td>
             </tr>
@@ -569,6 +629,15 @@ const Statistiques: React.FC = () => {
     enabled: activeTab === 'administratif'
   })
 
+  const { data: statsQualite, isLoading: isLoadingQualite } = useQuery<StatistiquesQualiteDemandeur[]>({
+    queryKey: ['statistiques-qualite', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/qualite-demandeur?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
   const { data: fluxMensuels, isLoading: isLoadingFlux } = useQuery<StatistiquesFluxMensuels>({
     queryKey: ['flux-mensuels', selectedYear],
     queryFn: async () => {
@@ -622,6 +691,8 @@ const Statistiques: React.FC = () => {
         )
       case 'bap':
         return <StatistiquesBAPComponent statsBAP={statsBAP} />
+      case 'qualite':
+        return <QualiteDemandeurComponent statsQualite={statsQualite} />
       case 'autocontrole':
         return <AutoControleComponent autoControle={autoControle} />
       case 'fluxmensuels':
@@ -643,7 +714,7 @@ const Statistiques: React.FC = () => {
     }
   }
 
-  if (isLoadingAdmin || isLoadingBAP || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
+  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
     return <LoadingSpinner />
   }
 
@@ -718,6 +789,7 @@ const Statistiques: React.FC = () => {
                     id === 'general' ? 'Statistiques générales' :
                     id === 'users' ? 'Utilisateurs' :
                     id === 'bap' ? 'BAP' :
+                    id === 'qualite' ? 'Qualité du demandeur' :
                     id === 'autocontrole' ? 'Auto-contrôle' :
                     id === 'fluxmensuels' ? 'Flux mensuels' :
                     id === 'fluxhebdo' ? 'Flux hebdomadaires' :

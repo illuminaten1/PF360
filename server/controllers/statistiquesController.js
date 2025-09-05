@@ -1409,6 +1409,56 @@ const getStatistiquesFormationAdministrative = async (req, res) => {
   }
 };
 
+const getStatistiquesBranche = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer toutes les demandes avec leur branche
+    const demandes = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        branche: true
+      }
+    });
+    
+    // Compter les occurrences de chaque branche
+    const compteurs = {};
+    let total = 0;
+    
+    demandes.forEach(demande => {
+      const branche = demande.branche || 'Non renseigné';
+      compteurs[branche] = (compteurs[branche] || 0) + 1;
+      total++;
+    });
+    
+    // Convertir en tableau avec pourcentages et trier par nombre de demandes décroissant
+    const statistiques = Object.entries(compteurs)
+      .map(([branche, nombre]) => ({
+        branche: branche,
+        nombreDemandes: nombre,
+        pourcentage: total > 0 ? (nombre / total) * 100 : 0
+      }))
+      .sort((a, b) => b.nombreDemandes - a.nombreDemandes);
+    
+    res.json(statistiques);
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques branche:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques branche' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1447,6 +1497,7 @@ module.exports = {
   getStatistiquesTypeInfraction,
   getStatistiquesContexteMissionnel,
   getStatistiquesFormationAdministrative,
+  getStatistiquesBranche,
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,

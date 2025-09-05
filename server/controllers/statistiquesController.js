@@ -1309,6 +1309,56 @@ const getStatistiquesTypeInfraction = async (req, res) => {
   }
 };
 
+const getStatistiquesContexteMissionnel = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer toutes les demandes avec leur contexte missionnel
+    const demandes = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        contexteMissionnel: true
+      }
+    });
+    
+    // Compter les occurrences de chaque contexte
+    const compteurs = {};
+    let total = 0;
+    
+    demandes.forEach(demande => {
+      const contexte = demande.contexteMissionnel || 'Non renseigné';
+      compteurs[contexte] = (compteurs[contexte] || 0) + 1;
+      total++;
+    });
+    
+    // Convertir en tableau avec pourcentages et trier par nombre de demandes décroissant
+    const statistiques = Object.entries(compteurs)
+      .map(([contexte, nombre]) => ({
+        contexteMissionnel: contexte,
+        nombreDemandes: nombre,
+        pourcentage: total > 0 ? (nombre / total) * 100 : 0
+      }))
+      .sort((a, b) => b.nombreDemandes - a.nombreDemandes);
+    
+    res.json(statistiques);
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques contexte missionnel:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques contexte missionnel' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1345,6 +1395,7 @@ module.exports = {
   getStatistiquesBAP,
   getStatistiquesQualiteDemandeur,
   getStatistiquesTypeInfraction,
+  getStatistiquesContexteMissionnel,
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,

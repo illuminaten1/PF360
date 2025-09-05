@@ -1359,6 +1359,56 @@ const getStatistiquesContexteMissionnel = async (req, res) => {
   }
 };
 
+const getStatistiquesFormationAdministrative = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer toutes les demandes avec leur formation administrative
+    const demandes = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        formationAdministrative: true
+      }
+    });
+    
+    // Compter les occurrences de chaque formation
+    const compteurs = {};
+    let total = 0;
+    
+    demandes.forEach(demande => {
+      const formation = demande.formationAdministrative || 'Non renseigné';
+      compteurs[formation] = (compteurs[formation] || 0) + 1;
+      total++;
+    });
+    
+    // Convertir en tableau avec pourcentages et trier par nombre de demandes décroissant
+    const statistiques = Object.entries(compteurs)
+      .map(([formation, nombre]) => ({
+        formationAdministrative: formation,
+        nombreDemandes: nombre,
+        pourcentage: total > 0 ? (nombre / total) * 100 : 0
+      }))
+      .sort((a, b) => b.nombreDemandes - a.nombreDemandes);
+    
+    res.json(statistiques);
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques formation administrative:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques formation administrative' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1396,6 +1446,7 @@ module.exports = {
   getStatistiquesQualiteDemandeur,
   getStatistiquesTypeInfraction,
   getStatistiquesContexteMissionnel,
+  getStatistiquesFormationAdministrative,
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,

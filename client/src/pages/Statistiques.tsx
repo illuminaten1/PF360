@@ -101,7 +101,13 @@ interface StatistiquesContexteMissionnel {
   pourcentage: number
 }
 
-type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
+interface StatistiquesFormationAdministrative {
+  formationAdministrative: string
+  nombreDemandes: number
+  pourcentage: number
+}
+
+type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
 
 const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
   direction: 'column' as const,
@@ -117,8 +123,13 @@ const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
         second: {
           direction: 'row' as const,
           first: 'qualite' as MosaicKey,
-          second: 'contexte' as MosaicKey,
-          splitPercentage: 50
+          second: {
+            direction: 'row' as const,
+            first: 'contexte' as MosaicKey,
+            second: 'formation' as MosaicKey,
+            splitPercentage: 50
+          },
+          splitPercentage: 33
         },
         splitPercentage: 33
       },
@@ -470,6 +481,55 @@ const ContexteMissionnelComponent: React.FC<{
   </div>
 )
 
+const FormationAdministrativeComponent: React.FC<{ 
+  statsFormation: StatistiquesFormationAdministrative[] | undefined 
+}> = ({ statsFormation }) => (
+  <div className="p-4 h-full overflow-auto">
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 text-sm">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Formation administrative
+            </th>
+            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Nbr demandes
+            </th>
+            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Pourcentage
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {statsFormation && statsFormation.length > 0 ? (
+            statsFormation.map((stat, index) => (
+              <tr key={`${stat.formationAdministrative}-${index}`} className="hover:bg-gray-50">
+                <td className="px-4 py-2 whitespace-nowrap">
+                  <div className="text-xs font-medium text-gray-900">
+                    {stat.formationAdministrative || 'Non renseigné'}
+                  </div>
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {stat.nombreDemandes}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {stat.pourcentage.toFixed(1)}%
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
+                Aucune donnée disponible
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)
+
 const AutoControleComponent: React.FC<{ 
   autoControle: StatistiquesAutoControle | undefined 
 }> = ({ autoControle }) => (
@@ -776,6 +836,15 @@ const Statistiques: React.FC = () => {
     enabled: activeTab === 'administratif'
   })
 
+  const { data: statsFormation, isLoading: isLoadingFormation } = useQuery<StatistiquesFormationAdministrative[]>({
+    queryKey: ['statistiques-formation', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/formation-administrative?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
   const { data: fluxMensuels, isLoading: isLoadingFlux } = useQuery<StatistiquesFluxMensuels>({
     queryKey: ['flux-mensuels', selectedYear],
     queryFn: async () => {
@@ -835,6 +904,8 @@ const Statistiques: React.FC = () => {
         return <TypeInfractionComponent statsInfractions={statsInfractions} />
       case 'contexte':
         return <ContexteMissionnelComponent statsContexte={statsContexte} />
+      case 'formation':
+        return <FormationAdministrativeComponent statsFormation={statsFormation} />
       case 'autocontrole':
         return <AutoControleComponent autoControle={autoControle} />
       case 'fluxmensuels':
@@ -856,7 +927,7 @@ const Statistiques: React.FC = () => {
     }
   }
 
-  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
+  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
     return <LoadingSpinner />
   }
 
@@ -934,6 +1005,7 @@ const Statistiques: React.FC = () => {
                     id === 'qualite' ? 'Qualité du demandeur' :
                     id === 'infractions' ? 'Type d\'infraction' :
                     id === 'contexte' ? 'Contexte missionnel' :
+                    id === 'formation' ? 'Formation administrative' :
                     id === 'autocontrole' ? 'Auto-contrôle' :
                     id === 'fluxmensuels' ? 'Flux mensuels' :
                     id === 'fluxhebdo' ? 'Flux hebdomadaires' :

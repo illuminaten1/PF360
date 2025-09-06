@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Mosaic, MosaicWindow, MosaicNode } from 'react-mosaic-component'
+import { Card, Elevation, H5, H1, HTMLTable, Tag, Button, HTMLSelect } from '@blueprintjs/core'
 import { api } from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ExtractionMensuelleComponent from '@/components/statistiques/ExtractionMensuelleComponent'
@@ -212,39 +213,39 @@ const StatistiquesGeneralesComponent: React.FC<{
 }> = ({ stats }) => (
   <div className="p-4 h-full overflow-auto">
     {stats && (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="text-center p-4 bg-blue-50 rounded-lg">
-          <div className="text-2xl font-bold text-blue-600">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
+          <H1 style={{ color: '#137CBD', margin: '0 0 8px 0' }}>
             {stats.demandesTotal}
-          </div>
-          <div className="text-xs text-gray-600 mt-1">
+          </H1>
+          <H5 style={{ color: '#5C7080', margin: 0 }}>
             Demandes reçues
-          </div>
-        </div>
-        <div className="text-center p-4 bg-green-50 rounded-lg">
-          <div className="text-2xl font-bold text-green-600">
+          </H5>
+        </Card>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
+          <H1 style={{ color: '#0F9960', margin: '0 0 8px 0' }}>
             {stats.demandesTraitees}
-          </div>
-          <div className="text-xs text-gray-600 mt-1">
+          </H1>
+          <H5 style={{ color: '#5C7080', margin: 0 }}>
             Demandes traitées
-          </div>
-        </div>
-        <div className="text-center p-4 bg-orange-50 rounded-lg">
-          <div className="text-2xl font-bold text-orange-600">
+          </H5>
+        </Card>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
+          <H1 style={{ color: '#D9822B', margin: '0 0 8px 0' }}>
             {stats.demandesEnInstance}
-          </div>
-          <div className="text-xs text-gray-600 mt-1">
+          </H1>
+          <H5 style={{ color: '#5C7080', margin: 0 }}>
             Demandes en instance
-          </div>
-        </div>
-        <div className="text-center p-4 bg-red-50 rounded-lg">
-          <div className="text-2xl font-bold text-red-600">
+          </H5>
+        </Card>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
+          <H1 style={{ color: '#DB3737', margin: '0 0 8px 0' }}>
             {stats.demandesNonAffectees}
-          </div>
-          <div className="text-xs text-gray-600 mt-1">
+          </H1>
+          <H5 style={{ color: '#5C7080', margin: 0 }}>
             Demandes non affectées
-          </div>
-        </div>
+          </H5>
+        </Card>
       </div>
     )}
   </div>
@@ -254,130 +255,110 @@ const StatistiquesUtilisateurComponent: React.FC<{
   users: StatistiquesUtilisateur[] | undefined 
 }> = ({ users }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Rédacteurs
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Total PF
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Propres
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase border-r border-gray-300">
-              BAP
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              PJ
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              AJ
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              AJE
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase border-r border-gray-300">
-              REJET
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-bold text-gray-600 uppercase">
-              En cours
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              En propre
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Suivis BAP
-            </th>
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Rédacteurs</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Total PF</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Propres</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>BAP</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>PJ</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>AJ</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>AJE</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>REJET</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>En cours</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>En propre</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Suivis BAP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users?.map((user) => (
+          <tr key={user.id}>
+            <td style={{ padding: '8px' }}>
+              <div style={{ fontWeight: 500 }}>
+                {user.prenom} {user.nom}
+              </div>
+              <Tag minimal style={{ fontSize: '11px', marginTop: '4px' }}>
+                {user.role}
+              </Tag>
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center' }}>
+              {user.demandesAttribuees}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center' }}>
+              {user.demandesPropres}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center' }}>
+              {user.demandesBAP}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#137CBD', fontWeight: 500 }}>
+              {user.decisionsRepartition.PJ}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#9D5FC2', fontWeight: 500 }}>
+              {user.decisionsRepartition.AJ}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#0F9960', fontWeight: 500 }}>
+              {user.decisionsRepartition.AJE}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#DB3737', fontWeight: 500 }}>
+              {user.decisionsRepartition.REJET}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center' }}>
+              {user.enCours}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center' }}>
+              {user.enCoursPropre}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center' }}>
+              {user.enCoursBAP}
+            </td>
           </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {users?.map((user) => (
-            <tr key={user.id} className="hover:bg-gray-50">
-              <td className="px-3 py-2 whitespace-nowrap">
-                <div className="text-xs font-medium text-gray-900">
-                  {user.prenom} {user.nom}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {user.role}
-                </div>
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                {user.demandesAttribuees}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                {user.demandesPropres}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 border-r border-gray-200">
-                {user.demandesBAP}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-blue-600 font-medium">
-                {user.decisionsRepartition.PJ}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-purple-600 font-medium">
-                {user.decisionsRepartition.AJ}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-green-600 font-medium">
-                {user.decisionsRepartition.AJE}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-red-600 font-medium border-r border-gray-200">
-                {user.decisionsRepartition.REJET}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
-                {user.enCours}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                {user.enCoursPropre}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                {user.enCoursBAP}
-              </td>
-            </tr>
-          ))}
-          {users && users.length > 0 && (
-            <tr className="bg-gray-50 border-t-2 border-gray-300">
-              <td className="px-3 py-2 whitespace-nowrap">
-                <div className="text-xs font-bold text-gray-900">
-                  TOTAL
-                </div>
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
-                {users.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
-                {users.reduce((sum, user) => sum + user.demandesPropres, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold border-r border-gray-200">
-                {users.reduce((sum, user) => sum + user.demandesBAP, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-blue-600 font-bold">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-purple-600 font-bold">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-green-600 font-bold">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-red-600 font-bold border-r border-gray-200">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
-                {users.reduce((sum, user) => sum + user.enCours, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
-                {users.reduce((sum, user) => sum + user.enCoursPropre, 0)}
-              </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
-                {users.reduce((sum, user) => sum + user.enCoursBAP, 0)}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+        ))}
+        {users && users.length > 0 && (
+          <tr style={{ backgroundColor: '#F5F8FA', borderTop: '2px solid #CED9E0' }}>
+            <td style={{ padding: '8px' }}>
+              <div style={{ fontWeight: 'bold' }}>
+                TOTAL
+              </div>
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.demandesPropres, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.demandesBAP, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#137CBD', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#9D5FC2', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#0F9960', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', color: '#DB3737', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.enCours, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.enCoursPropre, 0)}
+            </td>
+            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+              {users.reduce((sum, user) => sum + user.enCoursBAP, 0)}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -385,42 +366,38 @@ const StatistiquesBAPComponent: React.FC<{
   statsBAP: StatistiqueBAP[] | undefined 
 }> = ({ statsBAP }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              BAP
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Demandes
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsBAP && statsBAP.length > 0 ? (
-            statsBAP.map((bap) => (
-              <tr key={bap.nomBAP} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {bap.nomBAP}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {bap.nombreDemandes}
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={2} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>BAP</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Demandes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsBAP && statsBAP.length > 0 ? (
+          statsBAP.map((bap) => (
+            <tr key={bap.nomBAP}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {bap.nomBAP}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center' }}>
+                {bap.nombreDemandes}
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={2} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -428,48 +405,42 @@ const QualiteDemandeurComponent: React.FC<{
   statsQualite: StatistiquesQualiteDemandeur[] | undefined 
 }> = ({ statsQualite }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Qualité
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Nbr demandes
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsQualite && statsQualite.length > 0 ? (
-            statsQualite.map((stat) => (
-              <tr key={stat.qualite} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.pourcentage.toFixed(1)}%
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Qualité</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Nbr demandes</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsQualite && statsQualite.length > 0 ? (
+          statsQualite.map((stat) => (
+            <tr key={stat.qualite}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.nombreDemandes}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.pourcentage.toFixed(1)}%
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -477,48 +448,42 @@ const TypeInfractionComponent: React.FC<{
   statsInfractions: StatistiquesTypeInfraction[] | undefined 
 }> = ({ statsInfractions }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Type d&apos;infraction
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Nbr demandes
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsInfractions && statsInfractions.length > 0 ? (
-            statsInfractions.map((stat, index) => (
-              <tr key={`${stat.qualificationInfraction}-${index}`} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {stat.qualificationInfraction || 'Non renseigné'}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.pourcentage.toFixed(1)}%
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Type d&apos;infraction</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Nbr demandes</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsInfractions && statsInfractions.length > 0 ? (
+          statsInfractions.map((stat, index) => (
+            <tr key={`${stat.qualificationInfraction}-${index}`}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {stat.qualificationInfraction || 'Non renseigné'}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.nombreDemandes}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.pourcentage.toFixed(1)}%
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -526,48 +491,42 @@ const ContexteMissionnelComponent: React.FC<{
   statsContexte: StatistiquesContexteMissionnel[] | undefined 
 }> = ({ statsContexte }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Contexte missionnel
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Nbr demandes
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsContexte && statsContexte.length > 0 ? (
-            statsContexte.map((stat, index) => (
-              <tr key={`${stat.contexteMissionnel}-${index}`} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {stat.contexteMissionnel || 'Non renseigné'}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.pourcentage.toFixed(1)}%
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Contexte missionnel</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Nbr demandes</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsContexte && statsContexte.length > 0 ? (
+          statsContexte.map((stat, index) => (
+            <tr key={`${stat.contexteMissionnel}-${index}`}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {stat.contexteMissionnel || 'Non renseigné'}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.nombreDemandes}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.pourcentage.toFixed(1)}%
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -575,48 +534,42 @@ const FormationAdministrativeComponent: React.FC<{
   statsFormation: StatistiquesFormationAdministrative[] | undefined 
 }> = ({ statsFormation }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Formation administrative
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Nbr demandes
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsFormation && statsFormation.length > 0 ? (
-            statsFormation.map((stat, index) => (
-              <tr key={`${stat.formationAdministrative}-${index}`} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {stat.formationAdministrative || 'Non renseigné'}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.pourcentage.toFixed(1)}%
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Formation administrative</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Nbr demandes</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsFormation && statsFormation.length > 0 ? (
+          statsFormation.map((stat, index) => (
+            <tr key={`${stat.formationAdministrative}-${index}`}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {stat.formationAdministrative || 'Non renseigné'}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.nombreDemandes}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.pourcentage.toFixed(1)}%
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -624,48 +577,42 @@ const BrancheComponent: React.FC<{
   statsBranche: StatistiquesBranche[] | undefined 
 }> = ({ statsBranche }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Branche
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Nbr demandes
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsBranche && statsBranche.length > 0 ? (
-            statsBranche.map((stat, index) => (
-              <tr key={`${stat.branche}-${index}`} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {stat.branche || 'Non renseigné'}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.pourcentage.toFixed(1)}%
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Branche</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Nbr demandes</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsBranche && statsBranche.length > 0 ? (
+          statsBranche.map((stat, index) => (
+            <tr key={`${stat.branche}-${index}`}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {stat.branche || 'Non renseigné'}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.nombreDemandes}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.pourcentage.toFixed(1)}%
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -673,48 +620,42 @@ const StatutDemandeurComponent: React.FC<{
   statsStatut: StatistiquesStatutDemandeur[] | undefined 
 }> = ({ statsStatut }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Statut demandeur
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Nbr demandes
-            </th>
-            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {statsStatut && statsStatut.length > 0 ? (
-            statsStatut.map((stat, index) => (
-              <tr key={`${stat.statutDemandeur}-${index}`} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {stat.statutDemandeur || 'Non renseigné'}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                  {stat.pourcentage.toFixed(1)}%
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Statut demandeur</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Nbr demandes</th>
+          <th style={{ textAlign: 'center', padding: '8px' }}>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {statsStatut && statsStatut.length > 0 ? (
+          statsStatut.map((stat, index) => (
+            <tr key={`${stat.statutDemandeur}-${index}`}>
+              <td style={{ padding: '8px', fontWeight: 500 }}>
+                {stat.statutDemandeur || 'Non renseigné'}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.nombreDemandes}
+              </td>
+              <td style={{ padding: '8px', textAlign: 'center', fontWeight: 500 }}>
+                {stat.pourcentage.toFixed(1)}%
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -722,82 +663,70 @@ const AutoControleComponent: React.FC<{
   autoControle: StatistiquesAutoControle | undefined 
 }> = ({ autoControle }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <tbody className="bg-white divide-y divide-gray-200">
-          <tr className="hover:bg-gray-50">
-            <td className="px-4 py-2 whitespace-nowrap">
-              <div className="text-xs font-medium text-gray-900">PJ en attente de convention</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-red-600">
-                {autoControle?.pjEnAttenteConvention || 0}
-              </div>
-            </td>
-          </tr>
-          <tr className="hover:bg-gray-50">
-            <td className="px-4 py-2 whitespace-nowrap">
-              <div className="text-xs font-medium text-gray-900">Ancienneté moyenne non traités</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-gray-900">
-                {autoControle?.ancienneteMoyenneNonTraites?.toFixed(2) || '0,00'}
-              </div>
-            </td>
-          </tr>
-          <tr className="hover:bg-gray-50">
-            <td className="px-6 py-2 whitespace-nowrap">
-              <div className="text-xs text-gray-900">Dont BAP</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-gray-900">
-                {autoControle?.ancienneteMoyenneBAP?.toFixed(2) || '0,00'}
-              </div>
-            </td>
-          </tr>
-          <tr className="hover:bg-gray-50">
-            <td className="px-6 py-2 whitespace-nowrap">
-              <div className="text-xs text-gray-900">Dont BRPF</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-gray-900">
-                {autoControle?.ancienneteMoyenneBRP?.toFixed(2) || '0,00'}
-              </div>
-            </td>
-          </tr>
-          <tr className="hover:bg-gray-50">
-            <td className="px-4 py-2 whitespace-nowrap">
-              <div className="text-xs font-medium text-gray-900">Délai traitement moyen</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-gray-900">
-                {autoControle?.delaiTraitementMoyen?.toFixed(2) || '0,00'}
-              </div>
-            </td>
-          </tr>
-          <tr className="hover:bg-gray-50">
-            <td className="px-6 py-2 whitespace-nowrap">
-              <div className="text-xs text-gray-900">Dont BAP</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-gray-900">
-                {autoControle?.delaiTraitementBAP?.toFixed(2) || '0,00'}
-              </div>
-            </td>
-          </tr>
-          <tr className="hover:bg-gray-50">
-            <td className="px-6 py-2 whitespace-nowrap">
-              <div className="text-xs text-gray-900">Dont BRPF</div>
-            </td>
-            <td className="px-4 py-2 whitespace-nowrap text-right">
-              <div className="text-xs font-bold text-gray-900">
-                {autoControle?.delaiTraitementBRP?.toFixed(2) || '0,00'}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <tbody>
+        <tr>
+          <td style={{ padding: '8px', fontWeight: 500 }}>
+            PJ en attente de convention
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600, color: '#DB3737' }}>
+            {autoControle?.pjEnAttenteConvention || 0}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ padding: '8px', fontWeight: 500 }}>
+            Ancienneté moyenne non traités
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+            {autoControle?.ancienneteMoyenneNonTraites?.toFixed(2) || '0,00'}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ padding: '8px 8px 8px 24px', color: '#5C7080' }}>
+            Dont BAP
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+            {autoControle?.ancienneteMoyenneBAP?.toFixed(2) || '0,00'}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ padding: '8px 8px 8px 24px', color: '#5C7080' }}>
+            Dont BRP
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+            {autoControle?.ancienneteMoyenneBRP?.toFixed(2) || '0,00'}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ padding: '8px', fontWeight: 500 }}>
+            Délai traitement moyen
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+            {autoControle?.delaiTraitementMoyen?.toFixed(2) || '0,00'}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ padding: '8px 8px 8px 24px', color: '#5C7080' }}>
+            Dont BAP
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+            {autoControle?.delaiTraitementBAP?.toFixed(2) || '0,00'}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ padding: '8px 8px 8px 24px', color: '#5C7080' }}>
+            Dont BRPF
+          </td>
+          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+            {autoControle?.delaiTraitementBRP?.toFixed(2) || '0,00'}
+          </td>
+        </tr>
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -806,54 +735,52 @@ const FluxMensuelsComponent: React.FC<{
   selectedYear: number 
 }> = ({ fluxMensuels, selectedYear }) => (
   <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Mois
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-green-50">
-              Entrants {selectedYear}
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-red-50">
-              Sortants {selectedYear}
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase bg-gray-100">
-              Entrants {selectedYear - 1}
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {fluxMensuels && fluxMensuels.fluxMensuels.length > 0 ? (
-            fluxMensuels.fluxMensuels.map((flux) => (
-              <tr key={flux.mois} className="hover:bg-gray-50">
-                <td className="px-2 py-1 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {flux.mois}
-                  </div>
-                </td>
-                <td className="px-2 py-1 whitespace-nowrap text-center text-xs text-gray-900">
-                  {flux.entrantsAnnee}
-                </td>
-                <td className="px-2 py-1 whitespace-nowrap text-center text-xs text-gray-900">
-                  {flux.sortantsAnnee}
-                </td>
-                <td className="px-2 py-1 whitespace-nowrap text-center text-xs text-gray-500">
-                  {flux.entrantsAnneePrecedente}
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={4} className="px-2 py-3 text-center text-xs text-gray-500">
-                Aucune donnée disponible
+    <HTMLTable 
+      striped 
+      interactive
+      style={{ width: '100%', fontSize: '13px' }}
+    >
+      <thead>
+        <tr>
+          <th style={{ textAlign: 'left', padding: '8px' }}>Mois</th>
+          <th style={{ textAlign: 'center', padding: '8px', backgroundColor: '#E1F5FE' }}>
+            Entrants {selectedYear}
+          </th>
+          <th style={{ textAlign: 'center', padding: '8px', backgroundColor: '#FFEBEE' }}>
+            Sortants {selectedYear}
+          </th>
+          <th style={{ textAlign: 'center', padding: '8px', backgroundColor: '#F5F5F5' }}>
+            Entrants {selectedYear - 1}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {fluxMensuels && fluxMensuels.fluxMensuels.length > 0 ? (
+          fluxMensuels.fluxMensuels.map((flux) => (
+            <tr key={flux.mois}>
+              <td style={{ padding: '6px 8px', fontWeight: 500 }}>
+                {flux.mois}
+              </td>
+              <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                {flux.entrantsAnnee}
+              </td>
+              <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                {flux.sortantsAnnee}
+              </td>
+              <td style={{ padding: '6px 8px', textAlign: 'center', color: '#5C7080' }}>
+                {flux.entrantsAnneePrecedente}
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={4} style={{ padding: '12px 8px', textAlign: 'center', color: '#5C7080' }}>
+              Aucune donnée disponible
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </HTMLTable>
   </div>
 )
 
@@ -1156,62 +1083,68 @@ const Statistiques: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col" style={{ height: '100vh' }}>
-      <div className="flex-shrink-0 p-6 bg-white border-b">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Statistiques</h1>
+      <Card elevation={Elevation.ONE} style={{ margin: '16px', padding: '24px' }}>
+        <H1 style={{ marginBottom: '16px' }}>Statistiques</H1>
         
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <label htmlFor="year-select" className="text-sm font-medium text-gray-700">
-              Année :
-            </label>
-            <select
-              id="year-select"
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <H5 style={{ margin: 0 }}>Année :</H5>
+            <HTMLSelect
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="block w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              style={{ minWidth: '120px' }}
             >
               {yearOptions.map(year => (
                 <option key={year} value={year}>{year}</option>
               ))}
-            </select>
+            </HTMLSelect>
           </div>
           
           {activeTab === 'administratif' && (
-            <button
+            <Button
               onClick={resetLayout}
-              className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              intent="none"
+              text="Réinitialiser la disposition"
               title="Remettre la disposition par défaut"
-            >
-              Réinitialiser la disposition
-            </button>
+            />
           )}
         </div>
 
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+        <div style={{ borderBottom: '1px solid #E1E8ED', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '32px', marginBottom: '-1px' }}>
             <button
               onClick={() => setActiveTab('administratif')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'administratif'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              style={{
+                padding: '8px 4px',
+                borderBottom: `2px solid ${activeTab === 'administratif' ? '#137CBD' : 'transparent'}`,
+                color: activeTab === 'administratif' ? '#137CBD' : '#5C7080',
+                background: 'none',
+                border: 'none',
+                fontWeight: 500,
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
             >
               Suivi Administratif
             </button>
             <button
               onClick={() => setActiveTab('budgetaire')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'budgetaire'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              style={{
+                padding: '8px 4px',
+                borderBottom: `2px solid ${activeTab === 'budgetaire' ? '#137CBD' : 'transparent'}`,
+                color: activeTab === 'budgetaire' ? '#137CBD' : '#5C7080',
+                background: 'none',
+                border: 'none',
+                fontWeight: 500,
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
             >
               Suivi Budgétaire
             </button>
-          </nav>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <div className="flex-1 overflow-auto">
         {activeTab === 'administratif' ? (
@@ -1248,15 +1181,15 @@ const Statistiques: React.FC = () => {
             />
           </div>
         ) : (
-          <div className="p-6 space-y-8 h-full overflow-auto">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div style={{ padding: '24px', height: '100%', overflow: 'auto' }}>
+            <Card elevation={Elevation.ONE} style={{ padding: '24px' }}>
+              <H1 style={{ marginBottom: '16px' }}>
                 Suivi Budgétaire - {selectedYear}
-              </h2>
-              <p className="text-gray-600">
+              </H1>
+              <p style={{ color: '#5C7080' }}>
                 Les statistiques budgétaires seront implémentées prochainement.
               </p>
-            </div>
+            </Card>
           </div>
         )}
       </div>

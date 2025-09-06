@@ -978,7 +978,7 @@ const getAutoControle = async (req, res) => {
     }
     
     // 5. Délai de traitement moyen pour toutes les demandes traitées (en jours)
-    // Nous devons récupérer la première décision signée pour chaque demande
+    // Nous devons récupérer la première décision signée pour chaque demande (y compris les REJET)
     const demandesAvecPremiereDecision = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -1045,7 +1045,7 @@ const getAutoControle = async (req, res) => {
       }
     }
     
-    // 6. Délai de traitement moyen pour les demandes BAP (demandes assignées à un BAP)
+    // 6. Délai de traitement moyen pour les demandes BAP (demandes assignées à un BAP avec décision signée)
     const demandesAvecPremiereDecisionBAP = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -1115,7 +1115,7 @@ const getAutoControle = async (req, res) => {
       }
     }
     
-    // 7. Délai de traitement moyen pour les demandes BRPF (demandes non assignées à un BAP)
+    // 7. Délai de traitement moyen pour les demandes BRPF (demandes non assignées à un BAP avec décision signée)
     const demandesAvecPremiereDecisionBRPF = await prisma.demande.findMany({
       where: {
         dateReception: {

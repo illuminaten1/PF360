@@ -179,20 +179,20 @@ type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'conte
 
 const INITIAL_GRID_LAYOUTS = {
   lg: [
-    { i: 'general', x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
-    { i: 'users', x: 6, y: 0, w: 6, h: 8, minW: 4, minH: 6 },
-    { i: 'extraction', x: 0, y: 4, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'badges', x: 0, y: 10, w: 4, h: 6, minW: 3, minH: 4 },
-    { i: 'bap', x: 4, y: 10, w: 2, h: 6, minW: 2, minH: 4 },
-    { i: 'qualite', x: 6, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'infractions', x: 9, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'contexte', x: 6, y: 14, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'formation', x: 9, y: 14, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'branche', x: 0, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'statut', x: 3, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'autocontrole', x: 6, y: 20, w: 3, h: 8, minW: 2, minH: 6 },
-    { i: 'fluxmensuels', x: 9, y: 20, w: 3, h: 8, minW: 4, minH: 6 },
-    { i: 'fluxhebdo', x: 0, y: 22, w: 6, h: 10, minW: 4, minH: 8 }
+    { i: 'general', x: 0, y: 0, w: 3, h: 5, minW: 3, minH: 3 },
+    { i: 'users', x: 3, y: 0, w: 9, h: 25, minW: 4, minH: 6 },
+    { i: 'extraction', x: 0, y: 56, w: 8, h: 14, minW: 4, minH: 4 },
+    { i: 'badges', x: 0, y: 14, w: 3, h: 6, minW: 3, minH: 4 },
+    { i: 'bap', x: 6, y: 40, w: 2, h: 16, minW: 2, minH: 4 },
+    { i: 'qualite', x: 0, y: 20, w: 3, h: 5, minW: 2, minH: 4 },
+    { i: 'infractions', x: 3, y: 25, w: 5, h: 15, minW: 2, minH: 4 },
+    { i: 'contexte', x: 0, y: 37, w: 3, h: 19, minW: 2, minH: 4 },
+    { i: 'formation', x: 3, y: 40, w: 3, h: 16, minW: 2, minH: 4 },
+    { i: 'branche', x: 8, y: 56, w: 4, h: 14, minW: 2, minH: 4 },
+    { i: 'statut', x: 0, y: 25, w: 3, h: 12, minW: 2, minH: 4 },
+    { i: 'autocontrole', x: 0, y: 5, w: 3, h: 9, minW: 2, minH: 6 },
+    { i: 'fluxmensuels', x: 8, y: 25, w: 4, h: 15, minW: 4, minH: 6 },
+    { i: 'fluxhebdo', x: 8, y: 40, w: 4, h: 16, minW: 4, minH: 8 }
   ],
   md: [
     { i: 'general', x: 0, y: 0, w: 5, h: 4, minW: 3, minH: 3 },

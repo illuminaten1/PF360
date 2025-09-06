@@ -16,6 +16,7 @@ const decisionEditSchema = z.object({
   type: z.enum(['AJ', 'AJE', 'PJ', 'REJET'], {
     required_error: "Le type de décision est requis"
   }),
+  motifRejet: z.string().optional(),
   numero: z.string().regex(/^\d+$/, "Le numéro de décision doit être un nombre entier").min(1, "Le numéro de décision est requis"),
   visaId: z.string().min(1, "Le visa est requis"),
   avis_hierarchiques: z.boolean().default(false),
@@ -24,12 +25,22 @@ const decisionEditSchema = z.object({
   dateSignature: z.string().optional(),
   dateEnvoi: z.string().optional()
 })
+.refine((data) => {
+  if (data.type === 'REJET') {
+    return data.motifRejet && data.motifRejet.trim() !== ''
+  }
+  return true
+}, {
+  message: "Le motif de rejet est requis pour un rejet",
+  path: ['motifRejet']
+})
 
 type DecisionEditFormData = z.infer<typeof decisionEditSchema>
 
 interface Decision {
   id: string
   type: string
+  motifRejet?: string
   numero?: string
   date?: string
   dateSignature?: string
@@ -91,6 +102,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
   })
 
   const selectedType = watch('type')
+  const selectedMotifRejet = watch('motifRejet')
   const selectedAvisHierarchiques = watch('avis_hierarchiques')
   const selectedTypeVictMec = watch('typeVictMec')
 
@@ -108,6 +120,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
       // Initialize form with decision values
       reset({
         type: decision.type as 'AJ' | 'AJE' | 'PJ' | 'REJET',
+        motifRejet: decision.motifRejet || '',
         numero: decision.numero || '',
         visaId: decision.visa?.id || '',
         avis_hierarchiques: decision.avis_hierarchiques || false,
@@ -124,6 +137,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
       const cleanedData = {
         id: decision?.id,
         type: data.type,
+        motifRejet: data.type === 'REJET' ? data.motifRejet : undefined,
         numero: data.numero,
         visaId: data.visaId,
         avis_hierarchiques: data.avis_hierarchiques,
@@ -265,6 +279,49 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                       <p className="mt-2 text-sm text-red-600">{errors.type.message}</p>
                     )}
                   </div>
+
+                  {/* Motif de rejet (conditionnel) */}
+                  {selectedType === 'REJET' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Motif du rejet *
+                      </label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {[
+                          'Atteinte involontaire autre qu\'accident',
+                          'Accident de la circulation',
+                          'Faute personnelle détachable du service',
+                          'Fait étranger à la qualité de gendarme',
+                          'Absence d\'infraction'
+                        ].map((motif) => (
+                          <div key={motif} className="relative">
+                            <input
+                              type="radio"
+                              value={motif}
+                              {...register('motifRejet')}
+                              className="sr-only"
+                              id={`motif-${motif.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                            />
+                            <label 
+                              htmlFor={`motif-${motif.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                              onClick={() => setValue('motifRejet', motif)}
+                              className={`cursor-pointer rounded-lg border-2 p-3 text-center transition-all min-h-[4rem] flex items-center justify-center shadow-sm bg-gradient-to-br ${
+                                selectedMotifRejet === motif
+                                  ? 'border-blue-500 from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
+                                  : 'border-gray-200 from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                              }`}>
+                              <span className="text-xs font-medium text-gray-900 text-center leading-tight">
+                                {motif}
+                              </span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      {errors.motifRejet && (
+                        <p className="mt-2 text-sm text-red-600">{errors.motifRejet.message}</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Deuxième ligne : Numéro de décision et Type victime/mis en cause */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

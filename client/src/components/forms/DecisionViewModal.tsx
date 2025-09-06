@@ -9,6 +9,7 @@ dayjs.locale('fr')
 interface Decision {
   id: string
   type: string
+  motifRejet?: string
   numero?: string
   date?: string
   dateSignature?: string
@@ -257,6 +258,16 @@ const DecisionViewModal: React.FC<DecisionViewModalProps> = ({
                           </div>
                         )}
                       </div>
+                      
+                      {/* Motif de rejet */}
+                      {decision.type === 'REJET' && decision.motifRejet && (
+                        <div className="mt-4 p-4 bg-white rounded-lg border border-red-200">
+                          <span className="block text-sm font-medium text-gray-600 mb-2">Motif du rejet</span>
+                          <div className="inline-flex items-center px-3 py-2 rounded-lg bg-red-50 border border-red-200">
+                            <span className="text-red-800 font-medium">{decision.motifRejet}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Statut et dates */}

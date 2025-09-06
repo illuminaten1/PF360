@@ -1025,8 +1025,10 @@ const Statistiques: React.FC = () => {
       </div>
       
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-700">Année :</span>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Année
+          </label>
           <Listbox value={selectedYear} onChange={setSelectedYear}>
             <div className="relative">
               <Listbox.Button className="relative w-32 cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">

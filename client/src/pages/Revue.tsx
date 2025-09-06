@@ -91,27 +91,6 @@ const Revue: React.FC = () => {
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'decisions' | 'conventions')}
-                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
       {/* Sélecteur d'utilisateur */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -126,7 +105,7 @@ const Revue: React.FC = () => {
             }}
           >
             <div className="relative">
-              <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
                 <span className="block truncate">
                   {selectedUser ? (
                     `${selectedUser.grade ? `${selectedUser.grade} ` : ''}${selectedUser.prenom} ${selectedUser.nom}`
@@ -147,22 +126,26 @@ const Revue: React.FC = () => {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
                   <Listbox.Option
                     value={null}
                     className={({ active }) =>
-                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                        active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                      `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                        active ? 'bg-blue-600 text-white' : 'text-gray-900'
                       }`
                     }
                   >
-                    {({ selected }) => (
+                    {({ selected, active }) => (
                       <>
                         <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
                           -- Choisir un utilisateur --
                         </span>
                         {selected ? (
-                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                          <span
+                            className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                              active ? 'text-white' : 'text-blue-600'
+                            }`}
+                          >
                             <CheckIcon className="h-5 w-5" aria-hidden="true" />
                           </span>
                         ) : null}
@@ -174,18 +157,22 @@ const Revue: React.FC = () => {
                       key={user.id}
                       value={user}
                       className={({ active }) =>
-                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                          active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                        `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                          active ? 'bg-blue-600 text-white' : 'text-gray-900'
                         }`
                       }
                     >
-                      {({ selected }) => (
+                      {({ selected, active }) => (
                         <>
                           <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
                             {user.grade && `${user.grade} `}{user.prenom} {user.nom}
                           </span>
                           {selected ? (
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                            <span
+                              className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                                active ? 'text-white' : 'text-blue-600'
+                              }`}
+                            >
                               <CheckIcon className="h-5 w-5" aria-hidden="true" />
                             </span>
                           ) : null}
@@ -197,6 +184,27 @@ const Revue: React.FC = () => {
               </Transition>
             </div>
           </Listbox>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as 'decisions' | 'conventions')}
+                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.name}
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 

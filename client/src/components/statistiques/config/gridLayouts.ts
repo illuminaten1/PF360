@@ -2,21 +2,21 @@ import { Layout } from 'react-grid-layout'
 
 export const INITIAL_GRID_LAYOUTS = {
   lg: [
-    { i: 'general', x: 0, y: 0, w: 3, h: 5, minW: 3, minH: 3 },
-    { i: 'users', x: 3, y: 0, w: 9, h: 25, minW: 4, minH: 6 },
-    { i: 'extraction', x: 0, y: 56, w: 8, h: 14, minW: 4, minH: 4 },
-    { i: 'badges', x: 0, y: 14, w: 3, h: 6, minW: 3, minH: 4 },
-    { i: 'reponseBrpf', x: 3, y: 56, w: 3, h: 14, minW: 3, minH: 8 },
-    { i: 'bap', x: 6, y: 40, w: 2, h: 16, minW: 2, minH: 4 },
-    { i: 'qualite', x: 0, y: 20, w: 3, h: 5, minW: 2, minH: 4 },
-    { i: 'infractions', x: 3, y: 25, w: 5, h: 15, minW: 2, minH: 4 },
-    { i: 'contexte', x: 0, y: 37, w: 3, h: 19, minW: 2, minH: 4 },
-    { i: 'formation', x: 3, y: 40, w: 3, h: 16, minW: 2, minH: 4 },
-    { i: 'branche', x: 8, y: 56, w: 4, h: 14, minW: 2, minH: 4 },
-    { i: 'statut', x: 0, y: 25, w: 3, h: 12, minW: 2, minH: 4 },
-    { i: 'autocontrole', x: 0, y: 5, w: 3, h: 9, minW: 2, minH: 6 },
-    { i: 'fluxmensuels', x: 8, y: 25, w: 4, h: 15, minW: 4, minH: 6 },
-    { i: 'fluxhebdo', x: 8, y: 40, w: 4, h: 16, minW: 4, minH: 8 }
+    { w: 3, h: 5, x: 0, y: 0, i: 'general', minW: 3, minH: 3, moved: false, static: false },
+    { w: 9, h: 25, x: 3, y: 0, i: 'users', minW: 4, minH: 6, moved: false, static: false },
+    { w: 6, h: 17, x: 0, y: 57, i: 'extraction', minW: 4, minH: 4, moved: false, static: false },
+    { w: 3, h: 6, x: 0, y: 15, i: 'badges', minW: 3, minH: 4, moved: false, static: false },
+    { w: 4, h: 17, x: 8, y: 57, i: 'reponseBrpf', minW: 3, minH: 8, moved: false, static: false },
+    { w: 2, h: 17, x: 6, y: 40, i: 'bap', minW: 2, minH: 4, moved: false, static: false },
+    { w: 3, h: 5, x: 0, y: 21, i: 'qualite', minW: 2, minH: 4, moved: false, static: false },
+    { w: 5, h: 15, x: 3, y: 25, i: 'infractions', minW: 2, minH: 4, moved: false, static: false },
+    { w: 3, h: 19, x: 0, y: 38, i: 'contexte', minW: 2, minH: 4, moved: false, static: false },
+    { w: 3, h: 17, x: 3, y: 40, i: 'formation', minW: 2, minH: 4, moved: false, static: false },
+    { w: 2, h: 17, x: 6, y: 57, i: 'branche', minW: 2, minH: 4, moved: false, static: false },
+    { w: 3, h: 12, x: 0, y: 26, i: 'statut', minW: 2, minH: 4, moved: false, static: false },
+    { w: 3, h: 10, x: 0, y: 5, i: 'autocontrole', minW: 2, minH: 6, moved: false, static: false },
+    { w: 4, h: 15, x: 8, y: 25, i: 'fluxmensuels', minW: 4, minH: 6, moved: false, static: false },
+    { w: 4, h: 17, x: 8, y: 40, i: 'fluxhebdo', minW: 4, minH: 8, moved: false, static: false }
   ] as Layout[],
   md: [
     { i: 'general', x: 0, y: 0, w: 5, h: 4, minW: 3, minH: 3 },

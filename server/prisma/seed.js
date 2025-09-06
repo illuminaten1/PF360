@@ -627,6 +627,11 @@ async function main() {
 
   console.log(`📋 ${bapData.length} BAP à insérer...`)
 
+  // Supprimer les relations BAP existantes d'abord
+  await prisma.dossierBAP.deleteMany({})
+  await prisma.demandeBAP.deleteMany({})
+  console.log('🗑️  Relations BAP existantes supprimées')
+
   // Supprimer les BAP existants
   await prisma.bAP.deleteMany({})
   console.log('🗑️  BAP existants supprimés')

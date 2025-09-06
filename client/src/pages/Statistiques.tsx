@@ -250,154 +250,176 @@ const INITIAL_GRID_LAYOUTS = {
 const StatistiquesGeneralesComponent: React.FC<{ 
   stats: StatistiquesGenerales | undefined
 }> = ({ stats }) => (
-  <div className="p-4 h-full overflow-auto">
-    {stats && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
-          <div className="text-2xl font-bold text-blue-600 mb-1">
-            {stats.demandesTotal}
+  <div className="h-full flex flex-col">
+    <div className="flex-1 overflow-auto p-2">
+      {stats && (
+        <div className="h-full grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600 mb-1">
+              {stats.demandesTotal}
+            </div>
+            <div className="text-xs text-gray-600">
+              Reçues
+            </div>
           </div>
-          <div className="text-xs text-gray-600">
-            Reçues
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
+            <div className="text-xl sm:text-2xl font-bold text-green-600 mb-1">
+              {stats.demandesTraitees}
+            </div>
+            <div className="text-xs text-gray-600">
+              Traitées
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600 mb-1">
+              {stats.demandesEnInstance}
+            </div>
+            <div className="text-xs text-gray-600">
+              En instance
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
+            <div className="text-xl sm:text-2xl font-bold text-red-600 mb-1">
+              {stats.demandesNonAffectees}
+            </div>
+            <div className="text-xs text-gray-600">
+              Non affectées
+            </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
-          <div className="text-2xl font-bold text-green-600 mb-1">
-            {stats.demandesTraitees}
-          </div>
-          <div className="text-xs text-gray-600">
-            Traitées
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
-          <div className="text-2xl font-bold text-yellow-600 mb-1">
-            {stats.demandesEnInstance}
-          </div>
-          <div className="text-xs text-gray-600">
-            En instance
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
-          <div className="text-2xl font-bold text-red-600 mb-1">
-            {stats.demandesNonAffectees}
-          </div>
-          <div className="text-xs text-gray-600">
-            Non affectées
-          </div>
-        </div>
-      </div>
-    )}
+      )}
+    </div>
   </div>
 )
 
 const StatistiquesUtilisateurComponent: React.FC<{ 
   users: StatistiquesUtilisateur[] | undefined 
-}> = ({ users }) => (
-  <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rédacteurs</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total PF</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Propres</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">BAP</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PJ</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">AJ</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">AJE</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">REJET</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">En cours</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">En propre</th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Suivis BAP</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {users?.map((user, index) => (
-            <tr key={user.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-              <td className="px-2 py-2">
-                <div className="text-sm font-medium text-gray-900">
-                  {user.prenom} {user.nom}
-                </div>
-                <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full mt-1">
-                  {user.role}
-                </span>
-              </td>
-              <td className="px-2 py-2 text-center text-sm text-gray-900">
-                {user.demandesAttribuees}
-              </td>
-              <td className="px-2 py-2 text-center text-sm text-gray-900">
-                {user.demandesPropres}
-              </td>
-              <td className="px-2 py-2 text-center text-sm text-gray-900">
-                {user.demandesBAP}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-medium text-blue-600">
-                {user.decisionsRepartition.PJ}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-medium text-purple-600">
-                {user.decisionsRepartition.AJ}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-medium text-green-600">
-                {user.decisionsRepartition.AJE}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-medium text-red-600">
-                {user.decisionsRepartition.REJET}
-              </td>
-              <td className="px-2 py-2 text-center text-sm text-gray-900">
-                {user.enCours}
-              </td>
-              <td className="px-2 py-2 text-center text-sm text-gray-900">
-                {user.enCoursPropre}
-              </td>
-              <td className="px-2 py-2 text-center text-sm text-gray-900">
-                {user.enCoursBAP}
-              </td>
+}> = ({ users }) => {
+  const totalRows = users ? users.length + 1 : 1; // +1 pour la ligne TOTAL
+  const heightPercentage = (100 / totalRows).toFixed(2);
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Rédacteurs</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Total PF</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Propres</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">BAP</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">PJ</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">AJ</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">AJE</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">REJET</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">En cours</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">En propre</th>
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Suivis BAP</th>
             </tr>
-          ))}
-          {users && users.length > 0 && (
-            <tr className="bg-blue-50 border-t-2 border-blue-200">
-              <td className="px-2 py-2">
-                <div className="text-sm font-bold text-gray-900">
-                  TOTAL
-                </div>
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900">
-                {users.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900">
-                {users.reduce((sum, user) => sum + user.demandesPropres, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900">
-                {users.reduce((sum, user) => sum + user.demandesBAP, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-blue-600">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-purple-600">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-green-600">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-red-600">
-                {users.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900">
-                {users.reduce((sum, user) => sum + user.enCours, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900">
-                {users.reduce((sum, user) => sum + user.enCoursPropre, 0)}
-              </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900">
-                {users.reduce((sum, user) => sum + user.enCoursBAP, 0)}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white h-full">
+            {users && users.length > 0 ? (
+              <>
+                {users.map((user, index) => (
+                  <tr 
+                    key={user.id} 
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                    style={{ height: `${heightPercentage}%` }}
+                  >
+                    <td className="px-2 py-1 align-middle">
+                      <div className="text-xs font-medium text-gray-900">
+                        {user.prenom} {user.nom}
+                      </div>
+                      <span className="inline-flex px-2 py-1 text-[10px] font-medium bg-gray-100 text-gray-800 rounded-full mt-1">
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.demandesAttribuees}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.demandesPropres}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.demandesBAP}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-blue-600 align-middle">
+                      {user.decisionsRepartition.PJ}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-purple-600 align-middle">
+                      {user.decisionsRepartition.AJ}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-green-600 align-middle">
+                      {user.decisionsRepartition.AJE}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-red-600 align-middle">
+                      {user.decisionsRepartition.REJET}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.enCours}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.enCoursPropre}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.enCoursBAP}
+                    </td>
+                  </tr>
+                ))}
+                <tr 
+                  className="bg-blue-50 border-t-2 border-blue-200"
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-1 align-middle">
+                    <div className="text-xs font-bold text-gray-900">
+                      TOTAL
+                    </div>
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {users.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {users.reduce((sum, user) => sum + user.demandesPropres, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {users.reduce((sum, user) => sum + user.demandesBAP, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-blue-600 align-middle">
+                    {users.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-purple-600 align-middle">
+                    {users.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-green-600 align-middle">
+                    {users.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-red-600 align-middle">
+                    {users.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {users.reduce((sum, user) => sum + user.enCours, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {users.reduce((sum, user) => sum + user.enCoursPropre, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {users.reduce((sum, user) => sum + user.enCoursBAP, 0)}
+                  </td>
+                </tr>
+              </>
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={11} className="px-3 py-4 text-center text-xs text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const StatistiquesBAPComponent: React.FC<{ 
   statsBAP: StatistiqueBAP[] | undefined 
@@ -428,33 +450,58 @@ const StatistiquesBAPComponent: React.FC<{
 
 const QualiteDemandeurComponent: React.FC<{ 
   statsQualite: StatistiquesQualiteDemandeur[] | undefined 
-}> = ({ statsQualite }) => (
-  <div className="p-4 h-full overflow-auto">
-    <SimpleTable headers={['Qualité', 'Nbr demandes', 'Pourcentage']}>
-      {statsQualite && statsQualite.length > 0 ? (
-        statsQualite.map((stat, index) => (
-          <tr key={stat.qualite} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 text-sm font-medium text-gray-900">
-              {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
-            </td>
-            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.nombreDemandes}
-            </td>
-            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.pourcentage.toFixed(1)}%
-            </td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500">
-            Aucune donnée disponible
-          </td>
-        </tr>
-      )}
-    </SimpleTable>
-  </div>
-)
+}> = ({ statsQualite }) => {
+  const heightPercentage = statsQualite && statsQualite.length > 0 ? (100 / statsQualite.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Qualité
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Nbr demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Pourcentage
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsQualite && statsQualite.length > 0 ? (
+              statsQualite.map((stat, index) => (
+                <tr 
+                  key={stat.qualite} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
 
 const TypeInfractionComponent: React.FC<{ 
   statsInfractions: StatistiquesTypeInfraction[] | undefined 
@@ -633,33 +680,58 @@ const StatutDemandeurComponent: React.FC<{
 
 const BadgesComponent: React.FC<{ 
   statsBadges: StatistiquesBadges[] | undefined 
-}> = ({ statsBadges }) => (
-  <div className="p-4 h-full overflow-auto">
-    <SimpleTable headers={['Badge', 'Nbr demandes', 'Pourcentage']}>
-      {statsBadges && statsBadges.length > 0 ? (
-        statsBadges.map((stat, index) => (
-          <tr key={`${stat.badge}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 text-sm font-medium text-gray-900">
-              {stat.badge || 'Non renseigné'}
-            </td>
-            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.nombreDemandes}
-            </td>
-            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.pourcentage.toFixed(1)}%
-            </td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500">
-            Aucune donnée disponible
-          </td>
-        </tr>
-      )}
-    </SimpleTable>
-  </div>
-)
+}> = ({ statsBadges }) => {
+  const heightPercentage = statsBadges && statsBadges.length > 0 ? (100 / statsBadges.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Badge
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Nbr demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Pourcentage
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsBadges && statsBadges.length > 0 ? (
+              statsBadges.map((stat, index) => (
+                <tr 
+                  key={`${stat.badge}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.badge || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
 
 const ReponseBRPFComponent: React.FC<{ 
   statsReponseBRPF: StatistiquesReponseBRPF | undefined 

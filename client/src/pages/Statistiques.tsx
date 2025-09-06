@@ -24,6 +24,7 @@ interface StatistiquesUtilisateur {
   nom: string
   prenom: string
   role: string
+  grade: string | null
   demandesAttribuees: number
   demandesPropres: number
   demandesBAP: number
@@ -273,7 +274,14 @@ const StatistiquesGeneralesComponent: React.FC<{
 const StatistiquesUtilisateurComponent: React.FC<{ 
   users: StatistiquesUtilisateur[] | undefined 
 }> = ({ users }) => {
-  const totalRows = users ? users.length + 1 : 1; // +1 pour la ligne TOTAL
+  // Trier les utilisateurs par ordre alphabétique (nom puis prénom)
+  const sortedUsers = users ? [...users].sort((a, b) => {
+    const nomComparison = a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' })
+    if (nomComparison !== 0) return nomComparison
+    return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' })
+  }) : undefined
+
+  const totalRows = sortedUsers ? sortedUsers.length + 1 : 1; // +1 pour la ligne TOTAL
   const heightPercentage = (100 / totalRows).toFixed(2);
 
   return (
@@ -296,9 +304,9 @@ const StatistiquesUtilisateurComponent: React.FC<{
             </tr>
           </thead>
           <tbody className="bg-white h-full">
-            {users && users.length > 0 ? (
+            {sortedUsers && sortedUsers.length > 0 ? (
               <>
-                {users.map((user, index) => (
+                {sortedUsers.map((user, index) => (
                   <tr 
                     key={user.id} 
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
@@ -306,7 +314,7 @@ const StatistiquesUtilisateurComponent: React.FC<{
                   >
                     <td className="px-2 py-1 align-middle">
                       <div className="text-xs font-medium text-gray-900">
-                        {user.prenom} {user.nom}
+                        {user.grade ? `${user.grade} ` : ''}{user.prenom} {user.nom}
                       </div>
                       <span className="inline-flex px-2 py-1 text-[10px] font-medium bg-gray-100 text-gray-800 rounded-full mt-1">
                         {user.role}
@@ -354,34 +362,34 @@ const StatistiquesUtilisateurComponent: React.FC<{
                     </div>
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
-                    {users.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
-                    {users.reduce((sum, user) => sum + user.demandesPropres, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.demandesPropres, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
-                    {users.reduce((sum, user) => sum + user.demandesBAP, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.demandesBAP, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-blue-600 align-middle">
-                    {users.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-purple-600 align-middle">
-                    {users.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-green-600 align-middle">
-                    {users.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-red-600 align-middle">
-                    {users.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
-                    {users.reduce((sum, user) => sum + user.enCours, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.enCours, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
-                    {users.reduce((sum, user) => sum + user.enCoursPropre, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.enCoursPropre, 0)}
                   </td>
                   <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
-                    {users.reduce((sum, user) => sum + user.enCoursBAP, 0)}
+                    {sortedUsers.reduce((sum, user) => sum + user.enCoursBAP, 0)}
                   </td>
                 </tr>
               </>

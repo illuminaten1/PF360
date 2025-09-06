@@ -256,7 +256,8 @@ const getStatistiquesAdministratives = async (req, res) => {
         id: true,
         nom: true,
         prenom: true,
-        role: true
+        role: true,
+        grade: true
       },
       orderBy: [
         { role: 'asc' },
@@ -457,6 +458,7 @@ const getStatistiquesAdministratives = async (req, res) => {
         nom: user.nom,
         prenom: user.prenom,
         role: user.role,
+        grade: user.grade,
         demandesAttribuees,
         demandesPropres,
         demandesBAP,

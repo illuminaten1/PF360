@@ -656,7 +656,7 @@ const TypeInfractionComponent: React.FC<{
           <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Type d'infraction
+                Type
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Demandes
@@ -711,7 +711,7 @@ const ContexteMissionnelComponent: React.FC<{
           <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Contexte missionnel
+                Contexte
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Demandes
@@ -876,7 +876,7 @@ const StatutDemandeurComponent: React.FC<{
           <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Statut demandeur
+                Statut
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Demandes
@@ -1081,7 +1081,7 @@ const AutoControleComponent: React.FC<{
           </tr>
           <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
             <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
-              Délai traitement moyen
+              Délai de traitement moyen
             </td>
             <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.delaiTraitementMoyen?.toFixed(2) || '0,00'}

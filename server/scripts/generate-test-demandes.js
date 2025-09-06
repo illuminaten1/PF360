@@ -402,8 +402,49 @@ const generateRandomDemande = (year = null, dossierParams = null, grades = []) =
   }
 }
 
+// Définition de la répartition des BAP par utilisateur
+const getBapsByUser = (users, baps) => {
+  const userBapMapping = {
+    // Hervé gère RGARA et RGPACA (comme spécifié)
+    'herve': ['RGARA', 'RGPACA'],
+    // Répartition réaliste avec un seul BAP par utilisateur ou aucun
+    'marie': ['RGIF'],
+    'jean': ['RGBRET'],
+    'sophie': ['RGNORM'],
+    'paul': ['RGCVL'],
+    'claire': ['RGNA'],
+    'thomas': ['RGPDL'],
+    'julie': ['RGOCC'],
+    'olivier': ['RGCOR'],
+    'lucas': ['RGGE'],
+    // Certains utilisateurs sans BAP
+    'test': [],
+    'admin': ['RGBFC'], // Admin avec un BAP
+    'nathalie': [] // Pas de BAP
+  }
+  
+  // Créer un mapping utilisateur -> objets BAP
+  const result = {}
+  users.forEach(user => {
+    const bapNames = userBapMapping[user.identifiant] || []
+    result[user.identifiant] = baps.filter(bap => bapNames.includes(bap.nomBAP))
+  })
+  
+  return result
+}
+
+// Fonction pour attribuer un BAP à un utilisateur selon les probabilités
+const shouldAssignBapToUser = (userIdentifiant, totalDossiersForUser) => {
+  // Entre 35% et 45% des dossiers d'un utilisateur doivent être liés à ses BAP
+  const minPercent = 0.35
+  const maxPercent = 0.45
+  const targetPercent = minPercent + Math.random() * (maxPercent - minPercent)
+  
+  return Math.random() < targetPercent
+}
+
 // Fonction pour générer un dossier avec ses demandes
-const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
+const generateDossier = (year = 2025, users = [], sgamis = [], grades = [], baps = [], userBapMapping = {}) => {
   // Nombre de demandes par dossier (entre 1 et 14, moyenne ~3)
   const weights = [15, 25, 20, 15, 10, 5, 3, 2, 2, 1, 1, 1, 0.5, 0.5] // Poids pour 1 à 14 demandes
   const totalWeight = weights.reduce((sum, w) => sum + w, 0)
@@ -473,6 +514,15 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
   const assignedUser = randomChoice(users)
   const assignedSgami = randomChoice(sgamis)
   
+  // Déterminer si ce dossier doit être lié à un BAP géré par l'utilisateur
+  let assignedBap = null
+  if (shouldAssignBapToUser(assignedUser.identifiant)) {
+    const userBaps = userBapMapping[assignedUser.identifiant] || []
+    if (userBaps.length > 0) {
+      assignedBap = randomChoice(userBaps)
+    }
+  }
+  
   const demandes = []
   const aujourdhui = new Date()
   aujourdhui.setHours(0, 0, 0, 0) // Début de la journée
@@ -499,6 +549,7 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
     numero: generateNumeroDossier(),
     assigneAId: assignedUser.id,
     sgamiId: assignedSgami.id,
+    assignedBap: assignedBap, // BAP assigné si applicable
     demandes
   }
 
@@ -539,11 +590,26 @@ async function main() {
   const users = await prisma.user.findMany({ where: { active: true } })
   const sgamis = await prisma.sgami.findMany()
   const grades = await prisma.grade.findMany({ orderBy: { ordre: 'asc' } })
+  const baps = await prisma.bAP.findMany()
+  
+  // Créer le mapping utilisateur-BAP
+  const userBapMapping = getBapsByUser(users, baps)
   
   console.log(`🏷️  Badges disponibles : ${badges.map(b => b.nom).join(', ')}`)
   console.log(`👥 Utilisateurs disponibles : ${users.map(u => u.identifiant).join(', ')}`)
   console.log(`🏢 SGAMI disponibles : ${sgamis.map(s => s.formatCourtNommage).join(', ')}`)
   console.log(`🎖️  Grades disponibles : ${grades.map(g => g.gradeAbrege).join(', ')}`)
+  console.log(`📋 BAP disponibles : ${baps.map(b => b.nomBAP).join(', ')}`)
+  
+  // Afficher la répartition des BAP par utilisateur
+  console.log(`🔗 Répartition des BAP par utilisateur :`)
+  Object.entries(userBapMapping).forEach(([userIdentifiant, userBaps]) => {
+    if (userBaps.length > 0) {
+      console.log(`   - ${userIdentifiant} : ${userBaps.map(b => b.nomBAP).join(', ')}`)
+    } else {
+      console.log(`   - ${userIdentifiant} : aucun BAP`)
+    }
+  })
   
   if (users.length === 0) {
     console.error('❌ Aucun utilisateur trouvé ! Exécutez d\'abord le seed.')
@@ -560,13 +626,18 @@ async function main() {
     return
   }
   
+  if (baps.length === 0) {
+    console.error('❌ Aucun BAP trouvé ! Exécutez d\'abord le seed.')
+    return
+  }
+  
   const dossiers = []
   let totalDemandesGenerees = 0
   
   // Génération des dossiers et leurs demandes pour 2024
   console.log(`📅 Génération des dossiers et demandes pour 2024...`)
   for (let i = 0; i < nbDossiers2024 && totalDemandesGenerees < totalDemandes2024; i++) {
-    const dossier = generateDossier(2024, users, sgamis, grades)
+    const dossier = generateDossier(2024, users, sgamis, grades, baps, userBapMapping)
     // Limiter le nombre de demandes si on dépasse le total souhaité
     if (totalDemandesGenerees + dossier.demandes.length > totalDemandes2024) {
       dossier.demandes = dossier.demandes.slice(0, totalDemandes2024 - totalDemandesGenerees)
@@ -585,7 +656,7 @@ async function main() {
   let totalDemandesGenerees2025 = 0
   console.log(`📅 Génération des dossiers et demandes pour 2025...`)
   for (let i = 0; i < nbDossiers2025 && totalDemandesGenerees2025 < totalDemandes2025; i++) {
-    const dossier = generateDossier(2025, users, sgamis, grades)
+    const dossier = generateDossier(2025, users, sgamis, grades, baps, userBapMapping)
     // Limiter le nombre de demandes si on dépasse le total souhaité
     if (totalDemandesGenerees2025 + dossier.demandes.length > totalDemandes2025) {
       dossier.demandes = dossier.demandes.slice(0, totalDemandes2025 - totalDemandesGenerees2025)
@@ -641,6 +712,12 @@ async function main() {
   let dossiersInserted = 0
   let demandesInserted = 0
   let badgeStats = { signale: 0, uda: 0, vss: 0 }
+  let bapStats = {}
+  
+  // Initialiser les stats BAP
+  baps.forEach(bap => {
+    bapStats[bap.nomBAP] = 0
+  })
   
   for (const dossier of dossiers) {
     try {
@@ -696,14 +773,35 @@ async function main() {
         }
       }
       
-      // 3. Créer les demandes du dossier
+      // 3. Attribuer le BAP au dossier si applicable
+      if (dossier.assignedBap) {
+        await prisma.dossierBAP.create({
+          data: {
+            dossierId: createdDossier.id,
+            bapId: dossier.assignedBap.id
+          }
+        })
+        bapStats[dossier.assignedBap.nomBAP]++
+      }
+      
+      // 4. Créer les demandes du dossier
       for (const demande of dossier.demandes) {
-        await prisma.demande.create({
+        const createdDemande = await prisma.demande.create({
           data: {
             ...demande,
             dossierId: createdDossier.id
           }
         })
+        
+        // Si le dossier est lié à un BAP, lier aussi toutes ses demandes
+        if (dossier.assignedBap) {
+          await prisma.demandeBAP.create({
+            data: {
+              demandeId: createdDemande.id,
+              bapId: dossier.assignedBap.id
+            }
+          })
+        }
         
         demandesInserted++
       }
@@ -724,6 +822,12 @@ async function main() {
   console.log(`   - Signalé : ${badgeStats.signale} dossiers`)
   console.log(`   - UDA : ${badgeStats.uda} dossiers`)
   console.log(`   - VSS : ${badgeStats.vss} dossiers`)
+  console.log(`📋 BAP attribués aux dossiers :`)
+  Object.entries(bapStats).forEach(([bapName, count]) => {
+    if (count > 0) {
+      console.log(`   - ${bapName} : ${count} dossiers`)
+    }
+  })
   
   // Vérifications
   const totalDossiersEnBase = await prisma.dossier.count()
@@ -732,6 +836,8 @@ async function main() {
   const demandesAvecAssignation = await prisma.demande.count({ where: { assigneAId: { not: null } } })
   const dossiersAvecAssignation = await prisma.dossier.count({ where: { assigneAId: { not: null } } })
   const dossiersAvecSgami = await prisma.dossier.count({ where: { sgamiId: { not: null } } })
+  const dossiersAvecBap = await prisma.dossierBAP.count()
+  const demandesAvecBap = await prisma.demandeBAP.count()
   
   console.log(`📊 Statistiques finales :`)
   console.log(`   - Dossiers en base : ${totalDossiersEnBase}`)
@@ -740,7 +846,23 @@ async function main() {
   console.log(`   - Demandes assignées : ${demandesAvecAssignation}`)
   console.log(`   - Dossiers assignés : ${dossiersAvecAssignation}`)
   console.log(`   - Dossiers avec SGAMI : ${dossiersAvecSgami}`)
+  console.log(`   - Dossiers avec BAP : ${dossiersAvecBap}`)
+  console.log(`   - Demandes avec BAP : ${demandesAvecBap}`)
   console.log(`   - Moyenne de demandes par dossier : ${(totalDemandesEnBase / totalDossiersEnBase).toFixed(2)}`)
+  
+  // Statistiques détaillées par utilisateur
+  console.log(`\n📊 Répartition détaillée par utilisateur :`)
+  for (const user of users) {
+    const userDossiers = await prisma.dossier.count({ where: { assigneAId: user.id } })
+    const userDossiersAvecBap = await prisma.dossier.count({
+      where: {
+        assigneAId: user.id,
+        baps: { some: {} }
+      }
+    })
+    const pourcentageBap = userDossiers > 0 ? ((userDossiersAvecBap / userDossiers) * 100).toFixed(1) : '0.0'
+    console.log(`   - ${user.identifiant} : ${userDossiers} dossiers, ${userDossiersAvecBap} avec BAP (${pourcentageBap}%)`)
+  }
 }
 
 main()

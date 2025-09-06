@@ -1733,23 +1733,13 @@ const getStatistiquesReponseBRPF = async (req, res) => {
     const startOfYear = new Date(year, 0, 1);
     const endOfYear = new Date(year + 1, 0, 1);
     
-    // 1. Récupérer toutes les décisions signées de l'année pour des demandes de l'année
+    // 1. Récupérer toutes les décisions signées de l'année (peu importe l'année de réception de la demande)
     const decisions = await prisma.decision.findMany({
       where: {
         dateSignature: {
           gte: startOfYear,
           lt: endOfYear,
           not: null
-        },
-        demandes: {
-          some: {
-            demande: {
-              dateReception: {
-                gte: startOfYear,
-                lt: endOfYear
-              }
-            }
-          }
         }
       },
       select: {

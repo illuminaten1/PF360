@@ -1459,6 +1459,55 @@ const getStatistiquesBranche = async (req, res) => {
   }
 };
 
+const getStatistiquesStatutDemandeur = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer toutes les demandes avec leur statutDemandeur
+    const demandes = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        statutDemandeur: true
+      }
+    });
+
+    // Compter les occurrences de chaque statut demandeur
+    const statutCounts = {};
+    const totalDemandes = demandes.length;
+    
+    demandes.forEach(demande => {
+      const statut = demande.statutDemandeur || 'Non renseigné';
+      statutCounts[statut] = (statutCounts[statut] || 0) + 1;
+    });
+
+    // Convertir en format attendu avec pourcentages
+    const statistiques = Object.entries(statutCounts).map(([statutDemandeur, nombreDemandes]) => ({
+      statutDemandeur,
+      nombreDemandes,
+      pourcentage: totalDemandes > 0 ? (nombreDemandes / totalDemandes) * 100 : 0
+    }));
+
+    // Trier par nombre de demandes décroissant
+    statistiques.sort((a, b) => b.nombreDemandes - a.nombreDemandes);
+
+    res.json(statistiques);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques statut demandeur:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques statut demandeur' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1498,6 +1547,7 @@ module.exports = {
   getStatistiquesContexteMissionnel,
   getStatistiquesFormationAdministrative,
   getStatistiquesBranche,
+  getStatistiquesStatutDemandeur,
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,

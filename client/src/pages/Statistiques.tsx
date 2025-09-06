@@ -113,7 +113,13 @@ interface StatistiquesBranche {
   pourcentage: number
 }
 
-type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
+interface StatistiquesStatutDemandeur {
+  statutDemandeur: string
+  nombreDemandes: number
+  pourcentage: number
+}
+
+type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
 
 const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
   direction: 'column' as const,
@@ -139,12 +145,17 @@ const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
         second: {
           direction: 'row' as const,
           first: 'formation' as MosaicKey,
-          second: 'branche' as MosaicKey,
+          second: {
+            direction: 'row' as const,
+            first: 'branche' as MosaicKey,
+            second: 'statut' as MosaicKey,
+            splitPercentage: 50
+          },
           splitPercentage: 50
         },
-        splitPercentage: 33
+        splitPercentage: 25
       },
-      splitPercentage: 25
+      splitPercentage: 20
     },
     splitPercentage: 50
   },
@@ -296,6 +307,45 @@ const StatistiquesUtilisateurComponent: React.FC<{
               </td>
             </tr>
           ))}
+          {users && users.length > 0 && (
+            <tr className="bg-gray-50 border-t-2 border-gray-300">
+              <td className="px-3 py-2 whitespace-nowrap">
+                <div className="text-xs font-bold text-gray-900">
+                  TOTAL
+                </div>
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
+                {users.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
+                {users.reduce((sum, user) => sum + user.demandesPropres, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold border-r border-gray-200">
+                {users.reduce((sum, user) => sum + user.demandesBAP, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-blue-600 font-bold">
+                {users.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-purple-600 font-bold">
+                {users.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-green-600 font-bold">
+                {users.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-red-600 font-bold border-r border-gray-200">
+                {users.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
+                {users.reduce((sum, user) => sum + user.enCours, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
+                {users.reduce((sum, user) => sum + user.enCoursPropre, 0)}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-bold">
+                {users.reduce((sum, user) => sum + user.enCoursBAP, 0)}
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
@@ -403,7 +453,7 @@ const TypeInfractionComponent: React.FC<{
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Type d'infraction
+              Type d&apos;infraction
             </th>
             <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
               Nbr demandes
@@ -590,6 +640,55 @@ const BrancheComponent: React.FC<{
   </div>
 )
 
+const StatutDemandeurComponent: React.FC<{ 
+  statsStatut: StatistiquesStatutDemandeur[] | undefined 
+}> = ({ statsStatut }) => (
+  <div className="p-4 h-full overflow-auto">
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 text-sm">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Statut demandeur
+            </th>
+            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Nbr demandes
+            </th>
+            <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+              Pourcentage
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {statsStatut && statsStatut.length > 0 ? (
+            statsStatut.map((stat, index) => (
+              <tr key={`${stat.statutDemandeur}-${index}`} className="hover:bg-gray-50">
+                <td className="px-4 py-2 whitespace-nowrap">
+                  <div className="text-xs font-medium text-gray-900">
+                    {stat.statutDemandeur || 'Non renseigné'}
+                  </div>
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {stat.nombreDemandes}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
+                  {stat.pourcentage.toFixed(1)}%
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={3} className="px-4 py-3 text-center text-xs text-gray-500">
+                Aucune donnée disponible
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)
+
 const AutoControleComponent: React.FC<{ 
   autoControle: StatistiquesAutoControle | undefined 
 }> = ({ autoControle }) => (
@@ -731,8 +830,7 @@ const FluxMensuelsComponent: React.FC<{
 
 const FluxHebdomadairesComponent: React.FC<{ 
   fluxHebdomadaires: StatistiquesFluxHebdomadaires | undefined
-  selectedYear: number 
-}> = ({ fluxHebdomadaires, selectedYear }) => {
+}> = ({ fluxHebdomadaires }) => {
   // Calculer le stock cumulé pour chaque semaine
   const fluxAvecStock = fluxHebdomadaires?.fluxHebdomadaires ? 
     fluxHebdomadaires.fluxHebdomadaires.reduce((acc, flux, index) => {
@@ -914,6 +1012,15 @@ const Statistiques: React.FC = () => {
     enabled: activeTab === 'administratif'
   })
 
+  const { data: statsStatut, isLoading: isLoadingStatut } = useQuery<StatistiquesStatutDemandeur[]>({
+    queryKey: ['statistiques-statut', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/statut-demandeur?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
   const { data: fluxMensuels, isLoading: isLoadingFlux } = useQuery<StatistiquesFluxMensuels>({
     queryKey: ['flux-mensuels', selectedYear],
     queryFn: async () => {
@@ -977,6 +1084,8 @@ const Statistiques: React.FC = () => {
         return <FormationAdministrativeComponent statsFormation={statsFormation} />
       case 'branche':
         return <BrancheComponent statsBranche={statsBranche} />
+      case 'statut':
+        return <StatutDemandeurComponent statsStatut={statsStatut} />
       case 'autocontrole':
         return <AutoControleComponent autoControle={autoControle} />
       case 'fluxmensuels':
@@ -989,8 +1098,7 @@ const Statistiques: React.FC = () => {
       case 'fluxhebdo':
         return (
           <FluxHebdomadairesComponent 
-            fluxHebdomadaires={fluxHebdomadaires} 
-            selectedYear={selectedYear}
+            fluxHebdomadaires={fluxHebdomadaires}
           />
         )
       default:
@@ -998,7 +1106,7 @@ const Statistiques: React.FC = () => {
     }
   }
 
-  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
+  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
     return <LoadingSpinner />
   }
 
@@ -1078,6 +1186,7 @@ const Statistiques: React.FC = () => {
                     id === 'contexte' ? 'Contexte missionnel' :
                     id === 'formation' ? 'Formation administrative' :
                     id === 'branche' ? 'Branche' :
+                    id === 'statut' ? 'Statut demandeur' :
                     id === 'autocontrole' ? 'Auto-contrôle' :
                     id === 'fluxmensuels' ? 'Flux mensuels' :
                     id === 'fluxhebdo' ? 'Flux hebdomadaires' :

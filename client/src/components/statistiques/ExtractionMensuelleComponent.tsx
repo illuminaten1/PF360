@@ -1,4 +1,5 @@
 import React from 'react'
+import { HTMLTable } from '@blueprintjs/core'
 
 interface ExtractionMensuelleData {
   mois: string
@@ -30,7 +31,7 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
   if (!stats || !stats.donneesParMois?.length) {
     return (
       <div className="p-4 h-full overflow-auto">
-        <div className="text-center text-gray-500">
+        <div style={{ textAlign: 'center', color: '#5C7080' }}>
           Aucune donnée disponible
         </div>
       </div>
@@ -50,105 +51,106 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
 
   return (
     <div className="p-4 h-full overflow-auto">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                MOIS
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                DDES DE PF VICTIME UNIQUEMENT TOUTES INFRACTIONS
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                DONT RÉSERVISTES
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                CUMUL DDE VICTIME
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                DONT CUMUL VICTIME RÉSERVISTES
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                DDES DE PF POUR VIOLENCES
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                DONT DDES DE PF POUR VIOLENCES SUR RÉSERVISTES
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                CUMUL VIOLENCES
-              </th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                DONT CUMUL VIOLENCES RÉSERVISTES
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {stats.donneesParMois.map((data) => (
-              <tr key={data.mois} className="hover:bg-gray-50">
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs font-medium text-gray-900">
-                  {data.mois}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.ddesDePfVictimeUniquementToutesInfractions)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.dontReservistes)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.cumulDdeVictime)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.dontCumulVictimeReservistes)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.ddesDePfPourViolences)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.dontDdesDePfPourViolencesSurReservistes)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.cumulViolences)}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900">
-                  {formatNumber(data.dontCumulViolencesReservistes)}
-                </td>
-              </tr>
-            ))}
-            
-            {/* Ligne de moyennes */}
-            <tr className="hover:bg-gray-50">
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs font-medium text-gray-900">
-                MOYENNE / MOIS
+      <HTMLTable 
+        striped 
+        interactive
+        style={{ width: '100%', fontSize: '12px' }}
+      >
+        <thead>
+          <tr>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              MOIS
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              DDES DE PF VICTIME UNIQUEMENT TOUTES INFRACTIONS
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              DONT RÉSERVISTES
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              CUMUL DDE VICTIME
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              DONT CUMUL VICTIME RÉSERVISTES
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              DDES DE PF POUR VIOLENCES
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              DONT DDES DE PF POUR VIOLENCES SUR RÉSERVISTES
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              CUMUL VIOLENCES
+            </th>
+            <th style={{ textAlign: 'center', padding: '8px', fontSize: '10px' }}>
+              DONT CUMUL VIOLENCES RÉSERVISTES
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {stats.donneesParMois.map((data) => (
+            <tr key={data.mois}>
+              <td style={{ textAlign: 'center', padding: '6px', fontWeight: 500 }}>
+                {data.mois}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                {formatDecimal(stats.moyenneParMois.ddesDePfVictimeUniquementToutesInfractions)}
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.ddesDePfVictimeUniquementToutesInfractions)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                {formatDecimal(stats.moyenneParMois.dontReservistes)}
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.dontReservistes)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                -
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.cumulDdeVictime)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                -
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.dontCumulVictimeReservistes)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                {formatDecimal(stats.moyenneParMois.ddesDePfPourViolences)}
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.ddesDePfPourViolences)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                {formatDecimal(stats.moyenneParMois.dontDdesDePfPourViolencesSurReservistes)}
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.dontDdesDePfPourViolencesSurReservistes)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                -
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.cumulViolences)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-center text-xs text-gray-900 font-medium">
-                -
+              <td style={{ textAlign: 'center', padding: '6px' }}>
+                {formatNumber(data.dontCumulViolencesReservistes)}
               </td>
             </tr>
-          </tbody>
-        </table>
-      </div>
+          ))}
+          
+          <tr style={{ backgroundColor: '#F5F8FA', borderTop: '2px solid #CED9E0' }}>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              MOYENNE / MOIS
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              {formatDecimal(stats.moyenneParMois.ddesDePfVictimeUniquementToutesInfractions)}
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              {formatDecimal(stats.moyenneParMois.dontReservistes)}
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              -
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              -
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              {formatDecimal(stats.moyenneParMois.ddesDePfPourViolences)}
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              {formatDecimal(stats.moyenneParMois.dontDdesDePfPourViolencesSurReservistes)}
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              -
+            </td>
+            <td style={{ textAlign: 'center', padding: '6px', fontWeight: 'bold' }}>
+              -
+            </td>
+          </tr>
+        </tbody>
+      </HTMLTable>
     </div>
   )
 }

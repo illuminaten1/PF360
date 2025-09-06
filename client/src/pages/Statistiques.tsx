@@ -213,38 +213,38 @@ const StatistiquesGeneralesComponent: React.FC<{
 }> = ({ stats }) => (
   <div className="p-4 h-full overflow-auto">
     {stats && (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
-          <H1 style={{ color: '#137CBD', margin: '0 0 8px 0' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '12px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 600, color: '#137CBD', margin: '0 0 4px 0' }}>
             {stats.demandesTotal}
-          </H1>
-          <H5 style={{ color: '#5C7080', margin: 0 }}>
+          </div>
+          <div style={{ fontSize: '12px', color: '#5C7080', margin: 0 }}>
             Demandes reçues
-          </H5>
+          </div>
         </Card>
-        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
-          <H1 style={{ color: '#0F9960', margin: '0 0 8px 0' }}>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '12px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 600, color: '#0F9960', margin: '0 0 4px 0' }}>
             {stats.demandesTraitees}
-          </H1>
-          <H5 style={{ color: '#5C7080', margin: 0 }}>
+          </div>
+          <div style={{ fontSize: '12px', color: '#5C7080', margin: 0 }}>
             Demandes traitées
-          </H5>
+          </div>
         </Card>
-        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
-          <H1 style={{ color: '#D9822B', margin: '0 0 8px 0' }}>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '12px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 600, color: '#D9822B', margin: '0 0 4px 0' }}>
             {stats.demandesEnInstance}
-          </H1>
-          <H5 style={{ color: '#5C7080', margin: 0 }}>
+          </div>
+          <div style={{ fontSize: '12px', color: '#5C7080', margin: 0 }}>
             Demandes en instance
-          </H5>
+          </div>
         </Card>
-        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '16px' }}>
-          <H1 style={{ color: '#DB3737', margin: '0 0 8px 0' }}>
+        <Card elevation={Elevation.ONE} style={{ textAlign: 'center', padding: '12px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 600, color: '#DB3737', margin: '0 0 4px 0' }}>
             {stats.demandesNonAffectees}
-          </H1>
-          <H5 style={{ color: '#5C7080', margin: 0 }}>
+          </div>
+          <div style={{ fontSize: '12px', color: '#5C7080', margin: 0 }}>
             Demandes non affectées
-          </H5>
+          </div>
         </Card>
       </div>
     )}

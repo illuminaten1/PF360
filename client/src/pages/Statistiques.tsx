@@ -232,36 +232,36 @@ const StatistiquesGeneralesComponent: React.FC<{
   <div className="h-full flex flex-col">
     <div className="flex-1 overflow-auto p-2">
       {stats && (
-        <div className="h-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600 mb-1">
+        <div className="h-full grid grid-cols-1 sm:grid-cols-2 gap-1">
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-blue-600 mb-1">
               {stats.demandesTotal}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-[10px] text-gray-600">
               Reçues
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-xl sm:text-2xl font-bold text-green-600 mb-1">
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-green-600 mb-1">
               {stats.demandesTraitees}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-[10px] text-gray-600">
               Traitées
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-xl sm:text-2xl font-bold text-yellow-600 mb-1">
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-yellow-600 mb-1">
               {stats.demandesEnInstance}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-[10px] text-gray-600">
               En instance
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-xl sm:text-2xl font-bold text-red-600 mb-1">
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-red-600 mb-1">
               {stats.demandesNonAffectees}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-[10px] text-gray-600">
               Non affectées
             </div>
           </div>
@@ -607,10 +607,10 @@ const QualiteDemandeurComponent: React.FC<{
                 Qualité
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -662,10 +662,10 @@ const TypeInfractionComponent: React.FC<{
                 Type d'infraction
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -717,10 +717,10 @@ const ContexteMissionnelComponent: React.FC<{
                 Contexte missionnel
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -769,13 +769,13 @@ const FormationAdministrativeComponent: React.FC<{
           <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Formation administrative
+                FA
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -827,10 +827,10 @@ const BrancheComponent: React.FC<{
                 Branche
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -882,10 +882,10 @@ const StatutDemandeurComponent: React.FC<{
                 Statut demandeur
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -937,10 +937,10 @@ const BadgesComponent: React.FC<{
                 Badge
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr demandes
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>
@@ -992,10 +992,10 @@ const ReponseBRPFComponent: React.FC<{
                 
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nbr
+                Demandes
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Pourcentage
+                %
               </th>
             </tr>
           </thead>

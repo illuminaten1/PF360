@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { CameraIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 
 interface ExtractionMensuelleData {
@@ -44,7 +44,7 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
               className="p-1 text-gray-300 cursor-not-allowed rounded"
               title="Aucune donnée à capturer"
             >
-              <CameraIcon className="h-4 w-4" />
+              <ArrowDownTrayIcon className="h-4 w-4" />
             </button>
             <button
               disabled
@@ -183,14 +183,14 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
           <button
             onClick={captureTable}
             className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
-            title="Capturer le tableau en image JPEG"
+            title="Télécharger le tableau en image JPEG"
           >
-            <CameraIcon className="h-4 w-4" />
+            <ArrowDownTrayIcon className="h-4 w-4" />
           </button>
           <button
             onClick={copyToClipboard}
             className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
-            title="Copier le tableau dans le presse-papiers"
+            title="Copier l'image dans le presse-papiers"
           >
             <DocumentDuplicateIcon className="h-4 w-4" />
           </button>
@@ -204,28 +204,28 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
                 MOIS
               </th>
               <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                DDES DE PF VICTIME UNIQUEMENT TOUTES INFRACTIONS
+                DEMANDES VICTIME
               </th>
               <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 DONT RÉSERVISTES
               </th>
-              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                CUMUL DDE VICTIME
+              <th className="px-2 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                CUMUL DEMANDES VICTIME
+              </th>
+              <th className="px-2 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                CUMUL RÉSERVISTES VICTIME
               </th>
               <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                DONT CUMUL VICTIME RÉSERVISTES
+                DEMANDES VICTIME VIOLENCES
               </th>
               <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                DDES DE PF POUR VIOLENCES
+                DONT RÉSERVISTES
               </th>
-              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                DONT DDES DE PF POUR VIOLENCES SUR RÉSERVISTES
+              <th className="px-2 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                CUMUL VICTIME VIOLENCES
               </th>
-              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                CUMUL VIOLENCES
-              </th>
-              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                DONT CUMUL VIOLENCES RÉSERVISTES
+              <th className="px-2 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                CUMUL RÉSERVISTES VIOLENCES
               </th>
             </tr>
           </thead>
@@ -248,10 +248,10 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
                   <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
                     {formatNumber(data.dontReservistes)}
                   </td>
-                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                  <td className="px-2 py-2 text-center text-[10px] font-medium text-gray-900 align-middle">
                     {formatNumber(data.cumulDdeVictime)}
                   </td>
-                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                  <td className="px-2 py-2 text-center text-[10px] font-medium text-gray-900 align-middle">
                     {formatNumber(data.dontCumulVictimeReservistes)}
                   </td>
                   <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
@@ -260,10 +260,10 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
                   <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
                     {formatNumber(data.dontDdesDePfPourViolencesSurReservistes)}
                   </td>
-                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                  <td className="px-2 py-2 text-center text-[10px] font-medium text-gray-900 align-middle">
                     {formatNumber(data.cumulViolences)}
                   </td>
-                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                  <td className="px-2 py-2 text-center text-[10px] font-medium text-gray-900 align-middle">
                     {formatNumber(data.dontCumulViolencesReservistes)}
                   </td>
                 </tr>
@@ -283,10 +283,10 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
               <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
                 {formatDecimal(stats.moyenneParMois.dontReservistes)}
               </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
+              <td className="px-2 py-2 text-center text-[10px] font-bold text-gray-900 align-middle">
                 -
               </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
+              <td className="px-2 py-2 text-center text-[10px] font-bold text-gray-900 align-middle">
                 -
               </td>
               <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
@@ -295,10 +295,10 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
               <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
                 {formatDecimal(stats.moyenneParMois.dontDdesDePfPourViolencesSurReservistes)}
               </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
+              <td className="px-2 py-2 text-center text-[10px] font-bold text-gray-900 align-middle">
                 -
               </td>
-              <td className="px-2 py-2 text-center text-sm font-bold text-gray-900 align-middle">
+              <td className="px-2 py-2 text-center text-[10px] font-bold text-gray-900 align-middle">
                 -
               </td>
             </tr>

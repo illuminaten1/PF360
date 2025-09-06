@@ -169,36 +169,44 @@ interface ExtractionMensuelleStats {
   annee: number
 }
 
-type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction'
+interface StatistiquesBadges {
+  badge: string
+  nombreDemandes: number
+  pourcentage: number
+}
+
+type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges'
 
 const INITIAL_GRID_LAYOUTS = {
   lg: [
     { i: 'general', x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
     { i: 'users', x: 6, y: 0, w: 6, h: 8, minW: 4, minH: 6 },
     { i: 'extraction', x: 0, y: 4, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'bap', x: 0, y: 10, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'qualite', x: 3, y: 10, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'infractions', x: 6, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'contexte', x: 9, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'formation', x: 0, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'branche', x: 3, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'statut', x: 6, y: 14, w: 3, h: 6, minW: 2, minH: 4 },
-    { i: 'autocontrole', x: 9, y: 14, w: 3, h: 8, minW: 2, minH: 6 },
-    { i: 'fluxmensuels', x: 0, y: 22, w: 6, h: 8, minW: 4, minH: 6 },
-    { i: 'fluxhebdo', x: 6, y: 20, w: 6, h: 10, minW: 4, minH: 8 }
+    { i: 'badges', x: 0, y: 10, w: 4, h: 6, minW: 3, minH: 4 },
+    { i: 'bap', x: 4, y: 10, w: 2, h: 6, minW: 2, minH: 4 },
+    { i: 'qualite', x: 6, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'infractions', x: 9, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'contexte', x: 6, y: 14, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'formation', x: 9, y: 14, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'branche', x: 0, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'statut', x: 3, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'autocontrole', x: 6, y: 20, w: 3, h: 8, minW: 2, minH: 6 },
+    { i: 'fluxmensuels', x: 9, y: 20, w: 3, h: 8, minW: 4, minH: 6 },
+    { i: 'fluxhebdo', x: 0, y: 22, w: 6, h: 10, minW: 4, minH: 8 }
   ],
   md: [
     { i: 'general', x: 0, y: 0, w: 5, h: 4, minW: 3, minH: 3 },
     { i: 'users', x: 5, y: 0, w: 5, h: 8, minW: 4, minH: 6 },
     { i: 'extraction', x: 0, y: 4, w: 5, h: 6, minW: 4, minH: 4 },
+    { i: 'badges', x: 5, y: 8, w: 5, h: 6, minW: 3, minH: 4 },
     { i: 'bap', x: 0, y: 10, w: 5, h: 6, minW: 3, minH: 4 },
-    { i: 'qualite', x: 5, y: 8, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'qualite', x: 5, y: 14, w: 5, h: 6, minW: 3, minH: 4 },
     { i: 'infractions', x: 0, y: 16, w: 5, h: 6, minW: 3, minH: 4 },
-    { i: 'contexte', x: 5, y: 14, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'contexte', x: 5, y: 20, w: 5, h: 6, minW: 3, minH: 4 },
     { i: 'formation', x: 0, y: 22, w: 5, h: 6, minW: 3, minH: 4 },
-    { i: 'branche', x: 5, y: 20, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'branche', x: 5, y: 26, w: 5, h: 6, minW: 3, minH: 4 },
     { i: 'statut', x: 0, y: 28, w: 5, h: 6, minW: 3, minH: 4 },
-    { i: 'autocontrole', x: 5, y: 26, w: 5, h: 8, minW: 3, minH: 6 },
+    { i: 'autocontrole', x: 5, y: 32, w: 5, h: 8, minW: 3, minH: 6 },
     { i: 'fluxmensuels', x: 0, y: 34, w: 10, h: 8, minW: 6, minH: 6 },
     { i: 'fluxhebdo', x: 0, y: 42, w: 10, h: 10, minW: 6, minH: 8 }
   ],
@@ -206,16 +214,17 @@ const INITIAL_GRID_LAYOUTS = {
     { i: 'general', x: 0, y: 0, w: 6, h: 4, minW: 4, minH: 3 },
     { i: 'users', x: 0, y: 4, w: 6, h: 8, minW: 4, minH: 6 },
     { i: 'extraction', x: 0, y: 12, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'bap', x: 0, y: 18, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'qualite', x: 0, y: 24, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'infractions', x: 0, y: 30, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'contexte', x: 0, y: 36, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'formation', x: 0, y: 42, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'branche', x: 0, y: 48, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'statut', x: 0, y: 54, w: 6, h: 6, minW: 4, minH: 4 },
-    { i: 'autocontrole', x: 0, y: 60, w: 6, h: 8, minW: 4, minH: 6 },
-    { i: 'fluxmensuels', x: 0, y: 68, w: 6, h: 8, minW: 4, minH: 6 },
-    { i: 'fluxhebdo', x: 0, y: 76, w: 6, h: 10, minW: 4, minH: 8 }
+    { i: 'badges', x: 0, y: 18, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'bap', x: 0, y: 24, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'qualite', x: 0, y: 30, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'infractions', x: 0, y: 36, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'contexte', x: 0, y: 42, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'formation', x: 0, y: 48, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'branche', x: 0, y: 54, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'statut', x: 0, y: 60, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'autocontrole', x: 0, y: 66, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'fluxmensuels', x: 0, y: 74, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'fluxhebdo', x: 0, y: 82, w: 6, h: 10, minW: 4, minH: 8 }
   ]
 }
 
@@ -558,6 +567,36 @@ const StatutDemandeurComponent: React.FC<{
           <tr key={`${stat.statutDemandeur}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
             <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.statutDemandeur || 'Non renseigné'}
+            </td>
+            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
+              {stat.nombreDemandes}
+            </td>
+            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
+              {stat.pourcentage.toFixed(1)}%
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500">
+            Aucune donnée disponible
+          </td>
+        </tr>
+      )}
+    </SimpleTable>
+  </div>
+)
+
+const BadgesComponent: React.FC<{ 
+  statsBadges: StatistiquesBadges[] | undefined 
+}> = ({ statsBadges }) => (
+  <div className="p-4 h-full overflow-auto">
+    <SimpleTable headers={['Badge', 'Nbr demandes', 'Pourcentage']}>
+      {statsBadges && statsBadges.length > 0 ? (
+        statsBadges.map((stat, index) => (
+          <tr key={`${stat.badge}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
+              {stat.badge || 'Non renseigné'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
               {stat.nombreDemandes}
@@ -925,6 +964,15 @@ const Statistiques: React.FC = () => {
     enabled: activeTab === 'administratif'
   })
 
+  const { data: statsBadges, isLoading: isLoadingBadges } = useQuery<StatistiquesBadges[]>({
+    queryKey: ['statistiques-badges', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/badges?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
   const { data: anneesDisponibles } = useQuery<number[]>({
     queryKey: ['annees-disponibles'],
     queryFn: async () => {
@@ -946,6 +994,7 @@ const Statistiques: React.FC = () => {
       case 'formation': return 'Formation administrative'
       case 'branche': return 'Branche'
       case 'statut': return 'Statut demandeur'
+      case 'badges': return 'Badges'
       case 'autocontrole': return 'Auto-contrôle'
       case 'fluxmensuels': return 'Flux mensuels'
       case 'fluxhebdo': return 'Flux hebdomadaires'
@@ -984,6 +1033,9 @@ const Statistiques: React.FC = () => {
       case 'statut':
         content = <StatutDemandeurComponent statsStatut={statsStatut} />
         break
+      case 'badges':
+        content = <BadgesComponent statsBadges={statsBadges} />
+        break
       case 'autocontrole':
         content = <AutoControleComponent autoControle={autoControle} />
         break
@@ -1012,7 +1064,7 @@ const Statistiques: React.FC = () => {
     )
   }
 
-  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle || isLoadingExtraction) {
+  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle || isLoadingExtraction || isLoadingBadges) {
     return <LoadingSpinner />
   }
 
@@ -1137,7 +1189,7 @@ const Statistiques: React.FC = () => {
             compactType="vertical"
             preventCollision={false}
           >
-            {(['general', 'users', 'bap', 'qualite', 'infractions', 'contexte', 'formation', 'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo', 'extraction'] as PanelKey[]).map((panelId) => (
+            {(['general', 'users', 'extraction', 'badges', 'bap', 'qualite', 'infractions', 'contexte', 'formation', 'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo'] as PanelKey[]).map((panelId) => (
               <div key={panelId}>
                 {renderPanel(panelId)}
               </div>

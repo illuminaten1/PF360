@@ -1632,6 +1632,69 @@ const getExtractionMensuelle = async (req, res) => {
   }
 };
 
+const getStatistiquesBadges = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer le nombre total de demandes pour l'année (pour calculer les pourcentages)
+    const totalDemandes = await prisma.demande.count({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+    
+    // Récupérer tous les badges avec leurs statistiques
+    const statsBadges = await prisma.badge.findMany({
+      select: {
+        id: true,
+        nom: true,
+        _count: {
+          select: {
+            demandes: {
+              where: {
+                demande: {
+                  dateReception: {
+                    gte: startOfYear,
+                    lt: endOfYear
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        nom: 'asc'
+      }
+    });
+    
+    // Formater les résultats, filtrer ceux avec au moins une demande et trier par nombre de demandes décroissant
+    const statistiques = statsBadges
+      .filter(badge => badge._count.demandes > 0)
+      .map(badge => ({
+        badge: badge.nom,
+        nombreDemandes: badge._count.demandes,
+        pourcentage: totalDemandes > 0 ? (badge._count.demandes / totalDemandes) * 100 : 0
+      }))
+      .sort((a, b) => b.nombreDemandes - a.nombreDemandes);
+    
+    res.json(statistiques);
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques des badges:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques des badges' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1672,6 +1735,7 @@ module.exports = {
   getStatistiquesFormationAdministrative,
   getStatistiquesBranche,
   getStatistiquesStatutDemandeur,
+  getStatistiquesBadges,
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,

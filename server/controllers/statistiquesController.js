@@ -1797,26 +1797,7 @@ const getStatistiquesReponseBRPF = async (req, res) => {
     // 4. Calculer le nombre total de décisions (pour les pourcentages)
     const totalDecisions = agrement + countREJET;
 
-    // 5. Demandes en cours de traitement (demandes de l'année sans décision signée)
-    const enCoursTraitement = await prisma.demande.count({
-      where: {
-        dateReception: {
-          gte: startOfYear,
-          lt: endOfYear
-        },
-        decisions: {
-          none: {
-            decision: {
-              dateSignature: {
-                not: null
-              }
-            }
-          }
-        }
-      }
-    });
-
-    // 6. Formater les résultats
+    // 5. Formater les résultats
     const statistiques = [
       {
         libelle: 'AGRÉMENT',
@@ -1862,21 +1843,12 @@ const getStatistiquesReponseBRPF = async (req, res) => {
       }
     });
 
-    // Ajouter "En cours de traitement"
-    statistiques.push({
-      libelle: 'En cours de traitement',
-      nombre: enCoursTraitement,
-      pourcentage: 0, // Pas de pourcentage pour cette ligne
-      type: 'en_cours'
-    });
-
     res.json({
       statistiques,
       totaux: {
         totalDecisions,
         agrement,
-        rejet: countREJET,
-        enCoursTraitement
+        rejet: countREJET
       }
     });
 

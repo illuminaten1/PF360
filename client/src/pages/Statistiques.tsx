@@ -179,7 +179,7 @@ interface StatistiqueReponseBRPF {
   libelle: string
   nombre: number
   pourcentage: number
-  type: 'agrement' | 'decision' | 'rejet_global' | 'motif_rejet' | 'en_cours'
+  type: 'agrement' | 'decision' | 'rejet_global' | 'motif_rejet'
 }
 
 interface StatistiquesReponseBRPF {
@@ -188,7 +188,6 @@ interface StatistiquesReponseBRPF {
     totalDecisions: number
     agrement: number
     rejet: number
-    enCoursTraitement: number
   }
 }
 
@@ -647,7 +646,7 @@ const ReponseBRPFComponent: React.FC<{
           <tr key={`${stat.libelle}-${index}`} className={`${
             index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
           } ${
-            stat.type === 'agrement' || stat.type === 'rejet_global' || stat.type === 'en_cours' 
+            stat.type === 'agrement' || stat.type === 'rejet_global' 
               ? 'border-t-2 border-gray-200 font-semibold' 
               : ''
           }`}>
@@ -660,7 +659,7 @@ const ReponseBRPFComponent: React.FC<{
               {stat.nombre}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.type === 'en_cours' ? '-' : `${stat.pourcentage.toFixed(2)}%`}
+              {stat.pourcentage.toFixed(2)}%
             </td>
           </tr>
         ))

@@ -650,7 +650,7 @@ const AutoControleComponent: React.FC<{
           </tr>
           <tr className="bg-gray-50">
             <td className="px-2 py-2 pl-6 text-sm text-gray-600">
-              Dont BRP
+              Dont BRPF
             </td>
             <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.ancienneteMoyenneBRP?.toFixed(2) || '0,00'}

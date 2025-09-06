@@ -1508,6 +1508,130 @@ const getStatistiquesStatutDemandeur = async (req, res) => {
   }
 };
 
+const getExtractionMensuelle = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer toutes les demandes de type VICTIME pour l'année avec les champs nécessaires
+    const demandes = await prisma.demande.findMany({
+      where: {
+        type: 'VICTIME',
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        dateReception: true,
+        statutDemandeur: true,
+        qualificationInfraction: true
+      }
+    });
+
+    // Initialiser le tableau des données par mois
+    const donneesParMois = [];
+    const noms_mois = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+
+    // Variables pour calculer les cumuls
+    let cumulDdeVictime = 0;
+    let cumulVictimeReservistes = 0;
+    let cumulViolences = 0;
+    let cumulViolencesReservistes = 0;
+
+    // Variables pour les moyennes
+    let totalDdesPfVictime = 0;
+    let totalReservistes = 0;
+    let totalViolences = 0;
+    let totalViolencesReservistes = 0;
+    let moisAvecDonnees = 0;
+
+    for (let mois = 0; mois < 12; mois++) {
+      const debutMois = new Date(year, mois, 1);
+      const finMois = new Date(year, mois + 1, 1);
+
+      // Filtrer les demandes pour ce mois
+      const demandesMois = demandes.filter(demande => 
+        demande.dateReception >= debutMois && demande.dateReception < finMois
+      );
+
+      // Compter les demandes victimes toutes infractions
+      const ddesDePfVictimeToutes = demandesMois.length;
+      
+      // Compter les réservistes parmi les victimes
+      const reservistesVictimes = demandesMois.filter(demande => 
+        demande.statutDemandeur === 'Réserviste'
+      ).length;
+
+      // Compter les demandes pour violences (hors rébellion)
+      const ddesPourViolences = demandesMois.filter(demande => 
+        demande.qualificationInfraction && 
+        demande.qualificationInfraction.includes('VIOLENCES hors rébellion')
+      ).length;
+
+      // Compter les violences sur réservistes
+      const violencesReservistes = demandesMois.filter(demande => 
+        demande.statutDemandeur === 'Réserviste' &&
+        demande.qualificationInfraction && 
+        demande.qualificationInfraction.includes('VIOLENCES hors rébellion')
+      ).length;
+
+      // Mettre à jour les cumuls
+      cumulDdeVictime += ddesDePfVictimeToutes;
+      cumulVictimeReservistes += reservistesVictimes;
+      cumulViolences += ddesPourViolences;
+      cumulViolencesReservistes += violencesReservistes;
+
+      // Accumuler pour les moyennes si il y a des données
+      if (demandesMois.length > 0 || mois < new Date().getMonth()) {
+        totalDdesPfVictime += ddesDePfVictimeToutes;
+        totalReservistes += reservistesVictimes;
+        totalViolences += ddesPourViolences;
+        totalViolencesReservistes += violencesReservistes;
+        moisAvecDonnees++;
+      }
+
+      donneesParMois.push({
+        mois: noms_mois[mois],
+        ddesDePfVictimeUniquementToutesInfractions: ddesDePfVictimeToutes,
+        dontReservistes: reservistesVictimes,
+        cumulDdeVictime: cumulDdeVictime,
+        dontCumulVictimeReservistes: cumulVictimeReservistes,
+        ddesDePfPourViolences: ddesPourViolences,
+        dontDdesDePfPourViolencesSurReservistes: violencesReservistes,
+        cumulViolences: cumulViolences,
+        dontCumulViolencesReservistes: cumulViolencesReservistes
+      });
+    }
+
+    // Calculer les moyennes
+    const moyenneParMois = {
+      ddesDePfVictimeUniquementToutesInfractions: moisAvecDonnees > 0 ? totalDdesPfVictime / moisAvecDonnees : 0,
+      dontReservistes: moisAvecDonnees > 0 ? totalReservistes / moisAvecDonnees : 0,
+      ddesDePfPourViolences: moisAvecDonnees > 0 ? totalViolences / moisAvecDonnees : 0,
+      dontDdesDePfPourViolencesSurReservistes: moisAvecDonnees > 0 ? totalViolencesReservistes / moisAvecDonnees : 0
+    };
+
+    res.json({
+      donneesParMois,
+      moyenneParMois,
+      annee: year
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'extraction mensuelle:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération de l\'extraction mensuelle' 
+    });
+  }
+};
+
 const getAnneesDisponibles = async (req, res) => {
   try {
     // Récupérer les années distinctes où il y a des demandes
@@ -1551,5 +1675,6 @@ module.exports = {
   getFluxMensuels,
   getFluxHebdomadaires,
   getAutoControle,
+  getExtractionMensuelle,
   getAnneesDisponibles
 };

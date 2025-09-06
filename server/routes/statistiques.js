@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getAnneesDisponibles } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
@@ -38,6 +38,9 @@ router.get('/flux-hebdomadaires', authMiddleware, getFluxHebdomadaires);
 
 // GET /api/statistiques/auto-controle - Récupérer les statistiques d'auto-contrôle par année
 router.get('/auto-controle', authMiddleware, getAutoControle);
+
+// GET /api/statistiques/extraction-mensuelle - Récupérer l'extraction mensuelle pour BAA/SP par année
+router.get('/extraction-mensuelle', authMiddleware, getExtractionMensuelle);
 
 // GET /api/statistiques/annees-disponibles - Récupérer les années ayant des données
 router.get('/annees-disponibles', authMiddleware, getAnneesDisponibles);

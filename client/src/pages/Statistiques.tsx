@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Mosaic, MosaicWindow, MosaicNode } from 'react-mosaic-component'
 import { api } from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import ExtractionMensuelleComponent from '@/components/statistiques/ExtractionMensuelleComponent'
 import 'react-mosaic-component/react-mosaic-component.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
@@ -119,7 +120,30 @@ interface StatistiquesStatutDemandeur {
   pourcentage: number
 }
 
-type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo'
+interface ExtractionMensuelleData {
+  mois: string
+  ddesDePfVictimeUniquementToutesInfractions: number
+  dontReservistes: number
+  cumulDdeVictime: number
+  dontCumulVictimeReservistes: number
+  ddesDePfPourViolences: number
+  dontDdesDePfPourViolencesSurReservistes: number
+  cumulViolences: number
+  dontCumulViolencesReservistes: number
+}
+
+interface ExtractionMensuelleStats {
+  donneesParMois: ExtractionMensuelleData[]
+  moyenneParMois: {
+    ddesDePfVictimeUniquementToutesInfractions: number
+    dontReservistes: number
+    ddesDePfPourViolences: number
+    dontDdesDePfPourViolencesSurReservistes: number
+  }
+  annee: number
+}
+
+type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction'
 
 const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
   direction: 'column' as const,
@@ -160,22 +184,27 @@ const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
     splitPercentage: 50
   },
   second: {
-    direction: 'row' as const,
-    first: 'autocontrole' as MosaicKey,
+    direction: 'column' as const,
+    first: 'extraction' as MosaicKey,
     second: {
       direction: 'row' as const,
-      first: {
+      first: 'autocontrole' as MosaicKey,
+      second: {
         direction: 'row' as const,
-        first: 'infractions' as MosaicKey,
-        second: 'fluxmensuels' as MosaicKey,
-        splitPercentage: 50
+        first: {
+          direction: 'row' as const,
+          first: 'infractions' as MosaicKey,
+          second: 'fluxmensuels' as MosaicKey,
+          splitPercentage: 50
+        },
+        second: 'fluxhebdo' as MosaicKey,
+        splitPercentage: 66
       },
-      second: 'fluxhebdo' as MosaicKey,
-      splitPercentage: 66
+      splitPercentage: 25
     },
-    splitPercentage: 25
+    splitPercentage: 40
   },
-  splitPercentage: 66
+  splitPercentage: 60
 }
 
 const StatistiquesGeneralesComponent: React.FC<{ 
@@ -1048,6 +1077,15 @@ const Statistiques: React.FC = () => {
     enabled: activeTab === 'administratif'
   })
 
+  const { data: extractionMensuelle, isLoading: isLoadingExtraction } = useQuery<ExtractionMensuelleStats>({
+    queryKey: ['extraction-mensuelle', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/extraction-mensuelle?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
   const { data: anneesDisponibles } = useQuery<number[]>({
     queryKey: ['annees-disponibles'],
     queryFn: async () => {
@@ -1101,12 +1139,18 @@ const Statistiques: React.FC = () => {
             fluxHebdomadaires={fluxHebdomadaires}
           />
         )
+      case 'extraction':
+        return (
+          <ExtractionMensuelleComponent
+            stats={extractionMensuelle}
+          />
+        )
       default:
         return <div>Panneau non défini</div>
     }
   }
 
-  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle) {
+  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle || isLoadingExtraction) {
     return <LoadingSpinner />
   }
 
@@ -1190,6 +1234,7 @@ const Statistiques: React.FC = () => {
                     id === 'autocontrole' ? 'Auto-contrôle' :
                     id === 'fluxmensuels' ? 'Flux mensuels' :
                     id === 'fluxhebdo' ? 'Flux hebdomadaires' :
+                    id === 'extraction' ? 'Extraction mensuelle pour BAA / SP' :
                     'Panneau'
                   }
                   toolbarControls={[]}

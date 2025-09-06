@@ -1,5 +1,6 @@
 import React, { useRef } from 'react'
-import { CameraIcon } from '@heroicons/react/24/outline'
+import { CameraIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 
 interface ExtractionMensuelleData {
   mois: string
@@ -37,13 +38,22 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
           <span className="font-semibold text-sm text-gray-900">
             Extraction mensuelle pour BAA / SP
           </span>
-          <button
-            disabled
-            className="p-1 text-gray-300 cursor-not-allowed rounded"
-            title="Aucune donnée à capturer"
-          >
-            <CameraIcon className="h-4 w-4" />
-          </button>
+          <div className="flex space-x-1">
+            <button
+              disabled
+              className="p-1 text-gray-300 cursor-not-allowed rounded"
+              title="Aucune donnée à capturer"
+            >
+              <CameraIcon className="h-4 w-4" />
+            </button>
+            <button
+              disabled
+              className="p-1 text-gray-300 cursor-not-allowed rounded"
+              title="Aucune donnée à copier"
+            >
+              <DocumentDuplicateIcon className="h-4 w-4" />
+            </button>
+          </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-sm text-gray-500">
@@ -87,10 +97,79 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
+        toast.success('Capture d\'écran téléchargée avec succès')
       }, 'image/jpeg', 0.95)
     } catch (error) {
       console.error('Erreur lors de la capture:', error)
       alert('Erreur lors de la capture du tableau')
+    }
+  }
+
+  const copyToClipboard = async () => {
+    if (!tableRef.current) return
+
+    try {
+      const html2canvas = await import('html2canvas')
+      const canvas = await html2canvas.default(tableRef.current, {
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+      })
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob((b) => resolve(b), 'image/png')
+      )
+
+      if (!blob) {
+        toast.error('Erreur lors de la conversion de l\'image.')
+        return
+      }
+
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ])
+        toast.success('Image copiée dans le presse-papiers')
+      } catch (err) {
+        console.error('Erreur Clipboard API:', err)
+        fallbackCopyImage(canvas)
+      }
+    } catch (error) {
+      console.error('Erreur lors de la capture:', error)
+      toast.error('Erreur lors de la capture du tableau')
+    }
+  }
+
+  const fallbackCopyImage = (canvas: HTMLCanvasElement) => {
+    try {
+      const dataUrl = canvas.toDataURL('image/png')
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.style.position = 'fixed'
+      tempDiv.style.top = '-9999px'
+      tempDiv.innerHTML = `<img src="${dataUrl}" style="max-width: 100%; height: auto;">`
+      
+      document.body.appendChild(tempDiv)
+      
+      const range = document.createRange()
+      range.selectNodeContents(tempDiv)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+      
+      const successful = document.execCommand('copy')
+      
+      document.body.removeChild(tempDiv)
+      selection?.removeAllRanges()
+      
+      if (successful) {
+        toast.success('Image copiée dans le presse-papiers')
+      } else {
+        toast.error('Impossible de copier l\'image. Veuillez utiliser le bouton de téléchargement.')
+      }
+    } catch (error) {
+      console.error('Erreur fallback:', error)
+      toast.error('Copie non supportée par votre navigateur. Utilisez le bouton de téléchargement.')
     }
   }
 
@@ -100,13 +179,22 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
         <span className="font-semibold text-sm text-gray-900">
           Extraction mensuelle pour BAA / SP
         </span>
-        <button
-          onClick={captureTable}
-          className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
-          title="Capturer le tableau en image JPEG"
-        >
-          <CameraIcon className="h-4 w-4" />
-        </button>
+        <div className="flex space-x-1">
+          <button
+            onClick={captureTable}
+            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
+            title="Capturer le tableau en image JPEG"
+          >
+            <CameraIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={copyToClipboard}
+            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
+            title="Copier le tableau dans le presse-papiers"
+          >
+            <DocumentDuplicateIcon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       <div className="flex-1 overflow-auto">
         <table ref={tableRef} className="w-full h-full border-collapse text-xs" style={{ tableLayout: 'fixed' }}>

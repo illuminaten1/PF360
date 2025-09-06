@@ -18,7 +18,7 @@ const ReponseBRPFPanel: React.FC<ReponseBRPFPanelProps> = ({ statsReponseBRPF })
                 
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Demandes
+                Décisions
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 %

@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Mosaic, MosaicWindow, MosaicNode } from 'react-mosaic-component'
+import { Responsive, WidthProvider, Layout } from 'react-grid-layout'
 import { Card, Elevation, H5, H1, HTMLTable, Tag, Button, HTMLSelect } from '@blueprintjs/core'
 import { api } from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ExtractionMensuelleComponent from '@/components/statistiques/ExtractionMensuelleComponent'
-import 'react-mosaic-component/react-mosaic-component.css'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
+
+const ResponsiveGridLayout = WidthProvider(Responsive)
 
 interface StatistiquesGenerales {
   demandesTotal: number
@@ -144,68 +147,54 @@ interface ExtractionMensuelleStats {
   annee: number
 }
 
-type MosaicKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction'
+type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction'
 
-const INITIAL_MOSAIC_LAYOUT: MosaicNode<MosaicKey> = {
-  direction: 'column' as const,
-  first: {
-    direction: 'column' as const,
-    first: {
-      direction: 'row' as const,
-      first: 'general' as MosaicKey,
-      second: {
-        direction: 'row' as const,
-        first: 'users' as MosaicKey,
-        second: 'bap' as MosaicKey,
-        splitPercentage: 60
-      },
-      splitPercentage: 30
-    },
-    second: {
-      direction: 'row' as const,
-      first: 'qualite' as MosaicKey,
-      second: {
-        direction: 'row' as const,
-        first: 'contexte' as MosaicKey,
-        second: {
-          direction: 'row' as const,
-          first: 'formation' as MosaicKey,
-          second: {
-            direction: 'row' as const,
-            first: 'branche' as MosaicKey,
-            second: 'statut' as MosaicKey,
-            splitPercentage: 50
-          },
-          splitPercentage: 50
-        },
-        splitPercentage: 25
-      },
-      splitPercentage: 20
-    },
-    splitPercentage: 50
-  },
-  second: {
-    direction: 'column' as const,
-    first: 'extraction' as MosaicKey,
-    second: {
-      direction: 'row' as const,
-      first: 'autocontrole' as MosaicKey,
-      second: {
-        direction: 'row' as const,
-        first: {
-          direction: 'row' as const,
-          first: 'infractions' as MosaicKey,
-          second: 'fluxmensuels' as MosaicKey,
-          splitPercentage: 50
-        },
-        second: 'fluxhebdo' as MosaicKey,
-        splitPercentage: 66
-      },
-      splitPercentage: 25
-    },
-    splitPercentage: 40
-  },
-  splitPercentage: 60
+const INITIAL_GRID_LAYOUTS = {
+  lg: [
+    { i: 'general', x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
+    { i: 'users', x: 6, y: 0, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'extraction', x: 0, y: 4, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'bap', x: 0, y: 10, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'qualite', x: 3, y: 10, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'infractions', x: 6, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'contexte', x: 9, y: 8, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'formation', x: 0, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'branche', x: 3, y: 16, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'statut', x: 6, y: 14, w: 3, h: 6, minW: 2, minH: 4 },
+    { i: 'autocontrole', x: 9, y: 14, w: 3, h: 8, minW: 2, minH: 6 },
+    { i: 'fluxmensuels', x: 0, y: 22, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'fluxhebdo', x: 6, y: 20, w: 6, h: 10, minW: 4, minH: 8 }
+  ],
+  md: [
+    { i: 'general', x: 0, y: 0, w: 5, h: 4, minW: 3, minH: 3 },
+    { i: 'users', x: 5, y: 0, w: 5, h: 8, minW: 4, minH: 6 },
+    { i: 'extraction', x: 0, y: 4, w: 5, h: 6, minW: 4, minH: 4 },
+    { i: 'bap', x: 0, y: 10, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'qualite', x: 5, y: 8, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'infractions', x: 0, y: 16, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'contexte', x: 5, y: 14, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'formation', x: 0, y: 22, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'branche', x: 5, y: 20, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'statut', x: 0, y: 28, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: 'autocontrole', x: 5, y: 26, w: 5, h: 8, minW: 3, minH: 6 },
+    { i: 'fluxmensuels', x: 0, y: 34, w: 10, h: 8, minW: 6, minH: 6 },
+    { i: 'fluxhebdo', x: 0, y: 42, w: 10, h: 10, minW: 6, minH: 8 }
+  ],
+  sm: [
+    { i: 'general', x: 0, y: 0, w: 6, h: 4, minW: 4, minH: 3 },
+    { i: 'users', x: 0, y: 4, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'extraction', x: 0, y: 12, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'bap', x: 0, y: 18, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'qualite', x: 0, y: 24, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'infractions', x: 0, y: 30, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'contexte', x: 0, y: 36, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'formation', x: 0, y: 42, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'branche', x: 0, y: 48, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'statut', x: 0, y: 54, w: 6, h: 6, minW: 4, minH: 4 },
+    { i: 'autocontrole', x: 0, y: 60, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'fluxmensuels', x: 0, y: 68, w: 6, h: 8, minW: 4, minH: 6 },
+    { i: 'fluxhebdo', x: 0, y: 76, w: 6, h: 10, minW: 4, minH: 8 }
+  ]
 }
 
 const StatistiquesGeneralesComponent: React.FC<{ 
@@ -872,36 +861,32 @@ const Statistiques: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>('administratif')
   
   // Load saved layout from localStorage or use default
-  const [mosaicValue, setMosaicValue] = useState<MosaicNode<MosaicKey> | null>(() => {
+  const [layouts, setLayouts] = useState(() => {
     try {
-      const savedLayout = localStorage.getItem('pf360-statistiques-layout')
-      return savedLayout ? JSON.parse(savedLayout) : INITIAL_MOSAIC_LAYOUT
+      const savedLayouts = localStorage.getItem('pf360-statistiques-grid-layouts')
+      return savedLayouts ? JSON.parse(savedLayouts) : INITIAL_GRID_LAYOUTS
     } catch {
-      return INITIAL_MOSAIC_LAYOUT
+      return INITIAL_GRID_LAYOUTS
     }
   })
 
   // Handle layout changes and save to localStorage
-  const handleMosaicChange = (newValue: MosaicNode<MosaicKey> | null) => {
-    setMosaicValue(newValue)
+  const handleLayoutChange = (layout: Layout[], layouts: any) => {
+    setLayouts(layouts)
     try {
-      if (newValue) {
-        localStorage.setItem('pf360-statistiques-layout', JSON.stringify(newValue))
-      } else {
-        localStorage.removeItem('pf360-statistiques-layout')
-      }
+      localStorage.setItem('pf360-statistiques-grid-layouts', JSON.stringify(layouts))
     } catch (error) {
-      console.warn('Failed to save layout to localStorage:', error)
+      console.warn('Failed to save layouts to localStorage:', error)
     }
   }
 
   // Reset layout to default
   const resetLayout = () => {
-    setMosaicValue(INITIAL_MOSAIC_LAYOUT)
+    setLayouts(INITIAL_GRID_LAYOUTS)
     try {
-      localStorage.removeItem('pf360-statistiques-layout')
+      localStorage.removeItem('pf360-statistiques-grid-layouts')
     } catch (error) {
-      console.warn('Failed to remove layout from localStorage:', error)
+      console.warn('Failed to remove layouts from localStorage:', error)
     }
   }
 
@@ -1023,58 +1008,87 @@ const Statistiques: React.FC = () => {
 
   const yearOptions = anneesDisponibles || [currentYear]
 
-  const renderTile = (id: MosaicKey) => {
+  const getPanelTitle = (id: PanelKey): string => {
+    switch (id) {
+      case 'general': return 'Statistiques générales'
+      case 'users': return 'Utilisateurs'
+      case 'bap': return 'BAP'
+      case 'qualite': return 'Qualité du demandeur'
+      case 'infractions': return 'Type d\'infraction'
+      case 'contexte': return 'Contexte missionnel'
+      case 'formation': return 'Formation administrative'
+      case 'branche': return 'Branche'
+      case 'statut': return 'Statut demandeur'
+      case 'autocontrole': return 'Auto-contrôle'
+      case 'fluxmensuels': return 'Flux mensuels'
+      case 'fluxhebdo': return 'Flux hebdomadaires'
+      case 'extraction': return 'Extraction mensuelle pour BAA / SP'
+      default: return 'Panneau'
+    }
+  }
+
+  const renderPanel = (id: PanelKey) => {
+    let content
     switch (id) {
       case 'general':
-        return (
-          <StatistiquesGeneralesComponent 
-            stats={statsAdministratives?.generales} 
-          />
-        )
+        content = <StatistiquesGeneralesComponent stats={statsAdministratives?.generales} />
+        break
       case 'users':
-        return (
-          <StatistiquesUtilisateurComponent 
-            users={statsAdministratives?.utilisateurs} 
-          />
-        )
+        content = <StatistiquesUtilisateurComponent users={statsAdministratives?.utilisateurs} />
+        break
       case 'bap':
-        return <StatistiquesBAPComponent statsBAP={statsBAP} />
+        content = <StatistiquesBAPComponent statsBAP={statsBAP} />
+        break
       case 'qualite':
-        return <QualiteDemandeurComponent statsQualite={statsQualite} />
+        content = <QualiteDemandeurComponent statsQualite={statsQualite} />
+        break
       case 'infractions':
-        return <TypeInfractionComponent statsInfractions={statsInfractions} />
+        content = <TypeInfractionComponent statsInfractions={statsInfractions} />
+        break
       case 'contexte':
-        return <ContexteMissionnelComponent statsContexte={statsContexte} />
+        content = <ContexteMissionnelComponent statsContexte={statsContexte} />
+        break
       case 'formation':
-        return <FormationAdministrativeComponent statsFormation={statsFormation} />
+        content = <FormationAdministrativeComponent statsFormation={statsFormation} />
+        break
       case 'branche':
-        return <BrancheComponent statsBranche={statsBranche} />
+        content = <BrancheComponent statsBranche={statsBranche} />
+        break
       case 'statut':
-        return <StatutDemandeurComponent statsStatut={statsStatut} />
+        content = <StatutDemandeurComponent statsStatut={statsStatut} />
+        break
       case 'autocontrole':
-        return <AutoControleComponent autoControle={autoControle} />
+        content = <AutoControleComponent autoControle={autoControle} />
+        break
       case 'fluxmensuels':
-        return (
-          <FluxMensuelsComponent 
-            fluxMensuels={fluxMensuels} 
-            selectedYear={selectedYear}
-          />
-        )
+        content = <FluxMensuelsComponent fluxMensuels={fluxMensuels} selectedYear={selectedYear} />
+        break
       case 'fluxhebdo':
-        return (
-          <FluxHebdomadairesComponent 
-            fluxHebdomadaires={fluxHebdomadaires}
-          />
-        )
+        content = <FluxHebdomadairesComponent fluxHebdomadaires={fluxHebdomadaires} />
+        break
       case 'extraction':
-        return (
-          <ExtractionMensuelleComponent
-            stats={extractionMensuelle}
-          />
-        )
+        content = <ExtractionMensuelleComponent stats={extractionMensuelle} />
+        break
       default:
-        return <div>Panneau non défini</div>
+        content = <div>Panneau non défini</div>
     }
+
+    return (
+      <Card key={id} elevation={Elevation.ONE} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          padding: '12px 16px', 
+          borderBottom: '1px solid #E1E8ED', 
+          backgroundColor: '#F5F8FA',
+          fontWeight: 600,
+          fontSize: '14px'
+        }}>
+          {getPanelTitle(id)}
+        </div>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          {content}
+        </div>
+      </Card>
+    )
   }
 
   if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle || isLoadingExtraction) {
@@ -1148,37 +1162,25 @@ const Statistiques: React.FC = () => {
 
       <div className="flex-1 overflow-auto">
         {activeTab === 'administratif' ? (
-          <div style={{ height: '100%', minHeight: '600px' }}>
-            <Mosaic<MosaicKey>
-              renderTile={(id, path) => (
-                <MosaicWindow<MosaicKey> 
-                  path={path}
-                  createNode={() => 'general'}
-                  title={
-                    id === 'general' ? 'Statistiques générales' :
-                    id === 'users' ? 'Utilisateurs' :
-                    id === 'bap' ? 'BAP' :
-                    id === 'qualite' ? 'Qualité du demandeur' :
-                    id === 'infractions' ? 'Type d\'infraction' :
-                    id === 'contexte' ? 'Contexte missionnel' :
-                    id === 'formation' ? 'Formation administrative' :
-                    id === 'branche' ? 'Branche' :
-                    id === 'statut' ? 'Statut demandeur' :
-                    id === 'autocontrole' ? 'Auto-contrôle' :
-                    id === 'fluxmensuels' ? 'Flux mensuels' :
-                    id === 'fluxhebdo' ? 'Flux hebdomadaires' :
-                    id === 'extraction' ? 'Extraction mensuelle pour BAA / SP' :
-                    'Panneau'
-                  }
-                  toolbarControls={[]}
-                >
-                  {renderTile(id)}
-                </MosaicWindow>
-              )}
-              value={mosaicValue}
-              onChange={handleMosaicChange}
-              className="bg-gray-100"
-            />
+          <div style={{ height: '100%', minHeight: '600px', padding: '16px' }}>
+            <ResponsiveGridLayout
+              className="layout"
+              layouts={layouts}
+              onLayoutChange={handleLayoutChange}
+              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+              cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+              rowHeight={30}
+              isDraggable={true}
+              isResizable={true}
+              compactType="vertical"
+              preventCollision={false}
+            >
+              {(['general', 'users', 'bap', 'qualite', 'infractions', 'contexte', 'formation', 'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo', 'extraction'] as PanelKey[]).map((panelId) => (
+                <div key={panelId}>
+                  {renderPanel(panelId)}
+                </div>
+              ))}
+            </ResponsiveGridLayout>
           </div>
         ) : (
           <div style={{ padding: '24px', height: '100%', overflow: 'auto' }}>

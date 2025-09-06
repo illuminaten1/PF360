@@ -14,6 +14,8 @@ async function main() {
     const countConventionDiligences = await prisma.conventionDiligence.count()
     const countBadgesDemandes = await prisma.demandeBadge.count()
     const countBadgesDossiers = await prisma.dossierBadge.count()
+    const countBAPsDemandes = await prisma.demandeBAP.count()
+    const countBAPsDossiers = await prisma.dossierBAP.count()
     const countPaiements = await prisma.paiement.count()
     const countConventions = await prisma.convention.count()
     const countDecisions = await prisma.decision.count()
@@ -27,6 +29,8 @@ async function main() {
     console.log(`   - Liaisons conventions-diligences : ${countConventionDiligences}`)
     console.log(`   - Badges demandes : ${countBadgesDemandes}`)
     console.log(`   - Badges dossiers : ${countBadgesDossiers}`)
+    console.log(`   - BAPs demandes : ${countBAPsDemandes}`)
+    console.log(`   - BAPs dossiers : ${countBAPsDossiers}`)
     console.log(`   - Paiements : ${countPaiements}`)
     console.log(`   - Conventions : ${countConventions}`)
     console.log(`   - Décisions : ${countDecisions}`)
@@ -59,6 +63,14 @@ async function main() {
     console.log('🔄 Suppression des badges de dossiers...')
     const badgesDossiersResult = await prisma.dossierBadge.deleteMany({})
     console.log(`✅ ${badgesDossiersResult.count} badges de dossiers supprimés`)
+    
+    console.log('🔄 Suppression des BAPs de demandes...')
+    const bapsDemandesResult = await prisma.demandeBAP.deleteMany({})
+    console.log(`✅ ${bapsDemandesResult.count} BAPs de demandes supprimés`)
+    
+    console.log('🔄 Suppression des BAPs de dossiers...')
+    const bapsDossiersResult = await prisma.dossierBAP.deleteMany({})
+    console.log(`✅ ${bapsDossiersResult.count} BAPs de dossiers supprimés`)
     
     console.log('🔄 Suppression des paiements...')
     const paiementsResult = await prisma.paiement.deleteMany({})

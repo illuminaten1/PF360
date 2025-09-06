@@ -1052,6 +1052,15 @@ const Statistiques: React.FC = () => {
         content = <div>Panneau non défini</div>
     }
 
+    // L'encart extraction gère sa propre barre de titre avec le bouton de capture
+    if (id === 'extraction') {
+      return (
+        <div key={id} className="bg-white rounded-lg shadow border border-gray-200 h-full">
+          {content}
+        </div>
+      )
+    }
+
     return (
       <div key={id} className="bg-white rounded-lg shadow border border-gray-200 h-full flex flex-col">
         <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-sm text-gray-900">

@@ -785,6 +785,7 @@ const Statistiques: React.FC = () => {
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number>(currentYear)
   const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>('administratif')
+  const [isReorderMode, setIsReorderMode] = useState<boolean>(false)
   
   // Load saved layout from localStorage or use default
   const [layouts, setLayouts] = useState(() => {
@@ -1072,13 +1073,26 @@ const Statistiques: React.FC = () => {
         </div>
         
         {activeTab === 'administratif' && (
-          <button
-            onClick={resetLayout}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            title="Remettre la disposition par défaut"
-          >
-            Réinitialiser la disposition
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsReorderMode(!isReorderMode)}
+              className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                isReorderMode
+                  ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100'
+                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+              }`}
+              title={isReorderMode ? "Désactiver le mode réorganisation" : "Activer le mode réorganisation"}
+            >
+              {isReorderMode ? 'Désactiver la réorganisation' : 'Réorganiser'}
+            </button>
+            <button
+              onClick={resetLayout}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              title="Remettre la disposition par défaut"
+            >
+              Réinitialiser la disposition
+            </button>
+          </div>
         )}
       </div>
 
@@ -1118,8 +1132,8 @@ const Statistiques: React.FC = () => {
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
             rowHeight={30}
-            isDraggable={true}
-            isResizable={true}
+            isDraggable={isReorderMode}
+            isResizable={isReorderMode}
             compactType="vertical"
             preventCollision={false}
           >

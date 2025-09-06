@@ -287,7 +287,7 @@ const StatistiquesUtilisateurComponent: React.FC<{
           {users?.map((user, index) => (
             <tr key={user.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
               <td className="px-2 py-2">
-                <div className="font-medium text-gray-900">
+                <div className="text-sm font-medium text-gray-900">
                   {user.prenom} {user.nom}
                 </div>
                 <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full mt-1">
@@ -329,7 +329,7 @@ const StatistiquesUtilisateurComponent: React.FC<{
           {users && users.length > 0 && (
             <tr className="bg-blue-50 border-t-2 border-blue-200">
               <td className="px-2 py-2">
-                <div className="font-bold text-gray-900">
+                <div className="text-sm font-bold text-gray-900">
                   TOTAL
                 </div>
               </td>
@@ -379,7 +379,7 @@ const StatistiquesBAPComponent: React.FC<{
       {statsBAP && statsBAP.length > 0 ? (
         statsBAP.map((bap, index) => (
           <tr key={bap.nomBAP} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {bap.nomBAP}
             </td>
             <td className="px-2 py-2 text-center text-sm text-gray-900">
@@ -406,7 +406,7 @@ const QualiteDemandeurComponent: React.FC<{
       {statsQualite && statsQualite.length > 0 ? (
         statsQualite.map((stat, index) => (
           <tr key={stat.qualite} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
@@ -436,7 +436,7 @@ const TypeInfractionComponent: React.FC<{
       {statsInfractions && statsInfractions.length > 0 ? (
         statsInfractions.map((stat, index) => (
           <tr key={`${stat.qualificationInfraction}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.qualificationInfraction || 'Non renseigné'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
@@ -466,7 +466,7 @@ const ContexteMissionnelComponent: React.FC<{
       {statsContexte && statsContexte.length > 0 ? (
         statsContexte.map((stat, index) => (
           <tr key={`${stat.contexteMissionnel}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.contexteMissionnel || 'Non renseigné'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
@@ -496,7 +496,7 @@ const FormationAdministrativeComponent: React.FC<{
       {statsFormation && statsFormation.length > 0 ? (
         statsFormation.map((stat, index) => (
           <tr key={`${stat.formationAdministrative}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.formationAdministrative || 'Non renseigné'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
@@ -526,7 +526,7 @@ const BrancheComponent: React.FC<{
       {statsBranche && statsBranche.length > 0 ? (
         statsBranche.map((stat, index) => (
           <tr key={`${stat.branche}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.branche || 'Non renseigné'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
@@ -556,7 +556,7 @@ const StatutDemandeurComponent: React.FC<{
       {statsStatut && statsStatut.length > 0 ? (
         statsStatut.map((stat, index) => (
           <tr key={`${stat.statutDemandeur}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               {stat.statutDemandeur || 'Non renseigné'}
             </td>
             <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
@@ -586,7 +586,7 @@ const AutoControleComponent: React.FC<{
       <table className="min-w-full divide-y divide-gray-200">
         <tbody className="bg-white divide-y divide-gray-200">
           <tr className="bg-white">
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               PJ en attente de convention
             </td>
             <td className="px-2 py-2 text-right font-semibold text-red-600">
@@ -594,7 +594,7 @@ const AutoControleComponent: React.FC<{
             </td>
           </tr>
           <tr className="bg-gray-50">
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               Ancienneté moyenne non traités
             </td>
             <td className="px-2 py-2 text-right font-semibold text-gray-900">
@@ -618,7 +618,7 @@ const AutoControleComponent: React.FC<{
             </td>
           </tr>
           <tr className="bg-white">
-            <td className="px-2 py-2 font-medium text-gray-900">
+            <td className="px-2 py-2 text-sm font-medium text-gray-900">
               Délai traitement moyen
             </td>
             <td className="px-2 py-2 text-right font-semibold text-gray-900">

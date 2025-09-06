@@ -86,7 +86,7 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
           <tbody className="bg-white divide-y divide-gray-200">
             {stats.donneesParMois.map((data, index) => (
               <tr key={data.mois} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <td className="px-2 py-1 text-center font-medium text-gray-900">
+                <td className="px-2 py-1 text-center text-sm font-medium text-gray-900">
                   {data.mois}
                 </td>
                 <td className="px-2 py-1 text-center text-gray-900">
@@ -117,7 +117,7 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
             ))}
             
             <tr className="bg-blue-50 border-t-2 border-blue-200">
-              <td className="px-2 py-1 text-center font-bold text-gray-900">
+              <td className="px-2 py-1 text-center text-sm font-bold text-gray-900">
                 MOYENNE / MOIS
               </td>
               <td className="px-2 py-1 text-center font-bold text-gray-900">

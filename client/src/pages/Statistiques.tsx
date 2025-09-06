@@ -651,7 +651,9 @@ const ReponseBRPFComponent: React.FC<{
               : ''
           }`}>
             <td className={`px-2 py-2 text-sm text-gray-900 ${
-              stat.type === 'motif_rejet' ? 'pl-6 text-gray-600' : 'font-medium'
+              stat.type === 'motif_rejet' ? 'pl-6 text-gray-600' : 
+              stat.type === 'agrement' || stat.type === 'rejet_global' ? 'font-medium' : 
+              'font-normal'
             }`}>
               {stat.libelle}
             </td>

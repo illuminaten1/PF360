@@ -1016,73 +1016,78 @@ const Statistiques: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col min-h-screen">
-      <div className="bg-white rounded-lg shadow border border-gray-200 m-4 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Statistiques</h1>
-        
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">Année :</span>
-            <Listbox value={selectedYear} onChange={setSelectedYear}>
-              <div className="relative">
-                <Listbox.Button className="relative w-32 cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm">
-                  <span className="block truncate">{selectedYear}</span>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                  </span>
-                </Listbox.Button>
-                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
-                  {yearOptions.map((year) => (
-                    <Listbox.Option
-                      key={year}
-                      value={year}
-                      className={({ active }) =>
-                        `relative cursor-default select-none py-2 pl-3 pr-9 ${
-                          active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-                        }`
-                      }
-                    >
-                      {({ selected, active }) => (
-                        <>
-                          <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                            {year}
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Statistiques</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          Suivi administratif et budgétaire des demandes
+        </p>
+      </div>
+      
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-gray-700">Année :</span>
+          <Listbox value={selectedYear} onChange={setSelectedYear}>
+            <div className="relative">
+              <Listbox.Button className="relative w-32 cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
+                <span className="block truncate">{selectedYear}</span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </span>
+              </Listbox.Button>
+              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
+                {yearOptions.map((year) => (
+                  <Listbox.Option
+                    key={year}
+                    value={year}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                        active ? 'bg-blue-600 text-white' : 'text-gray-900'
+                      }`
+                    }
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                          {year}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                              active ? 'text-white' : 'text-blue-600'
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
                           </span>
-                          {selected ? (
-                            <span
-                              className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
-                                active ? 'text-white' : 'text-indigo-600'
-                              }`}
-                            >
-                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                            </span>
-                          ) : null}
-                        </>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </div>
-            </Listbox>
-          </div>
-          
-          {activeTab === 'administratif' && (
-            <button
-              onClick={resetLayout}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              title="Remettre la disposition par défaut"
-            >
-              Réinitialiser la disposition
-            </button>
-          )}
+                        ) : null}
+                      </>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </div>
+          </Listbox>
         </div>
+        
+        {activeTab === 'administratif' && (
+          <button
+            onClick={resetLayout}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            title="Remettre la disposition par défaut"
+          >
+            Réinitialiser la disposition
+          </button>
+        )}
+      </div>
 
-        <div className="border-b border-gray-200 mb-4">
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
             <button
               onClick={() => setActiveTab('administratif')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'administratif'
-                  ? 'border-indigo-500 text-indigo-600'
+                  ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -1090,9 +1095,9 @@ const Statistiques: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('budgetaire')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'budgetaire'
-                  ? 'border-indigo-500 text-indigo-600'
+                  ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -1102,41 +1107,39 @@ const Statistiques: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        {activeTab === 'administratif' ? (
-          <div style={{ height: '100%', minHeight: '600px', padding: '16px' }}>
-            <ResponsiveGridLayout
-              className="layout"
-              layouts={layouts}
-              onLayoutChange={handleLayoutChange}
-              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-              cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-              rowHeight={30}
-              isDraggable={true}
-              isResizable={true}
-              compactType="vertical"
-              preventCollision={false}
-            >
-              {(['general', 'users', 'bap', 'qualite', 'infractions', 'contexte', 'formation', 'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo', 'extraction'] as PanelKey[]).map((panelId) => (
-                <div key={panelId}>
-                  {renderPanel(panelId)}
-                </div>
-              ))}
-            </ResponsiveGridLayout>
+      {activeTab === 'administratif' ? (
+        <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={layouts}
+            onLayoutChange={handleLayoutChange}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+            rowHeight={30}
+            isDraggable={true}
+            isResizable={true}
+            compactType="vertical"
+            preventCollision={false}
+          >
+            {(['general', 'users', 'bap', 'qualite', 'infractions', 'contexte', 'formation', 'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo', 'extraction'] as PanelKey[]).map((panelId) => (
+              <div key={panelId}>
+                {renderPanel(panelId)}
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Suivi Budgétaire - {selectedYear}
+            </h2>
+            <p className="text-gray-600">
+              Les statistiques budgétaires seront implémentées prochainement.
+            </p>
           </div>
-        ) : (
-          <div className="p-6 h-full overflow-auto">
-            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Suivi Budgétaire - {selectedYear}
-              </h1>
-              <p className="text-gray-600">
-                Les statistiques budgétaires seront implémentées prochainement.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

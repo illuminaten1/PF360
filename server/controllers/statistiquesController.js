@@ -894,6 +894,7 @@ const getAutoControle = async (req, res) => {
     const pjEnAttenteConvention = [...demandeIdsAvecPJ].filter(id => !demandeIdsAvecConvention.has(id)).length;
     
     // 2. Ancienneté moyenne des demandes non traitées (en jours)
+    // Une demande est considérée comme non traitée si elle n'a aucune décision signée
     const demandesNonTraitees = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -901,7 +902,13 @@ const getAutoControle = async (req, res) => {
           lt: endOfYear
         },
         decisions: {
-          none: {}
+          none: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
         }
       },
       select: {
@@ -920,6 +927,7 @@ const getAutoControle = async (req, res) => {
     }
     
     // 3. Ancienneté moyenne des demandes BAP non traitées (demandes assignées à un BAP)
+    // Une demande BAP est considérée comme non traitée si elle n'a aucune décision signée
     const demandesNonTraiteesBAP = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -927,7 +935,13 @@ const getAutoControle = async (req, res) => {
           lt: endOfYear
         },
         decisions: {
-          none: {}
+          none: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
         },
         baps: {
           some: {}
@@ -949,6 +963,7 @@ const getAutoControle = async (req, res) => {
     }
     
     // 4. Ancienneté moyenne des demandes BRPF non traitées (demandes non assignées à un BAP)
+    // Une demande BRPF est considérée comme non traitée si elle n'a aucune décision signée
     const demandesNonTraiteesBRPF = await prisma.demande.findMany({
       where: {
         dateReception: {
@@ -956,7 +971,13 @@ const getAutoControle = async (req, res) => {
           lt: endOfYear
         },
         decisions: {
-          none: {}
+          none: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
         },
         baps: {
           none: {}

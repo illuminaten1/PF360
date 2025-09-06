@@ -1725,6 +1725,179 @@ const getAnneesDisponibles = async (req, res) => {
   }
 };
 
+const getStatistiquesReponseBRPF = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // 1. Récupérer toutes les décisions signées de l'année pour des demandes de l'année
+    const decisions = await prisma.decision.findMany({
+      where: {
+        dateSignature: {
+          gte: startOfYear,
+          lt: endOfYear,
+          not: null
+        },
+        demandes: {
+          some: {
+            demande: {
+              dateReception: {
+                gte: startOfYear,
+                lt: endOfYear
+              }
+            }
+          }
+        }
+      },
+      select: {
+        id: true,
+        type: true,
+        motifRejet: true,
+        demandes: {
+          select: {
+            demandeId: true
+          }
+        }
+      }
+    });
+
+    // 2. Compter par type de décision (en comptant les liens DecisionDemande)
+    let countAJ = 0;
+    let countAJE = 0;
+    let countPJ = 0;
+    let countREJET = 0;
+    
+    // Compter les motifs de rejet
+    const motifsRejet = {
+      'Atteinte involontaire autre qu\'accident': 0,
+      'Accident de la circulation': 0,
+      'Faute personnelle détachable du service': 0,
+      'Fait étranger à la qualité de gendarme': 0,
+      'Absence d\'infraction': 0
+    };
+    
+    decisions.forEach(decision => {
+      const nombreLiens = decision.demandes.length;
+      
+      switch (decision.type) {
+        case 'AJ':
+          countAJ += nombreLiens;
+          break;
+        case 'AJE':
+          countAJE += nombreLiens;
+          break;
+        case 'PJ':
+          countPJ += nombreLiens;
+          break;
+        case 'REJET':
+          countREJET += nombreLiens;
+          if (decision.motifRejet && motifsRejet.hasOwnProperty(decision.motifRejet)) {
+            motifsRejet[decision.motifRejet] += nombreLiens;
+          }
+          break;
+      }
+    });
+
+    // 3. Calculer l'agrément (AJ + AJE + PJ - sans réparation directe ni désistement)
+    const agrement = countAJ + countAJE + countPJ;
+
+    // 4. Calculer le nombre total de décisions (pour les pourcentages)
+    const totalDecisions = agrement + countREJET;
+
+    // 5. Demandes en cours de traitement (demandes de l'année sans décision signée)
+    const enCoursTraitement = await prisma.demande.count({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        decisions: {
+          none: {
+            decision: {
+              dateSignature: {
+                not: null
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // 6. Formater les résultats
+    const statistiques = [
+      {
+        libelle: 'AGRÉMENT',
+        nombre: agrement,
+        pourcentage: totalDecisions > 0 ? (agrement / totalDecisions) * 100 : 0,
+        type: 'agrement'
+      },
+      {
+        libelle: 'AJ',
+        nombre: countAJ,
+        pourcentage: totalDecisions > 0 ? (countAJ / totalDecisions) * 100 : 0,
+        type: 'decision'
+      },
+      {
+        libelle: 'AJE',
+        nombre: countAJE,
+        pourcentage: totalDecisions > 0 ? (countAJE / totalDecisions) * 100 : 0,
+        type: 'decision'
+      },
+      {
+        libelle: 'PJ',
+        nombre: countPJ,
+        pourcentage: totalDecisions > 0 ? (countPJ / totalDecisions) * 100 : 0,
+        type: 'decision'
+      },
+      {
+        libelle: 'REJET',
+        nombre: countREJET,
+        pourcentage: totalDecisions > 0 ? (countREJET / totalDecisions) * 100 : 0,
+        type: 'rejet_global'
+      }
+    ];
+
+    // Ajouter les motifs de rejet
+    Object.entries(motifsRejet).forEach(([motif, nombre]) => {
+      if (nombre > 0) {
+        statistiques.push({
+          libelle: motif,
+          nombre: nombre,
+          pourcentage: countREJET > 0 ? (nombre / countREJET) * 100 : 0,
+          type: 'motif_rejet'
+        });
+      }
+    });
+
+    // Ajouter "En cours de traitement"
+    statistiques.push({
+      libelle: 'En cours de traitement',
+      nombre: enCoursTraitement,
+      pourcentage: 0, // Pas de pourcentage pour cette ligne
+      type: 'en_cours'
+    });
+
+    res.json({
+      statistiques,
+      totaux: {
+        totalDecisions,
+        agrement,
+        rejet: countREJET,
+        enCoursTraitement
+      }
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques Réponse BRPF:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des statistiques Réponse BRPF' 
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -1740,5 +1913,6 @@ module.exports = {
   getFluxHebdomadaires,
   getAutoControle,
   getExtractionMensuelle,
-  getAnneesDisponibles
+  getAnneesDisponibles,
+  getStatistiquesReponseBRPF
 };

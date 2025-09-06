@@ -57,28 +57,28 @@ const ExtractionMensuelleComponent: React.FC<ExtractionMensuelleComponentProps> 
               <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 MOIS
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 DDES DE PF VICTIME UNIQUEMENT TOUTES INFRACTIONS
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 DONT RÉSERVISTES
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 CUMUL DDE VICTIME
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 DONT CUMUL VICTIME RÉSERVISTES
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 DDES DE PF POUR VIOLENCES
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 DONT DDES DE PF POUR VIOLENCES SUR RÉSERVISTES
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 CUMUL VIOLENCES
               </th>
-              <th className="px-1 py-2 text-center text-[10px] font-medium text-gray-500 uppercase tracking-tight leading-tight">
+              <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 DONT CUMUL VIOLENCES RÉSERVISTES
               </th>
             </tr>

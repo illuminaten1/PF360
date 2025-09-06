@@ -239,7 +239,7 @@ const StatistiquesGeneralesComponent: React.FC<{
             {stats.demandesTotal}
           </div>
           <div className="text-xs text-gray-600">
-            Demandes reçues
+            Reçues
           </div>
         </div>
         <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
@@ -247,7 +247,7 @@ const StatistiquesGeneralesComponent: React.FC<{
             {stats.demandesTraitees}
           </div>
           <div className="text-xs text-gray-600">
-            Demandes traitées
+            Traitées
           </div>
         </div>
         <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
@@ -255,7 +255,7 @@ const StatistiquesGeneralesComponent: React.FC<{
             {stats.demandesEnInstance}
           </div>
           <div className="text-xs text-gray-600">
-            Demandes en instance
+            En instance
           </div>
         </div>
         <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
@@ -263,7 +263,7 @@ const StatistiquesGeneralesComponent: React.FC<{
             {stats.demandesNonAffectees}
           </div>
           <div className="text-xs text-gray-600">
-            Demandes non affectées
+            Non affectées
           </div>
         </div>
       </div>
@@ -628,7 +628,7 @@ const AutoControleComponent: React.FC<{
             <td className="px-2 py-2 text-sm font-medium text-gray-900">
               PJ en attente de convention
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-red-600">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-red-600">
               {autoControle?.pjEnAttenteConvention || 0}
             </td>
           </tr>
@@ -636,23 +636,23 @@ const AutoControleComponent: React.FC<{
             <td className="px-2 py-2 text-sm font-medium text-gray-900">
               Ancienneté moyenne non traités
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.ancienneteMoyenneNonTraites?.toFixed(2) || '0,00'}
             </td>
           </tr>
           <tr className="bg-white">
-            <td className="px-2 py-2 pl-6 text-gray-600">
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
               Dont BAP
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.ancienneteMoyenneBAP?.toFixed(2) || '0,00'}
             </td>
           </tr>
           <tr className="bg-gray-50">
-            <td className="px-2 py-2 pl-6 text-gray-600">
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
               Dont BRP
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.ancienneteMoyenneBRP?.toFixed(2) || '0,00'}
             </td>
           </tr>
@@ -660,23 +660,23 @@ const AutoControleComponent: React.FC<{
             <td className="px-2 py-2 text-sm font-medium text-gray-900">
               Délai traitement moyen
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.delaiTraitementMoyen?.toFixed(2) || '0,00'}
             </td>
           </tr>
           <tr className="bg-gray-50">
-            <td className="px-2 py-2 pl-6 text-gray-600">
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
               Dont BAP
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.delaiTraitementBAP?.toFixed(2) || '0,00'}
             </td>
           </tr>
           <tr className="bg-white">
-            <td className="px-2 py-2 pl-6 text-gray-600">
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
               Dont BRPF
             </td>
-            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
               {autoControle?.delaiTraitementBRP?.toFixed(2) || '0,00'}
             </td>
           </tr>
@@ -985,7 +985,7 @@ const Statistiques: React.FC = () => {
 
   const getPanelTitle = (id: PanelKey): string => {
     switch (id) {
-      case 'general': return 'Statistiques générales'
+      case 'general': return 'Demandes'
       case 'users': return 'Utilisateurs'
       case 'bap': return 'BAP'
       case 'qualite': return 'Qualité du demandeur'

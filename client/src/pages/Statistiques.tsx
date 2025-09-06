@@ -452,9 +452,6 @@ const StatistiquesUtilisateurComponent: React.FC<{
                       <div className="text-xs font-medium text-gray-900">
                         {user.grade ? `${user.grade} ` : ''}{user.prenom} {user.nom}
                       </div>
-                      <span className="inline-flex px-2 py-1 text-[10px] font-medium bg-gray-100 text-gray-800 rounded-full mt-1">
-                        {user.role}
-                      </span>
                     </td>
                     <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
                       {user.demandesAttribuees}
@@ -959,7 +956,7 @@ const BadgesComponent: React.FC<{
                     {stat.nombreDemandes}
                   </td>
                   <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
-                    {stat.pourcentage.toFixed(1)}%
+                    {stat.pourcentage.toFixed(2)}%
                   </td>
                 </tr>
               ))

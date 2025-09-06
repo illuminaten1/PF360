@@ -489,30 +489,47 @@ const TypeInfractionComponent: React.FC<{
 const ContexteMissionnelComponent: React.FC<{ 
   statsContexte: StatistiquesContexteMissionnel[] | undefined 
 }> = ({ statsContexte }) => (
-  <div className="p-4 h-full overflow-auto">
-    <SimpleTable headers={['Contexte missionnel', 'Nbr demandes', 'Pourcentage']}>
-      {statsContexte && statsContexte.length > 0 ? (
-        statsContexte.map((stat, index) => (
-          <tr key={`${stat.contexteMissionnel}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-            <td className="px-2 py-2 text-sm font-medium text-gray-900">
-              {stat.contexteMissionnel || 'Non renseigné'}
-            </td>
-            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.nombreDemandes}
-            </td>
-            <td className="px-2 py-2 text-center text-sm font-medium text-gray-900">
-              {stat.pourcentage.toFixed(1)}%
-            </td>
+  <div className="h-full flex flex-col">
+    <div className="flex-1 overflow-auto">
+      <table className="w-full border-collapse">
+        <thead className="bg-gray-50 sticky top-0">
+          <tr>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              Contexte missionnel
+            </th>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              Nbr demandes
+            </th>
+            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              Pourcentage
+            </th>
           </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500">
-            Aucune donnée disponible
-          </td>
-        </tr>
-      )}
-    </SimpleTable>
+        </thead>
+        <tbody className="bg-white">
+          {statsContexte && statsContexte.length > 0 ? (
+            statsContexte.map((stat, index) => (
+              <tr key={`${stat.contexteMissionnel}-${index}`} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}>
+                <td className="px-2 py-1 text-xs font-medium text-gray-900">
+                  {stat.contexteMissionnel || 'Non renseigné'}
+                </td>
+                <td className="px-2 py-1 text-center text-xs font-medium text-gray-900">
+                  {stat.nombreDemandes}
+                </td>
+                <td className="px-2 py-1 text-center text-xs font-medium text-gray-900">
+                  {stat.pourcentage.toFixed(1)}%
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={3} className="px-3 py-4 text-center text-xs text-gray-500">
+                Aucune donnée disponible
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   </div>
 )
 

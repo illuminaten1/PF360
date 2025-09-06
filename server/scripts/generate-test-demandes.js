@@ -509,6 +509,19 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = []) => {
 }
 
 async function main() {
+  // Initialiser le compteur de dossier en fonction des dossiers existants
+  const existingDossiers = await prisma.dossier.findMany({
+    select: { numero: true },
+    orderBy: { numero: 'desc' }
+  })
+  
+  if (existingDossiers.length > 0) {
+    // Trouve le numéro le plus élevé et commence à partir du suivant
+    const maxNumero = Math.max(...existingDossiers.map(d => parseInt(d.numero) || 0))
+    dossierCounter = maxNumero + 1
+    console.log(`📊 Dossiers existants trouvés, compteur initialisé à ${dossierCounter}`)
+  }
+
   // Génération pour 2025 - calculer le nombre de dossiers nécessaires
   const totalDemandes2025 = 2825
   const totalDemandes2024 = 5000

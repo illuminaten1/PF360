@@ -488,50 +488,58 @@ const TypeInfractionComponent: React.FC<{
 
 const ContexteMissionnelComponent: React.FC<{ 
   statsContexte: StatistiquesContexteMissionnel[] | undefined 
-}> = ({ statsContexte }) => (
-  <div className="h-full flex flex-col">
-    <div className="flex-1 overflow-auto">
-      <table className="w-full border-collapse">
-        <thead className="bg-gray-50 sticky top-0">
-          <tr>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-              Contexte missionnel
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-              Nbr demandes
-            </th>
-            <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-              Pourcentage
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white">
-          {statsContexte && statsContexte.length > 0 ? (
-            statsContexte.map((stat, index) => (
-              <tr key={`${stat.contexteMissionnel}-${index}`} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}>
-                <td className="px-2 py-1 text-xs font-medium text-gray-900">
-                  {stat.contexteMissionnel || 'Non renseigné'}
-                </td>
-                <td className="px-2 py-1 text-center text-xs font-medium text-gray-900">
-                  {stat.nombreDemandes}
-                </td>
-                <td className="px-2 py-1 text-center text-xs font-medium text-gray-900">
-                  {stat.pourcentage.toFixed(1)}%
+}> = ({ statsContexte }) => {
+  const heightPercentage = statsContexte && statsContexte.length > 0 ? (100 / statsContexte.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Contexte missionnel
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Nbr demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Pourcentage
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsContexte && statsContexte.length > 0 ? (
+              statsContexte.map((stat, index) => (
+                <tr 
+                  key={`${stat.contexteMissionnel}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.contexteMissionnel || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-3 py-4 text-center text-xs text-gray-500">
-                Aucune donnée disponible
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const FormationAdministrativeComponent: React.FC<{ 
   statsFormation: StatistiquesFormationAdministrative[] | undefined 
@@ -697,63 +705,63 @@ const ReponseBRPFComponent: React.FC<{
 const AutoControleComponent: React.FC<{ 
   autoControle: StatistiquesAutoControle | undefined 
 }> = ({ autoControle }) => (
-  <div className="p-4 h-full overflow-auto">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <tbody className="bg-white divide-y divide-gray-200">
-          <tr className="bg-white">
-            <td className="px-2 py-2 text-sm font-medium text-gray-900">
+  <div className="h-full flex flex-col">
+    <div className="flex-1 overflow-auto">
+      <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+        <tbody className="bg-white h-full">
+          <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
               PJ en attente de convention
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-red-600">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-red-600 align-middle">
               {autoControle?.pjEnAttenteConvention || 0}
             </td>
           </tr>
-          <tr className="bg-gray-50">
-            <td className="px-2 py-2 text-sm font-medium text-gray-900">
+          <tr className="bg-gray-50 border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
               Ancienneté moyenne non traités
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.ancienneteMoyenneNonTraites?.toFixed(2) || '0,00'}
             </td>
           </tr>
-          <tr className="bg-white">
-            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
+          <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
               Dont BAP
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.ancienneteMoyenneBAP?.toFixed(2) || '0,00'}
             </td>
           </tr>
-          <tr className="bg-gray-50">
-            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
+          <tr className="bg-gray-50 border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
               Dont BRPF
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.ancienneteMoyenneBRP?.toFixed(2) || '0,00'}
             </td>
           </tr>
-          <tr className="bg-white">
-            <td className="px-2 py-2 text-sm font-medium text-gray-900">
+          <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
               Délai traitement moyen
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.delaiTraitementMoyen?.toFixed(2) || '0,00'}
             </td>
           </tr>
-          <tr className="bg-gray-50">
-            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
+          <tr className="bg-gray-50 border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
               Dont BAP
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.delaiTraitementBAP?.toFixed(2) || '0,00'}
             </td>
           </tr>
-          <tr className="bg-white">
-            <td className="px-2 py-2 pl-6 text-sm text-gray-600">
+          <tr className="bg-white" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
               Dont BRPF
             </td>
-            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900">
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
               {autoControle?.delaiTraitementBRP?.toFixed(2) || '0,00'}
             </td>
           </tr>

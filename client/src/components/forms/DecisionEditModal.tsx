@@ -72,7 +72,9 @@ interface Decision {
       prenom: string
       nom: string
       numeroDS: string
-      grade?: string
+      grade?: {
+        gradeAbrege: string
+      }
     }
   }>
 }
@@ -484,7 +486,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                                 <div key={index} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center shadow-sm hover:shadow-md transition-shadow">
                                   <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
                                   <span className="font-medium text-gray-900 text-sm">
-                                    {demandeRel.demande.grade && `${demandeRel.demande.grade} `}
+                                    {demandeRel.demande.grade?.gradeAbrege && `${demandeRel.demande.grade.gradeAbrege} `}
                                     {demandeRel.demande.prenom} {demandeRel.demande.nom}
                                   </span>
                                 </div>

@@ -1,0 +1,1482 @@
+import React, { useState } from 'react'
+import { Responsive, WidthProvider, Layout } from 'react-grid-layout'
+import { Listbox } from '@headlessui/react'
+import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
+import ExtractionMensuelleComponent from '@/components/statistiques/ExtractionMensuelleComponent'
+import { useStatistiquesQueries } from '@/components/statistiques/hooks/useStatistiquesQueries'
+import { INITIAL_GRID_LAYOUTS } from '@/components/statistiques/config/gridLayouts'
+import { getPanelTitle, PANEL_ORDER } from '@/components/statistiques/config/panelConfig'
+import { PanelKey } from '@/components/statistiques/types'
+import {
+  StatistiquesGeneralesPanel,
+  StatistiquesUtilisateurPanel,
+  StatistiquesBAPPanel,
+  QualiteDemandeurPanel,
+  TypeInfractionPanel,
+  ContexteMissionnelPanel,
+  FormationAdministrativePanel,
+  BranchePanel,
+  StatutDemandeurPanel,
+  BadgesPanel,
+  ReponseBRPFPanel,
+  AutoControlePanel,
+  FluxMensuelsPanel,
+  FluxHebdomadairesPanel
+} from '@/components/statistiques/panels'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
+
+const ResponsiveGridLayout = WidthProvider(Responsive)
+
+
+
+
+const StatistiquesGeneralesComponent: React.FC<{ 
+  stats: StatistiquesGenerales | undefined
+}> = ({ stats }) => (
+  <div className="h-full flex flex-col">
+    <div className="flex-1 overflow-auto p-2">
+      {stats && (
+        <div className="h-full grid grid-cols-1 sm:grid-cols-2 gap-1">
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-blue-600 mb-1">
+              {stats.demandesTotal}
+            </div>
+            <div className="text-[10px] text-gray-600">
+              Reçues
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-green-600 mb-1">
+              {stats.demandesTraitees}
+            </div>
+            <div className="text-[10px] text-gray-600">
+              Traitées
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-yellow-600 mb-1">
+              {stats.demandesEnInstance}
+            </div>
+            <div className="text-[10px] text-gray-600">
+              En instance
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center">
+            <div className="text-lg sm:text-xl font-semibold text-red-600 mb-1">
+              {stats.demandesNonAffectees}
+            </div>
+            <div className="text-[10px] text-gray-600">
+              Non affectées
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)
+
+type SortColumn = 'nom' | 'totalPF' | 'propres' | 'bap' | 'pj' | 'aj' | 'aje' | 'rejet' | 'enCours' | 'enCoursPropre' | 'enCoursBAP'
+type SortOrder = 'asc' | 'desc'
+
+const StatistiquesUtilisateurComponent: React.FC<{ 
+  users: StatistiquesUtilisateur[] | undefined 
+}> = ({ users }) => {
+  const [sortColumn, setSortColumn] = useState<SortColumn>('nom')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortOrder('asc')
+    }
+  }
+
+  const getSortValue = (user: StatistiquesUtilisateur, column: SortColumn): number | string => {
+    switch (column) {
+      case 'nom': return `${user.nom} ${user.prenom}`
+      case 'totalPF': return user.demandesAttribuees
+      case 'propres': return user.demandesPropres
+      case 'bap': return user.demandesBAP
+      case 'pj': return user.decisionsRepartition.PJ
+      case 'aj': return user.decisionsRepartition.AJ
+      case 'aje': return user.decisionsRepartition.AJE
+      case 'rejet': return user.decisionsRepartition.REJET
+      case 'enCours': return user.enCours
+      case 'enCoursPropre': return user.enCoursPropre
+      case 'enCoursBAP': return user.enCoursBAP
+      default: return 0
+    }
+  }
+
+  const sortedUsers = users ? [...users].sort((a, b) => {
+    const aValue = getSortValue(a, sortColumn)
+    const bValue = getSortValue(b, sortColumn)
+    
+    let comparison = 0
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      comparison = aValue.localeCompare(bValue, 'fr', { sensitivity: 'base' })
+    } else {
+      comparison = (aValue as number) - (bValue as number)
+    }
+    
+    return sortOrder === 'asc' ? comparison : -comparison
+  }) : undefined
+
+  const SortIcon: React.FC<{ column: SortColumn }> = ({ column }) => {
+    if (sortColumn !== column) {
+      return <span className="ml-1 text-gray-400">⇅</span>
+    }
+    return sortOrder === 'asc' 
+      ? <span className="ml-1 text-blue-600">↑</span>
+      : <span className="ml-1 text-blue-600">↓</span>
+  }
+
+  const totalRows = sortedUsers ? sortedUsers.length + 1 : 1; // +1 pour la ligne TOTAL
+  const heightPercentage = (100 / totalRows).toFixed(2);
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th 
+                className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('nom')}
+              >
+                <div className="flex items-center">
+                  Rédacteurs
+                  <SortIcon column="nom" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('totalPF')}
+              >
+                <div className="flex items-center justify-center">
+                  Total PF
+                  <SortIcon column="totalPF" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('propres')}
+              >
+                <div className="flex items-center justify-center">
+                  Propres
+                  <SortIcon column="propres" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('bap')}
+              >
+                <div className="flex items-center justify-center">
+                  BAP
+                  <SortIcon column="bap" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('pj')}
+              >
+                <div className="flex items-center justify-center">
+                  PJ
+                  <SortIcon column="pj" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('aj')}
+              >
+                <div className="flex items-center justify-center">
+                  AJ
+                  <SortIcon column="aj" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('aje')}
+              >
+                <div className="flex items-center justify-center">
+                  AJE
+                  <SortIcon column="aje" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('rejet')}
+              >
+                <div className="flex items-center justify-center">
+                  REJET
+                  <SortIcon column="rejet" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('enCours')}
+              >
+                <div className="flex items-center justify-center">
+                  En cours
+                  <SortIcon column="enCours" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('enCoursPropre')}
+              >
+                <div className="flex items-center justify-center">
+                  En propre
+                  <SortIcon column="enCoursPropre" />
+                </div>
+              </th>
+              <th 
+                className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={() => handleSort('enCoursBAP')}
+              >
+                <div className="flex items-center justify-center">
+                  Suivis BAP
+                  <SortIcon column="enCoursBAP" />
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {sortedUsers && sortedUsers.length > 0 ? (
+              <>
+                {sortedUsers.map((user, index) => (
+                  <tr 
+                    key={user.id} 
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                    style={{ height: `${heightPercentage}%` }}
+                  >
+                    <td className="px-2 py-1 align-middle">
+                      <div className="text-xs font-medium text-gray-900">
+                        {user.grade ? `${user.grade} ` : ''}{user.prenom} {user.nom}
+                      </div>
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.demandesAttribuees}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.demandesPropres}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.demandesBAP}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-blue-600 align-middle">
+                      {user.decisionsRepartition.PJ}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-purple-600 align-middle">
+                      {user.decisionsRepartition.AJ}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-green-600 align-middle">
+                      {user.decisionsRepartition.AJE}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs font-medium text-red-600 align-middle">
+                      {user.decisionsRepartition.REJET}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.enCours}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.enCoursPropre}
+                    </td>
+                    <td className="px-2 py-1 text-center text-xs text-gray-900 align-middle">
+                      {user.enCoursBAP}
+                    </td>
+                  </tr>
+                ))}
+                <tr 
+                  className="bg-blue-50 border-t-2 border-blue-200"
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-1 align-middle">
+                    <div className="text-xs font-bold text-gray-900">
+                      TOTAL
+                    </div>
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.demandesAttribuees, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.demandesPropres, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.demandesBAP, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-blue-600 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.PJ, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-purple-600 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.AJ, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-green-600 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.AJE, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-red-600 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.decisionsRepartition.REJET, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.enCours, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.enCoursPropre, 0)}
+                  </td>
+                  <td className="px-2 py-1 text-center text-xs font-bold text-gray-900 align-middle">
+                    {sortedUsers.reduce((sum, user) => sum + user.enCoursBAP, 0)}
+                  </td>
+                </tr>
+              </>
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={11} className="px-3 py-4 text-center text-xs text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const StatistiquesBAPComponent: React.FC<{ 
+  statsBAP: StatistiqueBAP[] | undefined 
+}> = ({ statsBAP }) => {
+  const heightPercentage = statsBAP && statsBAP.length > 0 ? (100 / statsBAP.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                BAP
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsBAP && statsBAP.length > 0 ? (
+              statsBAP.map((bap, index) => (
+                <tr 
+                  key={bap.nomBAP} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {bap.nomBAP}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {bap.nombreDemandes}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={2} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const QualiteDemandeurComponent: React.FC<{ 
+  statsQualite: StatistiquesQualiteDemandeur[] | undefined 
+}> = ({ statsQualite }) => {
+  const heightPercentage = statsQualite && statsQualite.length > 0 ? (100 / statsQualite.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Qualité
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsQualite && statsQualite.length > 0 ? (
+              statsQualite.map((stat, index) => (
+                <tr 
+                  key={stat.qualite} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.qualite === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const TypeInfractionComponent: React.FC<{ 
+  statsInfractions: StatistiquesTypeInfraction[] | undefined 
+}> = ({ statsInfractions }) => {
+  const heightPercentage = statsInfractions && statsInfractions.length > 0 ? (100 / statsInfractions.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Type
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsInfractions && statsInfractions.length > 0 ? (
+              statsInfractions.map((stat, index) => (
+                <tr 
+                  key={`${stat.qualificationInfraction}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.qualificationInfraction || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const ContexteMissionnelComponent: React.FC<{ 
+  statsContexte: StatistiquesContexteMissionnel[] | undefined 
+}> = ({ statsContexte }) => {
+  const heightPercentage = statsContexte && statsContexte.length > 0 ? (100 / statsContexte.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Contexte
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsContexte && statsContexte.length > 0 ? (
+              statsContexte.map((stat, index) => (
+                <tr 
+                  key={`${stat.contexteMissionnel}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.contexteMissionnel || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const FormationAdministrativeComponent: React.FC<{ 
+  statsFormation: StatistiquesFormationAdministrative[] | undefined 
+}> = ({ statsFormation }) => {
+  const heightPercentage = statsFormation && statsFormation.length > 0 ? (100 / statsFormation.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                FA
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsFormation && statsFormation.length > 0 ? (
+              statsFormation.map((stat, index) => (
+                <tr 
+                  key={`${stat.formationAdministrative}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.formationAdministrative || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const BrancheComponent: React.FC<{ 
+  statsBranche: StatistiquesBranche[] | undefined 
+}> = ({ statsBranche }) => {
+  const heightPercentage = statsBranche && statsBranche.length > 0 ? (100 / statsBranche.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Branche
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsBranche && statsBranche.length > 0 ? (
+              statsBranche.map((stat, index) => (
+                <tr 
+                  key={`${stat.branche}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.branche || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const StatutDemandeurComponent: React.FC<{ 
+  statsStatut: StatistiquesStatutDemandeur[] | undefined 
+}> = ({ statsStatut }) => {
+  const heightPercentage = statsStatut && statsStatut.length > 0 ? (100 / statsStatut.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Statut
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsStatut && statsStatut.length > 0 ? (
+              statsStatut.map((stat, index) => (
+                <tr 
+                  key={`${stat.statutDemandeur}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.statutDemandeur || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(1)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const BadgesComponent: React.FC<{ 
+  statsBadges: StatistiquesBadges[] | undefined 
+}> = ({ statsBadges }) => {
+  const heightPercentage = statsBadges && statsBadges.length > 0 ? (100 / statsBadges.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Badge
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsBadges && statsBadges.length > 0 ? (
+              statsBadges.map((stat, index) => (
+                <tr 
+                  key={`${stat.badge}-${index}`} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {stat.badge || 'Non renseigné'}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombreDemandes}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(2)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const ReponseBRPFComponent: React.FC<{ 
+  statsReponseBRPF: StatistiquesReponseBRPF | undefined 
+}> = ({ statsReponseBRPF }) => {
+  const heightPercentage = statsReponseBRPF && statsReponseBRPF.statistiques.length > 0 ? (100 / statsReponseBRPF.statistiques.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Demandes
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                %
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {statsReponseBRPF && statsReponseBRPF.statistiques.length > 0 ? (
+              statsReponseBRPF.statistiques.map((stat, index) => (
+                <tr 
+                  key={`${stat.libelle}-${index}`} 
+                  className={`${
+                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                  } border-b border-gray-100 ${
+                    stat.type === 'agrement' || stat.type === 'rejet_global' 
+                      ? 'border-t-2 border-gray-200 font-semibold' 
+                      : ''
+                  }`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className={`px-2 py-2 text-sm text-gray-900 align-middle ${
+                    stat.type === 'motif_rejet' ? 'pl-6 text-gray-600' : 
+                    stat.type === 'decision' ? 'pl-6 font-normal text-gray-600' :
+                    stat.type === 'agrement' || stat.type === 'rejet_global' ? 'font-medium' : 
+                    'font-normal'
+                  }`}>
+                    {stat.libelle}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.nombre}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {stat.pourcentage.toFixed(2)}%
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const AutoControleComponent: React.FC<{ 
+  autoControle: StatistiquesAutoControle | undefined 
+}> = ({ autoControle }) => (
+  <div className="h-full flex flex-col">
+    <div className="flex-1 overflow-auto">
+      <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+        <tbody className="bg-white h-full">
+          <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+              PJ en attente de convention
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-red-600 align-middle">
+              {autoControle?.pjEnAttenteConvention || 0}
+            </td>
+          </tr>
+          <tr className="bg-gray-50 border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+              Ancienneté moyenne non traités
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
+              {autoControle?.ancienneteMoyenneNonTraites?.toFixed(2) || '0,00'}
+            </td>
+          </tr>
+          <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
+              Dont BAP
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
+              {autoControle?.ancienneteMoyenneBAP?.toFixed(2) || '0,00'}
+            </td>
+          </tr>
+          <tr className="bg-gray-50 border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
+              Dont BRPF
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
+              {autoControle?.ancienneteMoyenneBRP?.toFixed(2) || '0,00'}
+            </td>
+          </tr>
+          <tr className="bg-white border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+              Délai de traitement moyen
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
+              {autoControle?.delaiTraitementMoyen?.toFixed(2) || '0,00'}
+            </td>
+          </tr>
+          <tr className="bg-gray-50 border-b border-gray-100" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
+              Dont BAP
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
+              {autoControle?.delaiTraitementBAP?.toFixed(2) || '0,00'}
+            </td>
+          </tr>
+          <tr className="bg-white" style={{ height: '14.28%' }}>
+            <td className="px-2 py-2 pl-6 text-sm text-gray-600 align-middle">
+              Dont BRPF
+            </td>
+            <td className="px-2 py-2 text-right text-sm font-semibold text-gray-900 align-middle">
+              {autoControle?.delaiTraitementBRP?.toFixed(2) || '0,00'}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+)
+
+const FluxMensuelsComponent: React.FC<{ 
+  fluxMensuels: StatistiquesFluxMensuels | undefined
+  selectedYear: number 
+}> = ({ fluxMensuels, selectedYear }) => {
+  const heightPercentage = fluxMensuels && fluxMensuels.fluxMensuels.length > 0 ? (100 / fluxMensuels.fluxMensuels.length).toFixed(2) : '100';
+  
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Mois
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-blue-50">
+                Entrants {selectedYear}
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-red-50">
+                Sortants {selectedYear}
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-gray-100">
+                Entrants {selectedYear - 1}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {fluxMensuels && fluxMensuels.fluxMensuels.length > 0 ? (
+              fluxMensuels.fluxMensuels.map((flux, index) => (
+                <tr 
+                  key={flux.mois} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                    {flux.mois}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {flux.entrantsAnnee}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {flux.sortantsAnnee}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-600 align-middle">
+                    {flux.entrantsAnneePrecedente}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={4} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const FluxHebdomadairesComponent: React.FC<{ 
+  fluxHebdomadaires: StatistiquesFluxHebdomadaires | undefined
+}> = ({ fluxHebdomadaires }) => {
+  // Calculer le stock cumulé pour chaque semaine
+  const fluxAvecStock = fluxHebdomadaires?.fluxHebdomadaires ? 
+    fluxHebdomadaires.fluxHebdomadaires.reduce((acc, flux, index) => {
+      const difference = flux.entrantsAnnee - flux.sortantsAnnee;
+      const stock = index === 0 ? difference : acc[index - 1].stock + difference;
+      acc.push({
+        ...flux,
+        difference,
+        stock
+      });
+      return acc;
+    }, [] as Array<typeof fluxHebdomadaires.fluxHebdomadaires[0] & {difference: number, stock: number}>) : [];
+
+  const heightPercentage = fluxAvecStock && fluxAvecStock.length > 0 ? (100 / fluxAvecStock.length).toFixed(2) : '100';
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+            <tr>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Semaine
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-green-50">
+                Entrants
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-red-50">
+                Sortants
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-blue-50">
+                Différence
+              </th>
+              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 bg-yellow-50">
+                Stock
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white h-full">
+            {fluxAvecStock && fluxAvecStock.length > 0 ? (
+              fluxAvecStock.map((flux, index) => (
+                <tr 
+                  key={flux.numeroSemaine} 
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-100 hover:bg-gray-100`}
+                  style={{ height: `${heightPercentage}%` }}
+                >
+                  <td className="px-2 py-2 text-center align-middle">
+                    <div className="text-sm font-medium text-gray-900">
+                      S{flux.numeroSemaine.toString().padStart(2, '0')}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {flux.dateDebut} - {flux.dateFin}
+                    </div>
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {flux.entrantsAnnee}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {flux.sortantsAnnee}
+                  </td>
+                  <td className={`px-2 py-2 text-center text-sm font-medium align-middle ${
+                    flux.difference > 0 ? 'text-green-600' : 
+                    flux.difference < 0 ? 'text-red-600' : 'text-gray-900'
+                  }`}>
+                    {flux.difference > 0 ? '+' : ''}{flux.difference}
+                  </td>
+                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
+                    {flux.stock}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={5} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+const Statistiques: React.FC = () => {
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear)
+  const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>('administratif')
+  const [isReorderMode, setIsReorderMode] = useState<boolean>(false)
+  
+  // Load saved layout from localStorage or use default
+  const [layouts, setLayouts] = useState(() => {
+    try {
+      const savedLayouts = localStorage.getItem('pf360-statistiques-grid-layouts')
+      return savedLayouts ? JSON.parse(savedLayouts) : INITIAL_GRID_LAYOUTS
+    } catch {
+      return INITIAL_GRID_LAYOUTS
+    }
+  })
+
+  // Handle layout changes and save to localStorage
+  const handleLayoutChange = (_layout: Layout[], layouts: { [key: string]: Layout[] }) => {
+    setLayouts(layouts)
+    try {
+      localStorage.setItem('pf360-statistiques-grid-layouts', JSON.stringify(layouts))
+    } catch (error) {
+      console.warn('Failed to save layouts to localStorage:', error)
+    }
+  }
+
+  // Reset layout to default
+  const resetLayout = () => {
+    setLayouts(INITIAL_GRID_LAYOUTS)
+    try {
+      localStorage.removeItem('pf360-statistiques-grid-layouts')
+    } catch (error) {
+      console.warn('Failed to remove layouts from localStorage:', error)
+    }
+  }
+
+  const { data: statsAdministratives, isLoading: isLoadingAdmin } = useQuery<StatistiquesAdministratives>({
+    queryKey: ['statistiques-administratives', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/administratives?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsBAP, isLoading: isLoadingBAP } = useQuery<StatistiqueBAP[]>({
+    queryKey: ['statistiques-bap', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/bap?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsQualite, isLoading: isLoadingQualite } = useQuery<StatistiquesQualiteDemandeur[]>({
+    queryKey: ['statistiques-qualite', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/qualite-demandeur?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsInfractions, isLoading: isLoadingInfractions } = useQuery<StatistiquesTypeInfraction[]>({
+    queryKey: ['statistiques-infractions', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/type-infraction?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsContexte, isLoading: isLoadingContexte } = useQuery<StatistiquesContexteMissionnel[]>({
+    queryKey: ['statistiques-contexte', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/contexte-missionnel?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsFormation, isLoading: isLoadingFormation } = useQuery<StatistiquesFormationAdministrative[]>({
+    queryKey: ['statistiques-formation', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/formation-administrative?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsBranche, isLoading: isLoadingBranche } = useQuery<StatistiquesBranche[]>({
+    queryKey: ['statistiques-branche', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/branche?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsStatut, isLoading: isLoadingStatut } = useQuery<StatistiquesStatutDemandeur[]>({
+    queryKey: ['statistiques-statut', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/statut-demandeur?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: fluxMensuels, isLoading: isLoadingFlux } = useQuery<StatistiquesFluxMensuels>({
+    queryKey: ['flux-mensuels', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/flux-mensuels?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: fluxHebdomadaires, isLoading: isLoadingFluxHebdo } = useQuery<StatistiquesFluxHebdomadaires>({
+    queryKey: ['flux-hebdomadaires', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/flux-hebdomadaires?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: autoControle, isLoading: isLoadingAutoControle } = useQuery<StatistiquesAutoControle>({
+    queryKey: ['auto-controle', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/auto-controle?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: extractionMensuelle, isLoading: isLoadingExtraction } = useQuery<ExtractionMensuelleStats>({
+    queryKey: ['extraction-mensuelle', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/extraction-mensuelle?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsBadges, isLoading: isLoadingBadges } = useQuery<StatistiquesBadges[]>({
+    queryKey: ['statistiques-badges', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/badges?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: statsReponseBRPF, isLoading: isLoadingReponseBRPF } = useQuery<StatistiquesReponseBRPF>({
+    queryKey: ['statistiques-reponse-brpf', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/reponse-brpf?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: activeTab === 'administratif'
+  })
+
+  const { data: anneesDisponibles } = useQuery<number[]>({
+    queryKey: ['annees-disponibles'],
+    queryFn: async () => {
+      const response = await api.get('/statistiques/annees-disponibles')
+      return response.data
+    }
+  })
+
+  const yearOptions = anneesDisponibles || [currentYear]
+
+  const getPanelTitle = (id: PanelKey): string => {
+    switch (id) {
+      case 'general': return 'Demandes'
+      case 'users': return 'Utilisateurs'
+      case 'bap': return 'BAP'
+      case 'qualite': return 'Qualité du demandeur'
+      case 'infractions': return 'Type d\'infraction'
+      case 'contexte': return 'Contexte missionnel'
+      case 'formation': return 'Formation administrative'
+      case 'branche': return 'Branche'
+      case 'statut': return 'Statut demandeur'
+      case 'badges': return 'Badges'
+      case 'reponseBrpf': return 'Réponse BRPF'
+      case 'autocontrole': return 'Auto-contrôle'
+      case 'fluxmensuels': return 'Flux mensuels'
+      case 'fluxhebdo': return 'Flux hebdomadaires'
+      case 'extraction': return 'Extraction mensuelle pour BAA / SP'
+      default: return 'Panneau'
+    }
+  }
+
+  const renderPanel = (id: PanelKey) => {
+    let content
+    switch (id) {
+      case 'general':
+        content = <StatistiquesGeneralesComponent stats={statsAdministratives?.generales} />
+        break
+      case 'users':
+        content = <StatistiquesUtilisateurComponent users={statsAdministratives?.utilisateurs} />
+        break
+      case 'bap':
+        content = <StatistiquesBAPComponent statsBAP={statsBAP} />
+        break
+      case 'qualite':
+        content = <QualiteDemandeurComponent statsQualite={statsQualite} />
+        break
+      case 'infractions':
+        content = <TypeInfractionComponent statsInfractions={statsInfractions} />
+        break
+      case 'contexte':
+        content = <ContexteMissionnelComponent statsContexte={statsContexte} />
+        break
+      case 'formation':
+        content = <FormationAdministrativeComponent statsFormation={statsFormation} />
+        break
+      case 'branche':
+        content = <BrancheComponent statsBranche={statsBranche} />
+        break
+      case 'statut':
+        content = <StatutDemandeurComponent statsStatut={statsStatut} />
+        break
+      case 'badges':
+        content = <BadgesComponent statsBadges={statsBadges} />
+        break
+      case 'reponseBrpf':
+        content = <ReponseBRPFComponent statsReponseBRPF={statsReponseBRPF} />
+        break
+      case 'autocontrole':
+        content = <AutoControleComponent autoControle={autoControle} />
+        break
+      case 'fluxmensuels':
+        content = <FluxMensuelsComponent fluxMensuels={fluxMensuels} selectedYear={selectedYear} />
+        break
+      case 'fluxhebdo':
+        content = <FluxHebdomadairesComponent fluxHebdomadaires={fluxHebdomadaires} />
+        break
+      case 'extraction':
+        content = <ExtractionMensuelleComponent stats={extractionMensuelle} />
+        break
+      default:
+        content = <div>Panneau non défini</div>
+    }
+
+    // L'encart extraction gère sa propre barre de titre avec le bouton de capture
+    if (id === 'extraction') {
+      return (
+        <div key={id} className="bg-white rounded-lg shadow border border-gray-200 h-full">
+          {content}
+        </div>
+      )
+    }
+
+    return (
+      <div key={id} className="bg-white rounded-lg shadow border border-gray-200 h-full flex flex-col">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-sm text-gray-900">
+          {getPanelTitle(id)}
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {content}
+        </div>
+      </div>
+    )
+  }
+
+  if (isLoadingAdmin || isLoadingBAP || isLoadingQualite || isLoadingInfractions || isLoadingContexte || isLoadingFormation || isLoadingBranche || isLoadingStatut || isLoadingFlux || isLoadingFluxHebdo || isLoadingAutoControle || isLoadingExtraction || isLoadingBadges || isLoadingReponseBRPF) {
+    return <LoadingSpinner />
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Statistiques</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          Suivi administratif et budgétaire des demandes
+        </p>
+      </div>
+      
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Année
+          </label>
+          <Listbox value={selectedYear} onChange={setSelectedYear}>
+            <div className="relative">
+              <Listbox.Button className="relative w-32 cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
+                <span className="block truncate">{selectedYear}</span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </span>
+              </Listbox.Button>
+              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
+                {yearOptions.map((year) => (
+                  <Listbox.Option
+                    key={year}
+                    value={year}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                        active ? 'bg-blue-600 text-white' : 'text-gray-900'
+                      }`
+                    }
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                          {year}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                              active ? 'text-white' : 'text-blue-600'
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </div>
+          </Listbox>
+        </div>
+        
+        {activeTab === 'administratif' && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsReorderMode(!isReorderMode)}
+              className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                isReorderMode
+                  ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100'
+                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+              }`}
+              title={isReorderMode ? "Désactiver le mode réorganisation" : "Activer le mode réorganisation"}
+            >
+              {isReorderMode ? 'Désactiver la réorganisation' : 'Réorganiser'}
+            </button>
+            <button
+              onClick={resetLayout}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              title="Remettre la disposition par défaut"
+            >
+              Réinitialiser la disposition
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('administratif')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'administratif'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Suivi Administratif
+            </button>
+            <button
+              onClick={() => setActiveTab('budgetaire')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'budgetaire'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Suivi Budgétaire
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {activeTab === 'administratif' ? (
+        <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={layouts}
+            onLayoutChange={handleLayoutChange}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+            rowHeight={30}
+            isDraggable={isReorderMode}
+            isResizable={isReorderMode}
+            compactType="vertical"
+            preventCollision={false}
+          >
+            {(['general', 'users', 'extraction', 'badges', 'reponseBrpf', 'bap', 'qualite', 'infractions', 'contexte', 'formation', 'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo'] as PanelKey[]).map((panelId) => (
+              <div key={panelId}>
+                {renderPanel(panelId)}
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Suivi Budgétaire - {selectedYear}
+            </h2>
+            <p className="text-gray-600">
+              Les statistiques budgétaires seront implémentées prochainement.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Statistiques

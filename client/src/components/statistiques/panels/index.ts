@@ -13,6 +13,7 @@ export { default as ReponseBRPFPanel } from './ReponseBRPFPanel'
 export { default as AutoControlePanel } from './AutoControlePanel'
 export { default as FluxMensuelsPanel } from './FluxMensuelsPanel'
 export { default as FluxHebdomadairesPanel } from './FluxHebdomadairesPanel'
+export { default as BudgetPanel } from './BudgetPanel'
 
 // Utility components
 export { default as GenericStatsTable } from './GenericStatsTable'

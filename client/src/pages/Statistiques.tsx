@@ -22,18 +22,23 @@ import {
   ReponseBRPFPanel,
   AutoControlePanel,
   FluxMensuelsPanel,
-  FluxHebdomadairesPanel
+  FluxHebdomadairesPanel,
+  BudgetPanel
 } from '@/components/statistiques/panels'
+import { useAuth } from '@/contexts/AuthContext'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const Statistiques: React.FC = () => {
+  const { user } = useAuth()
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number>(currentYear)
   const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>('administratif')
   const [isReorderMode, setIsReorderMode] = useState<boolean>(false)
+  
+  const isAdmin = user?.role === 'ADMIN'
   
   // Load saved layout from localStorage or use default
   const [layouts, setLayouts] = useState(() => {
@@ -293,14 +298,23 @@ const Statistiques: React.FC = () => {
           </ResponsiveGridLayout>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Suivi Budgétaire - {selectedYear}
-            </h2>
-            <p className="text-gray-600">
-              Les statistiques budgétaires seront implémentées prochainement.
-            </p>
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-sm text-gray-900">
+              Budget
+            </div>
+            <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} />
+          </div>
+          
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Autres statistiques budgétaires
+              </h2>
+              <p className="text-gray-600">
+                Les autres statistiques budgétaires seront implémentées prochainement.
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -87,7 +87,8 @@ const EngagementDepensesMensuellesPanel: React.FC<EngagementDepensesMensuellesPa
           <tbody className="bg-white h-full">
             {allData.map((engagement, index) => {
               const isTotal = engagement.mois === 'TOTAL'
-              const isLastMonth = !isTotal && index === statsEngagementsMensuels.engagementsMensuels.length - 1
+              const totalRows = allData.length // 12 mois + 1 total = 13
+              const rowHeight = `${(100 / totalRows).toFixed(2)}%`
               
               return (
                 <tr 
@@ -97,7 +98,7 @@ const EngagementDepensesMensuellesPanel: React.FC<EngagementDepensesMensuellesPa
                       ? 'bg-green-200 border-t-2 border-green-400 font-bold' 
                       : index % 2 === 0 ? 'bg-green-50' : 'bg-white'
                   } border-b border-green-200`}
-                  style={{ height: isTotal ? 'auto' : `${(100 / (allData.length - 1)).toFixed(2)}%` }}
+                  style={{ height: rowHeight }}
                 >
                   <td className={`px-1 py-2 text-xs align-middle ${
                     isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'

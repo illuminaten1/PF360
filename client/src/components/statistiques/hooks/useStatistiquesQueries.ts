@@ -15,7 +15,8 @@ import {
   ExtractionMensuelleStats,
   StatistiquesBadges,
   StatistiquesReponseBRPF,
-  StatistiquesBudgetaires
+  StatistiquesBudgetaires,
+  EngagementServicePayeurData
 } from '../types'
 
 export const useStatistiquesQueries = (selectedYear: number, activeTab: 'administratif' | 'budgetaire') => {
@@ -157,6 +158,15 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     enabled: isBudgetaire
   })
 
+  const statsEngagements = useQuery<EngagementServicePayeurData>({
+    queryKey: ['engagement-service-payeur', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/engagement-service-payeur?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: isBudgetaire
+  })
+
   const anneesDisponibles = useQuery<number[]>({
     queryKey: ['annees-disponibles'],
     queryFn: async () => {
@@ -172,7 +182,7 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
                    fluxMensuels.isLoading || fluxHebdomadaires.isLoading || 
                    autoControle.isLoading || extractionMensuelle.isLoading || 
                    statsBadges.isLoading || statsReponseBRPF.isLoading ||
-                   statsBudgetaires.isLoading
+                   statsBudgetaires.isLoading || statsEngagements.isLoading
 
   return {
     statsAdministratives: statsAdministratives.data,
@@ -190,6 +200,7 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     statsBadges: statsBadges.data,
     statsReponseBRPF: statsReponseBRPF.data,
     statsBudgetaires: statsBudgetaires.data,
+    statsEngagements: statsEngagements.data,
     anneesDisponibles: anneesDisponibles.data,
     isLoading
   }

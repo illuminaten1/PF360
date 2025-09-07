@@ -14,6 +14,7 @@ export { default as AutoControlePanel } from './AutoControlePanel'
 export { default as FluxMensuelsPanel } from './FluxMensuelsPanel'
 export { default as FluxHebdomadairesPanel } from './FluxHebdomadairesPanel'
 export { default as BudgetPanel } from './BudgetPanel'
+export { default as EngagementServicePayeurPanel } from './EngagementServicePayeurPanel'
 
 // Utility components
 export { default as GenericStatsTable } from './GenericStatsTable'

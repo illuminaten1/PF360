@@ -47,6 +47,8 @@ model User {
   transfersAsTarget  TransferHistory[] @relation("TransferHistoryTarget")
   transfersInitiated TransferHistory[] @relation("TransferHistoryTransferrer")
   transfersRolledBack TransferHistory[] @relation("TransferHistoryRollbacker")
+  budgetsCrees       BudgetAnnuel[] @relation("BudgetAnnuelCreateur")
+  budgetsModifies    BudgetAnnuel[] @relation("BudgetAnnuelModificateur")
 
   @@map("users")
 }
@@ -558,6 +560,24 @@ model TransferHistory {
   updatedAt             DateTime @updatedAt
   
   @@map("transfer_history")
+}
+
+model BudgetAnnuel {
+  id              String   @id @default(cuid())
+  annee           Int      @unique // Année du budget (ex: 2024)
+  budgetBase      Float    // Budget de base de l'année
+  abondements     Float    @default(0) // Montant des abondements
+  
+  // Champs de logging
+  creePar         User?    @relation("BudgetAnnuelCreateur", fields: [creeParId], references: [id])
+  creeParId       String?
+  modifiePar      User?    @relation("BudgetAnnuelModificateur", fields: [modifieParId], references: [id])
+  modifieParId    String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("budgets_annuels")
 }
 
 // Note: Using strings instead of enums for SQLite compatibility

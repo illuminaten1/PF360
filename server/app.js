@@ -24,6 +24,7 @@ const diligenceRoutes = require('./routes/diligence');
 const templateRoutes = require('./routes/templates');
 const logRoutes = require('./routes/logs');
 const statistiquesRoutes = require('./routes/statistiques');
+const budgetRoutes = require('./routes/budget');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -77,6 +78,7 @@ app.use('/api/diligences', diligenceRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/statistiques', statistiquesRoutes);
+app.use('/api/budget', budgetRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1077,13 +1077,6 @@ const DossierDetail: React.FC = () => {
                             >
                               Modifier
                             </button>
-                            <button 
-                              className="text-green-600 hover:text-green-800 text-sm"
-                              disabled={true}
-                              title="Détails - À venir"
-                            >
-                              Voir détails
-                            </button>
                           </div>
                         </div>
                       </div>

@@ -25,6 +25,7 @@ import {
   FluxHebdomadairesPanel,
   BudgetPanel
 } from '@/components/statistiques/panels'
+import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import { useAuth } from '@/contexts/AuthContext'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -80,6 +81,7 @@ const Statistiques: React.FC = () => {
     extractionMensuelle,
     statsBadges,
     statsReponseBRPF,
+    statsBudgetaires,
     anneesDisponibles,
     isLoading
   } = useStatistiquesQueries(selectedYear, activeTab)
@@ -156,6 +158,9 @@ const Statistiques: React.FC = () => {
         break
       case 'budget':
         content = <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} />
+        break
+      case 'statistiquesBudgetaires':
+        content = <StatistiquesBudgetairesPanel statsBudgetaires={statsBudgetaires} />
         break
       default:
         content = <div>Panneau non défini</div>

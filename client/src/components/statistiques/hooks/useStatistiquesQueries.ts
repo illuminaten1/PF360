@@ -14,11 +14,13 @@ import {
   StatistiquesAutoControle,
   ExtractionMensuelleStats,
   StatistiquesBadges,
-  StatistiquesReponseBRPF
+  StatistiquesReponseBRPF,
+  StatistiquesBudgetaires
 } from '../types'
 
 export const useStatistiquesQueries = (selectedYear: number, activeTab: 'administratif' | 'budgetaire') => {
   const isAdministratif = activeTab === 'administratif'
+  const isBudgetaire = activeTab === 'budgetaire'
 
   const statsAdministratives = useQuery<StatistiquesAdministratives>({
     queryKey: ['statistiques-administratives', selectedYear],
@@ -146,6 +148,15 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     enabled: isAdministratif
   })
 
+  const statsBudgetaires = useQuery<StatistiquesBudgetaires>({
+    queryKey: ['statistiques-budgetaires', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/budgetaires?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: isBudgetaire
+  })
+
   const anneesDisponibles = useQuery<number[]>({
     queryKey: ['annees-disponibles'],
     queryFn: async () => {
@@ -160,7 +171,8 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
                    statsBranche.isLoading || statsStatut.isLoading || 
                    fluxMensuels.isLoading || fluxHebdomadaires.isLoading || 
                    autoControle.isLoading || extractionMensuelle.isLoading || 
-                   statsBadges.isLoading || statsReponseBRPF.isLoading
+                   statsBadges.isLoading || statsReponseBRPF.isLoading ||
+                   statsBudgetaires.isLoading
 
   return {
     statsAdministratives: statsAdministratives.data,
@@ -177,6 +189,7 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     extractionMensuelle: extractionMensuelle.data,
     statsBadges: statsBadges.data,
     statsReponseBRPF: statsReponseBRPF.data,
+    statsBudgetaires: statsBudgetaires.data,
     anneesDisponibles: anneesDisponibles.data,
     isLoading
   }

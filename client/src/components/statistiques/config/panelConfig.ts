@@ -18,6 +18,7 @@ export const getPanelTitle = (id: PanelKey): string => {
     case 'fluxhebdo': return 'Flux hebdomadaires'
     case 'extraction': return 'Extraction mensuelle pour BAA / SP'
     case 'budget': return 'Budget'
+    case 'statistiquesBudgetaires': return 'Statistiques Budgétaires'
     default: return 'Panneau'
   }
 }
@@ -29,7 +30,7 @@ export const PANEL_ORDER_ADMINISTRATIF: PanelKey[] = [
 ]
 
 export const PANEL_ORDER_BUDGETAIRE: PanelKey[] = [
-  'budget'
+  'budget', 'statistiquesBudgetaires'
 ]
 
 // Pour la compatibilité avec l'existant

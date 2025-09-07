@@ -1883,6 +1883,109 @@ const getStatistiquesReponseBRPF = async (req, res) => {
   }
 };
 
+const getStatistiquesBudgetaires = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+
+    // 1. Nombre de dossiers pour l'année sélectionnée
+    const nombreDossiersAnnee = await prisma.dossier.count({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+
+    // 2. Nombre de dossiers toutes années
+    const nombreDossiersToutesAnnees = await prisma.dossier.count();
+
+    // 3. Conventions d'honoraires créées pour l'année sélectionnée
+    const conventionsCreees = await prisma.convention.count({
+      where: {
+        type: 'CONVENTION',
+        dateCreation: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+
+    // 4. Conventions d'honoraires signées pour l'année sélectionnée (par date de signature)
+    const conventionsSignees = await prisma.convention.count({
+      where: {
+        type: 'CONVENTION',
+        dateRetourSigne: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+
+    // 5. Avenants créés pour l'année sélectionnée
+    const avenantsCreees = await prisma.convention.count({
+      where: {
+        type: 'AVENANT',
+        dateCreation: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+
+    // 6. Avenants signés pour l'année sélectionnée (par date de signature)
+    const avenantsSignees = await prisma.convention.count({
+      where: {
+        type: 'AVENANT',
+        dateRetourSigne: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+
+    const statistiques = [
+      {
+        libelle: `NOMBRE DE DOSSIERS ${year}`,
+        nombre: nombreDossiersAnnee
+      },
+      {
+        libelle: "NOMBRE DE DOSSIERS TOUTES ANNÉES",
+        nombre: nombreDossiersToutesAnnees
+      },
+      {
+        libelle: "CONVENTIONS D'HONORAIRES CRÉÉES",
+        nombre: conventionsCreees
+      },
+      {
+        libelle: "CONVENTIONS D'HONORAIRES SIGNÉES (par l'avocat)",
+        nombre: conventionsSignees
+      },
+      {
+        libelle: "AVENANTS CRÉÉS",
+        nombre: avenantsCreees
+      },
+      {
+        libelle: "AVENANTS SIGNÉS (par l'avocat)",
+        nombre: avenantsSignees
+      }
+    ];
+
+    res.json({ statistiques });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques budgétaires:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des statistiques budgétaires',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -1899,5 +2002,6 @@ module.exports = {
   getAutoControle,
   getExtractionMensuelle,
   getAnneesDisponibles,
-  getStatistiquesReponseBRPF
+  getStatistiquesReponseBRPF,
+  getStatistiquesBudgetaires
 };

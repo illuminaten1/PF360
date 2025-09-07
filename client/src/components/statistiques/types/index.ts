@@ -159,10 +159,14 @@ export interface StatistiquesReponseBRPF {
 export interface StatistiqueBudgetaire {
   libelle: string
   nombre: number
+  pourcentage?: number
+  type?: 'currency' | 'currency_with_percentage'
+  bold?: boolean
 }
 
 export interface StatistiquesBudgetaires {
   statistiques: StatistiqueBudgetaire[]
+  budgetTotal?: number
 }
 
 export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires'

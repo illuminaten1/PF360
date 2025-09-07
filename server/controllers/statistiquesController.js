@@ -1948,6 +1948,93 @@ const getStatistiquesBudgetaires = async (req, res) => {
       }
     });
 
+    // 7. Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // 8. Montant moyen gagé par convention (conventions créées l'année sélectionnée)
+    const conventionsAvecMontant = await prisma.convention.findMany({
+      where: {
+        type: 'CONVENTION',
+        dateCreation: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        montantHT: true
+      }
+    });
+    
+    // Filtrer les conventions avec montantHT non nul
+    const conventionsAvecMontantValide = conventionsAvecMontant.filter(conv => conv.montantHT !== null && conv.montantHT !== undefined);
+    const montantMoyenConvention = conventionsAvecMontantValide.length > 0 
+      ? conventionsAvecMontantValide.reduce((sum, conv) => sum + conv.montantHT, 0) / conventionsAvecMontantValide.length
+      : 0;
+
+    // 9. Montant moyen gagé par avenant (avenants créés l'année sélectionnée)
+    const avenantsAvecMontant = await prisma.convention.findMany({
+      where: {
+        type: 'AVENANT',
+        dateCreation: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        montantHT: true
+      }
+    });
+    
+    // Filtrer les avenants avec montantHT non nul
+    const avenantsAvecMontantValide = avenantsAvecMontant.filter(av => av.montantHT !== null && av.montantHT !== undefined);
+    const montantMoyenAvenant = avenantsAvecMontantValide.length > 0 
+      ? avenantsAvecMontantValide.reduce((sum, av) => sum + av.montantHT, 0) / avenantsAvecMontantValide.length
+      : 0;
+
+    // 10. Montant HT gagé (signés) - conventions et avenants signés par l'avocat l'année sélectionnée
+    const conventionsEtAvenantsSignes = await prisma.convention.findMany({
+      where: {
+        dateRetourSigne: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        montantHT: true
+      }
+    });
+    
+    // Filtrer et calculer le montant HT signé
+    const montantHTSigne = conventionsEtAvenantsSignes
+      .filter(conv => conv.montantHT !== null && conv.montantHT !== undefined)
+      .reduce((sum, conv) => sum + conv.montantHT, 0);
+    const pourcentageBudgetSigne = budgetTotal > 0 ? (montantHTSigne / budgetTotal) * 100 : 0;
+
+    // 11. Montant HT gagé total - conventions et avenants créés l'année sélectionnée
+    const conventionsEtAvenantsCreees = await prisma.convention.findMany({
+      where: {
+        dateCreation: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        montantHT: true
+      }
+    });
+    
+    // Filtrer et calculer le montant HT total
+    const montantHTTotal = conventionsEtAvenantsCreees
+      .filter(conv => conv.montantHT !== null && conv.montantHT !== undefined)
+      .reduce((sum, conv) => sum + conv.montantHT, 0);
+    const pourcentageBudgetTotal = budgetTotal > 0 ? (montantHTTotal / budgetTotal) * 100 : 0;
+
     const statistiques = [
       {
         libelle: "Dossiers toutes années",
@@ -1972,10 +2059,33 @@ const getStatistiquesBudgetaires = async (req, res) => {
       {
         libelle: "Avenants signés (avocat)",
         nombre: avenantsSignees
+      },
+      {
+        libelle: "Montant moyen gagé par convention",
+        nombre: Math.round(montantMoyenConvention),
+        type: "currency"
+      },
+      {
+        libelle: "Montant moyen gagé par avenant",
+        nombre: Math.round(montantMoyenAvenant),
+        type: "currency"
+      },
+      {
+        libelle: "Montant HT gagé (signés)",
+        nombre: Math.round(montantHTSigne),
+        pourcentage: Math.round(pourcentageBudgetSigne * 100) / 100,
+        type: "currency_with_percentage"
+      },
+      {
+        libelle: "Montant HT gagé total",
+        nombre: Math.round(montantHTTotal),
+        pourcentage: Math.round(pourcentageBudgetTotal * 100) / 100,
+        type: "currency_with_percentage",
+        bold: true
       }
     ];
 
-    res.json({ statistiques });
+    res.json({ statistiques, budgetTotal });
 
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques budgétaires:', error);

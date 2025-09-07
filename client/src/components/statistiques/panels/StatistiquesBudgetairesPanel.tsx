@@ -3,11 +3,14 @@ import React from 'react'
 interface StatistiqueBudgetaire {
   libelle: string
   nombre: number
-  type?: 'section' | 'item'
+  pourcentage?: number
+  type?: 'currency' | 'currency_with_percentage'
+  bold?: boolean
 }
 
 interface StatistiquesBudgetairesData {
   statistiques: StatistiqueBudgetaire[]
+  budgetTotal?: number
 }
 
 interface StatistiquesBudgetairesPanelProps {
@@ -16,6 +19,32 @@ interface StatistiquesBudgetairesPanelProps {
 
 const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> = ({ statsBudgetaires }) => {
   const heightPercentage = statsBudgetaires && statsBudgetaires.statistiques.length > 0 ? (100 / statsBudgetaires.statistiques.length).toFixed(2) : '100'
+  
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const formatValue = (stat: StatistiqueBudgetaire) => {
+    if (stat.type === 'currency' || stat.type === 'currency_with_percentage') {
+      const formattedCurrency = formatCurrency(stat.nombre)
+      if (stat.type === 'currency_with_percentage' && stat.pourcentage !== undefined) {
+        return (
+          <span>
+            {formattedCurrency}
+            <br />
+            <span className="text-xs text-gray-500">({stat.pourcentage.toFixed(1)}% du budget)</span>
+          </span>
+        )
+      }
+      return formattedCurrency
+    }
+    return stat.nombre.toLocaleString('fr-FR')
+  }
   
   return (
     <div className="h-full flex flex-col">
@@ -27,7 +56,7 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                 
               </th>
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Nombre
+                Valeur
               </th>
             </tr>
           </thead>
@@ -41,11 +70,15 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                   } border-b border-gray-100`}
                   style={{ height: `${heightPercentage}%` }}
                 >
-                  <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">
+                  <td className={`px-2 py-2 text-sm align-middle ${
+                    stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                  }`}>
                     {stat.libelle}
                   </td>
-                  <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
-                    {stat.nombre}
+                  <td className={`px-2 py-2 text-center text-sm align-middle ${
+                    stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                  }`}>
+                    {formatValue(stat)}
                   </td>
                 </tr>
               ))

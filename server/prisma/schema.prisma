@@ -172,6 +172,7 @@ model Decision {
   modifieParId    String?
   demandes        DecisionDemande[]
   paiements       PaiementDecision[]
+  conventions     ConventionDecision[]
   
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -202,6 +203,7 @@ model Convention {
   modifieParId    String?
   demandes        ConventionDemande[]
   diligences      ConventionDiligence[]
+  decisions       ConventionDecision[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -449,6 +451,16 @@ model ConventionDiligence {
   
   @@id([conventionId, diligenceId])
   @@map("conventions_diligences")
+}
+
+model ConventionDecision {
+  convention   Convention @relation(fields: [conventionId], references: [id])
+  conventionId String
+  decision     Decision   @relation(fields: [decisionId], references: [id])
+  decisionId   String
+  
+  @@id([conventionId, decisionId])
+  @@map("conventions_decisions")
 }
 
 model Pce {

@@ -19,7 +19,8 @@ const createConventionSchema = z.object({
   dossierId: z.string().min(1, "Le dossier est requis"),
   avocatId: z.string().min(1, "L'avocat est requis"),
   demandes: z.array(z.string()).optional(),
-  diligences: z.array(z.string()).optional()
+  diligences: z.array(z.string()).optional(),
+  decisions: z.array(z.string()).optional()
 });
 
 const updateConventionSchema = z.object({
@@ -32,7 +33,8 @@ const updateConventionSchema = z.object({
   dossierId: z.string().min(1).optional(),
   avocatId: z.string().min(1).optional(),
   demandes: z.array(z.string()).optional(),
-  diligences: z.array(z.string()).optional()
+  diligences: z.array(z.string()).optional(),
+  decisions: z.array(z.string()).optional()
 });
 
 router.get('/', async (req, res) => {
@@ -124,7 +126,8 @@ router.post('/', async (req, res) => {
       dossierId, 
       avocatId, 
       demandes = [], 
-      diligences = [] 
+      diligences = [],
+      decisions = []
     } = validatedData;
 
     if (type === 'AVENANT' && !montantHTGagePrecedemment) {
@@ -164,6 +167,13 @@ router.post('/', async (req, res) => {
             diligences: {
               create: diligences.map(diligenceId => ({
                 diligenceId
+              }))
+            }
+          }),
+          ...(decisions.length > 0 && {
+            decisions: {
+              create: decisions.map(decisionId => ({
+                decisionId
               }))
             }
           })
@@ -301,13 +311,15 @@ router.get('/:id', async (req, res) => {
             }
           }
         },
-        paiements: {
-          select: {
-            id: true,
-            facture: true,
-            montantHT: true,
-            montantTTC: true,
-            createdAt: true
+        decisions: {
+          include: {
+            decision: {
+              select: {
+                id: true,
+                type: true,
+                numero: true
+              }
+            }
           }
         }
       }
@@ -337,12 +349,13 @@ router.put('/:id', async (req, res) => {
       dossierId, 
       avocatId, 
       demandes = [], 
-      diligences = [] 
+      diligences = [],
+      decisions = []
     } = validatedData;
 
     const existingConvention = await prisma.convention.findUnique({
       where: { id: req.params.id },
-      include: { demandes: true, diligences: true }
+      include: { demandes: true, diligences: true, decisions: true }
     });
 
     if (!existingConvention) {
@@ -363,6 +376,10 @@ router.put('/:id', async (req, res) => {
       where: { conventionId: req.params.id }
     });
 
+    await prisma.conventionDecision.deleteMany({
+      where: { conventionId: req.params.id }
+    });
+
     const updateData = {
       modifieParId: req.user.id,
       demandes: {
@@ -373,6 +390,11 @@ router.put('/:id', async (req, res) => {
       diligences: {
         create: diligences.map(diligenceId => ({
           diligenceId
+        }))
+      },
+      decisions: {
+        create: decisions.map(decisionId => ({
+          decisionId
         }))
       }
     };
@@ -443,6 +465,17 @@ router.put('/:id', async (req, res) => {
               }
             }
           }
+        },
+        decisions: {
+          include: {
+            decision: {
+              select: {
+                id: true,
+                type: true,
+                numero: true
+              }
+            }
+          }
         }
       }
     });
@@ -491,6 +524,10 @@ router.delete('/:id', async (req, res) => {
     });
 
     await prisma.conventionDiligence.deleteMany({
+      where: { conventionId: req.params.id }
+    });
+
+    await prisma.conventionDecision.deleteMany({
       where: { conventionId: req.params.id }
     });
 

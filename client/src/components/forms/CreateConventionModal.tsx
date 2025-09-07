@@ -144,9 +144,6 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
 
   const handleFormSubmit = async (data: CreateConventionFormData) => {
     try {
-      console.log('=== DEBUG: Form submit triggered ===');
-      console.log('Form data:', data);
-      
       // Use the selected demande IDs from the form
       const demandeIds = data.demandeIds
       
@@ -160,11 +157,9 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
         dossierId: dossier.id,
         avocatId: data.avocatId,
         demandes: demandeIds,
-        diligences: data.diligenceId ? [data.diligenceId] : []
+        diligences: data.diligenceId ? [data.diligenceId] : [],
+        decisions: data.decisionIds
       }
-
-      console.log('=== DEBUG: Cleaned data to send ===');
-      console.log(cleanedData);
       
       await onSubmit(cleanedData)
       onClose()

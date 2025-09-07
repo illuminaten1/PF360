@@ -25,7 +25,8 @@ import {
   FluxHebdomadairesPanel,
   BudgetPanel,
   EngagementServicePayeurPanel,
-  EngagementDepensesMensuellesPanel
+  EngagementDepensesMensuellesPanel,
+  EngagementDepensesGraphiquePanel
 } from '@/components/statistiques/panels'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import { useAuth } from '@/contexts/AuthContext'
@@ -172,6 +173,9 @@ const Statistiques: React.FC = () => {
       case 'engagementDepensesMensuelles':
         content = <EngagementDepensesMensuellesPanel statsEngagementsMensuels={statsEngagementsMensuels} />
         break
+      case 'engagementDepensesGraphique':
+        content = <EngagementDepensesGraphiquePanel statsEngagementsMensuels={statsEngagementsMensuels} />
+        break
       default:
         content = <div>Panneau non défini</div>
     }
@@ -186,7 +190,7 @@ const Statistiques: React.FC = () => {
     }
 
     // Définir les panels d'engagement avec le style vert
-    const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles']
+    const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique']
     const isEngagementPanel = engagementPanels.includes(id)
 
     return (

@@ -59,10 +59,10 @@ const EngagementDepensesMensuellesPanel: React.FC<EngagementDepensesMensuellesPa
   const allData = [...statsEngagementsMensuels.engagementsMensuels, statsEngagementsMensuels.total]
   
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-green-50">
       <div className="flex-1 overflow-auto">
         <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
-          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+          <thead className="bg-green-100 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200" style={{ width: '12%' }}>
                 Mois
@@ -94,38 +94,38 @@ const EngagementDepensesMensuellesPanel: React.FC<EngagementDepensesMensuellesPa
                   key={`${engagement.mois}-${index}`} 
                   className={`${
                     isTotal 
-                      ? 'bg-blue-50 border-t-2 border-blue-200 font-bold' 
-                      : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } border-b border-gray-100`}
+                      ? 'bg-green-200 border-t-2 border-green-400 font-bold' 
+                      : index % 2 === 0 ? 'bg-green-50' : 'bg-white'
+                  } border-b border-green-200`}
                   style={{ height: isTotal ? 'auto' : `${(100 / (allData.length - 1)).toFixed(2)}%` }}
                 >
                   <td className={`px-1 py-2 text-xs align-middle ${
-                    isTotal ? 'font-bold text-blue-900' : 'font-medium text-gray-900'
+                    isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'
                   }`}>
                     {engagement.mois}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
-                    isTotal ? 'font-bold text-blue-900' : 'font-medium text-gray-900'
+                    isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatValueWithPercentage(engagement.montantGageHT, engagement.pourcentageMontantGage, 'HT')}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
-                    isTotal ? 'font-bold text-blue-900' : 'font-medium text-gray-900'
+                    isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatValueWithPercentage(engagement.cumuleHT, engagement.pourcentageCumuleHT, 'HT')}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
-                    isTotal ? 'font-bold text-blue-900' : 'font-medium text-gray-900'
+                    isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatValueWithPercentage(engagement.prevision10, engagement.pourcentagePrevision10, 'HT')}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
-                    isTotal ? 'font-bold text-blue-900' : 'font-medium text-gray-900'
+                    isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatValueWithPercentage(engagement.prevision20, engagement.pourcentagePrevision20, 'TTC')}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
-                    isTotal ? 'font-bold text-blue-900' : 'font-medium text-gray-900'
+                    isTotal ? 'font-bold text-green-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatValueWithPercentage(engagement.cumuleTTC, engagement.pourcentageCumuleTTC, 'TTC')}
                   </td>

@@ -62,10 +62,10 @@ const EngagementServicePayeurPanel: React.FC<EngagementServicePayeurPanelProps> 
   }
   
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-green-50">
       <div className="flex-1 overflow-auto">
         <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
-          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+          <thead className="bg-green-100 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-2 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 SGAMI
@@ -87,8 +87,8 @@ const EngagementServicePayeurPanel: React.FC<EngagementServicePayeurPanelProps> 
                 <tr 
                   key={`${engagement.sgami}-${index}`} 
                   className={`${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } border-b border-gray-100`}
+                    index % 2 === 0 ? 'bg-green-50' : 'bg-white'
+                  } border-b border-green-200`}
                   style={{ height: `${heightPercentage}%` }}
                 >
                   <td className="px-2 py-2 text-sm font-medium text-gray-900 align-middle">

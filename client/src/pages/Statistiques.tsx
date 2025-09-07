@@ -185,9 +185,21 @@ const Statistiques: React.FC = () => {
       )
     }
 
+    // Définir les panels d'engagement avec le style vert
+    const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles']
+    const isEngagementPanel = engagementPanels.includes(id)
+
     return (
-      <div key={id} className="bg-white rounded-lg shadow border border-gray-200 h-full flex flex-col">
-        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-sm text-gray-900">
+      <div key={id} className={`bg-white rounded-lg shadow border h-full flex flex-col ${
+        isEngagementPanel 
+          ? 'border-l-4 border-l-green-400 border-t-gray-200 border-r-gray-200 border-b-gray-200'
+          : 'border-gray-200'
+      }`}>
+        <div className={`px-4 py-3 border-b font-semibold text-sm ${
+          isEngagementPanel
+            ? 'border-green-200 bg-green-100 text-green-900'
+            : 'border-gray-200 bg-gray-50 text-gray-900'
+        }`}>
           {getPanelTitle(id)}
         </div>
         <div className="flex-1 overflow-hidden">

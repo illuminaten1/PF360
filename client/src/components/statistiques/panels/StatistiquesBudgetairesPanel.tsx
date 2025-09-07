@@ -56,10 +56,10 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
   const hasPrevisionsRows = statsBudgetaires?.statistiques.some(stat => stat.showPrevisions) || false
   
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-green-50">
       <div className="flex-1 overflow-auto">
         <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
-          <thead className="bg-gray-50 sticky top-0" style={{ height: 'auto' }}>
+          <thead className="bg-green-100 sticky top-0" style={{ height: 'auto' }}>
             <tr>
               <th className="px-2 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 
@@ -81,28 +81,33 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
           </thead>
           <tbody className="bg-white h-full">
             {statsBudgetaires && statsBudgetaires.statistiques.length > 0 ? (
-              statsBudgetaires.statistiques.map((stat, index) => (
+              statsBudgetaires.statistiques.map((stat, index) => {
+                const isTotalLine = stat.libelle === "Montant HT gagé total"
+                
+                return (
                 <tr 
                   key={`${stat.libelle}-${index}`} 
                   className={`${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } border-b border-gray-100`}
+                    isTotalLine 
+                      ? 'bg-green-200 border-t-2 border-green-400 font-bold' 
+                      : index % 2 === 0 ? 'bg-green-50' : 'bg-white'
+                  } border-b border-green-200`}
                   style={{ height: `${heightPercentage}%` }}
                 >
                   <td className={`px-2 py-2 text-sm align-middle ${
-                    stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                    isTotalLine ? 'font-bold text-green-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
                     {stat.libelle}
                   </td>
                   <td className={`px-2 py-2 text-center text-sm align-middle ${
-                    stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                    isTotalLine ? 'font-bold text-green-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatValue(stat)}
                   </td>
                   {hasPrevisionsRows && (
                     <>
                       <td className={`px-2 py-2 text-center text-sm align-middle ${
-                        stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                        isTotalLine ? 'font-bold text-green-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                       }`}>
                         {stat.showPrevisions && stat.prevision10 !== undefined ? (
                           <span>
@@ -115,7 +120,7 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                         ) : ''}
                       </td>
                       <td className={`px-2 py-2 text-center text-sm align-middle ${
-                        stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                        isTotalLine ? 'font-bold text-green-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                       }`}>
                         {stat.showPrevisions && stat.prevision20 !== undefined ? (
                           <span>
@@ -130,7 +135,8 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                     </>
                   )}
                 </tr>
-              ))
+                )
+              })
             ) : (
               <tr style={{ height: '100%' }}>
                 <td colSpan={hasPrevisionsRows ? 4 : 2} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">

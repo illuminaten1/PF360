@@ -60,22 +60,29 @@ interface Convention {
     region?: string
   }
   diligences?: Array<{
-    id: string
-    nom: string
+    diligence: {
+      id: string
+      nom: string
+      details?: string
+    }
   }>
   decisions: Array<{
-    id: string
-    type: string
-    numero?: string
+    decision: {
+      id: string
+      type: string
+      numero?: string
+    }
   }>
   demandes: Array<{
-    id: string
-    prenom: string
-    nom: string
-    numeroDS?: string
-    type: 'VICTIME' | 'MIS_EN_CAUSE'
-    grade?: {
-      gradeAbrege: string
+    demande: {
+      id: string
+      prenom: string
+      nom: string
+      numeroDS?: string
+      type: 'VICTIME' | 'MIS_EN_CAUSE'
+      grade?: {
+        gradeAbrege: string
+      }
     }
   }>
 }
@@ -155,16 +162,16 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         montantHT: convention.montantHT,
         montantHTGagePrecedemment: convention.montantHTGagePrecedemment,
         avocatId: convention.avocat.id,
-        diligenceId: convention.diligences?.[0]?.id || '',
+        diligenceId: convention.diligences?.[0]?.diligence?.id || '',
         dateRetourSigne: convention.dateRetourSigne ? dayjs(convention.dateRetourSigne).format('YYYY-MM-DD') : '',
-        decisionIds: convention.decisions.map(d => d.id),
-        demandeIds: convention.demandes.map(d => d.id)
+        decisionIds: convention.decisions.map(d => d.decision.id),
+        demandeIds: convention.demandes.map(d => d.demande.id)
       })
 
       // Set Listbox states
       setSelectedInstance(convention.instance)
       setSelectedAvocat(convention.avocat)
-      setSelectedDiligence(convention.diligences?.[0] || null)
+      setSelectedDiligence(convention.diligences?.[0]?.diligence || null)
       setAvocatSearchQuery(`${convention.avocat.prenom} ${convention.avocat.nom}`)
       setShowAvocatDropdown(false)
     }
@@ -200,7 +207,8 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         dossierId: dossier.id,
         avocatId: data.avocatId,
         demandes: data.demandeIds,
-        diligences: data.diligenceId ? [data.diligenceId] : []
+        diligences: data.diligenceId ? [data.diligenceId] : [],
+        decisions: data.decisionIds
       }
 
       console.log('=== DEBUG: Cleaned data to send ===');

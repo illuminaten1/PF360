@@ -5,8 +5,8 @@ import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ExtractionMensuelleComponent from '@/components/statistiques/ExtractionMensuelleComponent'
 import { useStatistiquesQueries } from '@/components/statistiques/hooks/useStatistiquesQueries'
-import { INITIAL_GRID_LAYOUTS } from '@/components/statistiques/config/gridLayouts'
-import { getPanelTitle, PANEL_ORDER } from '@/components/statistiques/config/panelConfig'
+import { INITIAL_GRID_LAYOUTS, INITIAL_GRID_LAYOUTS_BUDGETAIRE } from '@/components/statistiques/config/gridLayouts'
+import { getPanelTitle, PANEL_ORDER_ADMINISTRATIF, PANEL_ORDER_BUDGETAIRE } from '@/components/statistiques/config/panelConfig'
 import { PanelKey } from '@/components/statistiques/types'
 import {
   StatistiquesGeneralesPanel,
@@ -41,14 +41,28 @@ const Statistiques: React.FC = () => {
   const isAdmin = user?.role === 'ADMIN'
   
   // Load saved layout from localStorage or use default
-  const [layouts, setLayouts] = useState(() => {
+  const [layoutsAdministratif, setLayoutsAdministratif] = useState(() => {
     try {
-      const savedLayouts = localStorage.getItem('pf360-statistiques-grid-layouts')
+      const savedLayouts = localStorage.getItem('pf360-statistiques-grid-layouts-administratif')
       return savedLayouts ? JSON.parse(savedLayouts) : INITIAL_GRID_LAYOUTS
     } catch {
       return INITIAL_GRID_LAYOUTS
     }
   })
+
+  const [layoutsBudgetaire, setLayoutsBudgetaire] = useState(() => {
+    try {
+      const savedLayouts = localStorage.getItem('pf360-statistiques-grid-layouts-budgetaire')
+      return savedLayouts ? JSON.parse(savedLayouts) : INITIAL_GRID_LAYOUTS_BUDGETAIRE
+    } catch {
+      return INITIAL_GRID_LAYOUTS_BUDGETAIRE
+    }
+  })
+
+  const layouts = activeTab === 'administratif' ? layoutsAdministratif : layoutsBudgetaire
+  const setLayouts = activeTab === 'administratif' ? setLayoutsAdministratif : setLayoutsBudgetaire
+  const storageKey = activeTab === 'administratif' ? 'pf360-statistiques-grid-layouts-administratif' : 'pf360-statistiques-grid-layouts-budgetaire'
+  const initialLayouts = activeTab === 'administratif' ? INITIAL_GRID_LAYOUTS : INITIAL_GRID_LAYOUTS_BUDGETAIRE
 
   // Use the custom hook for all queries
   const {
@@ -71,10 +85,10 @@ const Statistiques: React.FC = () => {
   } = useStatistiquesQueries(selectedYear, activeTab)
 
   // Handle layout changes and save to localStorage
-  const handleLayoutChange = (_layout: Layout[], layouts: { [key: string]: Layout[] }) => {
-    setLayouts(layouts)
+  const handleLayoutChange = (_layout: Layout[], newLayouts: { [key: string]: Layout[] }) => {
+    setLayouts(newLayouts)
     try {
-      localStorage.setItem('pf360-statistiques-grid-layouts', JSON.stringify(layouts))
+      localStorage.setItem(storageKey, JSON.stringify(newLayouts))
     } catch (error) {
       console.warn('Failed to save layouts to localStorage:', error)
     }
@@ -82,9 +96,9 @@ const Statistiques: React.FC = () => {
 
   // Reset layout to default
   const resetLayout = () => {
-    setLayouts(INITIAL_GRID_LAYOUTS)
+    setLayouts(initialLayouts)
     try {
-      localStorage.removeItem('pf360-statistiques-grid-layouts')
+      localStorage.removeItem(storageKey)
     } catch (error) {
       console.warn('Failed to remove layouts from localStorage:', error)
     }
@@ -139,6 +153,9 @@ const Statistiques: React.FC = () => {
         break
       case 'extraction':
         content = <ExtractionMensuelleComponent stats={extractionMensuelle} />
+        break
+      case 'budget':
+        content = <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} />
         break
       default:
         content = <div>Panneau non défini</div>
@@ -225,28 +242,26 @@ const Statistiques: React.FC = () => {
           </Listbox>
         </div>
         
-        {activeTab === 'administratif' && (
-          <div className="flex gap-3">
-            <button
-              onClick={() => setIsReorderMode(!isReorderMode)}
-              className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                isReorderMode
-                  ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100'
-                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
-              }`}
-              title={isReorderMode ? "Désactiver le mode réorganisation" : "Activer le mode réorganisation"}
-            >
-              {isReorderMode ? 'Désactiver la réorganisation' : 'Réorganiser'}
-            </button>
-            <button
-              onClick={resetLayout}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              title="Remettre la disposition par défaut"
-            >
-              Réinitialiser la disposition
-            </button>
-          </div>
-        )}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsReorderMode(!isReorderMode)}
+            className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+              isReorderMode
+                ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100'
+                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+            }`}
+            title={isReorderMode ? "Désactiver le mode réorganisation" : "Activer le mode réorganisation"}
+          >
+            {isReorderMode ? 'Désactiver la réorganisation' : 'Réorganiser'}
+          </button>
+          <button
+            onClick={resetLayout}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            title="Remettre la disposition par défaut"
+          >
+            Réinitialiser la disposition
+          </button>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -276,48 +291,26 @@ const Statistiques: React.FC = () => {
         </div>
       </div>
 
-      {activeTab === 'administratif' ? (
-        <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
-          <ResponsiveGridLayout
-            className="layout"
-            layouts={layouts}
-            onLayoutChange={handleLayoutChange}
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-            rowHeight={30}
-            isDraggable={isReorderMode}
-            isResizable={isReorderMode}
-            compactType="vertical"
-            preventCollision={false}
-          >
-            {PANEL_ORDER.map((panelId) => (
-              <div key={panelId}>
-                {renderPanel(panelId)}
-              </div>
-            ))}
-          </ResponsiveGridLayout>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-sm text-gray-900">
-              Budget
+      <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
+        <ResponsiveGridLayout
+          className="layout"
+          layouts={layouts}
+          onLayoutChange={handleLayoutChange}
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+          rowHeight={30}
+          isDraggable={isReorderMode}
+          isResizable={isReorderMode}
+          compactType="vertical"
+          preventCollision={false}
+        >
+          {(activeTab === 'administratif' ? PANEL_ORDER_ADMINISTRATIF : PANEL_ORDER_BUDGETAIRE).map((panelId) => (
+            <div key={panelId}>
+              {renderPanel(panelId)}
             </div>
-            <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} />
-          </div>
-          
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Autres statistiques budgétaires
-              </h2>
-              <p className="text-gray-600">
-                Les autres statistiques budgétaires seront implémentées prochainement.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+          ))}
+        </ResponsiveGridLayout>
+      </div>
     </div>
   )
 }

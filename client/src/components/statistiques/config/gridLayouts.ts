@@ -53,3 +53,15 @@ export const INITIAL_GRID_LAYOUTS = {
     { i: 'fluxhebdo', x: 0, y: 90, w: 6, h: 10, minW: 4, minH: 8 }
   ] as Layout[]
 }
+
+export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
+  lg: [
+    { w: 3, h: 10, x: 0, y: 0, i: 'budget', minW: 3, minH: 8, moved: false, static: false }
+  ] as Layout[],
+  md: [
+    { i: 'budget', x: 0, y: 0, w: 5, h: 10, minW: 3, minH: 8 }
+  ] as Layout[],
+  sm: [
+    { i: 'budget', x: 0, y: 0, w: 6, h: 10, minW: 4, minH: 8 }
+  ] as Layout[]
+}

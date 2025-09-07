@@ -138,16 +138,15 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin }) => {
               <input
                 type="number"
                 min="0"
-                step="1000"
-                value={formData.budgetBase}
+                value={formData.budgetBase || ''}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
                   budgetBase: parseFloat(e.target.value) || 0
                 }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 placeholder="Montant du budget de base"
               />
-              <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">€</span>
             </div>
           </div>
 
@@ -159,16 +158,15 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin }) => {
               <input
                 type="number"
                 min="0"
-                step="1000"
-                value={formData.abondements}
+                value={formData.abondements || ''}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
                   abondements: parseFloat(e.target.value) || 0
                 }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 placeholder="Montant des abondements"
               />
-              <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">€</span>
             </div>
           </div>
 

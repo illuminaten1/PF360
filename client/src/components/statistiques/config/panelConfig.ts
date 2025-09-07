@@ -17,12 +17,20 @@ export const getPanelTitle = (id: PanelKey): string => {
     case 'fluxmensuels': return 'Flux mensuels'
     case 'fluxhebdo': return 'Flux hebdomadaires'
     case 'extraction': return 'Extraction mensuelle pour BAA / SP'
+    case 'budget': return 'Budget'
     default: return 'Panneau'
   }
 }
 
-export const PANEL_ORDER: PanelKey[] = [
+export const PANEL_ORDER_ADMINISTRATIF: PanelKey[] = [
   'general', 'users', 'extraction', 'badges', 'reponseBrpf', 
   'bap', 'qualite', 'infractions', 'contexte', 'formation', 
   'branche', 'statut', 'autocontrole', 'fluxmensuels', 'fluxhebdo'
 ]
+
+export const PANEL_ORDER_BUDGETAIRE: PanelKey[] = [
+  'budget'
+]
+
+// Pour la compatibilité avec l'existant
+export const PANEL_ORDER = PANEL_ORDER_ADMINISTRATIF

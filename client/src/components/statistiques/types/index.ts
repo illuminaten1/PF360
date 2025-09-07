@@ -162,6 +162,11 @@ export interface StatistiqueBudgetaire {
   pourcentage?: number
   type?: 'currency' | 'currency_with_percentage'
   bold?: boolean
+  showPrevisions?: boolean
+  prevision10?: number
+  prevision20?: number
+  pourcentagePrevision10?: number
+  pourcentagePrevision20?: number
 }
 
 export interface StatistiquesBudgetaires {

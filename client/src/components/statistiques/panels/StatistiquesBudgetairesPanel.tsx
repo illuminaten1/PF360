@@ -6,6 +6,11 @@ interface StatistiqueBudgetaire {
   pourcentage?: number
   type?: 'currency' | 'currency_with_percentage'
   bold?: boolean
+  showPrevisions?: boolean
+  prevision10?: number
+  prevision20?: number
+  pourcentagePrevision10?: number
+  pourcentagePrevision20?: number
 }
 
 interface StatistiquesBudgetairesData {
@@ -20,18 +25,19 @@ interface StatistiquesBudgetairesPanelProps {
 const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> = ({ statsBudgetaires }) => {
   const heightPercentage = statsBudgetaires && statsBudgetaires.statistiques.length > 0 ? (100 / statsBudgetaires.statistiques.length).toFixed(2) : '100'
   
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+  const formatCurrency = (amount: number, addHT: boolean = false) => {
+    const formatted = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
+    return addHT ? formatted + ' HT' : formatted
   }
 
   const formatValue = (stat: StatistiqueBudgetaire) => {
     if (stat.type === 'currency' || stat.type === 'currency_with_percentage') {
-      const formattedCurrency = formatCurrency(stat.nombre)
+      const formattedCurrency = formatCurrency(stat.nombre, stat.showPrevisions)
       if (stat.type === 'currency_with_percentage' && stat.pourcentage !== undefined) {
         return (
           <span>
@@ -46,6 +52,9 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
     return stat.nombre.toLocaleString('fr-FR')
   }
   
+  // Vérifier s'il y a des lignes avec prévisions
+  const hasPrevisionsRows = statsBudgetaires?.statistiques.some(stat => stat.showPrevisions) || false
+  
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto">
@@ -58,6 +67,16 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
               <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Valeur
               </th>
+              {hasPrevisionsRows && (
+                <>
+                  <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                    Prév. +10%
+                  </th>
+                  <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                    Prév. +20%
+                  </th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white h-full">
@@ -80,11 +99,41 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                   }`}>
                     {formatValue(stat)}
                   </td>
+                  {hasPrevisionsRows && (
+                    <>
+                      <td className={`px-2 py-2 text-center text-sm align-middle ${
+                        stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                      }`}>
+                        {stat.showPrevisions && stat.prevision10 !== undefined ? (
+                          <span>
+                            {formatCurrency(stat.prevision10, true)}
+                            <br />
+                            <span className="text-xs text-gray-500">
+                              ({stat.pourcentagePrevision10?.toFixed(1)}% du budget)
+                            </span>
+                          </span>
+                        ) : ''}
+                      </td>
+                      <td className={`px-2 py-2 text-center text-sm align-middle ${
+                        stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                      }`}>
+                        {stat.showPrevisions && stat.prevision20 !== undefined ? (
+                          <span>
+                            {formatCurrency(stat.prevision20, true)}
+                            <br />
+                            <span className="text-xs text-gray-500">
+                              ({stat.pourcentagePrevision20?.toFixed(1)}% du budget)
+                            </span>
+                          </span>
+                        ) : ''}
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))
             ) : (
               <tr style={{ height: '100%' }}>
-                <td colSpan={2} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                <td colSpan={hasPrevisionsRows ? 4 : 2} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
                   Aucune donnée disponible
                 </td>
               </tr>

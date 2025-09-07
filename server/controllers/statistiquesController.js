@@ -2074,14 +2074,24 @@ const getStatistiquesBudgetaires = async (req, res) => {
         libelle: "Montant HT gagé (signés)",
         nombre: Math.round(montantHTSigne),
         pourcentage: Math.round(pourcentageBudgetSigne * 100) / 100,
-        type: "currency_with_percentage"
+        type: "currency_with_percentage",
+        showPrevisions: true,
+        prevision10: Math.round(montantHTSigne * 1.1),
+        prevision20: Math.round(montantHTSigne * 1.1 * 1.2),
+        pourcentagePrevision10: budgetTotal > 0 ? Math.round((montantHTSigne * 1.1 / budgetTotal) * 100 * 100) / 100 : 0,
+        pourcentagePrevision20: budgetTotal > 0 ? Math.round((montantHTSigne * 1.1 * 1.2 / budgetTotal) * 100 * 100) / 100 : 0
       },
       {
         libelle: "Montant HT gagé total",
         nombre: Math.round(montantHTTotal),
         pourcentage: Math.round(pourcentageBudgetTotal * 100) / 100,
         type: "currency_with_percentage",
-        bold: true
+        bold: true,
+        showPrevisions: true,
+        prevision10: Math.round(montantHTTotal * 1.1),
+        prevision20: Math.round(montantHTTotal * 1.1 * 1.2),
+        pourcentagePrevision10: budgetTotal > 0 ? Math.round((montantHTTotal * 1.1 / budgetTotal) * 100 * 100) / 100 : 0,
+        pourcentagePrevision20: budgetTotal > 0 ? Math.round((montantHTTotal * 1.1 * 1.2 / budgetTotal) * 100 * 100) / 100 : 0
       }
     ];
 

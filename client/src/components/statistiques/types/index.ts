@@ -189,7 +189,28 @@ export interface EngagementServicePayeurData {
   budgetTotal?: number
 }
 
-export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur'
+export interface EngagementDepenseMensuelle {
+  mois: string
+  montantGageHT: number
+  pourcentageMontantGage: number
+  cumuleHT: number
+  pourcentageCumuleHT: number
+  prevision10: number
+  pourcentagePrevision10: number
+  prevision20: number
+  pourcentagePrevision20: number
+  cumuleTTC: number
+  pourcentageCumuleTTC: number
+}
+
+export interface EngagementDepensesMensuellesData {
+  engagementsMensuels: EngagementDepenseMensuelle[]
+  total: EngagementDepenseMensuelle
+  budgetTotal?: number
+  annee: number
+}
+
+export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles'
 
 export type SortColumn = 'nom' | 'totalPF' | 'propres' | 'bap' | 'pj' | 'aj' | 'aje' | 'rejet' | 'enCours' | 'enCoursPropre' | 'enCoursBAP'
 export type SortOrder = 'asc' | 'desc'

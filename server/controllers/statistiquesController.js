@@ -2190,6 +2190,140 @@ const getEngagementServicePayeur = async (req, res) => {
   }
 };
 
+const getEngagementDepensesMensuelles = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+
+    // Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // Noms des mois
+    const noms_mois = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+
+    // Initialiser les données mensuelles
+    const engagementsMensuels = [];
+    let cumuleHT = 0;
+    let cumuleTTC = 0;
+
+    // Variables pour les totaux
+    let totalMontantGageHT = 0;
+    let totalCumuleHT = 0;
+    let totalPrevision10 = 0;
+    let totalPrevision20 = 0;
+    let totalCumuleTTC = 0;
+
+    for (let mois = 0; mois < 12; mois++) {
+      const startOfMonth = new Date(year, mois, 1);
+      const endOfMonth = new Date(year, mois + 1, 1);
+
+      // Récupérer les conventions créées ce mois
+      const conventionsMois = await prisma.convention.findMany({
+        where: {
+          dateCreation: {
+            gte: startOfMonth,
+            lt: endOfMonth
+          }
+        },
+        select: {
+          montantHT: true
+        }
+      });
+
+      // Calculer le montant gagé HT pour ce mois
+      const montantGageHT = conventionsMois
+        .filter(conv => conv.montantHT !== null && conv.montantHT !== undefined)
+        .reduce((sum, conv) => sum + conv.montantHT, 0);
+
+      // Mettre à jour les cumuls
+      cumuleHT += montantGageHT;
+      
+      // Calculer les prévisionnels
+      const prevision10 = cumuleHT * 1.1;
+      const prevision20 = cumuleHT * 1.1 * 1.2;
+      cumuleTTC = prevision20;
+
+      // Calculer les pourcentages
+      const pourcentageMontantGage = budgetTotal > 0 ? (montantGageHT / budgetTotal) * 100 : 0;
+      const pourcentageCumuleHT = budgetTotal > 0 ? (cumuleHT / budgetTotal) * 100 : 0;
+      const pourcentagePrevision10 = budgetTotal > 0 ? (prevision10 / budgetTotal) * 100 : 0;
+      const pourcentagePrevision20 = budgetTotal > 0 ? (prevision20 / budgetTotal) * 100 : 0;
+      const pourcentageCumuleTTC = budgetTotal > 0 ? (cumuleTTC / budgetTotal) * 100 : 0;
+
+      engagementsMensuels.push({
+        mois: noms_mois[mois],
+        montantGageHT: Math.round(montantGageHT),
+        pourcentageMontantGage: Math.round(pourcentageMontantGage * 100) / 100,
+        cumuleHT: Math.round(cumuleHT),
+        pourcentageCumuleHT: Math.round(pourcentageCumuleHT * 100) / 100,
+        prevision10: Math.round(prevision10),
+        pourcentagePrevision10: Math.round(pourcentagePrevision10 * 100) / 100,
+        prevision20: Math.round(prevision20),
+        pourcentagePrevision20: Math.round(pourcentagePrevision20 * 100) / 100,
+        cumuleTTC: Math.round(cumuleTTC),
+        pourcentageCumuleTTC: Math.round(pourcentageCumuleTTC * 100) / 100
+      });
+
+      // Accumuler pour les totaux (on prend les valeurs du dernier mois pour les cumuls)
+      totalMontantGageHT += montantGageHT;
+      if (mois === 11) { // Dernier mois pour les cumuls
+        totalCumuleHT = cumuleHT;
+        totalPrevision10 = prevision10;
+        totalPrevision20 = prevision20;
+        totalCumuleTTC = cumuleTTC;
+      }
+    }
+
+    // Calculer les pourcentages des totaux
+    const pourcentageTotalMontantGage = budgetTotal > 0 ? (totalMontantGageHT / budgetTotal) * 100 : 0;
+    const pourcentageTotalCumuleHT = budgetTotal > 0 ? (totalCumuleHT / budgetTotal) * 100 : 0;
+    const pourcentageTotalPrevision10 = budgetTotal > 0 ? (totalPrevision10 / budgetTotal) * 100 : 0;
+    const pourcentageTotalPrevision20 = budgetTotal > 0 ? (totalPrevision20 / budgetTotal) * 100 : 0;
+    const pourcentageTotalCumuleTTC = budgetTotal > 0 ? (totalCumuleTTC / budgetTotal) * 100 : 0;
+
+    // Ligne total
+    const total = {
+      mois: 'TOTAL',
+      montantGageHT: Math.round(totalMontantGageHT),
+      pourcentageMontantGage: Math.round(pourcentageTotalMontantGage * 100) / 100,
+      cumuleHT: Math.round(totalCumuleHT),
+      pourcentageCumuleHT: Math.round(pourcentageTotalCumuleHT * 100) / 100,
+      prevision10: Math.round(totalPrevision10),
+      pourcentagePrevision10: Math.round(pourcentageTotalPrevision10 * 100) / 100,
+      prevision20: Math.round(totalPrevision20),
+      pourcentagePrevision20: Math.round(pourcentageTotalPrevision20 * 100) / 100,
+      cumuleTTC: Math.round(totalCumuleTTC),
+      pourcentageCumuleTTC: Math.round(pourcentageTotalCumuleTTC * 100) / 100
+    };
+
+    res.json({ 
+      engagementsMensuels, 
+      total,
+      budgetTotal,
+      annee: year 
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des engagements de dépenses mensuelles:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des engagements de dépenses mensuelles',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -2208,5 +2342,6 @@ module.exports = {
   getAnneesDisponibles,
   getStatistiquesReponseBRPF,
   getStatistiquesBudgetaires,
-  getEngagementServicePayeur
+  getEngagementServicePayeur,
+  getEngagementDepensesMensuelles
 };

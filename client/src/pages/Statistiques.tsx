@@ -24,7 +24,8 @@ import {
   FluxMensuelsPanel,
   FluxHebdomadairesPanel,
   BudgetPanel,
-  EngagementServicePayeurPanel
+  EngagementServicePayeurPanel,
+  EngagementDepensesMensuellesPanel
 } from '@/components/statistiques/panels'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import { useAuth } from '@/contexts/AuthContext'
@@ -84,6 +85,7 @@ const Statistiques: React.FC = () => {
     statsReponseBRPF,
     statsBudgetaires,
     statsEngagements,
+    statsEngagementsMensuels,
     anneesDisponibles,
     isLoading
   } = useStatistiquesQueries(selectedYear, activeTab)
@@ -166,6 +168,9 @@ const Statistiques: React.FC = () => {
         break
       case 'engagementServicePayeur':
         content = <EngagementServicePayeurPanel statsEngagements={statsEngagements} />
+        break
+      case 'engagementDepensesMensuelles':
+        content = <EngagementDepensesMensuellesPanel statsEngagementsMensuels={statsEngagementsMensuels} />
         break
       default:
         content = <div>Panneau non défini</div>

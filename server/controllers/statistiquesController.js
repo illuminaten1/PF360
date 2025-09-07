@@ -2106,6 +2106,90 @@ const getStatistiquesBudgetaires = async (req, res) => {
   }
 };
 
+const getEngagementServicePayeur = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+
+    // Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // Récupérer les engagements par SGAMI (conventions créées l'année sélectionnée)
+    const engagementsSGAMI = await prisma.sgami.findMany({
+      select: {
+        id: true,
+        nom: true,
+        dossiers: {
+          select: {
+            conventions: {
+              where: {
+                dateCreation: {
+                  gte: startOfYear,
+                  lt: endOfYear
+                }
+              },
+              select: {
+                montantHT: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Calculer les montants par SGAMI
+    const engagements = engagementsSGAMI.map(sgami => {
+      // Collecter tous les montants des conventions de tous les dossiers de ce SGAMI
+      const montants = [];
+      sgami.dossiers.forEach(dossier => {
+        dossier.conventions.forEach(convention => {
+          if (convention.montantHT !== null && convention.montantHT !== undefined) {
+            montants.push(convention.montantHT);
+          }
+        });
+      });
+
+      const montantTotal = montants.reduce((sum, montant) => sum + montant, 0);
+      const pourcentage = budgetTotal > 0 ? (montantTotal / budgetTotal) * 100 : 0;
+      const prevision10 = montantTotal * 1.1;
+      const prevision20 = montantTotal * 1.1 * 1.2;
+      const pourcentagePrevision10 = budgetTotal > 0 ? (prevision10 / budgetTotal) * 100 : 0;
+      const pourcentagePrevision20 = budgetTotal > 0 ? (prevision20 / budgetTotal) * 100 : 0;
+
+      return {
+        sgami: sgami.nom,
+        montantTotal: Math.round(montantTotal),
+        pourcentage: Math.round(pourcentage * 100) / 100,
+        prevision10: Math.round(prevision10),
+        prevision20: Math.round(prevision20),
+        pourcentagePrevision10: Math.round(pourcentagePrevision10 * 100) / 100,
+        pourcentagePrevision20: Math.round(pourcentagePrevision20 * 100) / 100
+      };
+    })
+    .filter(engagement => engagement.montantTotal > 0) // Ne garder que les SGAMI avec des engagements
+    .sort((a, b) => b.montantTotal - a.montantTotal); // Trier par montant décroissant
+
+
+    res.json({ engagements, budgetTotal });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des engagements par service payeur:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des engagements par service payeur',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -2123,5 +2207,6 @@ module.exports = {
   getExtractionMensuelle,
   getAnneesDisponibles,
   getStatistiquesReponseBRPF,
-  getStatistiquesBudgetaires
+  getStatistiquesBudgetaires,
+  getEngagementServicePayeur
 };

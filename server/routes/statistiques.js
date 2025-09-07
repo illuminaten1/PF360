@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
@@ -53,5 +53,8 @@ router.get('/reponse-brpf', authMiddleware, getStatistiquesReponseBRPF);
 
 // GET /api/statistiques/budgetaires - Récupérer les statistiques budgétaires par année
 router.get('/budgetaires', authMiddleware, getStatistiquesBudgetaires);
+
+// GET /api/statistiques/engagement-service-payeur - Récupérer les engagements par service payeur par année
+router.get('/engagement-service-payeur', authMiddleware, getEngagementServicePayeur);
 
 module.exports = router;

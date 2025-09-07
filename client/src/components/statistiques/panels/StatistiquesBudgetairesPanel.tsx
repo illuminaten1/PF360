@@ -25,19 +25,19 @@ interface StatistiquesBudgetairesPanelProps {
 const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> = ({ statsBudgetaires }) => {
   const heightPercentage = statsBudgetaires && statsBudgetaires.statistiques.length > 0 ? (100 / statsBudgetaires.statistiques.length).toFixed(2) : '100'
   
-  const formatCurrency = (amount: number, addHT: boolean = false) => {
+  const formatCurrency = (amount: number, addSuffix: string = '') => {
     const formatted = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
-    return addHT ? formatted + ' HT' : formatted
+    return addSuffix ? formatted + ' ' + addSuffix : formatted
   }
 
   const formatValue = (stat: StatistiqueBudgetaire) => {
     if (stat.type === 'currency' || stat.type === 'currency_with_percentage') {
-      const formattedCurrency = formatCurrency(stat.nombre, stat.showPrevisions)
+      const formattedCurrency = formatCurrency(stat.nombre, stat.showPrevisions ? 'HT' : '')
       if (stat.type === 'currency_with_percentage' && stat.pourcentage !== undefined) {
         return (
           <span>
@@ -106,7 +106,7 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                       }`}>
                         {stat.showPrevisions && stat.prevision10 !== undefined ? (
                           <span>
-                            {formatCurrency(stat.prevision10, true)}
+                            {formatCurrency(stat.prevision10, 'HT')}
                             <br />
                             <span className="text-xs text-gray-500">
                               ({stat.pourcentagePrevision10?.toFixed(1)}% du budget)
@@ -119,7 +119,7 @@ const StatistiquesBudgetairesPanel: React.FC<StatistiquesBudgetairesPanelProps> 
                       }`}>
                         {stat.showPrevisions && stat.prevision20 !== undefined ? (
                           <span>
-                            {formatCurrency(stat.prevision20, true)}
+                            {formatCurrency(stat.prevision20, 'TTC')}
                             <br />
                             <span className="text-xs text-gray-500">
                               ({stat.pourcentagePrevision20?.toFixed(1)}% du budget)

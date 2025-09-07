@@ -41,20 +41,20 @@ const EngagementServicePayeurPanel: React.FC<EngagementServicePayeurPanelProps> 
     )
   }
   
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, suffix: string = 'HT') => {
     const formatted = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
-    return formatted + ' HT'
+    return formatted + ' ' + suffix
   }
 
-  const formatValueWithPercentage = (amount: number, percentage: number) => {
+  const formatValueWithPercentage = (amount: number, percentage: number, suffix: string = 'HT') => {
     return (
       <span>
-        {formatCurrency(amount)}
+        {formatCurrency(amount, suffix)}
         <br />
         <span className="text-xs text-gray-500">({percentage.toFixed(1)}% du budget)</span>
       </span>
@@ -98,10 +98,10 @@ const EngagementServicePayeurPanel: React.FC<EngagementServicePayeurPanelProps> 
                     {formatValueWithPercentage(engagement.montantTotal, engagement.pourcentage)}
                   </td>
                   <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
-                    {formatValueWithPercentage(engagement.prevision10, engagement.pourcentagePrevision10)}
+                    {formatValueWithPercentage(engagement.prevision10, engagement.pourcentagePrevision10, 'HT')}
                   </td>
                   <td className="px-2 py-2 text-center text-sm font-medium text-gray-900 align-middle">
-                    {formatValueWithPercentage(engagement.prevision20, engagement.pourcentagePrevision20)}
+                    {formatValueWithPercentage(engagement.prevision20, engagement.pourcentagePrevision20, 'TTC')}
                   </td>
                 </tr>
               ))

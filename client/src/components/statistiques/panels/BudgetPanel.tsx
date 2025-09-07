@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '@/utils/api'
+import { PencilIcon } from '@heroicons/react/24/outline'
 
 interface BudgetAnnuel {
   id: string
@@ -102,148 +103,141 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin }) => {
     }).format(amount)
   }
 
-  const budgetTotal = (budget?.budgetBase || 0) + (budget?.abondements || 0)
 
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-gray-500">Chargement...</div>
+        <div className="text-gray-500 text-sm">Chargement...</div>
       </div>
     )
   }
 
+
+  // Vue normale - style identique à l'encart Demandes avec édition directe
   return (
-    <div className="h-full flex flex-col p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Budget {selectedYear}
-        </h3>
-        {isAdmin && !isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            {budget ? 'Modifier' : 'Définir le budget'}
-          </button>
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto p-2">
+        {budget || isEditing ? (
+          <div className="h-full grid grid-cols-1 sm:grid-cols-2 gap-1">
+            {/* Budget de base */}
+            <div className={`bg-white rounded-lg shadow border p-2 text-center flex flex-col justify-center ${
+              isEditing ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+            }`}>
+              {isEditing ? (
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.budgetBase || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      budgetBase: parseFloat(e.target.value) || 0
+                    }))}
+                    className="w-full text-center text-lg sm:text-xl font-semibold text-blue-600 bg-white border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
+                  />
+                </div>
+              ) : (
+                <div className="text-lg sm:text-xl font-semibold text-blue-600 mb-1">
+                  {budget ? formatCurrency(budget.budgetBase) : '0 €'}
+                </div>
+              )}
+              <div className="text-[10px] text-gray-600">
+                Budget de base
+              </div>
+            </div>
+
+            {/* Abondements */}
+            <div className={`bg-white rounded-lg shadow border p-2 text-center flex flex-col justify-center ${
+              isEditing ? 'border-green-300 bg-green-50' : 'border-gray-200'
+            }`}>
+              {isEditing ? (
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.abondements || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      abondements: parseFloat(e.target.value) || 0
+                    }))}
+                    className="w-full text-center text-lg sm:text-xl font-semibold text-green-600 bg-white border border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 rounded px-2 py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
+                  />
+                </div>
+              ) : (
+                <div className="text-lg sm:text-xl font-semibold text-green-600 mb-1">
+                  {budget ? formatCurrency(budget.abondements) : '0 €'}
+                </div>
+              )}
+              <div className="text-[10px] text-gray-600">
+                Abondements
+              </div>
+            </div>
+
+            {/* Budget total avec boutons */}
+            <div className={`bg-white rounded-lg shadow border p-2 text-center flex flex-col justify-center sm:col-span-2 relative ${
+              isEditing ? 'border-gray-300 bg-gray-50' : 'border-gray-200'
+            }`}>
+              <div className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
+                {formatCurrency((formData.budgetBase || 0) + (formData.abondements || 0))}
+              </div>
+              <div className="text-[10px] text-gray-600 mb-2">
+                Budget total
+              </div>
+              
+              {isAdmin && (
+                <div className="absolute top-1 right-1 flex gap-1">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleSave}
+                        className="p-1 text-green-600 hover:text-green-700 transition-colors bg-white rounded border border-green-300 hover:bg-green-50"
+                        title="Enregistrer"
+                      >
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        className="p-1 text-red-600 hover:text-red-700 transition-colors bg-white rounded border border-red-300 hover:bg-red-50"
+                        title="Annuler"
+                      >
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Modifier le budget"
+                    >
+                      <PencilIcon className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-sm text-gray-500 mb-2">Aucun budget défini pour {selectedYear}</div>
+              {isAdmin && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Définir le budget
+                </button>
+              )}
+            </div>
+          </div>
         )}
       </div>
-
-      {isEditing && isAdmin ? (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Budget de base
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                value={formData.budgetBase || ''}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  budgetBase: parseFloat(e.target.value) || 0
-                }))}
-                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Montant du budget de base"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">€</span>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Abondements
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                value={formData.abondements || ''}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  abondements: parseFloat(e.target.value) || 0
-                }))}
-                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Montant des abondements"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">€</span>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 p-3 rounded-md">
-            <div className="text-sm text-gray-600 mb-1">Budget total</div>
-            <div className="text-xl font-semibold text-blue-600">
-              {formatCurrency(formData.budgetBase + formData.abondements)}
-            </div>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-            >
-              Enregistrer
-            </button>
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-            >
-              Annuler
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {budget ? (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Budget de base</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    {formatCurrency(budget.budgetBase)}
-                  </div>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Abondements</div>
-                  <div className="text-2xl font-semibold text-green-600">
-                    {formatCurrency(budget.abondements)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-100 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Budget total annuel</div>
-                <div className="text-3xl font-bold text-gray-900">
-                  {formatCurrency(budgetTotal)}
-                </div>
-              </div>
-
-              {budget.modifiePar && (
-                <div className="text-xs text-gray-500 border-t pt-3">
-                  Dernière modification par {budget.modifiePar.prenom} {budget.modifiePar.nom} ({budget.modifiePar.identifiant})
-                  <br />
-                  {new Date(budget.updatedAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center text-gray-500 py-8">
-              <div className="text-lg mb-2">Aucun budget défini pour {selectedYear}</div>
-              {isAdmin && (
-                <div className="text-sm">
-                  Cliquez sur "Définir le budget" pour configurer le budget de cette année.
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }

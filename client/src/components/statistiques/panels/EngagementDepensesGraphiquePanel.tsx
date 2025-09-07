@@ -82,55 +82,15 @@ const EngagementDepensesGraphiquePanel: React.FC<EngagementDepensesGraphiquePane
 
   return (
     <div className="h-full flex flex-col bg-green-50">
-      <div className="p-4 bg-green-100 border-b border-green-200">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-green-900">
-            Dépenses Gagées par Mois {viewMode === 'cumule' ? '- Cumulé' : viewMode === 'pourcentage' ? 'en % du Budget Annuel' : ''}
-          </h3>
-          <div className="flex bg-white rounded-lg p-1 border border-green-300">
-            <button
-              onClick={() => setViewMode('mensuel')}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'mensuel'
-                  ? 'bg-green-500 text-white shadow-sm'
-                  : 'text-green-700 hover:bg-green-50'
-              }`}
-            >
-              Mensuel
-            </button>
-            <button
-              onClick={() => setViewMode('cumule')}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'cumule'
-                  ? 'bg-green-500 text-white shadow-sm'
-                  : 'text-green-700 hover:bg-green-50'
-              }`}
-            >
-              Cumulé
-            </button>
-            <button
-              onClick={() => setViewMode('pourcentage')}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'pourcentage'
-                  ? 'bg-green-500 text-white shadow-sm'
-                  : 'text-green-700 hover:bg-green-50'
-              }`}
-            >
-              Pourcentage
-            </button>
-          </div>
-        </div>
-      </div>
-      
       <div className="flex-1 p-4">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" />
             <XAxis 
               dataKey="mois" 
               angle={-45}
               textAnchor="end"
-              height={80}
+              height={50}
               interval={0}
               tick={{ fontSize: 12, fill: '#374151' }}
             />
@@ -180,6 +140,43 @@ const EngagementDepensesGraphiquePanel: React.FC<EngagementDepensesGraphiquePane
             />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+      
+      <div className="p-4 border-t border-green-200">
+        <div className="flex justify-center">
+          <div className="flex bg-white rounded-lg p-1 border border-green-300">
+            <button
+              onClick={() => setViewMode('mensuel')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'mensuel'
+                  ? 'bg-green-500 text-white shadow-sm'
+                  : 'text-green-700 hover:bg-green-50'
+              }`}
+            >
+              Mensuel
+            </button>
+            <button
+              onClick={() => setViewMode('cumule')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'cumule'
+                  ? 'bg-green-500 text-white shadow-sm'
+                  : 'text-green-700 hover:bg-green-50'
+              }`}
+            >
+              Cumulé
+            </button>
+            <button
+              onClick={() => setViewMode('pourcentage')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'pourcentage'
+                  ? 'bg-green-500 text-white shadow-sm'
+                  : 'text-green-700 hover:bg-green-50'
+              }`}
+            >
+              Pourcentage
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -45,7 +45,6 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
       annee: parseInt(annee),
       budgetBase: parseFloat(budgetBase),
       abondements: parseFloat(abondements || 0),
-      modifiePar: { connect: { id: req.user.id } },
       modifieParId: req.user.id
     };
 
@@ -74,7 +73,6 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
       budget = await prisma.budgetAnnuel.create({
         data: {
           ...budgetData,
-          creePar: { connect: { id: req.user.id } },
           creeParId: req.user.id
         },
         include: {

@@ -18,7 +18,7 @@ export const getPanelTitle = (id: PanelKey): string => {
     case 'fluxhebdo': return 'Flux hebdomadaires'
     case 'extraction': return 'Extraction mensuelle pour BAA / SP'
     case 'budget': return 'Budget'
-    case 'statistiquesBudgetaires': return 'Statistiques Budgétaires'
+    case 'statistiquesBudgetaires': return 'Statistiques'
     default: return 'Panneau'
   }
 }

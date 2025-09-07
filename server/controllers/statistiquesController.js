@@ -1950,27 +1950,27 @@ const getStatistiquesBudgetaires = async (req, res) => {
 
     const statistiques = [
       {
-        libelle: `NOMBRE DE DOSSIERS ${year}`,
-        nombre: nombreDossiersAnnee
-      },
-      {
-        libelle: "NOMBRE DE DOSSIERS TOUTES ANNÉES",
+        libelle: "Dossiers toutes années",
         nombre: nombreDossiersToutesAnnees
       },
       {
-        libelle: "CONVENTIONS D'HONORAIRES CRÉÉES",
+        libelle: `Dossiers ${year}`,
+        nombre: nombreDossiersAnnee
+      },
+      {
+        libelle: "Conventions créées",
         nombre: conventionsCreees
       },
       {
-        libelle: "CONVENTIONS D'HONORAIRES SIGNÉES (par l'avocat)",
+        libelle: "Convention signées (avocat)",
         nombre: conventionsSignees
       },
       {
-        libelle: "AVENANTS CRÉÉS",
+        libelle: "Avenants créés",
         nombre: avenantsCreees
       },
       {
-        libelle: "AVENANTS SIGNÉS (par l'avocat)",
+        libelle: "Avenants signés (avocat)",
         nombre: avenantsSignees
       }
     ];

@@ -48,6 +48,7 @@ router.get('/', async (req, res) => {
       include: {
         dossier: {
           select: {
+            id: true,
             numero: true,
             nomDossier: true
           }
@@ -416,6 +417,7 @@ router.put('/:id', async (req, res) => {
       include: {
         dossier: {
           select: {
+            id: true,
             numero: true,
             nomDossier: true
           }

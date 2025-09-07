@@ -44,11 +44,11 @@ const Conventions: React.FC = () => {
   })
 
   const handleViewConvention = (convention: Convention) => {
-    navigate(`/dossiers/${convention.dossier.id || convention.dossier.numero}`)
+    navigate(`/dossiers/${convention.dossier.id}`)
   }
 
   const handleEditConvention = (convention: Convention) => {
-    navigate(`/dossiers/${convention.dossier.id || convention.dossier.numero}`)
+    navigate(`/dossiers/${convention.dossier.id}`)
   }
 
   const handleDeleteConvention = (convention: Convention) => {

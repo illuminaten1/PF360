@@ -286,6 +286,33 @@ const randomDateInYear = (year) => {
 
 // Fonction utilitaire pour générer un numéro DS unique
 let dsCounter = 100000
+
+const initDSCounter = async () => {
+  // Récupérer le dernier numéro DS existant pour éviter les conflits
+  const lastDemande = await prisma.demande.findFirst({
+    where: {
+      numeroDS: {
+        startsWith: 'DS'
+      }
+    },
+    orderBy: {
+      numeroDS: 'desc'
+    },
+    select: {
+      numeroDS: true
+    }
+  })
+  
+  if (lastDemande && lastDemande.numeroDS) {
+    const lastNumber = parseInt(lastDemande.numeroDS.replace('DS', ''))
+    if (!isNaN(lastNumber)) {
+      dsCounter = lastNumber + 1
+    }
+  }
+  
+  console.log(`📊 Numérotation DS initialisée à partir de DS${dsCounter}`)
+}
+
 const generateNumeroDS = () => {
   return `DS${dsCounter++}`
 }
@@ -560,6 +587,9 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = [], baps
 }
 
 async function main() {
+  // Initialiser le compteur DS pour éviter les conflits
+  await initDSCounter()
+  
   // Initialiser le compteur de dossier en fonction des dossiers existants
   const existingDossiers = await prisma.dossier.findMany({
     select: { numero: true },

@@ -505,9 +505,9 @@ router.delete('/:id', async (req, res) => {
     const existingConvention = await prisma.convention.findUnique({
       where: { id: req.params.id },
       include: {
-        paiements: true,
         demandes: true,
-        diligences: true
+        diligences: true,
+        decisions: true
       }
     });
 
@@ -515,11 +515,6 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Convention non trouvée' });
     }
 
-    if (existingConvention.paiements.length > 0) {
-      return res.status(400).json({ 
-        error: 'Impossible de supprimer une convention avec des paiements associés' 
-      });
-    }
 
     await prisma.conventionDemande.deleteMany({
       where: { conventionId: req.params.id }

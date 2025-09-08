@@ -26,7 +26,9 @@ import {
   BudgetPanel,
   EngagementServicePayeurPanel,
   EngagementDepensesMensuellesPanel,
-  EngagementDepensesGraphiquePanel
+  EngagementDepensesGraphiquePanel,
+  DepensesOrdonneesParSgamiPanel,
+  DepensesOrdonneesParPcePanel
 } from '@/components/statistiques/panels'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import DepensesOrdonneesPanel from '@/components/statistiques/panels/DepensesOrdonneesPanel'
@@ -89,6 +91,8 @@ const Statistiques: React.FC = () => {
     statsEngagements,
     statsEngagementsMensuels,
     statsDepensesOrdonnees,
+    statsDepensesOrdonneesParSgami,
+    statsDepensesOrdonneesParPce,
     anneesDisponibles,
     isLoading
   } = useStatistiquesQueries(selectedYear, activeTab)
@@ -181,6 +185,12 @@ const Statistiques: React.FC = () => {
       case 'depensesOrdonnees':
         content = <DepensesOrdonneesPanel statsDepensesOrdonnees={statsDepensesOrdonnees} />
         break
+      case 'depensesOrdonneesParSgami':
+        content = <DepensesOrdonneesParSgamiPanel statsDepensesOrdonneesParSgami={statsDepensesOrdonneesParSgami} />
+        break
+      case 'depensesOrdonneesParPce':
+        content = <DepensesOrdonneesParPcePanel statsDepensesOrdonneesParPce={statsDepensesOrdonneesParPce} />
+        break
       default:
         content = <div>Panneau non défini</div>
     }
@@ -197,7 +207,7 @@ const Statistiques: React.FC = () => {
     // Définir les panels d'engagement avec le style vert
     const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique']
     const isEngagementPanel = engagementPanels.includes(id)
-    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees'
+    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees' || id === 'depensesOrdonneesParSgami' || id === 'depensesOrdonneesParPce'
 
     return (
       <div key={id} className={`bg-white rounded-lg shadow border h-full flex flex-col ${

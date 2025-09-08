@@ -23,6 +23,8 @@ export const getPanelTitle = (id: PanelKey): string => {
     case 'engagementDepensesMensuelles': return 'Engagement des dépenses par mois'
     case 'engagementDepensesGraphique': return 'Graphique des dépenses gagées'
     case 'depensesOrdonnees': return 'Dépenses ordonnées'
+    case 'depensesOrdonneesParSgami': return 'Dépenses ordonnées par service payeur'
+    case 'depensesOrdonneesParPce': return 'Dépenses ordonnées par PCE'
     default: return 'Panneau'
   }
 }
@@ -34,7 +36,7 @@ export const PANEL_ORDER_ADMINISTRATIF: PanelKey[] = [
 ]
 
 export const PANEL_ORDER_BUDGETAIRE: PanelKey[] = [
-  'budget', 'statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique', 'depensesOrdonnees'
+  'budget', 'statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique', 'depensesOrdonnees', 'depensesOrdonneesParSgami', 'depensesOrdonneesParPce'
 ]
 
 // Pour la compatibilité avec l'existant

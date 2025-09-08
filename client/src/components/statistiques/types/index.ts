@@ -224,7 +224,43 @@ export interface DepensesOrdonneesData {
   budgetTotal?: number
 }
 
-export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees'
+export interface DepenseOrdonneeSgami {
+  libelle: string
+  nombre: number
+  pourcentage?: number
+  type?: 'currency' | 'currency_with_percentage' | 'number'
+  bold?: boolean
+  isTotal?: boolean
+  extraInfo?: {
+    nombrePaiements: number
+    montantMoyen: number
+  }
+}
+
+export interface DepensesOrdonneesParSgamiData {
+  statistiques: DepenseOrdonneeSgami[]
+  budgetTotal?: number
+}
+
+export interface DepenseOrdonneePce {
+  libelle: string
+  nombre: number
+  pourcentage?: number
+  type?: 'currency' | 'currency_with_percentage' | 'number'
+  bold?: boolean
+  isTotal?: boolean
+  extraInfo?: {
+    nombrePaiements: number
+    montantMoyen: number
+  }
+}
+
+export interface DepensesOrdonneesParPceData {
+  statistiques: DepenseOrdonneePce[]
+  budgetTotal?: number
+}
+
+export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees' | 'depensesOrdonneesParSgami' | 'depensesOrdonneesParPce'
 
 export type SortColumn = 'nom' | 'totalPF' | 'propres' | 'bap' | 'pj' | 'aj' | 'aje' | 'rejet' | 'enCours' | 'enCoursPropre' | 'enCoursBAP'
 export type SortOrder = 'asc' | 'desc'

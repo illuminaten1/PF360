@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees, getDepensesOrdonneesParSgami, getDepensesOrdonneesParPce } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
@@ -62,5 +62,11 @@ router.get('/engagement-depenses-mensuelles', authMiddleware, getEngagementDepen
 
 // GET /api/statistiques/depenses-ordonnees - Récupérer les dépenses ordonnées par année
 router.get('/depenses-ordonnees', authMiddleware, getDepensesOrdonnees);
+
+// GET /api/statistiques/depenses-ordonnees-sgami - Récupérer les dépenses ordonnées par SGAMI par année
+router.get('/depenses-ordonnees-sgami', authMiddleware, getDepensesOrdonneesParSgami);
+
+// GET /api/statistiques/depenses-ordonnees-pce - Récupérer les dépenses ordonnées par PCE par année
+router.get('/depenses-ordonnees-pce', authMiddleware, getDepensesOrdonneesParPce);
 
 module.exports = router;

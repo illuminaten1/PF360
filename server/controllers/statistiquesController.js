@@ -2440,6 +2440,230 @@ const getDepensesOrdonnees = async (req, res) => {
   }
 };
 
+const getDepensesOrdonneesParSgami = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // Récupérer tous les paiements de l'année avec leur SGAMI
+    const paiementsParSgami = await prisma.sgami.findMany({
+      select: {
+        id: true,
+        nom: true,
+        paiements: {
+          where: {
+            createdAt: {
+              gte: startOfYear,
+              lt: endOfYear
+            }
+          },
+          select: {
+            montantTTC: true
+          }
+        }
+      }
+    });
+
+    // Calculer les statistiques par SGAMI
+    const statistiques = paiementsParSgami
+      .map(sgami => {
+        const paiements = sgami.paiements || [];
+        const nombrePaiements = paiements.length;
+        const montantTotal = paiements
+          .filter(p => p.montantTTC !== null && p.montantTTC !== undefined)
+          .reduce((sum, p) => sum + p.montantTTC, 0);
+        const pourcentage = budgetTotal > 0 ? (montantTotal / budgetTotal) * 100 : 0;
+        const montantMoyen = nombrePaiements > 0 ? montantTotal / nombrePaiements : 0;
+
+        return {
+          libelle: sgami.nom,
+          nombre: Math.round(montantTotal * 100) / 100,
+          pourcentage: Math.round(pourcentage * 100) / 100,
+          type: "currency_with_percentage",
+          extraInfo: {
+            nombrePaiements,
+            montantMoyen: Math.round(montantMoyen * 100) / 100
+          }
+        };
+      })
+      .filter(stat => stat.nombre > 0) // Ne garder que les SGAMI avec des paiements
+      .sort((a, b) => b.nombre - a.nombre); // Trier par montant décroissant
+
+    // Ajouter les totaux
+    const nombreTotalPaiements = statistiques.reduce((sum, stat) => sum + stat.extraInfo.nombrePaiements, 0);
+    const montantTotalGeneral = statistiques.reduce((sum, stat) => sum + stat.nombre, 0);
+    
+    statistiques.push({
+      libelle: "TOTAL",
+      nombre: Math.round(montantTotalGeneral * 100) / 100,
+      pourcentage: budgetTotal > 0 ? Math.round((montantTotalGeneral / budgetTotal) * 100 * 100) / 100 : 0,
+      type: "currency_with_percentage",
+      isTotal: true,
+      extraInfo: {
+        nombrePaiements: nombreTotalPaiements,
+        montantMoyen: nombreTotalPaiements > 0 ? Math.round((montantTotalGeneral / nombreTotalPaiements) * 100) / 100 : 0
+      }
+    });
+
+    res.json({ statistiques, budgetTotal });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des dépenses ordonnées par SGAMI:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des dépenses ordonnées par SGAMI',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+const getDepensesOrdonneesParPce = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // Récupérer tous les paiements de l'année avec leur PCE
+    const paiementsParPce = await prisma.pce.findMany({
+      select: {
+        id: true,
+        pceDetaille: true,
+        pceNumerique: true,
+        paiements: {
+          where: {
+            createdAt: {
+              gte: startOfYear,
+              lt: endOfYear
+            }
+          },
+          select: {
+            montantTTC: true
+          }
+        }
+      },
+      orderBy: {
+        ordre: 'asc'
+      }
+    });
+
+    // Aussi récupérer les paiements sans PCE
+    const paiementsSansPce = await prisma.paiement.count({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        pceId: null
+      }
+    });
+
+    const montantSansPce = await prisma.paiement.aggregate({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        pceId: null
+      },
+      _sum: {
+        montantTTC: true
+      }
+    });
+
+    // Calculer les statistiques par PCE
+    const statistiques = paiementsParPce
+      .map(pce => {
+        const paiements = pce.paiements || [];
+        const nombrePaiements = paiements.length;
+        const montantTotal = paiements
+          .filter(p => p.montantTTC !== null && p.montantTTC !== undefined)
+          .reduce((sum, p) => sum + p.montantTTC, 0);
+        const pourcentage = budgetTotal > 0 ? (montantTotal / budgetTotal) * 100 : 0;
+        const montantMoyen = nombrePaiements > 0 ? montantTotal / nombrePaiements : 0;
+
+        return {
+          libelle: `${pce.pceNumerique} - ${pce.pceDetaille}`,
+          nombre: Math.round(montantTotal * 100) / 100,
+          pourcentage: Math.round(pourcentage * 100) / 100,
+          type: "currency_with_percentage",
+          extraInfo: {
+            nombrePaiements,
+            montantMoyen: Math.round(montantMoyen * 100) / 100
+          }
+        };
+      })
+      .filter(stat => stat.nombre > 0); // Ne garder que les PCE avec des paiements
+
+    // Ajouter les paiements sans PCE s'il y en a
+    if (paiementsSansPce > 0 && montantSansPce._sum.montantTTC > 0) {
+      const montantSansPceTotal = montantSansPce._sum.montantTTC || 0;
+      const pourcentageSansPce = budgetTotal > 0 ? (montantSansPceTotal / budgetTotal) * 100 : 0;
+      const montantMoyenSansPce = paiementsSansPce > 0 ? montantSansPceTotal / paiementsSansPce : 0;
+
+      statistiques.push({
+        libelle: "Sans PCE assigné",
+        nombre: Math.round(montantSansPceTotal * 100) / 100,
+        pourcentage: Math.round(pourcentageSansPce * 100) / 100,
+        type: "currency_with_percentage",
+        extraInfo: {
+          nombrePaiements: paiementsSansPce,
+          montantMoyen: Math.round(montantMoyenSansPce * 100) / 100
+        }
+      });
+    }
+
+    // Trier par montant décroissant
+    statistiques.sort((a, b) => b.nombre - a.nombre);
+
+    // Ajouter les totaux
+    const nombreTotalPaiements = statistiques.reduce((sum, stat) => sum + stat.extraInfo.nombrePaiements, 0);
+    const montantTotalGeneral = statistiques.reduce((sum, stat) => sum + stat.nombre, 0);
+    
+    statistiques.push({
+      libelle: "TOTAL",
+      nombre: Math.round(montantTotalGeneral * 100) / 100,
+      pourcentage: budgetTotal > 0 ? Math.round((montantTotalGeneral / budgetTotal) * 100 * 100) / 100 : 0,
+      type: "currency_with_percentage",
+      isTotal: true,
+      extraInfo: {
+        nombrePaiements: nombreTotalPaiements,
+        montantMoyen: nombreTotalPaiements > 0 ? Math.round((montantTotalGeneral / nombreTotalPaiements) * 100) / 100 : 0
+      }
+    });
+
+    res.json({ statistiques, budgetTotal });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des dépenses ordonnées par PCE:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des dépenses ordonnées par PCE',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -2460,5 +2684,7 @@ module.exports = {
   getStatistiquesBudgetaires,
   getEngagementServicePayeur,
   getEngagementDepensesMensuelles,
-  getDepensesOrdonnees
+  getDepensesOrdonnees,
+  getDepensesOrdonneesParSgami,
+  getDepensesOrdonneesParPce
 };

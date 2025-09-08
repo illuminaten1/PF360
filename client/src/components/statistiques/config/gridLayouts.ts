@@ -61,7 +61,9 @@ export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
     { w: 5, h: 15, x: 7, y: 0, i: 'engagementServicePayeur', minW: 4, minH: 8, moved: false, static: false },
     { w: 6, h: 18, x: 0, y: 15, i: 'engagementDepensesMensuelles', minW: 4, minH: 12, moved: false, static: false },
     { w: 6, h: 18, x: 6, y: 15, i: 'engagementDepensesGraphique', minW: 4, minH: 12, moved: false, static: false },
-    { w: 4, h: 10, x: 0, y: 33, i: 'depensesOrdonnees', minW: 3, minH: 8, moved: false, static: false }
+    { w: 4, h: 10, x: 0, y: 33, i: 'depensesOrdonnees', minW: 3, minH: 8, moved: false, static: false },
+    { w: 4, h: 10, x: 4, y: 33, i: 'depensesOrdonneesParSgami', minW: 3, minH: 8, moved: false, static: false },
+    { w: 4, h: 10, x: 8, y: 33, i: 'depensesOrdonneesParPce', minW: 3, minH: 8, moved: false, static: false }
   ] as Layout[],
   md: [
     { i: 'budget', x: 0, y: 0, w: 5, h: 10, minW: 3, minH: 8 },
@@ -69,7 +71,9 @@ export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
     { i: 'engagementServicePayeur', x: 0, y: 12, w: 10, h: 12, minW: 4, minH: 8 },
     { i: 'engagementDepensesMensuelles', x: 0, y: 24, w: 5, h: 18, minW: 3, minH: 12 },
     { i: 'engagementDepensesGraphique', x: 5, y: 24, w: 5, h: 18, minW: 3, minH: 12 },
-    { i: 'depensesOrdonnees', x: 0, y: 42, w: 5, h: 10, minW: 3, minH: 8 }
+    { i: 'depensesOrdonnees', x: 0, y: 42, w: 5, h: 10, minW: 3, minH: 8 },
+    { i: 'depensesOrdonneesParSgami', x: 5, y: 42, w: 5, h: 10, minW: 3, minH: 8 },
+    { i: 'depensesOrdonneesParPce', x: 0, y: 52, w: 10, h: 10, minW: 4, minH: 8 }
   ] as Layout[],
   sm: [
     { i: 'budget', x: 0, y: 0, w: 6, h: 10, minW: 4, minH: 8 },
@@ -77,6 +81,8 @@ export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
     { i: 'engagementServicePayeur', x: 0, y: 22, w: 6, h: 12, minW: 4, minH: 8 },
     { i: 'engagementDepensesMensuelles', x: 0, y: 34, w: 6, h: 18, minW: 4, minH: 12 },
     { i: 'engagementDepensesGraphique', x: 0, y: 52, w: 6, h: 18, minW: 4, minH: 12 },
-    { i: 'depensesOrdonnees', x: 0, y: 70, w: 6, h: 10, minW: 4, minH: 8 }
+    { i: 'depensesOrdonnees', x: 0, y: 70, w: 6, h: 10, minW: 4, minH: 8 },
+    { i: 'depensesOrdonneesParSgami', x: 0, y: 80, w: 6, h: 10, minW: 4, minH: 8 },
+    { i: 'depensesOrdonneesParPce', x: 0, y: 90, w: 6, h: 10, minW: 4, minH: 8 }
   ] as Layout[]
 }

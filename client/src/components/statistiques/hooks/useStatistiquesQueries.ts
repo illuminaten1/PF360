@@ -18,7 +18,9 @@ import {
   StatistiquesBudgetaires,
   EngagementServicePayeurData,
   EngagementDepensesMensuellesData,
-  DepensesOrdonneesData
+  DepensesOrdonneesData,
+  DepensesOrdonneesParSgamiData,
+  DepensesOrdonneesParPceData
 } from '../types'
 
 export const useStatistiquesQueries = (selectedYear: number, activeTab: 'administratif' | 'budgetaire') => {
@@ -187,6 +189,24 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     enabled: isBudgetaire
   })
 
+  const statsDepensesOrdonneesParSgami = useQuery<DepensesOrdonneesParSgamiData>({
+    queryKey: ['depenses-ordonnees-sgami', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/depenses-ordonnees-sgami?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: isBudgetaire
+  })
+
+  const statsDepensesOrdonneesParPce = useQuery<DepensesOrdonneesParPceData>({
+    queryKey: ['depenses-ordonnees-pce', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/depenses-ordonnees-pce?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: isBudgetaire
+  })
+
   const anneesDisponibles = useQuery<number[]>({
     queryKey: ['annees-disponibles'],
     queryFn: async () => {
@@ -203,7 +223,8 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
                    autoControle.isLoading || extractionMensuelle.isLoading || 
                    statsBadges.isLoading || statsReponseBRPF.isLoading ||
                    statsBudgetaires.isLoading || statsEngagements.isLoading ||
-                   statsEngagementsMensuels.isLoading || statsDepensesOrdonnees.isLoading
+                   statsEngagementsMensuels.isLoading || statsDepensesOrdonnees.isLoading ||
+                   statsDepensesOrdonneesParSgami.isLoading || statsDepensesOrdonneesParPce.isLoading
 
   return {
     statsAdministratives: statsAdministratives.data,
@@ -224,6 +245,8 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     statsEngagements: statsEngagements.data,
     statsEngagementsMensuels: statsEngagementsMensuels.data,
     statsDepensesOrdonnees: statsDepensesOrdonnees.data,
+    statsDepensesOrdonneesParSgami: statsDepensesOrdonneesParSgami.data,
+    statsDepensesOrdonneesParPce: statsDepensesOrdonneesParPce.data,
     anneesDisponibles: anneesDisponibles.data,
     isLoading
   }

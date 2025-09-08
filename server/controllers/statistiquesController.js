@@ -2374,6 +2374,23 @@ const getDepensesOrdonnees = async (req, res) => {
       .filter(p => p.montantTTC !== null && p.montantTTC !== undefined)
       .reduce((sum, p) => sum + p.montantTTC, 0);
 
+    // 4. Nombre de dossiers ayant au moins un paiement cette année
+    const dossiersAvecPaiements = await prisma.dossier.count({
+      where: {
+        paiements: {
+          some: {
+            createdAt: {
+              gte: startOfYear,
+              lt: endOfYear
+            }
+          }
+        }
+      }
+    });
+
+    // 5. Calculer le montant moyen TTC par dossier ayant un paiement
+    const montantMoyenTTCParDossier = dossiersAvecPaiements > 0 ? depenseTotaleTTC / dossiersAvecPaiements : 0;
+
     // Calcul des pourcentages par rapport au budget total
     const pourcentageDepenseHT = budgetTotal > 0 ? (depenseTotaleHT / budgetTotal) * 100 : 0;
     const pourcentageDepenseTTC = budgetTotal > 0 ? (depenseTotaleTTC / budgetTotal) * 100 : 0;
@@ -2383,6 +2400,11 @@ const getDepensesOrdonnees = async (req, res) => {
         libelle: "Nombre de paiements émis",
         nombre: nombrePaiementsEmis,
         type: "number"
+      },
+      {
+        libelle: "Montant moyen TTC par dossier",
+        nombre: Math.round(montantMoyenTTCParDossier * 100) / 100,
+        type: "currency"
       },
       {
         libelle: "Dépense totale HT (indicatif)",

@@ -30,18 +30,30 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
     return `${nomMois} ${stat.annee}`
   }
 
-  const formatValueWithPercentage = (amount: number, percentage?: number) => {
+  const formatValueWithPercentageHT = (amount: number, percentage?: number) => {
     const formattedCurrency = formatCurrency(amount)
     if (percentage !== undefined) {
       return (
-        <span>
-          {formattedCurrency}
-          <br />
-          <span className="text-xs text-gray-500">({percentage.toFixed(1)}% du budget)</span>
-        </span>
+        <div className="text-xs">
+          <div>{formattedCurrency} HT</div>
+          <div className="text-xs text-gray-500">({percentage.toFixed(1)}% du budget)</div>
+        </div>
       )
     }
-    return formattedCurrency
+    return <div className="text-xs">{formattedCurrency} HT</div>
+  }
+
+  const formatValueWithPercentageTTC = (amount: number, percentage?: number) => {
+    const formattedCurrency = formatCurrency(amount)
+    if (percentage !== undefined) {
+      return (
+        <div className="text-xs">
+          <div>{formattedCurrency} TTC</div>
+          <div className="text-xs text-gray-500">({percentage.toFixed(1)}% du budget)</div>
+        </div>
+      )
+    }
+    return <div className="text-xs">{formattedCurrency} TTC</div>
   }
   
   return (
@@ -50,14 +62,20 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
         <table className="w-full h-full border-collapse" style={{ tableLayout: 'fixed' }}>
           <thead className="bg-orange-100 sticky top-0" style={{ height: 'auto' }}>
             <tr>
-              <th className="px-2 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              <th className="px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Mois
               </th>
-              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Payé HT (indicatif)
               </th>
-              <th className="px-2 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Cumul HT (indicatif)
+              </th>
+              <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Payé TTC
+              </th>
+              <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                Cumul TTC
               </th>
             </tr>
           </thead>
@@ -76,7 +94,7 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
                   } border-b border-orange-200`}
                   style={{ height: `${heightPercentage}%` }}
                 >
-                  <td className={`px-2 py-2 text-sm align-middle ${
+                  <td className={`px-1 py-2 text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
                     {formatMoisLabel(stat)}
@@ -84,19 +102,29 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
                   <td className={`px-2 py-2 text-center text-sm align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
-                    {formatValueWithPercentage(stat.montantHTPaiements, stat.pourcentageHT)}
+                    {formatValueWithPercentageHT(stat.montantHTPaiements, stat.pourcentageHT)}
                   </td>
-                  <td className={`px-2 py-2 text-center text-sm align-middle ${
+                  <td className={`px-1 py-2 text-center text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
-                    {formatValueWithPercentage(stat.montantTTCDossiers, stat.pourcentageTTC)}
+                    {stat.cumulHT !== undefined ? <div className="text-xs">{formatCurrency(stat.cumulHT)} HT</div> : <div className="text-xs">-</div>}
+                  </td>
+                  <td className={`px-1 py-2 text-center text-xs align-middle ${
+                    isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                  }`}>
+                    {formatValueWithPercentageTTC(stat.montantTTCDossiers, stat.pourcentageTTC)}
+                  </td>
+                  <td className={`px-1 py-2 text-center text-xs align-middle ${
+                    isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
+                  }`}>
+                    {stat.cumulTTC !== undefined ? <div className="text-xs">{formatCurrency(stat.cumulTTC)} TTC</div> : <div className="text-xs">-</div>}
                   </td>
                 </tr>
                 )
               })
             ) : (
               <tr style={{ height: '100%' }}>
-                <td colSpan={3} className="px-3 py-4 text-center text-sm text-gray-500 align-middle">
+                <td colSpan={5} className="px-3 py-4 text-center text-xs text-gray-500 align-middle">
                   Aucune donnée disponible
                 </td>
               </tr>

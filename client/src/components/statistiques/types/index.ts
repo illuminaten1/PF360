@@ -265,6 +265,8 @@ export interface DepenseOrdonneeMois {
   annee: number
   montantHTPaiements: number
   montantTTCDossiers: number
+  cumulHT?: number
+  cumulTTC?: number
   pourcentageHT?: number
   pourcentageTTC?: number
   bold?: boolean

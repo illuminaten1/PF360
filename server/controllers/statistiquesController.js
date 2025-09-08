@@ -2744,13 +2744,25 @@ const getDepensesOrdonneesParMois = async (req, res) => {
       }
     });
 
-    // Convertir en array et calculer les pourcentages
-    let statistiques = Object.values(statsParMois)
-      .map(stat => ({
+    // Convertir en array et calculer les pourcentages et cumuls
+    let statistiques = Object.values(statsParMois);
+    
+    // Calculer les cumuls
+    let cumulHT = 0;
+    let cumulTTC = 0;
+    
+    statistiques = statistiques.map(stat => {
+      cumulHT += stat.montantHTPaiements;
+      cumulTTC += stat.montantTTCDossiers;
+      
+      return {
         ...stat,
+        cumulHT: cumulHT,
+        cumulTTC: cumulTTC,
         pourcentageHT: budgetTotal > 0 ? (stat.montantHTPaiements / budgetTotal) * 100 : 0,
         pourcentageTTC: budgetTotal > 0 ? (stat.montantTTCDossiers / budgetTotal) * 100 : 0
-      }));
+      };
+    });
 
     // Calculer les totaux
     const totalMontantHT = statistiques.reduce((sum, stat) => sum + stat.montantHTPaiements, 0);
@@ -2762,6 +2774,8 @@ const getDepensesOrdonneesParMois = async (req, res) => {
       annee: year,
       montantHTPaiements: totalMontantHT,
       montantTTCDossiers: totalMontantTTC,
+      cumulHT: totalMontantHT,
+      cumulTTC: totalMontantTTC,
       pourcentageHT: budgetTotal > 0 ? (totalMontantHT / budgetTotal) * 100 : 0,
       pourcentageTTC: budgetTotal > 0 ? (totalMontantTTC / budgetTotal) * 100 : 0,
       isTotal: true,

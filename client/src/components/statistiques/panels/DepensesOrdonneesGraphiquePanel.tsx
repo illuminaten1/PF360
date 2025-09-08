@@ -6,8 +6,12 @@ interface DepenseOrdonneeMois {
   annee: number
   montantHTPaiements: number
   montantTTCDossiers: number
+  cumulHT?: number
+  cumulTTC?: number
   pourcentageHT?: number
   pourcentageTTC?: number
+  pourcentageCumulHT?: number
+  pourcentageCumulTTC?: number
   bold?: boolean
   isTotal?: boolean
 }
@@ -59,22 +63,6 @@ const DepensesOrdonneesGraphiquePanel: React.FC<DepensesOrdonneesGraphiquePanelP
     return moisNames[moisIndex] || mois
   }
 
-  // Calculer les données cumulées si nécessaire
-  const calculateCumulativeData = () => {
-    const filteredData = statsDepensesOrdonneesParMois.statistiques.filter(dep => !dep.isTotal)
-    let cumulHT = 0
-    let cumulTTC = 0
-    
-    return filteredData.map(dep => {
-      cumulHT += dep.montantHTPaiements
-      cumulTTC += dep.montantTTCDossiers
-      return {
-        ...dep,
-        cumulHT,
-        cumulTTC
-      }
-    })
-  }
 
   // Préparer les données pour le graphique
   const chartData = (() => {
@@ -83,15 +71,14 @@ const DepensesOrdonneesGraphiquePanel: React.FC<DepensesOrdonneesGraphiquePanelP
     if (viewMode === 'pourcentage') {
       return filteredData.map(dep => ({
         mois: formatMoisLabel(dep.mois),
-        montantHT: dep.pourcentageHT || 0,
-        montantTTC: dep.pourcentageTTC || 0
+        montantHT: dep.pourcentageCumulHT || 0,
+        montantTTC: dep.pourcentageCumulTTC || 0
       }))
     } else if (viewMode === 'cumule') {
-      const cumulativeData = calculateCumulativeData()
-      return cumulativeData.map(dep => ({
+      return filteredData.map(dep => ({
         mois: formatMoisLabel(dep.mois),
-        montantHT: dep.cumulHT,
-        montantTTC: dep.cumulTTC
+        montantHT: dep.cumulHT || 0,
+        montantTTC: dep.cumulTTC || 0
       }))
     } else {
       return filteredData.map(dep => ({
@@ -179,7 +166,7 @@ const DepensesOrdonneesGraphiquePanel: React.FC<DepensesOrdonneesGraphiquePanelP
                 dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
                 name={
                   viewMode === 'pourcentage' 
-                    ? 'HT en % du budget annuel' 
+                    ? 'HT (% du budget annuel)' 
                     : 'Cumul HT'
                 }
               />

@@ -28,7 +28,8 @@ import {
   EngagementDepensesMensuellesPanel,
   EngagementDepensesGraphiquePanel,
   DepensesOrdonneesParSgamiPanel,
-  DepensesOrdonneesParPcePanel
+  DepensesOrdonneesParPcePanel,
+  DepensesOrdonneesGraphiquePanel
 } from '@/components/statistiques/panels'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import DepensesOrdonneesPanel from '@/components/statistiques/panels/DepensesOrdonneesPanel'
@@ -196,6 +197,9 @@ const Statistiques: React.FC = () => {
       case 'depensesOrdonneesParMois':
         content = <DepensesOrdonneesParMoisPanel statsDepensesOrdonneesParMois={statsDepensesOrdonneesParMois} />
         break
+      case 'depensesOrdonneesGraphique':
+        content = <DepensesOrdonneesGraphiquePanel statsDepensesOrdonneesParMois={statsDepensesOrdonneesParMois} />
+        break
       default:
         content = <div>Panneau non défini</div>
     }
@@ -212,7 +216,7 @@ const Statistiques: React.FC = () => {
     // Définir les panels d'engagement avec le style vert
     const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique']
     const isEngagementPanel = engagementPanels.includes(id)
-    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees' || id === 'depensesOrdonneesParSgami' || id === 'depensesOrdonneesParPce' || id === 'depensesOrdonneesParMois'
+    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees' || id === 'depensesOrdonneesParSgami' || id === 'depensesOrdonneesParPce' || id === 'depensesOrdonneesParMois' || id === 'depensesOrdonneesGraphique'
 
     return (
       <div key={id} className={`bg-white rounded-lg shadow border h-full flex flex-col ${

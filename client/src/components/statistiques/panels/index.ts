@@ -19,6 +19,7 @@ export { default as EngagementDepensesMensuellesPanel } from './EngagementDepens
 export { default as EngagementDepensesGraphiquePanel } from './EngagementDepensesGraphiquePanel'
 export { default as DepensesOrdonneesParSgamiPanel } from './DepensesOrdonneesParSgamiPanel'
 export { default as DepensesOrdonneesParPcePanel } from './DepensesOrdonneesParPcePanel'
+export { default as DepensesOrdonneesGraphiquePanel } from './DepensesOrdonneesGraphiquePanel'
 
 // Utility components
 export { default as GenericStatsTable } from './GenericStatsTable'

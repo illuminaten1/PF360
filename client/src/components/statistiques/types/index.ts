@@ -276,7 +276,7 @@ export interface DepensesOrdonneesParMoisData {
   budgetTotal?: number
 }
 
-export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees' | 'depensesOrdonneesParSgami' | 'depensesOrdonneesParPce' | 'depensesOrdonneesParMois'
+export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees' | 'depensesOrdonneesParSgami' | 'depensesOrdonneesParPce' | 'depensesOrdonneesParMois' | 'depensesOrdonneesGraphique'
 
 export type SortColumn = 'nom' | 'totalPF' | 'propres' | 'bap' | 'pj' | 'aj' | 'aje' | 'rejet' | 'enCours' | 'enCoursPropre' | 'enCoursBAP'
 export type SortOrder = 'asc' | 'desc'

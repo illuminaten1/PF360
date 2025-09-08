@@ -64,7 +64,8 @@ export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
     { w: 3, h: 10, x: 0, y: 33, i: 'depensesOrdonnees', minW: 3, minH: 8, moved: false, static: false },
     { w: 3, h: 10, x: 3, y: 33, i: 'depensesOrdonneesParSgami', minW: 3, minH: 8, moved: false, static: false },
     { w: 3, h: 10, x: 6, y: 33, i: 'depensesOrdonneesParPce', minW: 3, minH: 8, moved: false, static: false },
-    { w: 3, h: 10, x: 9, y: 33, i: 'depensesOrdonneesParMois', minW: 3, minH: 8, moved: false, static: false }
+    { w: 3, h: 10, x: 9, y: 33, i: 'depensesOrdonneesParMois', minW: 3, minH: 8, moved: false, static: false },
+    { w: 6, h: 18, x: 0, y: 43, i: 'depensesOrdonneesGraphique', minW: 4, minH: 12, moved: false, static: false }
   ] as Layout[],
   md: [
     { i: 'budget', x: 0, y: 0, w: 5, h: 10, minW: 3, minH: 8 },
@@ -75,7 +76,8 @@ export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
     { i: 'depensesOrdonnees', x: 0, y: 42, w: 5, h: 10, minW: 3, minH: 8 },
     { i: 'depensesOrdonneesParSgami', x: 5, y: 42, w: 5, h: 10, minW: 3, minH: 8 },
     { i: 'depensesOrdonneesParPce', x: 0, y: 52, w: 5, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesParMois', x: 5, y: 52, w: 5, h: 10, minW: 4, minH: 8 }
+    { i: 'depensesOrdonneesParMois', x: 5, y: 52, w: 5, h: 10, minW: 4, minH: 8 },
+    { i: 'depensesOrdonneesGraphique', x: 0, y: 62, w: 10, h: 18, minW: 4, minH: 12 }
   ] as Layout[],
   sm: [
     { i: 'budget', x: 0, y: 0, w: 6, h: 10, minW: 4, minH: 8 },
@@ -86,6 +88,7 @@ export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
     { i: 'depensesOrdonnees', x: 0, y: 70, w: 6, h: 10, minW: 4, minH: 8 },
     { i: 'depensesOrdonneesParSgami', x: 0, y: 80, w: 6, h: 10, minW: 4, minH: 8 },
     { i: 'depensesOrdonneesParPce', x: 0, y: 90, w: 6, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesParMois', x: 0, y: 100, w: 6, h: 10, minW: 4, minH: 8 }
+    { i: 'depensesOrdonneesParMois', x: 0, y: 100, w: 6, h: 10, minW: 4, minH: 8 },
+    { i: 'depensesOrdonneesGraphique', x: 0, y: 110, w: 6, h: 18, minW: 4, minH: 12 }
   ] as Layout[]
 }

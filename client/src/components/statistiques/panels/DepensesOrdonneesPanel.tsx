@@ -65,7 +65,7 @@ const DepensesOrdonneesPanel: React.FC<DepensesOrdonneesPanelProps> = ({ statsDe
           <tbody className="bg-white h-full">
             {statsDepensesOrdonnees && statsDepensesOrdonnees.statistiques.length > 0 ? (
               statsDepensesOrdonnees.statistiques.map((stat, index) => {
-                const isTotalLine = stat.isTotal || stat.libelle.toLowerCase().includes('total')
+                const isTotalLine = stat.isTotal
                 
                 return (
                 <tr 

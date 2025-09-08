@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout'
 import { Listbox } from '@headlessui/react'
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
@@ -44,10 +44,26 @@ const Statistiques: React.FC = () => {
   const { user } = useAuth()
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number>(currentYear)
-  const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>('administratif')
+  const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>(() => {
+    try {
+      const savedTab = localStorage.getItem('pf360-statistiques-active-tab')
+      return (savedTab === 'budgetaire' || savedTab === 'administratif') ? savedTab : 'administratif'
+    } catch {
+      return 'administratif'
+    }
+  })
   const [isReorderMode, setIsReorderMode] = useState<boolean>(false)
   
   const isAdmin = user?.role === 'ADMIN'
+  
+  // Save active tab to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('pf360-statistiques-active-tab', activeTab)
+    } catch (error) {
+      console.warn('Failed to save active tab to localStorage:', error)
+    }
+  }, [activeTab])
   
   // Load saved layout from localStorage or use default
   const [layoutsAdministratif, setLayoutsAdministratif] = useState(() => {
@@ -335,7 +351,7 @@ const Statistiques: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Suivi Administratif
+              Administratif
             </button>
             <button
               onClick={() => setActiveTab('budgetaire')}
@@ -345,7 +361,7 @@ const Statistiques: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Suivi Budgétaire
+              Budgétaire
             </button>
           </nav>
         </div>

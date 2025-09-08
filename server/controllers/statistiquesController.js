@@ -2250,10 +2250,13 @@ const getEngagementDepensesMensuelles = async (req, res) => {
       // Mettre à jour les cumuls
       cumuleHT += montantGageHT;
       
-      // Calculer les prévisionnels
-      const prevision10 = cumuleHT * 1.1;
-      const prevision20 = cumuleHT * 1.1 * 1.2;
-      cumuleTTC = prevision20;
+      // Calculer les prévisionnels basés sur le montant gagé HT du mois
+      const prevision10 = montantGageHT * 1.1;
+      const prevision20 = montantGageHT * 1.2;
+      
+      // Calculer le montant TTC du mois (on peut utiliser une approximation de 20% de TVA)
+      const montantTTCMois = montantGageHT * 1.2;
+      cumuleTTC += montantTTCMois;
 
       // Calculer les pourcentages
       const pourcentageMontantGage = budgetTotal > 0 ? (montantGageHT / budgetTotal) * 100 : 0;

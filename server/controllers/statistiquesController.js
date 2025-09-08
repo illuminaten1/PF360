@@ -2664,6 +2664,123 @@ const getDepensesOrdonneesParPce = async (req, res) => {
   }
 };
 
+const getDepensesOrdonneesParMois = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // Grouper les données par mois
+    const statsParMois = {};
+    
+    // Initialiser tous les mois de l'année avec des valeurs nulles
+    for (let mois = 1; mois <= 12; mois++) {
+      statsParMois[mois] = {
+        mois: mois.toString().padStart(2, '0'),
+        annee: year,
+        montantHTPaiements: 0,
+        montantTTCDossiers: 0
+      };
+    }
+
+    // 1. Récupérer les paiements émis chaque mois (montant HT)
+    const paiementsParMois = await prisma.paiement.findMany({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        createdAt: true,
+        montantHT: true
+      }
+    });
+
+    // Grouper les paiements par mois d'émission
+    paiementsParMois.forEach(paiement => {
+      const mois = paiement.createdAt.getMonth() + 1; // getMonth() retourne 0-11
+      if (statsParMois[mois]) {
+        statsParMois[mois].montantHTPaiements += paiement.montantHT || 0;
+      }
+    });
+
+    // 2. Récupérer les paiements créés chaque mois (montant TTC des dossiers créés ce mois-ci)
+    const paiementsTTCParMois = await prisma.paiement.findMany({
+      where: {
+        dossier: {
+          createdAt: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        }
+      },
+      select: {
+        montantTTC: true,
+        dossier: {
+          select: {
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    // Grouper les paiements par mois de création du dossier
+    paiementsTTCParMois.forEach(paiement => {
+      const mois = paiement.dossier.createdAt.getMonth() + 1;
+      if (statsParMois[mois]) {
+        statsParMois[mois].montantTTCDossiers += paiement.montantTTC || 0;
+      }
+    });
+
+    // Convertir en array et calculer les pourcentages
+    let statistiques = Object.values(statsParMois)
+      .map(stat => ({
+        ...stat,
+        pourcentageHT: budgetTotal > 0 ? (stat.montantHTPaiements / budgetTotal) * 100 : 0,
+        pourcentageTTC: budgetTotal > 0 ? (stat.montantTTCDossiers / budgetTotal) * 100 : 0
+      }));
+
+    // Calculer les totaux
+    const totalMontantHT = statistiques.reduce((sum, stat) => sum + stat.montantHTPaiements, 0);
+    const totalMontantTTC = statistiques.reduce((sum, stat) => sum + stat.montantTTCDossiers, 0);
+    
+    // Ajouter la ligne de total
+    statistiques.push({
+      mois: 'Total',
+      annee: year,
+      montantHTPaiements: totalMontantHT,
+      montantTTCDossiers: totalMontantTTC,
+      pourcentageHT: budgetTotal > 0 ? (totalMontantHT / budgetTotal) * 100 : 0,
+      pourcentageTTC: budgetTotal > 0 ? (totalMontantTTC / budgetTotal) * 100 : 0,
+      isTotal: true,
+      bold: true
+    });
+
+    res.json({
+      statistiques,
+      budgetTotal
+    });
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des dépenses ordonnées par mois:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération des dépenses ordonnées par mois' 
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -2686,5 +2803,6 @@ module.exports = {
   getEngagementDepensesMensuelles,
   getDepensesOrdonnees,
   getDepensesOrdonneesParSgami,
-  getDepensesOrdonneesParPce
+  getDepensesOrdonneesParPce,
+  getDepensesOrdonneesParMois
 };

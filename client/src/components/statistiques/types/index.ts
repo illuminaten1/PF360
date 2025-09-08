@@ -260,7 +260,23 @@ export interface DepensesOrdonneesParPceData {
   budgetTotal?: number
 }
 
-export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees' | 'depensesOrdonneesParSgami' | 'depensesOrdonneesParPce'
+export interface DepenseOrdonneeMois {
+  mois: string
+  annee: number
+  montantHTPaiements: number
+  montantTTCDossiers: number
+  pourcentageHT?: number
+  pourcentageTTC?: number
+  bold?: boolean
+  isTotal?: boolean
+}
+
+export interface DepensesOrdonneesParMoisData {
+  statistiques: DepenseOrdonneeMois[]
+  budgetTotal?: number
+}
+
+export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees' | 'depensesOrdonneesParSgami' | 'depensesOrdonneesParPce' | 'depensesOrdonneesParMois'
 
 export type SortColumn = 'nom' | 'totalPF' | 'propres' | 'bap' | 'pj' | 'aj' | 'aje' | 'rejet' | 'enCours' | 'enCoursPropre' | 'enCoursBAP'
 export type SortOrder = 'asc' | 'desc'

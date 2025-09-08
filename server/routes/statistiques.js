@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees, getDepensesOrdonneesParSgami, getDepensesOrdonneesParPce } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees, getDepensesOrdonneesParSgami, getDepensesOrdonneesParPce, getDepensesOrdonneesParMois } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
@@ -68,5 +68,8 @@ router.get('/depenses-ordonnees-sgami', authMiddleware, getDepensesOrdonneesParS
 
 // GET /api/statistiques/depenses-ordonnees-pce - Récupérer les dépenses ordonnées par PCE par année
 router.get('/depenses-ordonnees-pce', authMiddleware, getDepensesOrdonneesParPce);
+
+// GET /api/statistiques/depenses-ordonnees-mois - Récupérer les dépenses ordonnées par mois par année
+router.get('/depenses-ordonnees-mois', authMiddleware, getDepensesOrdonneesParMois);
 
 module.exports = router;

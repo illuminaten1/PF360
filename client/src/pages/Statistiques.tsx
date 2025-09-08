@@ -32,6 +32,7 @@ import {
 } from '@/components/statistiques/panels'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import DepensesOrdonneesPanel from '@/components/statistiques/panels/DepensesOrdonneesPanel'
+import DepensesOrdonneesParMoisPanel from '@/components/statistiques/panels/DepensesOrdonneesParMoisPanel'
 import { useAuth } from '@/contexts/AuthContext'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -93,6 +94,7 @@ const Statistiques: React.FC = () => {
     statsDepensesOrdonnees,
     statsDepensesOrdonneesParSgami,
     statsDepensesOrdonneesParPce,
+    statsDepensesOrdonneesParMois,
     anneesDisponibles,
     isLoading
   } = useStatistiquesQueries(selectedYear, activeTab)
@@ -191,6 +193,9 @@ const Statistiques: React.FC = () => {
       case 'depensesOrdonneesParPce':
         content = <DepensesOrdonneesParPcePanel statsDepensesOrdonneesParPce={statsDepensesOrdonneesParPce} />
         break
+      case 'depensesOrdonneesParMois':
+        content = <DepensesOrdonneesParMoisPanel statsDepensesOrdonneesParMois={statsDepensesOrdonneesParMois} />
+        break
       default:
         content = <div>Panneau non défini</div>
     }
@@ -207,7 +212,7 @@ const Statistiques: React.FC = () => {
     // Définir les panels d'engagement avec le style vert
     const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique']
     const isEngagementPanel = engagementPanels.includes(id)
-    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees' || id === 'depensesOrdonneesParSgami' || id === 'depensesOrdonneesParPce'
+    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees' || id === 'depensesOrdonneesParSgami' || id === 'depensesOrdonneesParPce' || id === 'depensesOrdonneesParMois'
 
     return (
       <div key={id} className={`bg-white rounded-lg shadow border h-full flex flex-col ${

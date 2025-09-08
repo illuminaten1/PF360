@@ -20,7 +20,8 @@ import {
   EngagementDepensesMensuellesData,
   DepensesOrdonneesData,
   DepensesOrdonneesParSgamiData,
-  DepensesOrdonneesParPceData
+  DepensesOrdonneesParPceData,
+  DepensesOrdonneesParMoisData
 } from '../types'
 
 export const useStatistiquesQueries = (selectedYear: number, activeTab: 'administratif' | 'budgetaire') => {
@@ -207,6 +208,15 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     enabled: isBudgetaire
   })
 
+  const statsDepensesOrdonneesParMois = useQuery<DepensesOrdonneesParMoisData>({
+    queryKey: ['depenses-ordonnees-mois', selectedYear],
+    queryFn: async () => {
+      const response = await api.get(`/statistiques/depenses-ordonnees-mois?year=${selectedYear}`)
+      return response.data
+    },
+    enabled: isBudgetaire
+  })
+
   const anneesDisponibles = useQuery<number[]>({
     queryKey: ['annees-disponibles'],
     queryFn: async () => {
@@ -224,7 +234,8 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
                    statsBadges.isLoading || statsReponseBRPF.isLoading ||
                    statsBudgetaires.isLoading || statsEngagements.isLoading ||
                    statsEngagementsMensuels.isLoading || statsDepensesOrdonnees.isLoading ||
-                   statsDepensesOrdonneesParSgami.isLoading || statsDepensesOrdonneesParPce.isLoading
+                   statsDepensesOrdonneesParSgami.isLoading || statsDepensesOrdonneesParPce.isLoading ||
+                   statsDepensesOrdonneesParMois.isLoading
 
   return {
     statsAdministratives: statsAdministratives.data,
@@ -247,6 +258,7 @@ export const useStatistiquesQueries = (selectedYear: number, activeTab: 'adminis
     statsDepensesOrdonnees: statsDepensesOrdonnees.data,
     statsDepensesOrdonneesParSgami: statsDepensesOrdonneesParSgami.data,
     statsDepensesOrdonneesParPce: statsDepensesOrdonneesParPce.data,
+    statsDepensesOrdonneesParMois: statsDepensesOrdonneesParMois.data,
     anneesDisponibles: anneesDisponibles.data,
     isLoading
   }

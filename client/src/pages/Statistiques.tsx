@@ -171,7 +171,7 @@ const Statistiques: React.FC = () => {
         content = <ExtractionMensuelleComponent stats={extractionMensuelle} />
         break
       case 'budget':
-        content = <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} />
+        content = <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} statsBudgetaires={statsBudgetaires} statsDepensesOrdonnees={statsDepensesOrdonnees} />
         break
       case 'statistiquesBudgetaires':
         content = <StatistiquesBudgetairesPanel statsBudgetaires={statsBudgetaires} />

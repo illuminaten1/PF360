@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 interface EngagementDepenseMensuelle {
   mois: string
@@ -84,61 +84,97 @@ const EngagementDepensesGraphiquePanel: React.FC<EngagementDepensesGraphiquePane
     <div className="h-full flex flex-col bg-green-50">
       <div className="flex-1 p-4">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" />
-            <XAxis 
-              dataKey="mois" 
-              angle={-45}
-              textAnchor="end"
-              height={50}
-              interval={0}
-              tick={{ fontSize: 12, fill: '#374151' }}
-            />
-            <YAxis 
-              tickFormatter={viewMode === 'pourcentage' ? (value) => `${value}%` : formatCurrency}
-              tick={{ fontSize: 12, fill: '#374151' }}
-            />
-            <Tooltip 
-              formatter={formatTooltip}
-              labelStyle={{ color: '#374151' }}
-              contentStyle={{ 
-                backgroundColor: '#f9fafb', 
-                border: '1px solid #d1d5db',
-                borderRadius: '8px'
-              }}
-            />
-            <Legend 
-              wrapperStyle={{ paddingTop: '20px' }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="montantHT" 
-              stroke="#3b82f6" 
-              strokeWidth={3}
-              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-              name={
-                viewMode === 'pourcentage' 
-                  ? '% évolution du budget annuel (HT réel)' 
-                  : viewMode === 'cumule' 
-                    ? 'Cumulé HT par mois (réel)' 
-                    : 'Dépenses gagées par mois'
-              }
-            />
-            <Line 
-              type="monotone" 
-              dataKey="previsionTTC" 
-              stroke="#ef4444" 
-              strokeWidth={3}
-              dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
-              name={
-                viewMode === 'pourcentage' 
-                  ? '% évolution du budget annuel (TTC prévisionnel)' 
-                  : viewMode === 'cumule' 
-                    ? 'Cumulé TTC par mois (prévisionnel)' 
-                    : 'Prévisionnel +20% (taxes) TTC'
-              }
-            />
-          </LineChart>
+          {viewMode === 'mensuel' ? (
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" />
+              <XAxis 
+                dataKey="mois" 
+                angle={-45}
+                textAnchor="end"
+                height={50}
+                interval={0}
+                tick={{ fontSize: 12, fill: '#374151' }}
+              />
+              <YAxis 
+                tickFormatter={formatCurrency}
+                tick={{ fontSize: 12, fill: '#374151' }}
+              />
+              <Tooltip 
+                formatter={formatTooltip}
+                labelStyle={{ color: '#374151' }}
+                contentStyle={{ 
+                  backgroundColor: '#f9fafb', 
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend 
+                wrapperStyle={{ paddingTop: '20px' }}
+              />
+              <Bar 
+                dataKey="montantHT" 
+                fill="#3b82f6" 
+                name="Dépenses gagées HT (réel)"
+              />
+              <Bar 
+                dataKey="previsionTTC" 
+                fill="#ef4444" 
+                name="Prévisionnel +32% (taxes et autre) TTC"
+              />
+            </BarChart>
+          ) : (
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" />
+              <XAxis 
+                dataKey="mois" 
+                angle={-45}
+                textAnchor="end"
+                height={50}
+                interval={0}
+                tick={{ fontSize: 12, fill: '#374151' }}
+              />
+              <YAxis 
+                tickFormatter={viewMode === 'pourcentage' ? (value) => `${value}%` : formatCurrency}
+                tick={{ fontSize: 12, fill: '#374151' }}
+              />
+              <Tooltip 
+                formatter={formatTooltip}
+                labelStyle={{ color: '#374151' }}
+                contentStyle={{ 
+                  backgroundColor: '#f9fafb', 
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend 
+                wrapperStyle={{ paddingTop: '20px' }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="montantHT" 
+                stroke="#3b82f6" 
+                strokeWidth={3}
+                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                name={
+                  viewMode === 'pourcentage' 
+                    ? 'HT (réel) en % du budget annuel' 
+                    : 'Cumulé HT (réel)'
+                }
+              />
+              <Line 
+                type="monotone" 
+                dataKey="previsionTTC" 
+                stroke="#ef4444" 
+                strokeWidth={3}
+                dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
+                name={
+                  viewMode === 'pourcentage' 
+                    ? 'TTC (prévisionnel) en % du budget annuel' 
+                    : 'Cumulé TTC (prévisionnel)'
+                }
+              />
+            </LineChart>
+          )}
         </ResponsiveContainer>
       </div>
       

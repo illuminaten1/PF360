@@ -56,39 +56,25 @@ export const INITIAL_GRID_LAYOUTS = {
 
 export const INITIAL_GRID_LAYOUTS_BUDGETAIRE = {
   lg: [
-    { w: 3, h: 10, x: 0, y: 0, i: 'budget', minW: 3, minH: 8, moved: false, static: false },
-    { w: 4, h: 15, x: 3, y: 0, i: 'statistiquesBudgetaires', minW: 3, minH: 8, moved: false, static: false },
-    { w: 5, h: 15, x: 7, y: 0, i: 'engagementServicePayeur', minW: 4, minH: 8, moved: false, static: false },
-    { w: 6, h: 18, x: 0, y: 15, i: 'engagementDepensesMensuelles', minW: 4, minH: 12, moved: false, static: false },
-    { w: 6, h: 18, x: 6, y: 15, i: 'engagementDepensesGraphique', minW: 4, minH: 12, moved: false, static: false },
-    { w: 3, h: 10, x: 0, y: 33, i: 'depensesOrdonnees', minW: 3, minH: 8, moved: false, static: false },
-    { w: 3, h: 10, x: 3, y: 33, i: 'depensesOrdonneesParSgami', minW: 3, minH: 8, moved: false, static: false },
-    { w: 3, h: 10, x: 6, y: 33, i: 'depensesOrdonneesParPce', minW: 3, minH: 8, moved: false, static: false },
-    { w: 3, h: 10, x: 9, y: 33, i: 'depensesOrdonneesParMois', minW: 3, minH: 8, moved: false, static: false },
-    { w: 6, h: 18, x: 0, y: 43, i: 'depensesOrdonneesGraphique', minW: 4, minH: 12, moved: false, static: false }
+    { w: 12, h: 8, x: 0, y: 0, i: 'budget', minW: 3, minH: 8, moved: false, static: false },
+    { w: 6, h: 17, x: 0, y: 22, i: 'statistiquesBudgetaires', minW: 3, minH: 8, moved: false, static: false },
+    { w: 6, h: 23, x: 0, y: 67, i: 'engagementServicePayeur', minW: 4, minH: 8, moved: false, static: false },
+    { w: 6, h: 28, x: 0, y: 39, i: 'engagementDepensesMensuelles', moved: false, static: false },
+    { w: 6, h: 14, x: 0, y: 8, i: 'engagementDepensesGraphique', moved: false, static: false },
+    { w: 6, h: 17, x: 6, y: 22, i: 'depensesOrdonnees', moved: false, static: false },
+    { w: 3, h: 23, x: 6, y: 67, i: 'depensesOrdonneesParSgami', moved: false, static: false },
+    { w: 3, h: 23, x: 9, y: 67, i: 'depensesOrdonneesParPce', moved: false, static: false },
+    { w: 6, h: 28, x: 6, y: 39, i: 'depensesOrdonneesParMois', moved: false, static: false },
+    { w: 6, h: 14, x: 6, y: 8, i: 'depensesOrdonneesGraphique', moved: false, static: false }
   ] as Layout[],
   md: [
     { i: 'budget', x: 0, y: 0, w: 5, h: 10, minW: 3, minH: 8 },
     { i: 'statistiquesBudgetaires', x: 5, y: 0, w: 5, h: 12, minW: 3, minH: 8 },
-    { i: 'engagementServicePayeur', x: 0, y: 12, w: 10, h: 12, minW: 4, minH: 8 },
-    { i: 'engagementDepensesMensuelles', x: 0, y: 24, w: 5, h: 18, minW: 3, minH: 12 },
-    { i: 'engagementDepensesGraphique', x: 5, y: 24, w: 5, h: 18, minW: 3, minH: 12 },
-    { i: 'depensesOrdonnees', x: 0, y: 42, w: 5, h: 10, minW: 3, minH: 8 },
-    { i: 'depensesOrdonneesParSgami', x: 5, y: 42, w: 5, h: 10, minW: 3, minH: 8 },
-    { i: 'depensesOrdonneesParPce', x: 0, y: 52, w: 5, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesParMois', x: 5, y: 52, w: 5, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesGraphique', x: 0, y: 62, w: 10, h: 18, minW: 4, minH: 12 }
+    { i: 'engagementServicePayeur', x: 0, y: 12, w: 10, h: 12, minW: 4, minH: 8 }
   ] as Layout[],
   sm: [
     { i: 'budget', x: 0, y: 0, w: 6, h: 10, minW: 4, minH: 8 },
     { i: 'statistiquesBudgetaires', x: 0, y: 10, w: 6, h: 12, minW: 4, minH: 8 },
-    { i: 'engagementServicePayeur', x: 0, y: 22, w: 6, h: 12, minW: 4, minH: 8 },
-    { i: 'engagementDepensesMensuelles', x: 0, y: 34, w: 6, h: 18, minW: 4, minH: 12 },
-    { i: 'engagementDepensesGraphique', x: 0, y: 52, w: 6, h: 18, minW: 4, minH: 12 },
-    { i: 'depensesOrdonnees', x: 0, y: 70, w: 6, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesParSgami', x: 0, y: 80, w: 6, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesParPce', x: 0, y: 90, w: 6, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesParMois', x: 0, y: 100, w: 6, h: 10, minW: 4, minH: 8 },
-    { i: 'depensesOrdonneesGraphique', x: 0, y: 110, w: 6, h: 18, minW: 4, minH: 12 }
+    { i: 'engagementServicePayeur', x: 0, y: 22, w: 6, h: 12, minW: 4, minH: 8 }
   ] as Layout[]
 }

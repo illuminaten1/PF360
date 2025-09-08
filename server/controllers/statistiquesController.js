@@ -2391,6 +2391,9 @@ const getDepensesOrdonnees = async (req, res) => {
     // 5. Calculer le montant moyen TTC par dossier ayant un paiement
     const montantMoyenTTCParDossier = dossiersAvecPaiements > 0 ? depenseTotaleTTC / dossiersAvecPaiements : 0;
 
+    // 6. Calculer le montant moyen TTC par paiement
+    const montantMoyenTTCParPaiement = nombrePaiementsEmis > 0 ? depenseTotaleTTC / nombrePaiementsEmis : 0;
+
     // Calcul des pourcentages par rapport au budget total
     const pourcentageDepenseHT = budgetTotal > 0 ? (depenseTotaleHT / budgetTotal) * 100 : 0;
     const pourcentageDepenseTTC = budgetTotal > 0 ? (depenseTotaleTTC / budgetTotal) * 100 : 0;
@@ -2400,6 +2403,11 @@ const getDepensesOrdonnees = async (req, res) => {
         libelle: "Nombre de paiements émis",
         nombre: nombrePaiementsEmis,
         type: "number"
+      },
+      {
+        libelle: "Montant moyen TTC par paiement",
+        nombre: Math.round(montantMoyenTTCParPaiement * 100) / 100,
+        type: "currency"
       },
       {
         libelle: "Montant moyen TTC par dossier",

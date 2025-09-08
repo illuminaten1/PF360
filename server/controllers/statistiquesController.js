@@ -2324,6 +2324,92 @@ const getEngagementDepensesMensuelles = async (req, res) => {
   }
 };
 
+const getDepensesOrdonnees = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    
+    // Dates de début et fin d'année
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    
+    // Récupérer le budget annuel pour calculer les pourcentages
+    const budgetAnnuel = await prisma.budgetAnnuel.findUnique({
+      where: {
+        annee: year
+      }
+    });
+    
+    const budgetTotal = budgetAnnuel ? budgetAnnuel.budgetBase + budgetAnnuel.abondements : 0;
+
+    // 1. Nombre de paiements émis pour l'année sélectionnée
+    const nombrePaiementsEmis = await prisma.paiement.count({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      }
+    });
+
+    // 2. Récupérer tous les paiements de l'année pour calculer les montants
+    const paiementsDeLAnnee = await prisma.paiement.findMany({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lt: endOfYear
+        }
+      },
+      select: {
+        montantHT: true,
+        montantTTC: true
+      }
+    });
+
+    // 3. Calculer les montants totaux
+    const depenseTotaleHT = paiementsDeLAnnee
+      .filter(p => p.montantHT !== null && p.montantHT !== undefined)
+      .reduce((sum, p) => sum + p.montantHT, 0);
+    
+    const depenseTotaleTTC = paiementsDeLAnnee
+      .filter(p => p.montantTTC !== null && p.montantTTC !== undefined)
+      .reduce((sum, p) => sum + p.montantTTC, 0);
+
+    // Calcul des pourcentages par rapport au budget total
+    const pourcentageDepenseHT = budgetTotal > 0 ? (depenseTotaleHT / budgetTotal) * 100 : 0;
+    const pourcentageDepenseTTC = budgetTotal > 0 ? (depenseTotaleTTC / budgetTotal) * 100 : 0;
+
+    const statistiques = [
+      {
+        libelle: "Nombre de paiements émis",
+        nombre: nombrePaiementsEmis,
+        type: "number"
+      },
+      {
+        libelle: "Dépense totale HT (indicatif)",
+        nombre: Math.round(depenseTotaleHT * 100) / 100,
+        pourcentage: Math.round(pourcentageDepenseHT * 100) / 100,
+        type: "currency_with_percentage"
+      },
+      {
+        libelle: "Dépense totale TTC",
+        nombre: Math.round(depenseTotaleTTC * 100) / 100,
+        pourcentage: Math.round(pourcentageDepenseTTC * 100) / 100,
+        type: "currency_with_percentage",
+        isTotal: true
+      }
+    ];
+
+    res.json({ statistiques, budgetTotal });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des dépenses ordonnées:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des dépenses ordonnées',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getRecentWeeklyStats,
   getStatistiquesAdministratives,
@@ -2343,5 +2429,6 @@ module.exports = {
   getStatistiquesReponseBRPF,
   getStatistiquesBudgetaires,
   getEngagementServicePayeur,
-  getEngagementDepensesMensuelles
+  getEngagementDepensesMensuelles,
+  getDepensesOrdonnees
 };

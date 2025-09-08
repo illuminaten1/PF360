@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles } = require('../controllers/statistiquesController');
+const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
@@ -59,5 +59,8 @@ router.get('/engagement-service-payeur', authMiddleware, getEngagementServicePay
 
 // GET /api/statistiques/engagement-depenses-mensuelles - Récupérer les engagements de dépenses mensuelles par année
 router.get('/engagement-depenses-mensuelles', authMiddleware, getEngagementDepensesMensuelles);
+
+// GET /api/statistiques/depenses-ordonnees - Récupérer les dépenses ordonnées par année
+router.get('/depenses-ordonnees', authMiddleware, getDepensesOrdonnees);
 
 module.exports = router;

@@ -29,6 +29,7 @@ import {
   EngagementDepensesGraphiquePanel
 } from '@/components/statistiques/panels'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
+import DepensesOrdonneesPanel from '@/components/statistiques/panels/DepensesOrdonneesPanel'
 import { useAuth } from '@/contexts/AuthContext'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -87,6 +88,7 @@ const Statistiques: React.FC = () => {
     statsBudgetaires,
     statsEngagements,
     statsEngagementsMensuels,
+    statsDepensesOrdonnees,
     anneesDisponibles,
     isLoading
   } = useStatistiquesQueries(selectedYear, activeTab)
@@ -176,6 +178,9 @@ const Statistiques: React.FC = () => {
       case 'engagementDepensesGraphique':
         content = <EngagementDepensesGraphiquePanel statsEngagementsMensuels={statsEngagementsMensuels} />
         break
+      case 'depensesOrdonnees':
+        content = <DepensesOrdonneesPanel statsDepensesOrdonnees={statsDepensesOrdonnees} />
+        break
       default:
         content = <div>Panneau non défini</div>
     }
@@ -192,16 +197,21 @@ const Statistiques: React.FC = () => {
     // Définir les panels d'engagement avec le style vert
     const engagementPanels = ['statistiquesBudgetaires', 'engagementServicePayeur', 'engagementDepensesMensuelles', 'engagementDepensesGraphique']
     const isEngagementPanel = engagementPanels.includes(id)
+    const isDepensesOrdonneesPanel = id === 'depensesOrdonnees'
 
     return (
       <div key={id} className={`bg-white rounded-lg shadow border h-full flex flex-col ${
         isEngagementPanel 
           ? 'border-l-4 border-l-green-400 border-t-gray-200 border-r-gray-200 border-b-gray-200'
+          : isDepensesOrdonneesPanel
+          ? 'border-l-4 border-l-orange-400 border-t-gray-200 border-r-gray-200 border-b-gray-200'
           : 'border-gray-200'
       }`}>
         <div className={`px-4 py-3 border-b font-semibold text-sm ${
           isEngagementPanel
             ? 'border-green-200 bg-green-100 text-green-900'
+            : isDepensesOrdonneesPanel
+            ? 'border-orange-200 bg-orange-100 text-orange-900'
             : 'border-gray-200 bg-gray-50 text-gray-900'
         }`}>
           {getPanelTitle(id)}

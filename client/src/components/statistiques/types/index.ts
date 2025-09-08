@@ -210,7 +210,21 @@ export interface EngagementDepensesMensuellesData {
   annee: number
 }
 
-export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique'
+export interface DepenseOrdonnee {
+  libelle: string
+  nombre: number
+  pourcentage?: number
+  type?: 'currency' | 'currency_with_percentage' | 'number'
+  bold?: boolean
+  isTotal?: boolean
+}
+
+export interface DepensesOrdonneesData {
+  statistiques: DepenseOrdonnee[]
+  budgetTotal?: number
+}
+
+export type PanelKey = 'general' | 'users' | 'bap' | 'qualite' | 'infractions' | 'contexte' | 'formation' | 'branche' | 'statut' | 'autocontrole' | 'fluxmensuels' | 'fluxhebdo' | 'extraction' | 'badges' | 'reponseBrpf' | 'budget' | 'statistiquesBudgetaires' | 'engagementServicePayeur' | 'engagementDepensesMensuelles' | 'engagementDepensesGraphique' | 'depensesOrdonnees'
 
 export type SortColumn = 'nom' | 'totalPF' | 'propres' | 'bap' | 'pj' | 'aj' | 'aje' | 'rejet' | 'enCours' | 'enCoursPropre' | 'enCoursBAP'
 export type SortOrder = 'asc' | 'desc'

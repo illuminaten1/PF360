@@ -55,6 +55,19 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
     }
     return <div className="text-xs">{formattedCurrency} TTC</div>
   }
+
+  const formatCumulWithPercentage = (amount: number, percentage?: number, suffix: string = '') => {
+    const formattedCurrency = formatCurrency(amount)
+    if (percentage !== undefined) {
+      return (
+        <div className="text-xs">
+          <div>{formattedCurrency} {suffix}</div>
+          <div className="text-xs text-gray-500">({percentage.toFixed(1)}% du budget)</div>
+        </div>
+      )
+    }
+    return <div className="text-xs">{formattedCurrency} {suffix}</div>
+  }
   
   return (
     <div className="h-full flex flex-col bg-orange-50">
@@ -107,7 +120,7 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
-                    {stat.cumulHT !== undefined ? <div className="text-xs">{formatCurrency(stat.cumulHT)} HT</div> : <div className="text-xs">-</div>}
+                    {stat.cumulHT !== undefined ? formatCumulWithPercentage(stat.cumulHT, stat.pourcentageCumulHT, 'HT') : <div className="text-xs">-</div>}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
@@ -117,7 +130,7 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
-                    {stat.cumulTTC !== undefined ? <div className="text-xs">{formatCurrency(stat.cumulTTC)} TTC</div> : <div className="text-xs">-</div>}
+                    {stat.cumulTTC !== undefined ? formatCumulWithPercentage(stat.cumulTTC, stat.pourcentageCumulTTC, 'TTC') : <div className="text-xs">-</div>}
                   </td>
                 </tr>
                 )

@@ -2759,6 +2759,8 @@ const getDepensesOrdonneesParMois = async (req, res) => {
         ...stat,
         cumulHT: cumulHT,
         cumulTTC: cumulTTC,
+        pourcentageCumulHT: budgetTotal > 0 ? (cumulHT / budgetTotal) * 100 : 0,
+        pourcentageCumulTTC: budgetTotal > 0 ? (cumulTTC / budgetTotal) * 100 : 0,
         pourcentageHT: budgetTotal > 0 ? (stat.montantHTPaiements / budgetTotal) * 100 : 0,
         pourcentageTTC: budgetTotal > 0 ? (stat.montantTTCDossiers / budgetTotal) * 100 : 0
       };
@@ -2776,6 +2778,8 @@ const getDepensesOrdonneesParMois = async (req, res) => {
       montantTTCDossiers: totalMontantTTC,
       cumulHT: totalMontantHT,
       cumulTTC: totalMontantTTC,
+      pourcentageCumulHT: budgetTotal > 0 ? (totalMontantHT / budgetTotal) * 100 : 0,
+      pourcentageCumulTTC: budgetTotal > 0 ? (totalMontantTTC / budgetTotal) * 100 : 0,
       pourcentageHT: budgetTotal > 0 ? (totalMontantHT / budgetTotal) * 100 : 0,
       pourcentageTTC: budgetTotal > 0 ? (totalMontantTTC / budgetTotal) * 100 : 0,
       isTotal: true,

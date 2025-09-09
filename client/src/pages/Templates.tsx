@@ -27,22 +27,22 @@ const TemplatesPage: React.FC = () => {
   const TEMPLATE_CONFIG: TemplatesConfig = {
     decision: { 
       name: 'Template de décision', 
-      filename: 'decision_template.docx', 
+      filename: 'decision_template.odt', 
       status: 'default' 
     },
     convention: { 
       name: 'Template de convention d\'honoraires', 
-      filename: 'convention_template.docx', 
+      filename: 'convention_template.odt', 
       status: 'default' 
     },
     avenant: { 
       name: 'Template d\'avenant', 
-      filename: 'avenant_template.docx', 
+      filename: 'avenant_template.odt', 
       status: 'default' 
     },
     reglement: { 
       name: 'Template de fiche de règlement', 
-      filename: 'reglement_template.docx', 
+      filename: 'reglement_template.odt', 
       status: 'default' 
     }
   }
@@ -166,8 +166,8 @@ const TemplatesPage: React.FC = () => {
     if (!file) return
     
     const fileExt = file.name.split('.').pop()?.toLowerCase()
-    if (fileExt !== 'docx') {
-      toast.error('Le fichier doit être au format DOCX (.docx)')
+    if (fileExt !== 'odt') {
+      toast.error('Le fichier doit être au format ODT (.odt)')
       return
     }
     
@@ -296,7 +296,7 @@ const TemplatesPage: React.FC = () => {
                   type="file"
                   ref={inputRefs[templateType]}
                   className="hidden"
-                  accept=".docx"
+                  accept=".odt"
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
                 

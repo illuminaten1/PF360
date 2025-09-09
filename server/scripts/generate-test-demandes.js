@@ -551,6 +551,7 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = [], baps
   }
   
   const demandes = []
+  const demandesNonAffectees = [] // Demandes complètement non affectées
   const aujourdhui = new Date()
   aujourdhui.setHours(0, 0, 0, 0) // Début de la journée
   const demainDebut = new Date(aujourdhui.getTime() + 24 * 60 * 60 * 1000) // Début de demain
@@ -561,15 +562,17 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = [], baps
     // Vérifier si la demande est reçue aujourd'hui (seulement pour 2025)
     const estDuJour = year === 2025 && demande.dateReception >= aujourdhui && demande.dateReception < demainDebut
     
-    // Si c'est une demande du jour (2025), 30% de chance de ne pas être assignée
-    // Pour 2024, toutes les demandes sont assignées
+    // Si c'est une demande du jour (2025), 30% de chance de ne pas être assignée DU TOUT
+    // Ces demandes ne seront liées ni à un dossier, ni à un utilisateur, ni à un BAP
     if (estDuJour && Math.random() < 0.3) {
       demande.assigneAId = null
+      // Cette demande ne sera pas dans le dossier - elle sera créée séparément
+      demandesNonAffectees.push(demande)
     } else {
+      // Demande normale assignée à l'utilisateur et incluse dans le dossier
       demande.assigneAId = assignedUser.id
+      demandes.push(demande)
     }
-    
-    demandes.push(demande)
   }
   
   const dossierData = {
@@ -577,7 +580,8 @@ const generateDossier = (year = 2025, users = [], sgamis = [], grades = [], baps
     assigneAId: assignedUser.id,
     sgamiId: assignedSgami.id,
     assignedBap: assignedBap, // BAP assigné si applicable
-    demandes
+    demandes,
+    demandesNonAffectees // Demandes à créer séparément sans dossier
   }
 
   return {
@@ -741,12 +745,21 @@ async function main() {
   // Insertion dossier par dossier
   let dossiersInserted = 0
   let demandesInserted = 0
+  let demandesNonAffecteesInserted = 0
   let badgeStats = { signale: 0, uda: 0, vss: 0 }
   let bapStats = {}
   
   // Initialiser les stats BAP
   baps.forEach(bap => {
     bapStats[bap.nomBAP] = 0
+  })
+  
+  // Collecter toutes les demandes non affectées avant de traiter les dossiers
+  const toutesDemandesNonAffectees = []
+  dossiers.forEach(dossier => {
+    if (dossier.demandesNonAffectees) {
+      toutesDemandesNonAffectees.push(...dossier.demandesNonAffectees)
+    }
   })
   
   for (const dossier of dossiers) {
@@ -847,7 +860,28 @@ async function main() {
     }
   }
   
-  console.log(`🎉 Génération terminée ! ${dossiersInserted} dossiers et ${demandesInserted} demandes ont été créées en base de données.`)
+  // Insérer les demandes non affectées (sans dossier, sans BAP, sans assignation)
+  if (toutesDemandesNonAffectees.length > 0) {
+    console.log(`📝 Insertion de ${toutesDemandesNonAffectees.length} demandes non affectées...`)
+    
+    for (const demande of toutesDemandesNonAffectees) {
+      try {
+        await prisma.demande.create({
+          data: {
+            ...demande,
+            dossierId: null // Explicitement sans dossier
+          }
+        })
+        demandesNonAffecteesInserted++
+      } catch (error) {
+        console.error(`❌ Erreur lors de l'insertion de la demande non affectée ${demande.numeroDS}:`, error.message)
+      }
+    }
+    
+    console.log(`✅ ${demandesNonAffecteesInserted} demandes non affectées insérées`)
+  }
+  
+  console.log(`🎉 Génération terminée ! ${dossiersInserted} dossiers, ${demandesInserted} demandes dans des dossiers et ${demandesNonAffecteesInserted} demandes non affectées ont été créées en base de données.`)
   console.log(`🏷️  Badges attribués aux dossiers :`)
   console.log(`   - Signalé : ${badgeStats.signale} dossiers`)
   console.log(`   - UDA : ${badgeStats.uda} dossiers`)
@@ -863,7 +897,9 @@ async function main() {
   const totalDossiersEnBase = await prisma.dossier.count()
   const totalDemandesEnBase = await prisma.demande.count()
   const demandesAvecDossier = await prisma.demande.count({ where: { dossierId: { not: null } } })
+  const demandesSansDossier = await prisma.demande.count({ where: { dossierId: null } })
   const demandesAvecAssignation = await prisma.demande.count({ where: { assigneAId: { not: null } } })
+  const demandesSansAssignation = await prisma.demande.count({ where: { assigneAId: null } })
   const dossiersAvecAssignation = await prisma.dossier.count({ where: { assigneAId: { not: null } } })
   const dossiersAvecSgami = await prisma.dossier.count({ where: { sgamiId: { not: null } } })
   const dossiersAvecBap = await prisma.dossierBAP.count()
@@ -873,12 +909,14 @@ async function main() {
   console.log(`   - Dossiers en base : ${totalDossiersEnBase}`)
   console.log(`   - Demandes en base : ${totalDemandesEnBase}`)
   console.log(`   - Demandes liées à un dossier : ${demandesAvecDossier}`)
+  console.log(`   - Demandes NON liées à un dossier : ${demandesSansDossier}`)
   console.log(`   - Demandes assignées : ${demandesAvecAssignation}`)
+  console.log(`   - Demandes NON assignées : ${demandesSansAssignation}`)
   console.log(`   - Dossiers assignés : ${dossiersAvecAssignation}`)
   console.log(`   - Dossiers avec SGAMI : ${dossiersAvecSgami}`)
   console.log(`   - Dossiers avec BAP : ${dossiersAvecBap}`)
   console.log(`   - Demandes avec BAP : ${demandesAvecBap}`)
-  console.log(`   - Moyenne de demandes par dossier : ${(totalDemandesEnBase / totalDossiersEnBase).toFixed(2)}`)
+  console.log(`   - Moyenne de demandes par dossier : ${totalDossiersEnBase > 0 ? (demandesAvecDossier / totalDossiersEnBase).toFixed(2) : '0'}`)
   
   // Statistiques détaillées par utilisateur
   console.log(`\n📊 Répartition détaillée par utilisateur :`)

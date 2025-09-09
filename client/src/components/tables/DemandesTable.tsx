@@ -48,6 +48,7 @@ interface DemandesTableProps {
   onEdit: (demande: Demande) => void
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
+  onCreateDossierWithSelection?: (selectedDemandes: Demande[]) => void
   canDelete?: boolean
 }
 
@@ -671,6 +672,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   onEdit,
   onDelete,
   onAddToDossier,
+  onCreateDossierWithSelection,
   canDelete = true
 }, ref) => {
   const navigate = useNavigate()
@@ -706,6 +708,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   const [currentAssignee, setCurrentAssignee] = useState<any>(null)
   const [showBAPModal, setShowBAPModal] = useState(false)
   const [currentBAP, setCurrentBAP] = useState<any>(null)
+  const [selectedDemandes, setSelectedDemandes] = useState<Set<string>>(new Set())
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
@@ -753,8 +756,71 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     }
   }
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      // Sélectionner uniquement les demandes non liées
+      const unlinkedDemandes = table.getFilteredRowModel().rows
+        .filter(row => !row.original.dossier && !row.original.assigneA && (!row.original.baps || row.original.baps.length === 0))
+        .map(row => row.original.id)
+      setSelectedDemandes(new Set(unlinkedDemandes))
+    } else {
+      setSelectedDemandes(new Set())
+    }
+  }
+
+  const handleSelectDemande = (demandeId: string, checked: boolean) => {
+    const newSelection = new Set(selectedDemandes)
+    if (checked) {
+      newSelection.add(demandeId)
+    } else {
+      newSelection.delete(demandeId)
+    }
+    setSelectedDemandes(newSelection)
+  }
+
+  const isDemandeSelectable = (demande: Demande) => {
+    return !demande.dossier && !demande.assigneA && (!demande.baps || demande.baps.length === 0)
+  }
+
+  const getSelectedDemandesData = () => {
+    return data.filter(demande => selectedDemandes.has(demande.id))
+  }
+
   const columns = useMemo<ColumnDef<Demande>[]>(
     () => [
+      // 0. Selection checkbox
+      {
+        id: 'select',
+        header: () => (
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+          </div>
+        ),
+        cell: ({ row }) => {
+          const demande = row.original
+          const isSelectable = isDemandeSelectable(demande)
+          const isSelected = selectedDemandes.has(demande.id)
+          
+          return (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => handleSelectDemande(demande.id, e.target.checked)}
+                disabled={!isSelectable}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )
+        },
+        enableSorting: false,
+        enableColumnFilter: false,
+        size: 50
+      },
       // 1. numeroDS
       {
         accessorKey: 'numeroDS',
@@ -1297,6 +1363,14 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     }
   })
 
+  // Calculs pour la sélection après création de table
+  const filteredSelectableDemandes = table.getFilteredRowModel().rows
+    .filter(row => isDemandeSelectable(row.original))
+    .map(row => row.original.id)
+
+  const allSelectableSelected = filteredSelectableDemandes.length > 0 && 
+    filteredSelectableDemandes.every(id => selectedDemandes.has(id))
+
   // Expose les méthodes via la ref
   useImperativeHandle(ref, () => ({
     setColumnFilters: (filters: any[]) => {
@@ -1329,6 +1403,40 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         filteredRowsCount={table.getFilteredRowModel().rows.length}
       />
 
+      {/* Barre d'actions pour la sélection multiple */}
+      {selectedDemandes.size > 0 && onCreateDossierWithSelection && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedDemandes.size} demande{selectedDemandes.size > 1 ? 's' : ''} sélectionnée{selectedDemandes.size > 1 ? 's' : ''}
+                </span>
+              </div>
+              <span className="text-xs text-blue-700">
+                (demandes non liées à un dossier, utilisateur ou BAP)
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setSelectedDemandes(new Set())}
+                className="px-3 py-1 text-xs text-blue-700 hover:text-blue-900 border border-blue-300 rounded hover:bg-blue-100 transition-colors"
+              >
+                Désélectionner tout
+              </button>
+              <button
+                onClick={() => onCreateDossierWithSelection(getSelectedDemandesData())}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span>Créer un dossier</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto" style={{ minHeight: '400px' }}>
         <table className="min-w-full divide-y divide-gray-200">
@@ -1348,30 +1456,42 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                       <div className="flex items-center space-x-2">
                         {header.isPlaceholder ? null : (
                           <>
-                            <div
-                              className={`cursor-pointer select-none flex items-center ${
-                                header.column.getCanSort() ? 'hover:text-gray-700' : ''
-                              }`}
-                              onClick={header.column.getToggleSortingHandler()}
-                            >
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                              {header.column.getCanSort() && (
-                                <span className="ml-1">
-                                  {header.column.getIsSorted() === 'asc' ? (
-                                    <ChevronUpIcon className="h-4 w-4" />
-                                  ) : header.column.getIsSorted() === 'desc' ? (
-                                    <ChevronDownIcon className="h-4 w-4" />
-                                  ) : (
-                                    <div className="h-4 w-4 opacity-0 group-hover:opacity-100">
+                            {header.column.id === 'select' ? (
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={allSelectableSelected}
+                                  onChange={(e) => handleSelectAll(e.target.checked)}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                  disabled={filteredSelectableDemandes.length === 0}
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className={`cursor-pointer select-none flex items-center ${
+                                  header.column.getCanSort() ? 'hover:text-gray-700' : ''
+                                }`}
+                                onClick={header.column.getToggleSortingHandler()}
+                              >
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                                {header.column.getCanSort() && (
+                                  <span className="ml-1">
+                                    {header.column.getIsSorted() === 'asc' ? (
                                       <ChevronUpIcon className="h-4 w-4" />
-                                    </div>
-                                  )}
-                                </span>
-                              )}
-                            </div>
+                                    ) : header.column.getIsSorted() === 'desc' ? (
+                                      <ChevronDownIcon className="h-4 w-4" />
+                                    ) : (
+                                      <div className="h-4 w-4 opacity-0 group-hover:opacity-100">
+                                        <ChevronUpIcon className="h-4 w-4" />
+                                      </div>
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </>
                         )}
                       </div>

@@ -24,6 +24,7 @@ interface DossierModalProps {
   onClose: () => void
   onSubmit: (data: any) => Promise<void>
   dossier?: Dossier | null
+  selectedDemandes?: any[] // Demandes sélectionnées pour création groupée
   title: string
 }
 
@@ -32,6 +33,7 @@ const DossierModal: React.FC<DossierModalProps> = ({
   onClose,
   onSubmit,
   dossier,
+  selectedDemandes,
   title
 }) => {
   const {
@@ -133,7 +135,9 @@ const DossierModal: React.FC<DossierModalProps> = ({
         sgamiId: data.sgamiId?.trim() || null,
         assigneAId: data.assigneAId?.trim() || '',
         badges: data.badges || [],
-        bapId: data.bapId?.trim() || null
+        bapId: data.bapId?.trim() || null,
+        // Ajouter les IDs des demandes sélectionnées pour la création groupée
+        selectedDemandeIds: selectedDemandes?.map(d => d.id) || []
       }
       
       await onSubmit(cleanedData)
@@ -195,6 +199,29 @@ const DossierModal: React.FC<DossierModalProps> = ({
                 </div>
                 
                 <div className="p-6">
+
+                {/* Affichage des demandes sélectionnées */}
+                {selectedDemandes && selectedDemandes.length > 0 && (
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-900 mb-3">
+                      Demandes qui seront liées à ce dossier ({selectedDemandes.length})
+                    </h4>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {selectedDemandes.map((demande, index) => (
+                        <div key={demande.id} className="flex items-center justify-between bg-white p-2 rounded border">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-gray-500">#{index + 1}</span>
+                            <span className="font-medium text-sm">
+                              {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
+                              {demande.prenom} {demande.nom}
+                            </span>
+                          </div>
+                          <span className="text-xs text-blue-600">{demande.numeroDS}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
                   {/* Nom du dossier + Assigné à */}

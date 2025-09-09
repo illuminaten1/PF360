@@ -16,7 +16,8 @@ const createDossierSchema = z.object({
   sgamiId: z.string().optional().nullable(),
   assigneAId: z.string().min(1, "Le rédacteur est requis"),
   badges: z.array(z.string()).optional(),
-  bapId: z.string().optional().nullable()
+  bapId: z.string().optional().nullable(),
+  selectedDemandeIds: z.array(z.string()).optional() // Pour la création avec demandes sélectionnées
 });
 
 const updateDossierSchema = z.object({
@@ -204,7 +205,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const validatedData = createDossierSchema.parse(req.body);
-    const { nomDossier, notes, sgamiId, assigneAId, badges = [], bapId } = validatedData;
+    const { nomDossier, notes, sgamiId, assigneAId, badges = [], bapId, selectedDemandeIds = [] } = validatedData;
 
     const dossier = await prisma.$transaction(async (tx) => {
       // Trouver le dernier numéro utilisé (tri numérique)
@@ -220,7 +221,7 @@ router.post('/', async (req, res) => {
       const nextNumber = (maxNumber + 1).toString();
 
       // Créer le dossier avec le nouveau numéro
-      return await tx.dossier.create({
+      const newDossier = await tx.dossier.create({
         data: {
           numero: nextNumber,
           nomDossier,
@@ -280,6 +281,20 @@ router.post('/', async (req, res) => {
           }
         }
       });
+
+      // Lier les demandes sélectionnées au nouveau dossier
+      if (selectedDemandeIds.length > 0) {
+        await tx.demande.updateMany({
+          where: {
+            id: { in: selectedDemandeIds }
+          },
+          data: {
+            dossierId: newDossier.id
+          }
+        });
+      }
+
+      return newDossier;
     });
 
     // Sync badges and BAP to linked demandes if any were added

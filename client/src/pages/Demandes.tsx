@@ -10,6 +10,7 @@ import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
 import LierDemandeDossierModal from '@/components/forms/LierDemandeDossierModal'
+import DossierModal from '@/components/forms/DossierModal'
 
 interface DemandesStats {
   totalDemandes: number
@@ -25,7 +26,9 @@ const Demandes: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isLierModalOpen, setIsLierModalOpen] = useState(false)
+  const [isDossierModalOpen, setIsDossierModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
+  const [selectedDemandesForDossier, setSelectedDemandesForDossier] = useState<Demande[]>([])
   const { user } = useAuth()
   const tableRef = useRef<DemandesTableRef>(null)
 
@@ -99,6 +102,22 @@ const Demandes: React.FC = () => {
     }
   })
 
+  // Create dossier mutation (existing)
+  const createDossierMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.post('/dossiers', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      toast.success('Dossier créé et demandes liées avec succès')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la création du dossier')
+    }
+  })
+
   const handleCreateDemande = () => {
     setSelectedDemande(null)
     setIsModalOpen(true)
@@ -145,12 +164,21 @@ const Demandes: React.FC = () => {
     setIsLierModalOpen(true)
   }
 
+  const handleCreateDossierWithSelection = (selectedDemandes: Demande[]) => {
+    setSelectedDemandesForDossier(selectedDemandes)
+    setIsDossierModalOpen(true)
+  }
+
   const handleSubmitDemande = async (data: any) => {
     if (selectedDemande) {
       await updateDemandeMutation.mutateAsync({ id: selectedDemande.id, data })
     } else {
       await createDemandeMutation.mutateAsync(data)
     }
+  }
+
+  const handleSubmitDossier = async (data: any) => {
+    await createDossierMutation.mutateAsync(data)
   }
 
   // Fonctions pour appliquer les filtres depuis les statistiques
@@ -335,6 +363,7 @@ const Demandes: React.FC = () => {
         onEdit={handleEditDemande}
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
+        onCreateDossierWithSelection={handleCreateDossierWithSelection}
         canDelete={user ? ['ADMIN', 'GREFFIER'].includes(user.role) : false}
       />
 
@@ -384,6 +413,17 @@ const Demandes: React.FC = () => {
           demandeNumeroDS={selectedDemande.numeroDS}
         />
       )}
+
+      <DossierModal
+        isOpen={isDossierModalOpen}
+        onClose={() => {
+          setIsDossierModalOpen(false)
+          setSelectedDemandesForDossier([])
+        }}
+        onSubmit={handleSubmitDossier}
+        selectedDemandes={selectedDemandesForDossier}
+        title="Créer un dossier avec les demandes sélectionnées"
+      />
     </div>
   )
 }

@@ -783,11 +783,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
       // 0. Selection checkbox
       {
         id: 'select',
-        header: () => (
-          <div className="flex items-center">
-            <span className="text-xs font-medium text-gray-500">Sélection</span>
-          </div>
-        ),
+        header: '',
         cell: ({ row }) => {
           const demande = row.original
           const isSelectable = isDemandeSelectable(demande)

@@ -49,6 +49,7 @@ interface DemandesTableProps {
   onDelete: (demande: Demande) => void
   onAddToDossier: (demande: Demande) => void
   onCreateDossierWithSelection?: (selectedDemandes: Demande[]) => void
+  onLinkToExistingDossier?: (selectedDemandes: Demande[]) => void
   canDelete?: boolean
 }
 
@@ -674,6 +675,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   onDelete,
   onAddToDossier,
   onCreateDossierWithSelection,
+  onLinkToExistingDossier,
   canDelete = true
 }, ref) => {
   const navigate = useNavigate()
@@ -757,17 +759,6 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     }
   }
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      // Sélectionner uniquement les demandes non liées
-      const unlinkedDemandes = table.getFilteredRowModel().rows
-        .filter(row => !row.original.dossier && !row.original.assigneA && (!row.original.baps || row.original.baps.length === 0))
-        .map(row => row.original.id)
-      setSelectedDemandes(new Set(unlinkedDemandes))
-    } else {
-      setSelectedDemandes(new Set())
-    }
-  }
 
   const handleSelectDemande = (demandeId: string, checked: boolean) => {
     const newSelection = new Set(selectedDemandes)
@@ -794,10 +785,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         id: 'select',
         header: () => (
           <div className="flex items-center">
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
+            <span className="text-xs font-medium text-gray-500">Sélection</span>
           </div>
         ),
         cell: ({ row }) => {
@@ -1364,13 +1352,6 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     }
   })
 
-  // Calculs pour la sélection après création de table
-  const filteredSelectableDemandes = table.getFilteredRowModel().rows
-    .filter(row => isDemandeSelectable(row.original))
-    .map(row => row.original.id)
-
-  const allSelectableSelected = filteredSelectableDemandes.length > 0 && 
-    filteredSelectableDemandes.every(id => selectedDemandes.has(id))
 
   // Expose les méthodes via la ref
   useImperativeHandle(ref, () => ({
@@ -1408,7 +1389,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
       />
 
       {/* Barre d'actions pour la sélection multiple */}
-      {selectedDemandes.size > 0 && onCreateDossierWithSelection && (
+      {selectedDemandes.size > 0 && (onCreateDossierWithSelection || onLinkToExistingDossier) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -1429,13 +1410,24 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
               >
                 Désélectionner tout
               </button>
-              <button
-                onClick={() => onCreateDossierWithSelection(getSelectedDemandesData())}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Créer un dossier</span>
-              </button>
+              {onLinkToExistingDossier && (
+                <button
+                  onClick={() => onLinkToExistingDossier(getSelectedDemandesData())}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <FolderIcon className="h-4 w-4" />
+                  <span>Lier à un dossier</span>
+                </button>
+              )}
+              {onCreateDossierWithSelection && (
+                <button
+                  onClick={() => onCreateDossierWithSelection(getSelectedDemandesData())}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Créer un dossier</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1461,15 +1453,10 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                         {header.isPlaceholder ? null : (
                           <>
                             {header.column.id === 'select' ? (
-                              <div className="flex items-center">
-                                <input
-                                  type="checkbox"
-                                  checked={allSelectableSelected}
-                                  onChange={(e) => handleSelectAll(e.target.checked)}
-                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                  disabled={filteredSelectableDemandes.length === 0}
-                                />
-                              </div>
+                              flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )
                             ) : (
                               <div
                                 className={`cursor-pointer select-none flex items-center ${

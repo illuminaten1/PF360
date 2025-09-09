@@ -10,6 +10,7 @@ import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
 import LierDemandeDossierModal from '@/components/forms/LierDemandeDossierModal'
+import LierDemandesMultiplesDossierModal from '@/components/forms/LierDemandesMultiplesDossierModal'
 import DossierModal from '@/components/forms/DossierModal'
 
 interface DemandesStats {
@@ -26,6 +27,7 @@ const Demandes: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isLierModalOpen, setIsLierModalOpen] = useState(false)
+  const [isLierMultiplesModalOpen, setIsLierMultiplesModalOpen] = useState(false)
   const [isDossierModalOpen, setIsDossierModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const [selectedDemandesForDossier, setSelectedDemandesForDossier] = useState<Demande[]>([])
@@ -172,6 +174,11 @@ const Demandes: React.FC = () => {
   const handleCreateDossierWithSelection = (selectedDemandes: Demande[]) => {
     setSelectedDemandesForDossier(selectedDemandes)
     setIsDossierModalOpen(true)
+  }
+
+  const handleLinkToExistingDossier = (selectedDemandes: Demande[]) => {
+    setSelectedDemandesForDossier(selectedDemandes)
+    setIsLierMultiplesModalOpen(true)
   }
 
   const handleSubmitDemande = async (data: any) => {
@@ -369,6 +376,7 @@ const Demandes: React.FC = () => {
         onDelete={handleDeleteDemande}
         onAddToDossier={handleAddToDossier}
         onCreateDossierWithSelection={handleCreateDossierWithSelection}
+        onLinkToExistingDossier={handleLinkToExistingDossier}
         canDelete={user ? ['ADMIN', 'GREFFIER'].includes(user.role) : false}
       />
 
@@ -418,6 +426,17 @@ const Demandes: React.FC = () => {
           demandeNumeroDS={selectedDemande.numeroDS}
         />
       )}
+
+      <LierDemandesMultiplesDossierModal
+        isOpen={isLierMultiplesModalOpen}
+        onClose={() => {
+          setIsLierMultiplesModalOpen(false)
+          setSelectedDemandesForDossier([])
+          // Réinitialiser la sélection dans la table
+          tableRef.current?.clearSelection()
+        }}
+        selectedDemandes={selectedDemandesForDossier}
+      />
 
       <DossierModal
         isOpen={isDossierModalOpen}

@@ -6,6 +6,79 @@ import api from '@/utils/api'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
 
+interface DemandeursList {
+  demandes: Demande[]
+}
+
+const DemandeursList: React.FC<DemandeursList> = ({ demandes }) => {
+  const [showAll, setShowAll] = useState(false)
+  
+  if (demandes.length === 0) {
+    return <span className="text-gray-400 italic">Aucun demandeur</span>
+  }
+  
+  return (
+    <div>
+      {showAll ? (
+        // Afficher tous les demandeurs
+        <div className="space-y-1">
+          {demandes.map((demande, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <span>
+                {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
+                {demande.prenom} {demande.nom}
+              </span>
+              {demande.numeroDS && (
+                <span className="text-xs text-gray-500 ml-2">
+                  ({demande.numeroDS})
+                </span>
+              )}
+            </div>
+          ))}
+          {demandes.length > 3 && (
+            <button
+              onClick={() => setShowAll(false)}
+              className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
+            >
+              Réduire
+            </button>
+          )}
+        </div>
+      ) : (
+        // Afficher les 3 premiers + bouton
+        <div>
+          <div className="space-y-1">
+            {demandes.slice(0, 3).map((demande, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span>
+                  {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
+                  {demande.prenom} {demande.nom}
+                </span>
+                {demande.numeroDS && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({demande.numeroDS})
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          {demandes.length > 3 && (
+            <div className="mt-1">
+              <span className="text-gray-500 text-xs">+{demandes.length - 3} autre(s) </span>
+              <button
+                onClick={() => setShowAll(true)}
+                className="text-blue-600 hover:text-blue-800 text-xs underline"
+              >
+                Voir tous
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface LierDemandesMultiplesDossierModalProps {
   isOpen: boolean
   onClose: () => void
@@ -176,26 +249,7 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
                         {dossier.demandes.length === 0 ? (
                           <span className="text-gray-400 italic">Aucun demandeur</span>
                         ) : (
-                          <div className="space-y-1">
-                            {dossier.demandes.slice(0, 3).map((demande, index) => (
-                              <div key={index} className="flex items-center justify-between">
-                                <span>
-                                  {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
-                                  {demande.prenom} {demande.nom}
-                                </span>
-                                {demande.numeroDS && (
-                                  <span className="text-xs text-gray-500 ml-2">
-                                    ({demande.numeroDS})
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                            {dossier.demandes.length > 3 && (
-                              <div className="text-xs text-gray-500">
-                                +{dossier.demandes.length - 3} autre(s)
-                              </div>
-                            )}
-                          </div>
+                          <DemandeursList demandes={dossier.demandes} />
                         )}
                       </div>
                     </td>

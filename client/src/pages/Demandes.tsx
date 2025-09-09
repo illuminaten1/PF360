@@ -112,6 +112,11 @@ const Demandes: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Dossier créé et demandes liées avec succès')
+      // Fermer le modal et réinitialiser la sélection
+      setIsDossierModalOpen(false)
+      setSelectedDemandesForDossier([])
+      // Réinitialiser la sélection dans la table
+      tableRef.current?.clearSelection()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la création du dossier')

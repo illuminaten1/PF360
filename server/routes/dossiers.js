@@ -297,12 +297,16 @@ router.post('/', async (req, res) => {
       return newDossier;
     });
 
-    // Sync badges and BAP to linked demandes if any were added
+    // Sync badges, BAP and assignation to linked demandes if any were added
     if (badges.length > 0) {
       await syncDemandeBadgesFromDossier(dossier.id);
     }
     if (bapId && bapId.trim() !== '') {
       await syncDemandeBAPsFromDossier(dossier.id);
+    }
+    // Synchroniser l'assignation pour les demandes nouvellement liées
+    if (selectedDemandeIds.length > 0) {
+      await syncDemandeAssignationFromDossier(dossier.id);
     }
 
     // Transform baps array to single bap object

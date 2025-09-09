@@ -55,6 +55,7 @@ interface DemandesTableProps {
 export interface DemandesTableRef {
   setColumnFilters: (filters: any[]) => void
   clearAllFilters: () => void
+  clearSelection: () => void
 }
 
 function Filter({ column }: { column: any }) {
@@ -1379,6 +1380,9 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     clearAllFilters: () => {
       setColumnFilters([])
       setGlobalFilter('')
+    },
+    clearSelection: () => {
+      setSelectedDemandes(new Set())
     }
   }), [setColumnFilters, setGlobalFilter])
 

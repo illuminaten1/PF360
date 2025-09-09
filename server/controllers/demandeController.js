@@ -196,18 +196,26 @@ const syncSingleDemandeAssignation = async (demandeId) => {
       select: { dossierId: true }
     });
     
-    if (!demande || !demande.dossierId) return;
+    if (!demande) return;
     
-    // Get the dossier assignation
-    const dossier = await prisma.dossier.findUnique({
-      where: { id: demande.dossierId },
-      select: { assigneAId: true }
-    });
-    
-    if (dossier) {
+    if (demande.dossierId) {
+      // Get the dossier assignation
+      const dossier = await prisma.dossier.findUnique({
+        where: { id: demande.dossierId },
+        select: { assigneAId: true }
+      });
+      
+      if (dossier) {
+        await prisma.demande.update({
+          where: { id: demandeId },
+          data: { assigneAId: dossier.assigneAId }
+        });
+      }
+    } else {
+      // If no dossier, reset assignation to null
       await prisma.demande.update({
         where: { id: demandeId },
-        data: { assigneAId: dossier.assigneAId }
+        data: { assigneAId: null }
       });
     }
   } catch (error) {

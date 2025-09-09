@@ -9,6 +9,7 @@ import DemandesTable, { DemandesTableRef } from '@/components/tables/DemandesTab
 import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
+import LierDemandeDossierModal from '@/components/forms/LierDemandeDossierModal'
 
 interface DemandesStats {
   totalDemandes: number
@@ -23,6 +24,7 @@ const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isLierModalOpen, setIsLierModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const { user } = useAuth()
   const tableRef = useRef<DemandesTableRef>(null)
@@ -140,7 +142,7 @@ const Demandes: React.FC = () => {
 
   const handleAddToDossier = (demande: Demande) => {
     setSelectedDemande(demande)
-    setIsModalOpen(true)
+    setIsLierModalOpen(true)
   }
 
   const handleSubmitDemande = async (data: any) => {
@@ -368,6 +370,18 @@ const Demandes: React.FC = () => {
           message={`Cette action supprimera définitivement la demande n°${selectedDemande.numeroDS} effectuée par ${selectedDemande.grade?.gradeAbrege ? `${selectedDemande.grade.gradeAbrege} ` : ''}${selectedDemande.prenom} ${selectedDemande.nom}. Cette action ne peut pas être annulée.`}
           confirmButtonText="Supprimer la demande"
           isLoading={deleteDemandeMutation.isPending}
+        />
+      )}
+
+      {selectedDemande && (
+        <LierDemandeDossierModal
+          isOpen={isLierModalOpen}
+          onClose={() => {
+            setIsLierModalOpen(false)
+            setSelectedDemande(null)
+          }}
+          demandeId={selectedDemande.id}
+          demandeNumeroDS={selectedDemande.numeroDS}
         />
       )}
     </div>

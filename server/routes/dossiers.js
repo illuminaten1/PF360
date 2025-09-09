@@ -30,16 +30,64 @@ const updateDossierSchema = z.object({
 
 router.get('/', async (req, res) => {
   try {
+    const { search, limit } = req.query;
+    const limitInt = limit ? parseInt(limit) : undefined;
+
+    // Construire les conditions de recherche
+    const whereClause = {};
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+      whereClause.OR = [
+        {
+          numero: {
+            contains: searchTerm,
+            mode: 'insensitive'
+          }
+        },
+        {
+          demandes: {
+            some: {
+              OR: [
+                {
+                  nom: {
+                    contains: searchTerm,
+                    mode: 'insensitive'
+                  }
+                },
+                {
+                  prenom: {
+                    contains: searchTerm,
+                    mode: 'insensitive'
+                  }
+                },
+                {
+                  numeroDS: {
+                    contains: searchTerm,
+                    mode: 'insensitive'
+                  }
+                },
+                {
+                  grade: {
+                    gradeAbrege: {
+                      contains: searchTerm,
+                      mode: 'insensitive'
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ];
+    }
+
     const dossiers = await prisma.dossier.findMany({
+      where: whereClause,
+      ...(limitInt && { take: limitInt }),
       include: {
         demandes: {
-          select: {
-            id: true,
-            numeroDS: true,
-            type: true,
-            nom: true,
-            prenom: true,
-            dateReception: true
+          include: {
+            grade: true
           }
         },
         sgami: true,
@@ -212,6 +260,11 @@ router.post('/', async (req, res) => {
           badges: {
             include: {
               badge: true
+            }
+          },
+          baps: {
+            include: {
+              bap: true
             }
           },
           assigneA: {

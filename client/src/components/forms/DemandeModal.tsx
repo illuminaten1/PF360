@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { Demande, Dossier } from '@/types'
+import { Demande } from '@/types'
 import api from '@/utils/api'
 import GradeSelector from './GradeSelector'
 
@@ -58,8 +58,6 @@ const demandeSchema = z.object({
   // Date de réception
   dateReception: z.string().optional(),
   
-  // Association dossier (uniquement pour modification)
-  dossierId: z.string().optional(),
   
 }).refine(
   (data) => {
@@ -133,13 +131,11 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
       soutienPsychologique: false,
       soutienSocial: false,
       soutienMedical: false,
-      dateReception: new Date().toISOString().split('T')[0],
-      dossierId: ''
+      dateReception: new Date().toISOString().split('T')[0]
     }
   })
 
   const partieCivile = watch('partieCivile')
-  const dossierId = watch('dossierId')
 
   // Nettoyer le montant quand partieCivile est décochée
   React.useEffect(() => {
@@ -148,15 +144,6 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
     }
   }, [partieCivile, setValue])
 
-  // Fetch dossiers for assignment (only when editing existing demande)
-  const { data: dossiers = [] } = useQuery<Dossier[]>({
-    queryKey: ['dossiers'],
-    queryFn: async () => {
-      const response = await api.get('/dossiers')
-      return response.data
-    },
-    enabled: !!demande // Only fetch when editing an existing demande
-  })
 
 
   useEffect(() => {
@@ -196,8 +183,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           soutienPsychologique: demande.soutienPsychologique,
           soutienSocial: demande.soutienSocial,
           soutienMedical: demande.soutienMedical,
-          dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : '',
-          dossierId: demande.dossier?.id || ''
+          dateReception: demande.dateReception ? new Date(demande.dateReception).toISOString().split('T')[0] : ''
         })
       } else {
         // Mode création : réinitialiser complètement le formulaire
@@ -234,8 +220,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
           soutienPsychologique: false,
           soutienSocial: false,
           soutienMedical: false,
-          dateReception: new Date().toISOString().split('T')[0], // Date actuelle par défaut
-          dossierId: ''
+          dateReception: new Date().toISOString().split('T')[0] // Date actuelle par défaut
         })
       }
     }
@@ -305,7 +290,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                   {/* Informations générales */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Informations générales</h4>
-                    <div className={`grid grid-cols-1 gap-4 ${demande ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="label block text-gray-700 mb-2">
                           Numéro DS <span className="text-red-500">*</span>
@@ -349,59 +334,17 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                           disabled={isSubmitting}
                         />
                       </div>
-
-                      {/* Afficher le champ dossier uniquement en mode modification */}
-                      {demande && (
-                        <div>
-                          <label className="label block text-gray-700 mb-2">
-                            Dossier associé
-                          </label>
-                          <select
-                            {...register('dossierId')}
-                            className="input w-full"
-                            disabled={isSubmitting}
-                          >
-                            <option value="">Aucun dossier</option>
-                            {dossiers.map((dossier) => (
-                              <option key={dossier.id} value={dossier.id}>
-                                {dossier.numero} {dossier.sgami?.nom && `(${dossier.sgami.nom})`}
-                              </option>
-                            ))}
-                          </select>
-                          
-                          {/* Message d'information quand un dossier est sélectionné */}
-                          {dossierId && (
-                            (() => {
-                              const selectedDossier = dossiers.find(d => d.id === dossierId);
-                              if (selectedDossier?.assigneA) {
-                                return (
-                                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-                                    <p className="text-xs text-blue-700">
-                                      <strong>ℹ️ Information :</strong> La demande sera automatiquement attribuée à{' '}
-                                      <span className="font-semibold">
-                                        {selectedDossier.assigneA.grade && `${selectedDossier.assigneA.grade} `}
-                                        {selectedDossier.assigneA.prenom} {selectedDossier.assigneA.nom}
-                                      </span>
-                                      {' '}(utilisateur gestionnaire du dossier).
-                                    </p>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })()
-                          )}
-                        </div>
-                      )}
                     </div>
                     
-                    {/* Message informatif pour les nouvelles demandes */}
-                    {!demande && (
-                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                        <p className="text-sm text-blue-700">
-                          La demande sera créée sans dossier. Vous pourrez l&apos;associer à un dossier ultérieurement depuis la liste des demandes.
-                        </p>
-                      </div>
-                    )}
+                    {/* Message informatif pour toutes les demandes */}
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-700">
+                        {demande 
+                          ? "Utilisez le bouton \"Lier\" dans la table des demandes pour associer cette demande à un dossier."
+                          : "La demande sera créée sans dossier. Vous pourrez l'associer à un dossier ultérieurement depuis la table des demandes."
+                        }
+                      </p>
+                    </div>
 
                   </div>
 

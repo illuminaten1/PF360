@@ -40,8 +40,7 @@ router.get('/', async (req, res) => {
       whereClause.OR = [
         {
           numero: {
-            contains: searchTerm,
-            mode: 'insensitive'
+            contains: searchTerm
           }
         },
         {
@@ -50,28 +49,17 @@ router.get('/', async (req, res) => {
               OR: [
                 {
                   nom: {
-                    contains: searchTerm,
-                    mode: 'insensitive'
+                    contains: searchTerm
                   }
                 },
                 {
                   prenom: {
-                    contains: searchTerm,
-                    mode: 'insensitive'
+                    contains: searchTerm
                   }
                 },
                 {
                   numeroDS: {
-                    contains: searchTerm,
-                    mode: 'insensitive'
-                  }
-                },
-                {
-                  grade: {
-                    gradeAbrege: {
-                      contains: searchTerm,
-                      mode: 'insensitive'
-                    }
+                    contains: searchTerm
                   }
                 }
               ]

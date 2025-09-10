@@ -71,6 +71,37 @@ const Paiements: React.FC = () => {
     }
   }
 
+  const handleGenerateDocument = async (paiement: Paiement) => {
+    try {
+      const response = await api.get(`/paiements/${paiement.id}/generate-document`, {
+        responseType: 'blob'
+      })
+      
+      // Créer un blob URL pour télécharger le fichier
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.oasis.opendocument.text' 
+      })
+      const url = window.URL.createObjectURL(blob)
+      
+      // Créer un lien temporaire pour télécharger le fichier
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `fiche_reglement_${paiement.numero}_FRI.odt`
+      document.body.appendChild(link)
+      link.click()
+      
+      // Nettoyer
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Document généré avec succès')
+      
+    } catch (error) {
+      console.error('Erreur lors de la génération du document:', error)
+      toast.error('Erreur lors de la génération du document')
+    }
+  }
+
   const getStatsData = () => {
     const totalPaiements = paiements.length
     const avocatCount = paiements.filter(p => p.qualiteBeneficiaire === 'Avocat').length
@@ -169,6 +200,7 @@ const Paiements: React.FC = () => {
         onView={handleViewPaiement}
         onEdit={handleEditPaiement}
         onDelete={handleDeletePaiement}
+        onGenerateDocument={handleGenerateDocument}
         loading={isLoading}
       />
     </div>

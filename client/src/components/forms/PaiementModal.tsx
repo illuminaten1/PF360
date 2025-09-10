@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Dialog, Transition, Listbox } from '@headlessui/react'
 import { useQuery } from '@tanstack/react-query'
-import { XMarkIcon, BanknotesIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, BanknotesIcon, ChevronUpDownIcon, CheckIcon, DocumentIcon } from '@heroicons/react/24/outline'
 import { Paiement } from '@/types'
 import api from '@/utils/api'
 
@@ -50,6 +50,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
   const [selectedPce, setSelectedPce] = useState<any>(null)
   const [avocatSearchQuery, setAvocatSearchQuery] = useState('')
   const [showAvocatDropdown, setShowAvocatDropdown] = useState(false)
+  const [isGeneratingDocument, setIsGeneratingDocument] = useState(false)
 
   // Fetch SGAMIS
   const { data: sgamis = [] } = useQuery({
@@ -324,6 +325,44 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     }
 
     onSubmit(submitData)
+  }
+
+  const handleGenerateDocument = async () => {
+    if (!paiement?.id) {
+      alert('Le paiement doit être enregistré avant de pouvoir générer le document')
+      return
+    }
+
+    setIsGeneratingDocument(true)
+    
+    try {
+      const response = await api.get(`/paiements/${paiement.id}/generate-document`, {
+        responseType: 'blob'
+      })
+      
+      // Créer un blob URL pour télécharger le fichier
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.oasis.opendocument.text' 
+      })
+      const url = window.URL.createObjectURL(blob)
+      
+      // Créer un lien temporaire pour télécharger le fichier
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `fiche_reglement_${paiement.numero}_FRI.odt`
+      document.body.appendChild(link)
+      link.click()
+      
+      // Nettoyer
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+    } catch (error) {
+      console.error('Erreur lors de la génération du document:', error)
+      alert('Erreur lors de la génération du document')
+    } finally {
+      setIsGeneratingDocument(false)
+    }
   }
 
   return (
@@ -950,20 +989,38 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
           </div>
 
                   {/* Actions */}
-                  <div className="flex justify-end space-x-3 pt-6 border-t mt-8">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="btn-secondary"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn-primary"
-                    >
-                      {paiement ? 'Modifier le paiement' : 'Créer le paiement'}
-                    </button>
+                  <div className="flex justify-between items-center pt-6 border-t mt-8">
+                    {/* Bouton générer document à gauche (seulement si paiement existant) */}
+                    <div>
+                      {paiement && (
+                        <button
+                          type="button"
+                          onClick={handleGenerateDocument}
+                          disabled={isGeneratingDocument}
+                          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <DocumentIcon className="h-4 w-4 mr-2" />
+                          {isGeneratingDocument ? 'Génération...' : 'Générer document'}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Boutons d'action à droite */}
+                    <div className="flex space-x-3">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="btn-secondary"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-primary"
+                      >
+                        {paiement ? 'Modifier le paiement' : 'Créer le paiement'}
+                      </button>
+                    </div>
                   </div>
                 </form>
               </Dialog.Panel>

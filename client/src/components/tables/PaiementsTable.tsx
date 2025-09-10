@@ -29,7 +29,8 @@ import {
   BuildingOfficeIcon,
   CheckCircleIcon,
   XCircleIcon,
-  CalendarDaysIcon
+  CalendarDaysIcon,
+  DocumentIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
 
@@ -41,6 +42,7 @@ interface PaiementsTableProps {
   onView: (paiement: Paiement) => void
   onEdit: (paiement: Paiement) => void
   onDelete: (paiement: Paiement) => void
+  onGenerateDocument?: (paiement: Paiement) => void
 }
 
 function Filter({ column }: { column: any }) {
@@ -89,7 +91,8 @@ const PaiementsTable: React.FC<PaiementsTableProps> = ({
   loading = false,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  onGenerateDocument
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true }
@@ -360,6 +363,15 @@ const PaiementsTable: React.FC<PaiementsTableProps> = ({
             >
               <PencilIcon className="h-5 w-5" />
             </button>
+            {onGenerateDocument && (
+              <button
+                onClick={() => onGenerateDocument(row.original)}
+                className="p-1 text-gray-400 hover:text-purple-600 rounded-full hover:bg-purple-50"
+                title="Générer document"
+              >
+                <DocumentIcon className="h-5 w-5" />
+              </button>
+            )}
             <button
               onClick={() => onDelete(row.original)}
               className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
@@ -373,7 +385,7 @@ const PaiementsTable: React.FC<PaiementsTableProps> = ({
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete]
+    [onView, onEdit, onDelete, onGenerateDocument]
   )
 
   const table = useReactTable({

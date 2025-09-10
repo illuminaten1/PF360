@@ -119,7 +119,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         accessorFn: (row) => {
           if (row.demandes.length === 0) return 'Aucun'
           // Inclure TOUS les demandeurs pour la recherche - cette chaîne est utilisée pour le filtrage
-          return row.demandes.map(d => `${d.grade ? `${d.grade} ` : ''}${d.prenom} ${d.nom} ${d.numeroDS || ''}`).join(' | ')
+          return row.demandes.map(d => `${d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}${d.prenom} ${d.nom} ${d.numeroDS || ''}`).join(' | ')
         },
         cell: ({ row }) => {
           const dossier = row.original
@@ -149,7 +149,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
                   <div className="space-y-1">
                     {dossier.demandes.map((d, index) => (
                       <div key={index} className="flex items-center justify-between">
-                        <span>{d.grade ? `${d.grade} ` : ''}{d.prenom} {d.nom}</span>
+                        <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
                         {d.numeroDS && (
                           <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
                         )}
@@ -172,7 +172,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
                   <div>
                     {dossier.demandes.slice(0, 2).map((d, index) => (
                       <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                        <span>{d.grade ? `${d.grade} ` : ''}{d.prenom} {d.nom}</span>
+                        <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
                         {d.numeroDS && (
                           <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
                         )}

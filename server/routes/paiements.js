@@ -497,7 +497,7 @@ router.get('/:id/generate-document', async (req, res) => {
             demandes: {
               include: {
                 grade: {
-                  select: { nom: true, abrege: true }
+                  select: { gradeComplet: true, gradeAbrege: true }
                 }
               }
             }
@@ -571,7 +571,7 @@ router.get('/:id/generate-document', async (req, res) => {
       },
       d: {
         demandes: (paiement.dossier && paiement.dossier.demandes) ? paiement.dossier.demandes.map(demande => ({
-          grade: demande.grade?.abrege || demande.grade?.nom || '',
+          grade: demande.grade?.gradeAbrege || demande.grade?.gradeComplet || '',
           prenom: demande.prenom || '',
           nom: demande.nom || ''
         })) : [],

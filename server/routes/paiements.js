@@ -622,8 +622,8 @@ router.get('/:id/generate-document', async (req, res) => {
 
     // TEST: Créer un template minimal en mémoire pour vérifier Carbone
     const testTemplateData = {
-      numero: templateData.paiement.numero,
-      montant: templateData.paiement.montantTTC
+      numero: templateData["paiement.numero"],
+      montant: templateData["paiement.montantTTC"]
     };
     
     // Test simple avec un template en string (juste pour debug)

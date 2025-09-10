@@ -587,11 +587,31 @@ router.get('/:id/generate-document', async (req, res) => {
     console.log('templateData:', JSON.stringify(templateData, null, 2));
     console.log('==========================');
 
-    // Chemin vers le template ODT
-    const templatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
+    // Chemin vers le template ODT - utiliser le système de templates existant
+    const templatePath = path.join(__dirname, '../uploads/templates/reglement');
+    
+    // Chercher le template actif ou utiliser le défaut
+    let finalTemplatePath;
+    try {
+      // Vérifier s'il y a un template custom uploadé
+      const files = await require('fs').promises.readdir(templatePath);
+      const odtFile = files.find(file => file.endsWith('.odt'));
+      if (odtFile) {
+        finalTemplatePath = path.join(templatePath, odtFile);
+      } else {
+        // Fallback vers le template par défaut
+        finalTemplatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
+      }
+    } catch (error) {
+      // Si le dossier n'existe pas, utiliser le template par défaut
+      finalTemplatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
+    }
+
+    // Debug: afficher le chemin du template utilisé
+    console.log('Chemin template utilisé:', finalTemplatePath);
 
     // Générer le document avec Carbone
-    carbone.render(templatePath, templateData, (err, result) => {
+    carbone.render(finalTemplatePath, templateData, (err, result) => {
       if (err) {
         console.error('Erreur génération Carbone:', err);
         return res.status(500).json({ error: 'Erreur lors de la génération du document' });

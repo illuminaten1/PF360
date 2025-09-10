@@ -2,6 +2,9 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
+const carbone = require('carbone');
+const path = require('path');
+const dayjs = require('dayjs');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -476,6 +479,136 @@ router.delete('/:id', async (req, res) => {
     res.json({ message: 'Paiement supprimé avec succès' });
   } catch (error) {
     console.error('Delete paiement error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Route pour générer le document de paiement
+router.get('/:id/generate-document', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Récupérer les données complètes du paiement avec toutes les relations
+    const paiement = await prisma.paiement.findUnique({
+      where: { id },
+      include: {
+        dossier: {
+          include: {
+            demandes: {
+              include: {
+                demandeur: {
+                  select: { nom: true, prenom: true, grade: true }
+                }
+              }
+            }
+          }
+        },
+        sgami: {
+          select: { id: true, nom: true, intituleFicheReglement: true }
+        },
+        avocat: {
+          select: { id: true, nom: true, prenom: true, region: true }
+        },
+        pce: {
+          select: { 
+            id: true, 
+            ordre: true, 
+            pceDetaille: true, 
+            pceNumerique: true, 
+            codeMarchandise: true 
+          }
+        },
+        creePar: {
+          select: { id: true, nom: true, prenom: true, grade: true }
+        },
+        decisions: {
+          include: {
+            decision: {
+              select: {
+                id: true,
+                type: true,
+                numero: true,
+                dateSignature: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!paiement) {
+      return res.status(404).json({ error: 'Paiement non trouvé' });
+    }
+
+    // Préparer les données pour le template
+    const templateData = {
+      paiement: {
+        numero: paiement.numero,
+        montantHT: paiement.montantHT || 0,
+        montantTTC: paiement.montantTTC || 0,
+        dateServiceFait: paiement.dateServiceFait ? dayjs(paiement.dateServiceFait).format('DD/MM/YYYY') : '',
+        conventionJointeFRI: paiement.conventionJointeFRI || 'NON',
+        facture: paiement.facture || 'Facture',
+        qualiteBeneficiaire: paiement.qualiteBeneficiaire || '',
+        identiteBeneficiaire: paiement.identiteBeneficiaire || '',
+        siretOuRidet: paiement.siretOuRidet || '',
+        adresseBeneficiaire: paiement.adresseBeneficiaire || '',
+        titulaireCompteBancaire: paiement.titulaireCompteBancaire || '',
+        codeEtablissement: paiement.codeEtablissement || '',
+        codeGuichet: paiement.codeGuichet || '',
+        numeroCompte: paiement.numeroCompte || '',
+        cleRIB: paiement.cleRIB || '',
+        emissionTitrePerception: paiement.emissionTitrePerception || 'NON'
+      },
+      pce: paiement.pce ? {
+        pceNumerique: paiement.pce.pceNumerique || '',
+        codeMarchandise: paiement.pce.codeMarchandise || '',
+        pceDetaille: paiement.pce.pceDetaille || ''
+      } : {
+        pceNumerique: '',
+        codeMarchandise: '',
+        pceDetaille: ''
+      },
+      d: {
+        demandes: (paiement.dossier && paiement.dossier.demandes) ? paiement.dossier.demandes.map(demande => ({
+          grade: demande.demandeur?.grade || '',
+          prenom: demande.demandeur?.prenom || '',
+          nom: demande.demandeur?.nom || ''
+        })) : [],
+        decisions: paiement.decisions ? paiement.decisions.map(pd => ({
+          numero: pd.decision.numero || '',
+          dateSignature: pd.decision.dateSignature ? dayjs(pd.decision.dateSignature).format('DD/MM/YYYY') : ''
+        })) : []
+      }
+    };
+
+    // Chemin vers le template ODT
+    const templatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
+
+    // Générer le document avec Carbone
+    carbone.render(templatePath, templateData, (err, result) => {
+      if (err) {
+        console.error('Erreur génération Carbone:', err);
+        return res.status(500).json({ error: 'Erreur lors de la génération du document' });
+      }
+
+      // Définir les en-têtes pour le téléchargement
+      const filename = `fiche_reglement_${paiement.numero}_FRI.odt`;
+      res.set({
+        'Content-Type': 'application/vnd.oasis.opendocument.text',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': result.length
+      });
+
+      // Log de l'action
+      logAction(req.user.id, 'GENERATE_DOCUMENT_PAIEMENT', `Génération document paiement ${paiement.numero}`, 'Paiement', paiement.id);
+
+      // Envoyer le document généré
+      res.send(result);
+    });
+
+  } catch (error) {
+    console.error('Generate document error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });

@@ -634,8 +634,13 @@ router.get('/:id/generate-document', async (req, res) => {
     console.log('Test data:', testTemplateData);
     
     // Continuer avec le vrai template
-    // Générer le document avec Carbone
-    carbone.render(finalTemplatePath, templateData, (err, result) => {
+    // Options pour Carbone (comme dans votre autre projet)
+    const options = {
+      convertTo: null // Garder le format ODT original
+    };
+
+    // Générer le document avec Carbone (avec options)
+    carbone.render(finalTemplatePath, templateData, options, (err, result) => {
       if (err) {
         console.error('Erreur génération Carbone:', err);
         return res.status(500).json({ error: 'Erreur lors de la génération du document' });

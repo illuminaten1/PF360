@@ -600,25 +600,25 @@ router.get('/:id/generate-document', async (req, res) => {
     checkForNulls(templateData);
     console.log('==========================');
 
-    // Chemin vers le template ODT - utiliser le système de templates existant
-    const templatePath = path.join(__dirname, '../uploads/templates/reglement');
-    
-    // Chercher le template actif ou utiliser le défaut
-    let finalTemplatePath;
-    try {
-      // Vérifier s'il y a un template custom uploadé
-      const files = await require('fs').promises.readdir(templatePath);
-      const odtFile = files.find(file => file.endsWith('.odt'));
-      if (odtFile) {
-        finalTemplatePath = path.join(templatePath, odtFile);
-      } else {
-        // Fallback vers le template par défaut
-        finalTemplatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
+    // Utiliser le système de templates existant
+    const getTemplatePath = async (templateType) => {
+      const activeVersion = await prisma.templateVersion.findFirst({
+        where: { 
+          templateType,
+          isActive: true 
+        }
+      });
+      
+      if (activeVersion) {
+        return path.join(__dirname, '../uploads/templates', templateType, activeVersion.filename);
       }
-    } catch (error) {
-      // Si le dossier n'existe pas, utiliser le template par défaut
-      finalTemplatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
-    }
+      
+      // Fallback vers le template par défaut
+      return path.join(__dirname, '../templates/default/reglement_template.odt');
+    };
+
+    // Obtenir le chemin du template de règlement
+    const finalTemplatePath = await getTemplatePath('reglement');
 
     // Debug: afficher le chemin du template utilisé
     console.log('Chemin template utilisé:', finalTemplatePath);

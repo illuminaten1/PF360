@@ -582,6 +582,11 @@ router.get('/:id/generate-document', async (req, res) => {
       }
     };
 
+    // Debug: afficher les données envoyées à Carbone
+    console.log('=== DEBUG CARBONE DATA ===');
+    console.log('templateData:', JSON.stringify(templateData, null, 2));
+    console.log('==========================');
+
     // Chemin vers le template ODT
     const templatePath = path.join(__dirname, '../templates/default/reglement_template.odt');
 

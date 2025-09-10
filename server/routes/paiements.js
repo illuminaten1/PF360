@@ -540,32 +540,35 @@ router.get('/:id/generate-document', async (req, res) => {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
 
-    // Préparer les données pour le template - structure aplatie pour Carbone
+    // Préparer les données pour le template - structure Carbone correcte
     const templateData = {
-      // Variables paiement directement accessibles
-      "paiement.numero": paiement.numero,
-      "paiement.montantHT": paiement.montantHT || 0,
-      "paiement.montantTTC": paiement.montantTTC || 0,
-      "paiement.dateServiceFait": paiement.dateServiceFait ? dayjs(paiement.dateServiceFait).format('DD/MM/YYYY') : '',
-      "paiement.conventionJointeFRI": paiement.conventionJointeFRI || 'NON',
-      "paiement.facture": paiement.facture || 'Facture',
-      "paiement.qualiteBeneficiaire": paiement.qualiteBeneficiaire || '',
-      "paiement.identiteBeneficiaire": paiement.identiteBeneficiaire || '',
-      "paiement.siretOuRidet": paiement.siretOuRidet || '',
-      "paiement.adresseBeneficiaire": paiement.adresseBeneficiaire || '',
-      "paiement.titulaireCompteBancaire": paiement.titulaireCompteBancaire || '',
-      "paiement.codeEtablissement": paiement.codeEtablissement || '',
-      "paiement.codeGuichet": paiement.codeGuichet || '',
-      "paiement.numeroCompte": paiement.numeroCompte || '',
-      "paiement.cleRIB": paiement.cleRIB || '',
-      "paiement.emissionTitrePerception": paiement.emissionTitrePerception || 'NON',
-      
-      // Variables PCE directement accessibles
-      "pce.pceNumerique": paiement.pce?.pceNumerique || '',
-      "pce.codeMarchandise": paiement.pce?.codeMarchandise || '',
-      "pce.pceDetaille": paiement.pce?.pceDetaille || '',
-      
-      // Structure pour les boucles
+      paiement: {
+        numero: paiement.numero,
+        montantHT: paiement.montantHT || 0,
+        montantTTC: paiement.montantTTC || 0,
+        dateServiceFait: paiement.dateServiceFait ? dayjs(paiement.dateServiceFait).format('DD/MM/YYYY') : '',
+        conventionJointeFRI: paiement.conventionJointeFRI || 'NON',
+        facture: paiement.facture || 'Facture',
+        qualiteBeneficiaire: paiement.qualiteBeneficiaire || '',
+        identiteBeneficiaire: paiement.identiteBeneficiaire || '',
+        siretOuRidet: paiement.siretOuRidet || '',
+        adresseBeneficiaire: paiement.adresseBeneficiaire || '',
+        titulaireCompteBancaire: paiement.titulaireCompteBancaire || '',
+        codeEtablissement: paiement.codeEtablissement || '',
+        codeGuichet: paiement.codeGuichet || '',
+        numeroCompte: paiement.numeroCompte || '',
+        cleRIB: paiement.cleRIB || '',
+        emissionTitrePerception: paiement.emissionTitrePerception || 'NON'
+      },
+      pce: paiement.pce ? {
+        pceNumerique: paiement.pce.pceNumerique || '',
+        codeMarchandise: paiement.pce.codeMarchandise || '',
+        pceDetaille: paiement.pce.pceDetaille || ''
+      } : {
+        pceNumerique: '',
+        codeMarchandise: '',
+        pceDetaille: ''
+      },
       d: {
         demandes: (paiement.dossier && paiement.dossier.demandes) ? paiement.dossier.demandes.map(demande => ({
           grade: demande.grade?.gradeAbrege || demande.grade?.gradeComplet || '',
@@ -622,8 +625,8 @@ router.get('/:id/generate-document', async (req, res) => {
 
     // TEST: Créer un template minimal en mémoire pour vérifier Carbone
     const testTemplateData = {
-      numero: templateData["paiement.numero"],
-      montant: templateData["paiement.montantTTC"]
+      numero: templateData.paiement.numero,
+      montant: templateData.paiement.montantTTC
     };
     
     // Test simple avec un template en string (juste pour debug)

@@ -585,6 +585,19 @@ router.get('/:id/generate-document', async (req, res) => {
     // Debug: afficher les données envoyées à Carbone
     console.log('=== DEBUG CARBONE DATA ===');
     console.log('templateData:', JSON.stringify(templateData, null, 2));
+    
+    // Vérifier s'il y a des valeurs null/undefined qui pourraient poser problème
+    const checkForNulls = (obj, path = '') => {
+      for (const [key, value] of Object.entries(obj)) {
+        const currentPath = path ? `${path}.${key}` : key;
+        if (value === null || value === undefined) {
+          console.log(`⚠️  Valeur null/undefined trouvée: ${currentPath} = ${value}`);
+        } else if (typeof value === 'object' && !Array.isArray(value)) {
+          checkForNulls(value, currentPath);
+        }
+      }
+    };
+    checkForNulls(templateData);
     console.log('==========================');
 
     // Chemin vers le template ODT - utiliser le système de templates existant
@@ -610,6 +623,17 @@ router.get('/:id/generate-document', async (req, res) => {
     // Debug: afficher le chemin du template utilisé
     console.log('Chemin template utilisé:', finalTemplatePath);
 
+    // TEST: Créer un template minimal en mémoire pour vérifier Carbone
+    const testTemplateData = {
+      numero: templateData.paiement.numero,
+      montant: templateData.paiement.montantTTC
+    };
+    
+    // Test simple avec un template en string (juste pour debug)
+    console.log('=== TEST CARBONE SIMPLE ===');
+    console.log('Test data:', testTemplateData);
+    
+    // Continuer avec le vrai template
     // Générer le document avec Carbone
     carbone.render(finalTemplatePath, templateData, (err, result) => {
       if (err) {

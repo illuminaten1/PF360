@@ -82,7 +82,11 @@ const generatePaiementDocument = async (paiementId) => {
       });
 
       if (!paiement) {
-        throw new Error('Paiement non trouvé');
+        throw new Error(`Paiement non trouvé pour l'ID: ${paiementId}`);
+      }
+      
+      if (!paiement.numero) {
+        throw new Error(`Paiement sans numéro trouvé pour l'ID: ${paiementId}`);
       }
 
       // Récupération de la première demande pour les informations du demandeur
@@ -176,10 +180,18 @@ const generatePaiementDocument = async (paiementId) => {
       // Obtenir le chemin du template
       const templatePath = await getTemplatePath('reglement');
       console.log('Template path:', templatePath);
+      
+      // Vérifier que le template existe
+      const fs = require('fs').promises;
+      try {
+        await fs.access(templatePath);
+      } catch (error) {
+        throw new Error(`Template non trouvé : ${templatePath}. Erreur: ${error.message}`);
+      }
 
-      // Options Carbone pour DOCX
+      // Options Carbone pour DOCX  
       const options = {
-        convertTo: 'pdf' // Ou null pour garder DOCX, 'pdf' pour convertir en PDF
+        convertTo: null // Garder DOCX pour éviter les problèmes LibreOffice
       };
 
       // Génération avec Carbone

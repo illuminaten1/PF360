@@ -134,6 +134,10 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
           gradeAbrege: demande.grade.gradeAbrege
         } : null
       })),
+      // Chaîne formatée pour les demandeurs
+      demandeursListe: paiement.dossier.demandes.map(demande => 
+        `${demande.grade?.gradeAbrege || ''} ${demande.prenom} ${demande.nom}`.trim()
+      ).join(', '),
       decisions: paiement.decisions.map(pd => ({
         numero: pd.decision.numero,
         dateSignature: pd.decision.dateSignature ? new Date(pd.decision.dateSignature).toLocaleDateString('fr-FR') : null,

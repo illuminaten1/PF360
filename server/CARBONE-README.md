@@ -33,8 +33,11 @@ L'API récupère automatiquement :
 - ✅ **SGAMI** associé  
 - ✅ **PCE** (si présent)
 - ✅ **Dossier** associé
-- ✅ **Demandes** du dossier
+- ✅ **Demandes** du dossier (avec listes pré-formatées)
 - ✅ **Décisions** associées au paiement
+
+### Variables spéciales pour listes :
+- `{d.demandeursListe}` - Liste automatique de tous les demandeurs (GRADE Prénom NOM, ...)
 
 ## Test
 

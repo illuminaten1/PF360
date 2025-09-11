@@ -2,8 +2,9 @@
 
 ## Configuration
 
-1. **Template requis**: Placez votre template `fiche-paiement-template.docx` dans le dossier `templates/`
+1. **Template requis**: Utilisez la page **Templates** de l'admin pour uploader un template de type "règlement"
 2. **Variables**: Consultez `templates/EXEMPLE-variables-disponibles.txt` pour toutes les variables disponibles
+3. **Système intégré**: Utilise le système de versioning et gestion des templates existant
 
 ## Routes API
 

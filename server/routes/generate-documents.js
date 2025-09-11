@@ -143,15 +143,37 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
       dateGeneration: new Date().toLocaleDateString('fr-FR')
     };
 
-    // Chemin du template
-    const templatePath = path.join(__dirname, '../templates/fiche-paiement-template.docx');
+    // Utiliser le système de templates existant pour récupérer le template de règlement
+    const TEMPLATES_DIR = path.join(__dirname, '../uploads/templates');
+    const DEFAULT_TEMPLATES_DIR = path.join(__dirname, '../templates/default');
+    const TEMPLATE_TYPES = {
+      reglement: 'reglement_template.docx'
+    };
     
-    // Vérifier que le template existe
+    // Fonction pour obtenir le chemin du template (copiée du système existant)
+    const getTemplatePath = async (templateType) => {
+      const activeVersion = await prisma.templateVersion.findFirst({
+        where: { 
+          templateType,
+          isActive: true 
+        }
+      });
+      
+      if (activeVersion) {
+        return path.join(TEMPLATES_DIR, templateType, activeVersion.filename);
+      }
+      
+      return path.join(DEFAULT_TEMPLATES_DIR, TEMPLATE_TYPES[templateType]);
+    };
+    
+    let templatePath;
     try {
+      templatePath = await getTemplatePath('reglement');
+      // Vérifier que le fichier existe
       await fs.access(templatePath);
-    } catch {
+    } catch (error) {
       return res.status(404).json({ 
-        error: 'Template de fiche de paiement non trouvé. Veuillez placer le fichier "fiche-paiement-template.docx" dans le dossier templates/' 
+        error: 'Template de règlement non trouvé. Veuillez uploader un template via la page Templates de l\'admin.' 
       });
     }
     

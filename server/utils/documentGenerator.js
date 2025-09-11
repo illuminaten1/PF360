@@ -177,25 +177,45 @@ const generatePaiementDocument = async (paiementId) => {
       console.log('=== CARBONE TEMPLATE DATA ===');
       console.log(JSON.stringify(templateData, null, 2));
       
-      // Obtenir le chemin du template
-      const templatePath = await getTemplatePath('reglement');
-      console.log('Template path:', templatePath);
-      
-      // Vérifier que le template existe
-      const fs = require('fs').promises;
-      try {
-        await fs.access(templatePath);
-      } catch (error) {
-        throw new Error(`Template non trouvé : ${templatePath}. Erreur: ${error.message}`);
-      }
+      // TEST: Créer un template simple en mémoire pour debug
+      const templateSimple = `
+FICHE DE RÈGLEMENT TEST
+
+N° {paiement.numero}/FRI
+GEND/DRHGN/SDAP/BRPF
+
+Dossier suivi par : {utilisateur.gradeAbrege} {utilisateur.prenom} {utilisateur.nom} {utilisateur.mail}
+
+Destinataire : {sgami.intituleFicheReglement}
+PCE : {pce.pceNumerique}
+Groupe marchandise : {pce.codeMarchandise}
+
+Montant HT: {paiement.montantHT} €
+Montant TTC: {paiement.montantTTC} €
+
+DEMANDEURS:
+{d.demandes}{grade} {prenom} {nom}
+{/d.demandes}
+
+DÉCISIONS:
+{d.decisions}n° {numero} du {dateSignature}
+{/d.decisions}
+
+BÉNÉFICIAIRE: {paiement.qualiteBeneficiaire} {paiement.identiteBeneficiaire}
+
+Service fait: {paiement.dateServiceFait}
+Convention jointe: {paiement.conventionJointeFRI}
+`;
+
+      console.log('Utilisation template simple pour test');
 
       // Options Carbone pour DOCX  
       const options = {
-        convertTo: null // Garder DOCX pour éviter les problèmes LibreOffice
+        convertTo: 'pdf' // Test avec PDF pour voir si ça marche
       };
 
-      // Génération avec Carbone
-      carbone.render(templatePath, templateData, options, (err, result) => {
+      // Génération avec Carbone - utiliser template simple pour test
+      carbone.render(templateSimple, templateData, options, (err, result) => {
         if (err) {
           console.error('Erreur génération Carbone:', err);
           reject(err);

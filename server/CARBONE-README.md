@@ -2,7 +2,7 @@
 
 ## Configuration
 
-1. **Template requis**: Utilisez la page **Templates** de l'admin pour uploader un template de type "règlement"
+1. **Template requis**: Utilisez la page **Templates** de l'admin pour uploader un template de type "règlement" **au format ODT**
 2. **Variables**: Consultez `templates/EXEMPLE-variables-disponibles.txt` pour toutes les variables disponibles
 3. **Système intégré**: Utilise le système de versioning et gestion des templates existant
 
@@ -23,7 +23,7 @@ Authorization: Bearer YOUR_TOKEN
 ```
 
 **Paramètres**: `paiementId` = ID du paiement dans la base
-**Réponse**: Fichier DOCX généré avec toutes les données
+**Réponse**: Fichier ODT généré avec toutes les données
 
 ## Données injectées
 

@@ -33,12 +33,29 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    // Vérifier que le fichier est un DOCX
-    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-        path.extname(file.originalname).toLowerCase() === '.docx') {
-      cb(null, true);
+    const { type } = req.params;
+    
+    if (type === 'reglement') {
+      // Pour les templates de règlement, accepter seulement ODT
+      const isODT = file.mimetype === 'application/vnd.oasis.opendocument.text' ||
+                    file.mimetype === 'application/x-vnd.oasis.opendocument.text' ||
+                    file.mimetype === 'application/octet-stream' ||
+                    path.extname(file.originalname).toLowerCase() === '.odt';
+      
+      if (isODT) {
+        cb(null, true);
+      } else {
+        console.log('Fichier rejeté - MIME type:', file.mimetype, 'Extension:', path.extname(file.originalname));
+        cb(new Error('Le fichier doit être au format ODT pour les templates de règlement'));
+      }
     } else {
-      cb(new Error('Le fichier doit être au format DOCX'));
+      // Pour les autres templates, garder DOCX
+      if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+          path.extname(file.originalname).toLowerCase() === '.docx') {
+        cb(null, true);
+      } else {
+        cb(new Error('Le fichier doit être au format DOCX'));
+      }
     }
   },
   limits: {
@@ -60,7 +77,7 @@ const TEMPLATE_TYPES = {
   decision: 'decision_template.docx',
   convention: 'convention_template.docx',
   avenant: 'avenant_template.docx',
-  reglement: 'reglement_template.docx'
+  reglement: 'reglement_template.odt'
 };
 
 // Chemins des templates

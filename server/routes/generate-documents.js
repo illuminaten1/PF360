@@ -147,7 +147,7 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
     const TEMPLATES_DIR = path.join(__dirname, '../uploads/templates');
     const DEFAULT_TEMPLATES_DIR = path.join(__dirname, '../templates/default');
     const TEMPLATE_TYPES = {
-      reglement: 'reglement_template.docx'
+      reglement: 'reglement_template.odt'
     };
     
     // Fonction pour obtenir le chemin du template (copiée du système existant)
@@ -198,19 +198,19 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
           paiementId
         );
         
-        // Nom du fichier généré
-        const fileName = `fiche-paiement-${data.paiement.numero}-${Date.now()}.docx`;
+        // Nom du fichier généré en ODT
+        const fileName = `fiche-paiement-${data.paiement.numero}-${Date.now()}.odt`;
         
         // Envoyer le fichier en réponse
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Type', 'application/vnd.oasis.opendocument.text');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.send(result);
         
       } catch (logError) {
         console.error('Erreur lors du log:', logError);
         // Envoyer quand même le fichier même si le log échoue
-        const fileName = `fiche-paiement-${data.paiement.numero}-${Date.now()}.docx`;
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        const fileName = `fiche-paiement-${data.paiement.numero}-${Date.now()}.odt`;
+        res.setHeader('Content-Type', 'application/vnd.oasis.opendocument.text');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.send(result);
       }

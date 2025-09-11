@@ -33,7 +33,7 @@ const TEMPLATE_CONFIG: TemplatesConfig = {
   },
   reglement: { 
     name: 'Template de fiche de règlement', 
-    filename: 'reglement_template.docx', 
+    filename: 'reglement_template.odt', 
     status: 'default' 
   }
 }
@@ -165,9 +165,17 @@ const TemplatesPage: React.FC = () => {
     if (!file) return
     
     const fileExt = file.name.split('.').pop()?.toLowerCase()
-    if (fileExt !== 'docx') {
-      toast.error('Le fichier doit être au format DOCX (.docx)')
-      return
+    
+    if (templateType === 'reglement') {
+      if (fileExt !== 'odt') {
+        toast.error('Le fichier doit être au format ODT (.odt) pour les templates de règlement')
+        return
+      }
+    } else {
+      if (fileExt !== 'docx') {
+        toast.error('Le fichier doit être au format DOCX (.docx)')
+        return
+      }
     }
     
     uploadTemplateMutation.mutate({ templateType, file })
@@ -295,7 +303,7 @@ const TemplatesPage: React.FC = () => {
                   type="file"
                   ref={inputRefs[templateType]}
                   className="hidden"
-                  accept=".docx"
+                  accept={templateType === 'reglement' ? '.odt' : '.docx'}
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
                 

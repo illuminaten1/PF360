@@ -1,0 +1,101 @@
+VARIABLES DISPONIBLES POUR LE TEMPLATE FICHE DE PAIEMENT
+
+Placez ce fichier dans templates/fiche-paiement-template.docx
+
+===== VARIABLES PAIEMENT =====
+{d.paiement.numero} - Numéro du paiement
+{d.paiement.facture} - Numéro de facture  
+{d.paiement.montantHT} - Montant HT
+{d.paiement.montantTTC} - Montant TTC
+{d.paiement.emissionTitrePerception} - OUI | NON
+{d.paiement.qualiteBeneficiaire} - Avocat | Commissaire de justice | etc.
+{d.paiement.identiteBeneficiaire} - Nom/identité du bénéficiaire
+{d.paiement.dateServiceFait} - Date du service fait (format FR)
+{d.paiement.conventionJointeFRI} - OUI | NON
+
+===== COORDONNÉES BÉNÉFICIAIRE =====
+{d.paiement.adresseBeneficiaire}
+{d.paiement.siretOuRidet}
+{d.paiement.titulaireCompteBancaire}
+{d.paiement.codeEtablissement}
+{d.paiement.codeGuichet}
+{d.paiement.numeroCompte}
+{d.paiement.cleRIB}
+
+===== UTILISATEUR CRÉATEUR =====
+{d.utilisateur.grade} - Grade
+{d.utilisateur.nom} - Nom
+{d.utilisateur.prenom} - Prénom
+{d.utilisateur.gradeAbrege} - Grade abrégé
+{d.utilisateur.mail} - Email
+{d.utilisateur.telephone} - Téléphone
+
+===== SGAMI =====
+{d.sgami.nom} - Nom du SGAMI
+{d.sgami.formatCourtNommage} - Format court
+{d.sgami.intituleFicheReglement} - Intitulé pour fiche de règlement
+
+===== PCE (si présent) =====
+{d.pce.pceDetaille} - PCE détaillé
+{d.pce.pceNumerique} - PCE numérique
+{d.pce.codeMarchandise} - Code marchandise
+
+===== DOSSIER =====
+{d.dossier.numero} - Numéro du dossier
+{d.dossier.nomDossier} - Nom optionnel du dossier
+{d.dossier.notes} - Notes du dossier
+
+===== DEMANDES ASSOCIÉES =====
+{d.demandes[0].nom} - Nom du demandeur
+{d.demandes[0].prenom} - Prénom du demandeur
+{d.demandes[0].grade.gradeComplet} - Grade complet (si présent)
+{d.demandes[0].grade.gradeAbrege} - Grade abrégé (si présent)
+{d.demandes[i+1].nom} - Pour accéder aux autres demandes (i+1, i+2, etc.)
+
+===== LISTES PRÉ-FORMATÉES (recommandé) =====
+{d.demandeursListe} - Liste complète des demandeurs formatée automatiquement
+                     - Format: "GRADE Prénom NOM, GRADE Prénom NOM, ..."
+                     - S'adapte automatiquement au nombre de demandeurs
+
+===== DÉCISIONS ASSOCIÉES =====
+{d.decisions[0].numero} - Numéro de la décision
+{d.decisions[0].dateSignature} - Date de signature (format FR)
+{d.decisions[0].type} - Type (AJ, AJE, PJ, REJET)
+{d.decisions[i+1].numero} - Pour accéder aux autres décisions
+
+===== DONNÉES GÉNÉRÉES =====
+{d.dateGeneration} - Date de génération du document (format FR)
+
+===== EXEMPLE D'UTILISATION =====
+
+FICHE DE RÈGLEMENT
+N° {d.paiement.numero}/FRI
+
+Dossier suivi par : {d.utilisateur.grade} {d.utilisateur.prenom} {d.utilisateur.nom}
+Email: {d.utilisateur.mail}
+
+Destinataire : {d.sgami.intituleFicheReglement}
+Demandeurs : {d.demandeursListe}
+
+PCE : {d.pce.pceNumerique}
+Code marchandise : {d.pce.codeMarchandise}
+
+Montant à régler : {d.paiement.montantHT} € HT soit {d.paiement.montantTTC} € TTC
+
+BÉNÉFICIAIRE
+{d.paiement.qualiteBeneficiaire} {d.paiement.identiteBeneficiaire}
+SIRET : {d.paiement.siretOuRidet}
+Adresse : {d.paiement.adresseBeneficiaire}
+
+RIB : {d.paiement.codeEtablissement} {d.paiement.codeGuichet} {d.paiement.numeroCompte} {d.paiement.cleRIB}
+
+Décision n° {d.decisions[0].numero} du {d.decisions[0].dateSignature} ({d.decisions[0].type})
+
+Document généré le {d.dateGeneration}
+
+===== SYNTAXE CARBONE =====
+• Variables simples : {d.variable}
+• Tableaux avec index : {d.array[0].propriete}, {d.array[i+1].propriete}
+• Variables pré-formatées : {d.demandeursListe} (recommandé pour les listes)
+• Pour plusieurs éléments d'un tableau, utilisez [0], [i+1], [i+2], etc.
+• Format ODT natif supporté sans LibreOffice

@@ -15,6 +15,28 @@ import { templatesAPI } from '@/utils/api'
 import { TemplatesConfig, TemplateStats } from '@/types/template'
 import TemplateVersionHistory from '@/components/TemplateVersionHistory'
 
+const TEMPLATE_CONFIG: TemplatesConfig = {
+  decision: { 
+    name: 'Template de décision', 
+    filename: 'decision_template.docx', 
+    status: 'default' 
+  },
+  convention: { 
+    name: 'Template de convention d\'honoraires', 
+    filename: 'convention_template.docx', 
+    status: 'default' 
+  },
+  avenant: { 
+    name: 'Template d\'avenant', 
+    filename: 'avenant_template.docx', 
+    status: 'default' 
+  },
+  reglement: { 
+    name: 'Template de fiche de règlement', 
+    filename: 'reglement_template.docx', 
+    status: 'default' 
+  }
+}
 
 const TemplatesPage: React.FC = () => {
   const [showRestoreModal, setShowRestoreModal] = useState(false)
@@ -23,29 +45,6 @@ const TemplatesPage: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<keyof TemplatesConfig | ''>('')
   
   const queryClient = useQueryClient()
-  
-  const TEMPLATE_CONFIG: TemplatesConfig = {
-    decision: { 
-      name: 'Template de décision', 
-      filename: 'decision_template.odt', 
-      status: 'default' 
-    },
-    convention: { 
-      name: 'Template de convention d\'honoraires', 
-      filename: 'convention_template.odt', 
-      status: 'default' 
-    },
-    avenant: { 
-      name: 'Template d\'avenant', 
-      filename: 'avenant_template.odt', 
-      status: 'default' 
-    },
-    reglement: { 
-      name: 'Template de fiche de règlement', 
-      filename: 'reglement_template.odt', 
-      status: 'default' 
-    }
-  }
 
   const decisionInputRef = useRef<HTMLInputElement>(null)
   const conventionInputRef = useRef<HTMLInputElement>(null)
@@ -134,7 +133,7 @@ const TemplatesPage: React.FC = () => {
         inputRefs[templateType].current!.value = ''
       }
     },
-    onError: (error: any, { templateType }) => {
+    onError: (error: Error & { response?: { data?: { error?: string } } }, { templateType }) => {
       toast.error(`Impossible d'uploader le ${templates[templateType].name}: ${error.response?.data?.error || error.message}`)
     }
   })
@@ -166,8 +165,8 @@ const TemplatesPage: React.FC = () => {
     if (!file) return
     
     const fileExt = file.name.split('.').pop()?.toLowerCase()
-    if (fileExt !== 'odt') {
-      toast.error('Le fichier doit être au format ODT (.odt)')
+    if (fileExt !== 'docx') {
+      toast.error('Le fichier doit être au format DOCX (.docx)')
       return
     }
     
@@ -296,7 +295,7 @@ const TemplatesPage: React.FC = () => {
                   type="file"
                   ref={inputRefs[templateType]}
                   className="hidden"
-                  accept=".odt"
+                  accept=".docx"
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
                 

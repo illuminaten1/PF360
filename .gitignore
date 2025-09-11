@@ -136,10 +136,8 @@ server/templates/generated/
 server/logs/
 
 # Uploads - exclure les fichiers mais garder la structure des dossiers
-server/uploads/**/*.docx
 server/uploads/**/*.doc
 server/uploads/**/*.pdf
-server/uploads/**/*.odt
 server/uploads/**/*.rtf
 # Garder les fichiers .gitkeep pour maintenir la structure
 !server/uploads/**/.gitkeep
@@ -173,7 +171,6 @@ coverage/
 
 # Documents et fichiers de données
 *.csv
-*.odt
 *.doc
 *.docx
 *.txt

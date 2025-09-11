@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
     const templateType = req.params.type;
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const extension = path.extname(file.originalname);
-    // Format: templateType_v{version}_{timestamp}.odt
+    // Format: templateType_v{version}_{timestamp}.docx
     cb(null, `${templateType}_v{version}_${timestamp}${extension}`);
   }
 });
@@ -33,12 +33,12 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    // Vérifier que le fichier est un ODT
-    if (file.mimetype === 'application/vnd.oasis.opendocument.text' ||
-        path.extname(file.originalname).toLowerCase() === '.odt') {
+    // Vérifier que le fichier est un DOCX
+    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        path.extname(file.originalname).toLowerCase() === '.docx') {
       cb(null, true);
     } else {
-      cb(new Error('Le fichier doit être au format ODT'));
+      cb(new Error('Le fichier doit être au format DOCX'));
     }
   },
   limits: {
@@ -57,10 +57,10 @@ router.use((req, res, next) => {
 
 // Types de templates supportés
 const TEMPLATE_TYPES = {
-  decision: 'decision_template.odt',
-  convention: 'convention_template.odt',
-  avenant: 'avenant_template.odt',
-  reglement: 'reglement_template.odt'
+  decision: 'decision_template.docx',
+  convention: 'convention_template.docx',
+  avenant: 'avenant_template.docx',
+  reglement: 'reglement_template.docx'
 };
 
 // Chemins des templates
@@ -218,7 +218,7 @@ router.post('/:type/upload', upload.single('template'), async (req, res) => {
     
   } catch (error) {
     console.error('Upload template error:', error);
-    if (error.message === 'Le fichier doit être au format ODT') {
+    if (error.message === 'Le fichier doit être au format DOCX') {
       return res.status(400).json({ error: error.message });
     }
     res.status(500).json({ error: 'Erreur serveur' });

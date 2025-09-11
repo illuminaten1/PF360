@@ -2,6 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth');
 const { logAction } = require('../utils/logger');
+const { generatePaiementDocument } = require('../utils/documentGenerator');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -477,6 +478,45 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Delete paiement error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Route pour générer le document de paiement avec Carbone
+router.get('/:id/generate-document', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Vérifier que le paiement existe
+    const paiementExistant = await prisma.paiement.findUnique({
+      where: { id }
+    });
+
+    if (!paiementExistant) {
+      return res.status(404).json({ error: 'Paiement non trouvé' });
+    }
+
+    // Générer le document
+    const result = await generatePaiementDocument(id);
+    
+    // Définir les en-têtes pour le téléchargement
+    res.set({
+      'Content-Type': result.contentType,
+      'Content-Disposition': `attachment; filename="${result.filename}"`,
+      'Content-Length': result.buffer.length
+    });
+
+    // Log de l'action
+    await logAction(req.user.id, 'GENERATE_DOCUMENT_PAIEMENT', `Génération document paiement ${paiementExistant.numero}`, 'Paiement', id);
+
+    // Envoyer le document généré
+    res.send(result.buffer);
+
+  } catch (error) {
+    console.error('Generate document error:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la génération du document',
+      details: error.message 
+    });
   }
 });
 

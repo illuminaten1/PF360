@@ -24,7 +24,8 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  DocumentArrowDownIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -406,6 +407,44 @@ const DossierDetail: React.FC = () => {
   const handleClosePaiementModal = () => {
     setIsPaiementModalOpen(false)
     setSelectedPaiement(null)
+  }
+
+  // Génération de document pour paiement
+  const handleGeneratePaiementDocument = async (paiement: any) => {
+    try {
+      const response = await api.get(`/paiements/${paiement.id}/generate-document`, {
+        responseType: 'blob'
+      })
+      
+      // Créer un lien de téléchargement
+      const blob = new Blob([response.data])
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Extraire le nom de fichier depuis les headers ou utiliser un nom par défaut
+      const contentDisposition = response.headers['content-disposition']
+      let filename = `fiche_reglement_${paiement.numero || 'paiement'}.pdf`
+      
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '')
+        }
+      }
+      
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Document généré avec succès')
+      
+    } catch (error: any) {
+      console.error('Erreur lors de la génération du document:', error)
+      toast.error(error.response?.data?.error || 'Erreur lors de la génération du document')
+    }
   }
 
   // Initialize notes when dossier loads
@@ -1189,6 +1228,14 @@ const DossierDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => handleGeneratePaiementDocument(paiement)}
+                              className="text-green-600 hover:text-green-800 text-sm flex items-center"
+                              title="Générer la fiche de règlement"
+                            >
+                              <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
+                              Générer
+                            </button>
                             <button 
                               onClick={() => handleEditPaiement(paiement)}
                               className="text-blue-600 hover:text-blue-800 text-sm"

@@ -57,6 +57,11 @@ Placez ce fichier dans templates/fiche-paiement-template.docx
                      - Format: "GRADE Prénom NOM, GRADE Prénom NOM, ..."
                      - S'adapte automatiquement au nombre de demandeurs
 
+{d.decisionsListe} - Liste complète des décisions formatée automatiquement
+                    - Format: "n° 2348 du 17/08/2025" (une décision)
+                    - Format: "n° 3435, 78435 et 38209 du 13/05/2025, 24/05/2025 et 26/05/2025" (multiples)
+                    - S'adapte automatiquement au nombre de décisions
+
 ===== DÉCISIONS ASSOCIÉES =====
 {d.decisions[0].numero} - Numéro de la décision
 {d.decisions[0].dateSignature} - Date de signature (format FR)
@@ -89,13 +94,13 @@ Adresse : {d.paiement.adresseBeneficiaire}
 
 RIB : {d.paiement.codeEtablissement} {d.paiement.codeGuichet} {d.paiement.numeroCompte} {d.paiement.cleRIB}
 
-Décision n° {d.decisions[0].numero} du {d.decisions[0].dateSignature} ({d.decisions[0].type})
+Décisions visées par ce paiement : {d.decisionsListe}
 
 Document généré le {d.dateGeneration}
 
 ===== SYNTAXE CARBONE =====
 • Variables simples : {d.variable}
 • Tableaux avec index : {d.array[0].propriete}, {d.array[i+1].propriete}
-• Variables pré-formatées : {d.demandeursListe} (recommandé pour les listes)
+• Variables pré-formatées : {d.demandeursListe}, {d.decisionsListe} (recommandé pour les listes)
 • Pour plusieurs éléments d'un tableau, utilisez [0], [i+1], [i+2], etc.
 • Format ODT natif supporté sans LibreOffice

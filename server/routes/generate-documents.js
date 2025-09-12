@@ -143,6 +143,26 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
         dateSignature: pd.decision.dateSignature ? new Date(pd.decision.dateSignature).toLocaleDateString('fr-FR') : null,
         type: pd.decision.type
       })),
+      // Chaîne formatée pour les décisions : n° 2348 du 17/08/2025 ou n° 3435, 78435 et 38209 du 13/05/2025, 24/05/2025 et 26/05/2025
+      decisionsListe: (() => {
+        const decisions = paiement.decisions.map(pd => ({
+          numero: pd.decision.numero,
+          dateSignature: pd.decision.dateSignature ? new Date(pd.decision.dateSignature).toLocaleDateString('fr-FR') : null
+        }));
+        
+        if (decisions.length === 0) return '';
+        
+        // Grouper par date pour optimiser l'affichage
+        const numerosList = decisions.map(d => d.numero).join(', ');
+        const datesList = decisions.map(d => d.dateSignature).filter(d => d).join(', ');
+        
+        let result = `n° ${numerosList}`;
+        if (datesList) {
+          result += ` du ${datesList}`;
+        }
+        
+        return result;
+      })(),
       // Données générées
       dateGeneration: new Date().toLocaleDateString('fr-FR')
     };

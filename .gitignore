@@ -177,3 +177,4 @@ coverage/
 !README.txt
 !readme.txt
 !server/templates/EXEMPLE-variables-disponibles.txt
+!server/templates/EXEMPLE-variables-avenants.txt

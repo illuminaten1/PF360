@@ -1,0 +1,130 @@
+VARIABLES DISPONIBLES POUR LE TEMPLATE AVENANT
+
+Placez ce fichier dans templates/avenant-template.docx
+
+===== VARIABLES AVENANT =====
+{d.avenant.numero} - Numéro de l'avenant
+{d.avenant.type} - Type (AVENANT)
+{d.avenant.victimeOuMisEnCause} - VICTIME | MIS_EN_CAUSE
+{d.avenant.instance} - Instance judiciaire
+{d.avenant.montantHT} - Montant HT de l'avenant (en chiffres)
+{d.avenant.montantHTGagePrecedemment} - Montant HT gagé précédemment (en chiffres)
+{d.avenant.montantHTEnLettres} - Montant HT de l'avenant en lettres (ex: "sept cent euros")
+{d.avenant.montantHTGagePrecedemmentEnLettres} - Montant HT gagé précédemment en lettres
+{d.avenant.dateCreation} - Date de création (format FR)
+{d.avenant.dateRetourSigne} - Date de retour signé par l'avocat (format FR)
+
+===== UTILISATEUR CRÉATEUR =====
+{d.utilisateur.grade} - Grade
+{d.utilisateur.nom} - Nom
+{d.utilisateur.prenom} - Prénom
+{d.utilisateur.gradeAbrege} - Grade abrégé
+{d.utilisateur.mail} - Email
+{d.utilisateur.telephone} - Téléphone
+
+===== AVOCAT =====
+{d.avocat.nom} - Nom de l'avocat
+{d.avocat.prenom} - Prénom de l'avocat
+{d.avocat.email} - Email de l'avocat
+{d.avocat.region} - Région d'exercice
+{d.avocat.adressePostale} - Adresse postale complète
+{d.avocat.telephonePublic1} - Téléphone public 1
+{d.avocat.telephonePublic2} - Téléphone public 2
+{d.avocat.telephonePrive} - Téléphone privé
+{d.avocat.siretOuRidet} - SIRET ou RIDET
+{d.avocat.villesIntervention} - Villes d'intervention (JSON)
+{d.avocat.specialisation} - Spécialisation
+{d.avocat.notes} - Notes sur l'avocat
+{d.avocat.titulaireDuCompteBancaire} - Titulaire du compte bancaire
+{d.avocat.codeEtablissement} - Code établissement bancaire
+{d.avocat.codeGuichet} - Code guichet bancaire
+{d.avocat.numeroDeCompte} - Numéro de compte bancaire
+{d.avocat.cle} - Clé RIB
+
+===== DOSSIER =====
+{d.dossier.numero} - Numéro du dossier
+{d.dossier.nomDossier} - Nom optionnel du dossier
+{d.dossier.notes} - Notes du dossier
+
+===== DEMANDES ASSOCIÉES =====
+{d.demandes[0].nom} - Nom du demandeur
+{d.demandes[0].prenom} - Prénom du demandeur
+{d.demandes[0].grade.gradeComplet} - Grade complet (si présent)
+{d.demandes[0].grade.gradeAbrege} - Grade abrégé (si présent)
+{d.demandes[i+1].nom} - Pour accéder aux autres demandes (i+1, i+2, etc.)
+
+===== LISTES PRÉ-FORMATÉES (recommandé) =====
+{d.demandeursListe} - Liste complète des demandeurs formatée automatiquement
+                     - Format: "GRADE Prénom NOM, GRADE Prénom NOM, ..."
+                     - S'adapte automatiquement au nombre de demandeurs
+
+{d.demandeursListeDetaille} - Liste détaillée des demandeurs avec contacts
+                             - Format: "GRADE Prénom NOM\nemail1\nemail2\ntelephone1\ntelephone2\n\nGRADE2 Prénom2 NOM2\n..."
+                             - Inclut emails professionnels/personnels et téléphones si présents
+                             - Séparation par saut de ligne double entre demandeurs
+
+{d.decisionsListe} - Liste complète des décisions formatée automatiquement
+                    - Format: "n° 2348 du 17/08/2025" (une décision)
+                    - Format: "n° 3435, 78435 et 38209 du 13/05/2025, 24/05/2025 et 26/05/2025" (multiples)
+                    - S'adapte automatiquement au nombre de décisions
+
+===== DILIGENCE =====
+{d.diligence.libelle} - Libellé de la diligence
+{d.diligence.description} - Description de la diligence
+
+===== DÉCISIONS ASSOCIÉES =====
+{d.decisions[0].numero} - Numéro de la décision
+{d.decisions[0].dateSignature} - Date de signature (format FR)
+{d.decisions[0].type} - Type (AJ, AJE, PJ, REJET)
+{d.decisions[i+1].numero} - Pour accéder aux autres décisions
+
+===== DONNÉES GÉNÉRÉES =====
+{d.dateGeneration} - Date de génération du document (format FR)
+
+===== EXEMPLE D'UTILISATION =====
+
+AVENANT N° {d.avenant.numero}
+
+Date de création : {d.avenant.dateCreation}
+Instance : {d.avenant.instance}
+Partie représentée : {d.avenant.victimeOuMisEnCause}
+
+DOSSIER
+Numéro : {d.dossier.numero}
+Nom : {d.dossier.nomDossier}
+
+DEMANDEURS
+{d.demandeursListeDetaille}
+
+AVOCAT DÉSIGNÉ
+{d.avocat.prenom} {d.avocat.nom}
+Région : {d.avocat.region}
+Spécialisation : {d.avocat.specialisation}
+Email : {d.avocat.email}
+Téléphone public : {d.avocat.telephonePublic1}
+Téléphone privé : {d.avocat.telephonePrive}
+Adresse : {d.avocat.adressePostale}
+SIRET : {d.avocat.siretOuRidet}
+
+MONTANTS
+Montant HT de cet avenant : {d.avenant.montantHT} € ({d.avenant.montantHTEnLettres})
+Montant HT précédemment gagé : {d.avenant.montantHTGagePrecedemment} € ({d.avenant.montantHTGagePrecedemmentEnLettres})
+Montant total gagé : [Calculé automatiquement si nécessaire]
+
+DÉCISIONS VISÉES
+{d.decisionsListe}
+
+DILIGENCE À EFFECTUER
+{d.diligence.libelle} : {d.diligence.description}
+
+Date de retour signé : {d.avenant.dateRetourSigne}
+
+Document généré le {d.dateGeneration}
+Par : {d.utilisateur.grade} {d.utilisateur.prenom} {d.utilisateur.nom}
+
+===== SYNTAXE CARBONE =====
+• Variables simples : {d.variable}
+• Tableaux avec index : {d.array[0].propriete}, {d.array[i+1].propriete}
+• Variables pré-formatées : {d.demandeursListe}, {d.decisionsListe} (recommandé pour les listes)
+• Pour plusieurs éléments d'un tableau, utilisez [0], [i+1], [i+2], etc.
+• Format ODT natif supporté sans LibreOffice

@@ -348,7 +348,52 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitConvention = async (data: any) => {
-    await createConventionMutation.mutateAsync(data)
+    const conventionResult = await createConventionMutation.mutateAsync(data)
+
+    // Générer automatiquement le document d'avenant si c'est un avenant
+    if (data.type === 'AVENANT') {
+      try {
+        // Attendre un peu pour s'assurer que la transaction est bien commitée
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const response = await api.post(`/generate-documents/avenant/${conventionResult.id}`, {}, {
+          responseType: 'blob'
+        })
+
+        // Créer un lien pour télécharger le fichier
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+
+        // Extraire le nom du fichier depuis l'en-tête Content-Disposition
+        const contentDisposition = response.headers['content-disposition']
+        let fileName = `avenant-${conventionResult.numero || 'nouveau'}.odt`
+
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename="(.+)"/)
+          if (fileNameMatch) {
+            fileName = fileNameMatch[1]
+          }
+        }
+
+        link.setAttribute('download', fileName)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        toast.success('Document d\'avenant généré avec succès')
+      } catch (error: any) {
+        console.error('Erreur lors de la génération du document:', error)
+
+        // Erreur plus spécifique selon le code de statut
+        if (error.response?.status === 404) {
+          toast.error('Template d\'avenant non trouvé. Veuillez contacter l\'administrateur.')
+        } else {
+          toast.error('Erreur lors de la génération du document d\'avenant')
+        }
+      }
+    }
   }
 
   const handleEditConvention = async (convention: any) => {
@@ -364,7 +409,52 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitConventionEdit = async (data: any) => {
-    await updateConventionMutation.mutateAsync(data)
+    const conventionResult = await updateConventionMutation.mutateAsync(data)
+
+    // Générer automatiquement le document d'avenant si c'est un avenant
+    if (data.type === 'AVENANT') {
+      try {
+        // Attendre un peu pour s'assurer que la transaction est bien commitée
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const response = await api.post(`/generate-documents/avenant/${conventionResult.id}`, {}, {
+          responseType: 'blob'
+        })
+
+        // Créer un lien pour télécharger le fichier
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+
+        // Extraire le nom du fichier depuis l'en-tête Content-Disposition
+        const contentDisposition = response.headers['content-disposition']
+        let fileName = `avenant-${conventionResult.numero || 'nouveau'}.odt`
+
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename="(.+)"/)
+          if (fileNameMatch) {
+            fileName = fileNameMatch[1]
+          }
+        }
+
+        link.setAttribute('download', fileName)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        toast.success('Document d\'avenant généré avec succès')
+      } catch (error: any) {
+        console.error('Erreur lors de la génération du document:', error)
+
+        // Erreur plus spécifique selon le code de statut
+        if (error.response?.status === 404) {
+          toast.error('Template d\'avenant non trouvé. Veuillez contacter l\'administrateur.')
+        } else {
+          toast.error('Erreur lors de la génération du document d\'avenant')
+        }
+      }
+    }
   }
 
   const handleCloseConventionEditModal = () => {

@@ -9,6 +9,128 @@ const { logAction } = require('../utils/logger');
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Fonction pour convertir un nombre en lettres (français)
+const convertirNombreEnLettres = (nombre) => {
+  if (nombre === 0) return 'zéro';
+
+  const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+  const dizaines = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+  const teens = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+
+  const convertirCentaines = (n) => {
+    if (n === 0) return '';
+
+    let result = '';
+    const centaine = Math.floor(n / 100);
+    const reste = n % 100;
+
+    if (centaine > 0) {
+      if (centaine === 1) {
+        result += 'cent';
+      } else {
+        result += unites[centaine] + ' cent';
+      }
+      if (centaine > 1 && reste === 0) result += 's';
+    }
+
+    if (reste > 0) {
+      if (centaine > 0) result += ' ';
+
+      if (reste < 10) {
+        result += unites[reste];
+      } else if (reste < 20) {
+        result += teens[reste - 10];
+      } else {
+        const diz = Math.floor(reste / 10);
+        const unit = reste % 10;
+
+        if (diz === 7 || diz === 9) {
+          if (diz === 7) {
+            result += 'soixante';
+            if (unit === 0) {
+              result += '-dix';
+            } else {
+              result += '-' + teens[unit];
+            }
+          } else { // diz === 9
+            result += 'quatre-vingt';
+            if (unit === 0) {
+              result += '-dix';
+            } else {
+              result += '-' + teens[unit];
+            }
+          }
+        } else {
+          result += dizaines[diz];
+          if (diz === 8 && unit === 0) {
+            result += 's';
+          }
+          if (unit > 0) {
+            if (unit === 1 && (diz === 2 || diz === 3 || diz === 4 || diz === 5 || diz === 6)) {
+              result += ' et un';
+            } else {
+              result += '-' + unites[unit];
+            }
+          }
+        }
+      }
+    }
+
+    return result;
+  };
+
+  if (nombre < 1000) {
+    return convertirCentaines(nombre);
+  } else if (nombre < 1000000) {
+    const milliers = Math.floor(nombre / 1000);
+    const reste = nombre % 1000;
+    let result = '';
+
+    if (milliers === 1) {
+      result = 'mille';
+    } else {
+      result = convertirCentaines(milliers) + ' mille';
+    }
+
+    if (reste > 0) {
+      result += ' ' + convertirCentaines(reste);
+    }
+
+    return result;
+  } else if (nombre < 1000000000) {
+    const millions = Math.floor(nombre / 1000000);
+    const reste = nombre % 1000000;
+    let result = '';
+
+    if (millions === 1) {
+      result = 'un million';
+    } else {
+      result = convertirCentaines(millions) + ' millions';
+    }
+
+    if (reste > 0) {
+      if (reste < 1000) {
+        result += ' ' + convertirCentaines(reste);
+      } else {
+        const milliers = Math.floor(reste / 1000);
+        const centaines = reste % 1000;
+        if (milliers === 1) {
+          result += ' mille';
+        } else {
+          result += ' ' + convertirCentaines(milliers) + ' mille';
+        }
+        if (centaines > 0) {
+          result += ' ' + convertirCentaines(centaines);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  return nombre.toString(); // Fallback pour les très grands nombres
+};
+
 // Middleware d'authentification
 router.use(authMiddleware);
 
@@ -358,6 +480,8 @@ router.post('/avenant/:avenantId', async (req, res) => {
         instance: avenant.instance,
         montantHT: avenant.montantHT,
         montantHTGagePrecedemment: avenant.montantHTGagePrecedemment,
+        montantHTEnLettres: convertirNombreEnLettres(Math.floor(avenant.montantHT)) + ' euros',
+        montantHTGagePrecedemmentEnLettres: avenant.montantHTGagePrecedemment ? convertirNombreEnLettres(Math.floor(avenant.montantHTGagePrecedemment)) + ' euros' : null,
         dateCreation: new Date(avenant.dateCreation).toLocaleDateString('fr-FR'),
         dateRetourSigne: avenant.dateRetourSigne ? new Date(avenant.dateRetourSigne).toLocaleDateString('fr-FR') : null
       },
@@ -373,12 +497,20 @@ router.post('/avenant/:avenantId', async (req, res) => {
         nom: avenant.avocat.nom,
         prenom: avenant.avocat.prenom,
         email: avenant.avocat.email,
-        telephone: avenant.avocat.telephone,
-        adresse: avenant.avocat.adresse,
-        codePostal: avenant.avocat.codePostal,
-        ville: avenant.avocat.ville,
-        barreau: avenant.avocat.barreau,
-        toque: avenant.avocat.toque
+        region: avenant.avocat.region,
+        adressePostale: avenant.avocat.adressePostale,
+        telephonePublic1: avenant.avocat.telephonePublic1,
+        telephonePublic2: avenant.avocat.telephonePublic2,
+        telephonePrive: avenant.avocat.telephonePrive,
+        siretOuRidet: avenant.avocat.siretOuRidet,
+        villesIntervention: avenant.avocat.villesIntervention,
+        specialisation: avenant.avocat.specialisation,
+        notes: avenant.avocat.notes,
+        titulaireDuCompteBancaire: avenant.avocat.titulaireDuCompteBancaire,
+        codeEtablissement: avenant.avocat.codeEtablissement,
+        codeGuichet: avenant.avocat.codeGuichet,
+        numeroDeCompte: avenant.avocat.numeroDeCompte,
+        cle: avenant.avocat.cle
       },
       dossier: {
         numero: avenant.dossier.numero,
@@ -410,10 +542,10 @@ router.post('/avenant/:avenantId', async (req, res) => {
         }
         return result;
       }).join('\n\n'),
-      diligences: avenant.diligences.map(cd => ({
-        libelle: cd.diligence.libelle,
-        description: cd.diligence.description
-      })),
+      diligence: avenant.diligences.length > 0 ? {
+        libelle: avenant.diligences[0].diligence.libelle,
+        description: avenant.diligences[0].diligence.description
+      } : null,
       decisions: avenant.decisions.map(cd => ({
         numero: cd.decision.numero,
         dateSignature: cd.decision.dateSignature ? new Date(cd.decision.dateSignature).toLocaleDateString('fr-FR') : null,

@@ -480,8 +480,10 @@ router.post('/avenant/:avenantId', async (req, res) => {
         instance: avenant.instance,
         montantHT: avenant.montantHT,
         montantHTGagePrecedemment: avenant.montantHTGagePrecedemment,
+        montantHTTotal: avenant.montantHT + (avenant.montantHTGagePrecedemment || 0),
         montantHTEnLettres: convertirNombreEnLettres(Math.floor(avenant.montantHT)) + ' euros',
         montantHTGagePrecedemmentEnLettres: avenant.montantHTGagePrecedemment ? convertirNombreEnLettres(Math.floor(avenant.montantHTGagePrecedemment)) + ' euros' : null,
+        montantHTTotalEnLettres: convertirNombreEnLettres(Math.floor(avenant.montantHT + (avenant.montantHTGagePrecedemment || 0))) + ' euros',
         dateCreation: new Date(avenant.dateCreation).toLocaleDateString('fr-FR'),
         dateRetourSigne: avenant.dateRetourSigne ? new Date(avenant.dateRetourSigne).toLocaleDateString('fr-FR') : null
       },
@@ -543,8 +545,8 @@ router.post('/avenant/:avenantId', async (req, res) => {
         return result;
       }).join('\n\n'),
       diligence: avenant.diligences.length > 0 ? {
-        libelle: avenant.diligences[0].diligence.libelle,
-        description: avenant.diligences[0].diligence.description
+        libelle: avenant.diligences[0].diligence.nom,
+        description: avenant.diligences[0].diligence.details
       } : null,
       decisions: avenant.decisions.map(cd => ({
         numero: cd.decision.numero,

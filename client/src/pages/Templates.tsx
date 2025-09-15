@@ -16,25 +16,25 @@ import { TemplatesConfig, TemplateStats } from '@/types/template'
 import TemplateVersionHistory from '@/components/TemplateVersionHistory'
 
 const TEMPLATE_CONFIG: TemplatesConfig = {
-  decision: { 
-    name: 'Template de décision', 
-    filename: 'decision_template.docx', 
-    status: 'default' 
+  decision: {
+    name: 'Template de décision',
+    filename: 'decision_template.odt',
+    status: 'default'
   },
-  convention: { 
-    name: 'Template de convention d\'honoraires', 
-    filename: 'convention_template.docx', 
-    status: 'default' 
+  convention: {
+    name: 'Template de convention d\'honoraires',
+    filename: 'convention_template.odt',
+    status: 'default'
   },
   avenant: {
     name: 'Template d\'avenant',
     filename: 'avenant_template.odt',
     status: 'default'
   },
-  reglement: { 
-    name: 'Template de fiche de règlement', 
-    filename: 'reglement_template.odt', 
-    status: 'default' 
+  reglement: {
+    name: 'Template de fiche de règlement',
+    filename: 'reglement_template.odt',
+    status: 'default'
   }
 }
 
@@ -166,16 +166,10 @@ const TemplatesPage: React.FC = () => {
     
     const fileExt = file.name.split('.').pop()?.toLowerCase()
     
-    if (templateType === 'reglement' || templateType === 'avenant') {
-      if (fileExt !== 'odt') {
-        toast.error(`Le fichier doit être au format ODT (.odt) pour les templates de ${templateType}`)
-        return
-      }
-    } else {
-      if (fileExt !== 'docx') {
-        toast.error('Le fichier doit être au format DOCX (.docx)')
-        return
-      }
+    // Tous les templates doivent être au format ODT
+    if (fileExt !== 'odt') {
+      toast.error('Le fichier doit être au format ODT (.odt)')
+      return
     }
     
     uploadTemplateMutation.mutate({ templateType, file })
@@ -303,7 +297,7 @@ const TemplatesPage: React.FC = () => {
                   type="file"
                   ref={inputRefs[templateType]}
                   className="hidden"
-                  accept={templateType === 'reglement' || templateType === 'avenant' ? '.odt' : '.docx'}
+                  accept=".odt"
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
                 

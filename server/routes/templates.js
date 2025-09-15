@@ -33,29 +33,17 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    const { type } = req.params;
+    // Tous les templates doivent être au format ODT
+    const isODT = file.mimetype === 'application/vnd.oasis.opendocument.text' ||
+                  file.mimetype === 'application/x-vnd.oasis.opendocument.text' ||
+                  file.mimetype === 'application/octet-stream' ||
+                  path.extname(file.originalname).toLowerCase() === '.odt';
 
-    if (type === 'reglement' || type === 'avenant') {
-      // Pour les templates de règlement et d'avenant, accepter seulement ODT
-      const isODT = file.mimetype === 'application/vnd.oasis.opendocument.text' ||
-                    file.mimetype === 'application/x-vnd.oasis.opendocument.text' ||
-                    file.mimetype === 'application/octet-stream' ||
-                    path.extname(file.originalname).toLowerCase() === '.odt';
-
-      if (isODT) {
-        cb(null, true);
-      } else {
-        console.log('Fichier rejeté - MIME type:', file.mimetype, 'Extension:', path.extname(file.originalname));
-        cb(new Error(`Le fichier doit être au format ODT pour les templates de ${type}`));
-      }
+    if (isODT) {
+      cb(null, true);
     } else {
-      // Pour les autres templates, garder DOCX
-      if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          path.extname(file.originalname).toLowerCase() === '.docx') {
-        cb(null, true);
-      } else {
-        cb(new Error('Le fichier doit être au format DOCX'));
-      }
+      console.log('Fichier rejeté - MIME type:', file.mimetype, 'Extension:', path.extname(file.originalname));
+      cb(new Error('Le fichier doit être au format ODT'));
     }
   },
   limits: {
@@ -72,10 +60,10 @@ router.use((req, res, next) => {
   next();
 });
 
-// Types de templates supportés
+// Types de templates supportés - Tous au format ODT
 const TEMPLATE_TYPES = {
-  decision: 'decision_template.docx',
-  convention: 'convention_template.docx',
+  decision: 'decision_template.odt',
+  convention: 'convention_template.odt',
   avenant: 'avenant_template.odt',
   reglement: 'reglement_template.odt'
 };
@@ -235,7 +223,7 @@ router.post('/:type/upload', upload.single('template'), async (req, res) => {
     
   } catch (error) {
     console.error('Upload template error:', error);
-    if (error.message.includes('Le fichier doit être au format')) {
+    if (error.message === 'Le fichier doit être au format ODT') {
       return res.status(400).json({ error: error.message });
     }
     res.status(500).json({ error: 'Erreur serveur' });

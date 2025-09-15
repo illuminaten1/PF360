@@ -506,7 +506,8 @@ router.get('/:id', async (req, res) => {
             creePar: {
               select: {
                 nom: true,
-                prenom: true
+                prenom: true,
+                grade: true
               }
             }
           }

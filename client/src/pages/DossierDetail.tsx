@@ -1153,79 +1153,63 @@ const DossierDetail: React.FC = () => {
                 <p className="text-gray-500 text-center py-4">Aucun paiement enregistré</p>
               ) : (
                 <div className="space-y-4">
-                  {dossier.paiements.map((paiement) => {
-                    const getQualiteBadge = (qualite: string) => {
-                      switch (qualite) {
-                        case 'Avocat':
-                          return 'bg-blue-100 text-blue-800'
-                        case 'Commissaire de justice':
-                          return 'bg-purple-100 text-purple-800'
-                        case 'Militaire de la gendarmerie nationale':
-                          return 'bg-green-100 text-green-800'
-                        case 'Régisseur du tribunal judiciaire':
-                          return 'bg-amber-100 text-amber-800'
-                        case 'Médecin':
-                          return 'bg-red-100 text-red-800'
-                        case 'Victime':
-                          return 'bg-sky-100 text-sky-800'
-                        default:
-                          return 'bg-gray-100 text-gray-800'
-                      }
-                    }
-
-                    return (
+                  {dossier.paiements.map((paiement) => (
                       <div key={paiement.id} className="border rounded-lg p-4 hover:bg-gray-50">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center gap-4 mb-2">
-                              <span className="font-semibold text-gray-900">
+                            {/* Ligne principale - Numéro et montant */}
+                            <div className="flex items-baseline gap-3 mb-2">
+                              <span className="font-medium text-gray-900">
+                                FRI {(paiement as any).numero}
+                              </span>
+                              <span className="text-sm text-gray-600">•</span>
+                              <span className="font-medium text-gray-900">
                                 {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
                               </span>
-                              <div className="flex items-center gap-2">
-                                {(paiement as any).qualiteBeneficiaire && (
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getQualiteBadge((paiement as any).qualiteBeneficiaire)}`}>
-                                    {(paiement as any).qualiteBeneficiaire}
-                                  </span>
+                              <span className="text-sm text-gray-500">
+                                ({(paiement.montantHT || 0).toLocaleString('fr-FR')} € HT)
+                              </span>
+                            </div>
+
+                            {/* Bénéficiaire */}
+                            <div className="text-sm text-gray-900 mb-3">
+                              <span className="font-medium">Bénéficiaire :</span>
+                              <span className="ml-1">
+                                {(paiement as any).identiteBeneficiaire || 'Bénéficiaire non renseigné'}
+                              </span>
+                              {(paiement as any).qualiteBeneficiaire && (
+                                <span className="ml-2 text-gray-600">
+                                  ({(paiement as any).qualiteBeneficiaire})
+                                </span>
+                              )}
+                            </div>
+
+                            {/* PCE */}
+                            {(paiement as any).pce && (
+                              <div className="text-sm text-gray-900 mb-3">
+                                <span className="font-medium">PCE :</span>
+                                <span className="ml-1">
+                                  {(paiement as any).pce.pceDetaille} - {(paiement as any).pce.pceNumerique}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Informations administratives */}
+                            <div className="text-sm text-gray-900 space-y-1">
+                              {/* SGAMI et Facture */}
+                              <div className="flex items-center gap-4">
+                                {(paiement as any).sgami && (
+                                  <span><span className="font-medium">Org. payeur :</span> {(paiement as any).sgami.nom}</span>
+                                )}
+                                {paiement.facture && (
+                                  <span><span className="font-medium">Facture :</span> {paiement.facture}</span>
                                 )}
                               </div>
-                            </div>
-                            <div className="text-sm text-gray-900 mb-2">
-                              <strong>{(paiement as any).identiteBeneficiaire || 'Bénéficiaire non renseigné'}</strong>
-                              {(paiement as any).sgami && (
-                                <span className="ml-2 text-gray-600">• SGAMI: {(paiement as any).sgami.nom}</span>
-                              )}
-                            </div>
-                            <div className="text-sm text-gray-600 space-y-1">
-                              <div className="flex items-center gap-4">
-                                <span>HT: {(paiement.montantHT || 0).toLocaleString('fr-FR')} €</span>
-                                {paiement.facture && <span>Facture: {paiement.facture}</span>}
-                              </div>
-                              {(paiement as any).emissionTitrePerception && (
-                                <div className="flex items-center gap-4">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
-                                    (paiement as any).emissionTitrePerception === 'OUI' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    Émission titre: {(paiement as any).emissionTitrePerception}
-                                  </span>
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
-                                    (paiement as any).conventionJointeFRI === 'OUI' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    Convention jointe: {(paiement as any).conventionJointeFRI}
-                                  </span>
-                                </div>
-                              )}
-                              {(paiement as any).dateServiceFait && (
-                                <div>Service fait: {dayjs((paiement as any).dateServiceFait).format('DD/MM/YYYY')}</div>
-                              )}
-                              {(paiement as any).pce && (
-                                <div>PCE: {(paiement as any).pce.pceDetaille} - {(paiement as any).pce.pceNumerique}</div>
-                              )}
+
+
+                              {/* Métadonnées */}
                               {paiement.creePar && (
-                                <div className="text-xs">
+                                <div className="text-xs text-gray-500 mt-2">
                                   Créé par: {(paiement.creePar as any).grade && `${(paiement.creePar as any).grade} `}
                                   {paiement.creePar.prenom} {paiement.creePar.nom}
                                 </div>
@@ -1233,13 +1217,13 @@ const DossierDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <button 
+                            <button
                               onClick={() => handleEditPaiement(paiement)}
                               className="text-blue-600 hover:text-blue-800 text-sm"
                             >
                               Modifier
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleDeletePaiement(paiement)}
                               disabled={deletePaiementMutation.isPending}
                               className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
@@ -1249,8 +1233,7 @@ const DossierDetail: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                    )
-                  })}
+                    ))}
                 </div>
               )}
             </div>

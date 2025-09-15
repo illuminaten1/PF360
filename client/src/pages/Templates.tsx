@@ -26,10 +26,10 @@ const TEMPLATE_CONFIG: TemplatesConfig = {
     filename: 'convention_template.docx', 
     status: 'default' 
   },
-  avenant: { 
-    name: 'Template d\'avenant', 
-    filename: 'avenant_template.docx', 
-    status: 'default' 
+  avenant: {
+    name: 'Template d\'avenant',
+    filename: 'avenant_template.odt',
+    status: 'default'
   },
   reglement: { 
     name: 'Template de fiche de règlement', 
@@ -166,9 +166,9 @@ const TemplatesPage: React.FC = () => {
     
     const fileExt = file.name.split('.').pop()?.toLowerCase()
     
-    if (templateType === 'reglement') {
+    if (templateType === 'reglement' || templateType === 'avenant') {
       if (fileExt !== 'odt') {
-        toast.error('Le fichier doit être au format ODT (.odt) pour les templates de règlement')
+        toast.error(`Le fichier doit être au format ODT (.odt) pour les templates de ${templateType}`)
         return
       }
     } else {
@@ -303,7 +303,7 @@ const TemplatesPage: React.FC = () => {
                   type="file"
                   ref={inputRefs[templateType]}
                   className="hidden"
-                  accept={templateType === 'reglement' ? '.odt' : '.docx'}
+                  accept={templateType === 'reglement' || templateType === 'avenant' ? '.odt' : '.docx'}
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
                 

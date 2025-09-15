@@ -396,10 +396,54 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitPaiement = async (data: any) => {
+    let paiementResult;
     if (selectedPaiement) {
-      await updatePaiementMutation.mutateAsync(data)
+      paiementResult = await updatePaiementMutation.mutateAsync(data)
     } else {
-      await createPaiementMutation.mutateAsync(data)
+      paiementResult = await createPaiementMutation.mutateAsync(data)
+    }
+    
+    // Générer automatiquement le document de paiement
+    try {
+      // Attendre un peu pour s'assurer que la transaction est bien commitée
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const response = await api.post(`/generate-documents/fiche-paiement/${paiementResult.id}`, {}, {
+        responseType: 'blob'
+      })
+      
+      // Créer un lien pour télécharger le fichier
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Extraire le nom du fichier depuis l'en-tête Content-Disposition
+      const contentDisposition = response.headers['content-disposition']
+      let fileName = `fiche-paiement-${paiementResult.numero || 'nouveau'}.odt`
+      
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/)
+        if (fileNameMatch) {
+          fileName = fileNameMatch[1]
+        }
+      }
+      
+      link.setAttribute('download', fileName)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Document de paiement généré avec succès')
+    } catch (error: any) {
+      console.error('Erreur lors de la génération du document:', error)
+      
+      // Erreur plus spécifique selon le code de statut
+      if (error.response?.status === 404) {
+        toast.error('Template de règlement non trouvé. Veuillez contacter l\'administrateur.')
+      } else {
+        toast.error('Erreur lors de la génération du document de paiement')
+      }
     }
   }
 

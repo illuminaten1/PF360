@@ -174,7 +174,7 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
       reglement: 'reglement_template.odt'
     };
     
-    // Fonction pour obtenir le chemin du template (copiée du système existant)
+    // Fonction pour obtenir le chemin du template (améliorée avec vérification d'existence)
     const getTemplatePath = async (templateType) => {
       const activeVersion = await prisma.templateVersion.findFirst({
         where: { 
@@ -184,7 +184,19 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
       });
       
       if (activeVersion) {
-        return path.join(TEMPLATES_DIR, templateType, activeVersion.filename);
+        const uploadedTemplatePath = path.join(TEMPLATES_DIR, templateType, activeVersion.filename);
+        try {
+          // Vérifier que le fichier uploadé existe réellement
+          await fs.access(uploadedTemplatePath);
+          return uploadedTemplatePath;
+        } catch (error) {
+          console.warn(`Template uploadé non trouvé: ${uploadedTemplatePath}, fallback vers template par défaut`);
+          // Désactiver cette version en base car le fichier n'existe plus
+          await prisma.templateVersion.update({
+            where: { id: activeVersion.id },
+            data: { isActive: false }
+          });
+        }
       }
       
       return path.join(DEFAULT_TEMPLATES_DIR, TEMPLATE_TYPES[templateType]);
@@ -196,6 +208,7 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
       // Vérifier que le fichier existe
       await fs.access(templatePath);
     } catch (error) {
+      console.error('Erreur d\'accès au template:', error);
       return res.status(404).json({ 
         error: 'Template de règlement non trouvé. Veuillez uploader un template via la page Templates de l\'admin.' 
       });

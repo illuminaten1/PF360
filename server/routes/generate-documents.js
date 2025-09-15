@@ -135,7 +135,7 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
         } : null
       })),
       // Chaîne formatée pour les demandeurs
-      demandeursListe: paiement.dossier.demandes.map(demande => 
+      demandeursListe: paiement.dossier.demandes.map(demande =>
         `${demande.grade?.gradeAbrege || ''} ${demande.prenom} ${demande.nom}`.trim()
       ).join(', '),
       decisions: paiement.decisions.map(pd => ({
@@ -397,6 +397,19 @@ router.post('/avenant/:avenantId', async (req, res) => {
       demandeursListe: avenant.demandes.map(cd =>
         `${cd.demande.grade?.gradeAbrege || ''} ${cd.demande.prenom} ${cd.demande.nom}`.trim()
       ).join(', '),
+      // Chaîne formatée détaillée pour les demandeurs avec emails et téléphones
+      demandeursListeDetaille: avenant.demandes.map(cd => {
+        let result = `${cd.demande.grade?.gradeAbrege || ''} ${cd.demande.prenom} ${cd.demande.nom}`.trim();
+        const contacts = [];
+        if (cd.demande.emailProfessionnel) contacts.push(cd.demande.emailProfessionnel);
+        if (cd.demande.emailPersonnel) contacts.push(cd.demande.emailPersonnel);
+        if (cd.demande.telephoneProfessionnel) contacts.push(cd.demande.telephoneProfessionnel);
+        if (cd.demande.telephonePersonnel) contacts.push(cd.demande.telephonePersonnel);
+        if (contacts.length > 0) {
+          result += '\n' + contacts.join('\n');
+        }
+        return result;
+      }).join('\n\n'),
       diligences: avenant.diligences.map(cd => ({
         libelle: cd.diligence.libelle,
         description: cd.diligence.description

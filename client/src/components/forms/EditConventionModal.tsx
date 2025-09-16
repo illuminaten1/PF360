@@ -22,7 +22,7 @@ const editConventionSchema = z.object({
   }),
   instance: z.enum([
     'enquête',
-    'information judiciaire', 
+    'information judiciaire',
     'première instance',
     'appel',
     'assises',
@@ -34,6 +34,7 @@ const editConventionSchema = z.object({
   }),
   montantHT: z.number().positive("Le montant HT doit être positif"),
   montantHTGagePrecedemment: z.number().positive().optional().nullable(),
+  typeFacturation: z.enum(['FORFAITAIRE', 'DEMI_JOURNEE', 'ASSISES']).optional(),
   avocatId: z.string().min(1, "L'avocat est requis"),
   diligenceId: z.string().optional(),
   dateRetourSigne: z.string().optional(),
@@ -50,6 +51,7 @@ interface Convention {
   instance: string
   montantHT: number
   montantHTGagePrecedemment?: number | null
+  typeFacturation?: 'FORFAITAIRE' | 'DEMI_JOURNEE' | 'ASSISES' | null
   dateRetourSigne?: string | null
   createdAt: string
   updatedAt: string
@@ -115,6 +117,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
 
   const selectedType = watch('type')
   const selectedVictimeOuMisEnCause = watch('victimeOuMisEnCause')
+  const selectedTypeFacturation = watch('typeFacturation')
   const selectedDecisionIds = watch('decisionIds') || []
   const selectedDemandeIds = watch('demandeIds') || []
 
@@ -161,6 +164,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         instance: convention.instance as any,
         montantHT: convention.montantHT,
         montantHTGagePrecedemment: convention.montantHTGagePrecedemment,
+        typeFacturation: convention.typeFacturation || undefined,
         avocatId: convention.avocat.id,
         diligenceId: convention.diligences?.[0]?.diligence?.id || '',
         dateRetourSigne: convention.dateRetourSigne ? dayjs(convention.dateRetourSigne).format('YYYY-MM-DD') : '',
@@ -200,6 +204,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         instance: data.instance,
         montantHT: data.montantHT,
         montantHTGagePrecedemment: data.type === 'AVENANT' ? data.montantHTGagePrecedemment : undefined,
+        typeFacturation: data.typeFacturation || undefined,
         dateRetourSigne: data.dateRetourSigne || undefined,
         dossierId: dossier.id,
         avocatId: data.avocatId,
@@ -282,6 +287,19 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
     }
   }
 
+  const getTypeFacturationLabel = (type: string) => {
+    switch (type) {
+      case 'FORFAITAIRE':
+        return 'Forfaitaire'
+      case 'DEMI_JOURNEE':
+        return 'Par demi-journée'
+      case 'ASSISES':
+        return 'Assises'
+      default:
+        return type
+    }
+  }
+
   const getDecisionTypeLabel = (type: string) => {
     switch (type) {
       case 'AJ':
@@ -307,6 +325,12 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         return 'border-sky-500 bg-sky-100 hover:bg-sky-200 text-sky-900'
       case 'MIS_EN_CAUSE':
         return 'border-amber-500 bg-amber-100 hover:bg-amber-200 text-amber-900'
+      case 'FORFAITAIRE':
+        return 'border-emerald-500 bg-emerald-100 hover:bg-emerald-200 text-emerald-900'
+      case 'DEMI_JOURNEE':
+        return 'border-purple-500 bg-purple-100 hover:bg-purple-200 text-purple-900'
+      case 'ASSISES':
+        return 'border-red-500 bg-red-100 hover:bg-red-200 text-red-900'
       default:
         return 'border-blue-500 bg-blue-100 hover:bg-blue-200 text-blue-900'
     }
@@ -322,6 +346,12 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         return 'border-sky-200 bg-sky-100 hover:bg-sky-200 text-sky-800'
       case 'MIS_EN_CAUSE':
         return 'border-amber-200 bg-amber-100 hover:bg-amber-200 text-amber-800'
+      case 'FORFAITAIRE':
+        return 'border-emerald-200 bg-emerald-100 hover:bg-emerald-200 text-emerald-800'
+      case 'DEMI_JOURNEE':
+        return 'border-purple-200 bg-purple-100 hover:bg-purple-200 text-purple-800'
+      case 'ASSISES':
+        return 'border-red-200 bg-red-100 hover:bg-red-200 text-red-800'
       default:
         return 'border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700'
     }
@@ -604,6 +634,42 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                         {errors.montantHTGagePrecedemment && <p className="text-red-500 text-xs mt-1">{errors.montantHTGagePrecedemment.message}</p>}
                       </div>
                     )}
+                  </div>
+
+                  {/* Type de facturation */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Type de facturation</h3>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Type de facturation
+                      </label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {(['FORFAITAIRE', 'DEMI_JOURNEE', 'ASSISES'] as const).map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setValue('typeFacturation', type)}
+                            className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all min-h-[4rem] flex items-center justify-center shadow-sm ${
+                              selectedTypeFacturation === type
+                                ? getSelectedButtonStyle(type)
+                                : getUnselectedButtonStyle(type)
+                            }`}
+                          >
+                            <span className="text-sm font-medium leading-tight">
+                              {getTypeFacturationLabel(type)}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Ce champ détermine le texte qui suivra le montant en lettres dans le document généré
+                      </p>
+                      {convention.typeFacturation && (
+                        <p className="mt-1 text-xs text-blue-600">
+                          Actuellement : {getTypeFacturationLabel(convention.typeFacturation)}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Bénéficiaire */}

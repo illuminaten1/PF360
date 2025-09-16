@@ -31,6 +31,7 @@ import {
   DepensesOrdonneesParPcePanel,
   DepensesOrdonneesGraphiquePanel
 } from '@/components/statistiques/panels'
+import DemandesTablePanel from '@/components/statistiques/panels/DemandesTablePanel'
 import StatistiquesBudgetairesPanel from '@/components/statistiques/panels/StatistiquesBudgetairesPanel'
 import DepensesOrdonneesPanel from '@/components/statistiques/panels/DepensesOrdonneesPanel'
 import DepensesOrdonneesParMoisPanel from '@/components/statistiques/panels/DepensesOrdonneesParMoisPanel'
@@ -44,10 +45,10 @@ const Statistiques: React.FC = () => {
   const { user } = useAuth()
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number>(currentYear)
-  const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire'>(() => {
+  const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire' | 'toutes-demandes'>(() => {
     try {
       const savedTab = localStorage.getItem('pf360-statistiques-active-tab')
-      return (savedTab === 'budgetaire' || savedTab === 'administratif') ? savedTab : 'administratif'
+      return (savedTab === 'budgetaire' || savedTab === 'administratif' || savedTab === 'toutes-demandes') ? savedTab : 'administratif'
     } catch {
       return 'administratif'
     }
@@ -114,7 +115,7 @@ const Statistiques: React.FC = () => {
     statsDepensesOrdonneesParMois,
     anneesDisponibles,
     isLoading
-  } = useStatistiquesQueries(selectedYear, activeTab)
+  } = useStatistiquesQueries(selectedYear, activeTab === 'toutes-demandes' ? 'administratif' : activeTab)
 
   // Handle layout changes and save to localStorage
   const handleLayoutChange = (_layout: Layout[], newLayouts: { [key: string]: Layout[] }) => {
@@ -215,6 +216,9 @@ const Statistiques: React.FC = () => {
         break
       case 'depensesOrdonneesGraphique':
         content = <DepensesOrdonneesGraphiquePanel statsDepensesOrdonneesParMois={statsDepensesOrdonneesParMois} />
+        break
+      case 'toutes-demandes':
+        content = <DemandesTablePanel />
         break
       default:
         content = <div>Panneau non défini</div>
@@ -363,30 +367,46 @@ const Statistiques: React.FC = () => {
             >
               Budgétaire
             </button>
+            <button
+              onClick={() => setActiveTab('toutes-demandes')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'toutes-demandes'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Toutes les demandes
+            </button>
           </nav>
         </div>
       </div>
 
-      <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
-        <ResponsiveGridLayout
-          className="layout"
-          layouts={layouts}
-          onLayoutChange={handleLayoutChange}
-          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-          rowHeight={30}
-          isDraggable={isReorderMode}
-          isResizable={isReorderMode}
-          compactType="vertical"
-          preventCollision={false}
-        >
-          {(activeTab === 'administratif' ? PANEL_ORDER_ADMINISTRATIF : PANEL_ORDER_BUDGETAIRE).map((panelId) => (
-            <div key={panelId}>
-              {renderPanel(panelId)}
-            </div>
-          ))}
-        </ResponsiveGridLayout>
-      </div>
+      {activeTab === 'toutes-demandes' ? (
+        <div className="bg-white rounded-lg shadow border border-gray-200">
+          <DemandesTablePanel />
+        </div>
+      ) : (
+        <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={layouts}
+            onLayoutChange={handleLayoutChange}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+            rowHeight={30}
+            isDraggable={isReorderMode}
+            isResizable={isReorderMode}
+            compactType="vertical"
+            preventCollision={false}
+          >
+            {(activeTab === 'administratif' ? PANEL_ORDER_ADMINISTRATIF : PANEL_ORDER_BUDGETAIRE).map((panelId) => (
+              <div key={panelId}>
+                {renderPanel(panelId)}
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        </div>
+      )}
     </div>
   )
 }

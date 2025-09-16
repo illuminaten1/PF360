@@ -27,6 +27,7 @@ export const getPanelTitle = (id: PanelKey): string => {
     case 'depensesOrdonneesParPce': return 'Dépenses ordonnées par PCE'
     case 'depensesOrdonneesParMois': return 'Dépenses ordonnées par mois'
     case 'depensesOrdonneesGraphique': return 'Graphique des dépenses ordonnées'
+    case 'toutes-demandes': return 'Toutes les demandes'
     default: return 'Panneau'
   }
 }

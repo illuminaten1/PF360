@@ -178,3 +178,4 @@ coverage/
 !readme.txt
 !server/templates/EXEMPLE-variables-disponibles.txt
 !server/templates/EXEMPLE-variables-avenants.txt
+!server/templates/EXEMPLE-variables-conventions.txt

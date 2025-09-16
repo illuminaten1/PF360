@@ -47,7 +47,7 @@ Placez ce fichier dans templates/convention-template.docx
 ===== SGAMI (via le dossier) =====
 {d.sgami.nom} - Nom du SGAMI
 {d.sgami.formatCourtNommage} - Format court de nommage
-{d.sgami.texteConvention} - Texte spécifique pour les conventions
+{d.sgami.texteConvention:convCRLF} - Texte spécifique pour les conventions (avec gestion des retours à la ligne)
 {d.sgami.intituleFicheReglement} - Intitulé pour les fiches de règlement
 
 ===== DEMANDES ASSOCIÉES =====

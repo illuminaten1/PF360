@@ -131,6 +131,22 @@ const convertirNombreEnLettres = (nombre) => {
   return nombre.toString(); // Fallback pour les très grands nombres
 };
 
+// Fonction pour obtenir le complément de facturation
+const getComplementFacturation = (typeFacturation) => {
+  if (!typeFacturation || typeFacturation === 'FORFAITAIRE') {
+    return ''; // Pas de texte supplémentaire pour le forfaitaire
+  }
+
+  switch (typeFacturation) {
+    case 'DEMI_JOURNEE':
+      return ' par demi-journée d\'assistance';
+    case 'ASSISES':
+      return ', montant forfaitaire maximal représentant 1 000 euros [mille euros] hors taxes par militaire pour la préparation du dossier devant la cour d\'assises et 500 euros [cinq cents euros] hors taxes par demi-journée de présence devant la cour d\'assises, quel que soit le nombre de militaires concernés';
+    default:
+      return '';
+  }
+}
+
 // Middleware d'authentification
 router.use(authMiddleware);
 
@@ -494,6 +510,7 @@ router.post('/avenant/:avenantId', async (req, res) => {
         montantHTGagePrecedemment: avenant.montantHTGagePrecedemment,
         montantHTTotal: avenant.montantHT + (avenant.montantHTGagePrecedemment || 0),
         montantHTEnLettres: convertirNombreEnLettres(Math.floor(avenant.montantHT)) + ' euros',
+        complementFacturation: getComplementFacturation(avenant.typeFacturation),
         montantHTGagePrecedemmentEnLettres: avenant.montantHTGagePrecedemment ? convertirNombreEnLettres(Math.floor(avenant.montantHTGagePrecedemment)) + ' euros' : null,
         montantHTTotalEnLettres: convertirNombreEnLettres(Math.floor(avenant.montantHT + (avenant.montantHTGagePrecedemment || 0))) + ' euros',
         dateCreation: new Date(avenant.dateCreation).toLocaleDateString('fr-FR'),
@@ -793,6 +810,7 @@ router.post('/convention/:conventionId', async (req, res) => {
         instance: convention.instance,
         montantHT: convention.montantHT,
         montantHTEnLettres: convertirNombreEnLettres(Math.floor(convention.montantHT)) + ' euros',
+        complementFacturation: getComplementFacturation(convention.typeFacturation),
         dateCreation: new Date(convention.dateCreation).toLocaleDateString('fr-FR'),
         dateRetourSigne: convention.dateRetourSigne ? new Date(convention.dateRetourSigne).toLocaleDateString('fr-FR') : null
       },

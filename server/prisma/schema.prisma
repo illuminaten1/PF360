@@ -188,6 +188,7 @@ model Convention {
   instance                    String    // Instance judiciaire
   montantHT                   Float     // Montant HT en euros
   montantHTGagePrecedemment   Float?    // Pour les avenants seulement
+  typeFacturation             String?   // FORFAITAIRE | DEMI_JOURNEE | ASSISES
   dateCreation               DateTime  @default(now())
   dateRetourSigne            DateTime? // Date de retour de la convention signée par l'avocat
   documentGenere             String?   // Path vers le document généré

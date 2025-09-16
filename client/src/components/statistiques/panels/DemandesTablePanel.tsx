@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   useReactTable,
   getCoreRowModel,
@@ -197,7 +198,7 @@ interface Demande {
   }>
   baps: Array<{
     bap: {
-      nom: string
+      nomBAP: string
     }
   }>
   decisions: Array<{
@@ -227,28 +228,49 @@ const fetchAllDemandes = async (): Promise<Demande[]> => {
 }
 
 const DemandesTablePanel: React.FC = () => {
-  // Colonnes masquées par défaut pour éviter la surcharge visuelle
+  const navigate = useNavigate()
+  // Configuration des colonnes visibles par défaut
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    // Masquer les colonnes d'adresse par défaut
+    // Colonnes visibles par défaut : Type, Militaire, Statut demandeur, Date réception, Date faits, Département, Formation administrative, Assigné à, Dossier, Badges, BAP
+    numeroDS: false,
+    // type: true (visible par défaut)
+    // militaire: true (visible par défaut)
+    // statutDemandeur: true (visible par défaut)
+    nigend: false,
+    branche: false,
+    // formationAdministrative: true (visible par défaut)
+    // departement: true (visible par défaut)
     adressePostaleLigne1: false,
     adressePostaleLigne2: false,
-    codePostal: false,
-    // Masquer les téléphones/emails par défaut
     telephoneProfessionnel: false,
     telephonePersonnel: false,
     emailProfessionnel: false,
     emailPersonnel: false,
-    // Masquer les champs détaillés par défaut
+    unite: false,
+    // dateReception: true (visible par défaut)
+    // dateFaits: true (visible par défaut)
+    dateAudience: false,
+    commune: false,
+    codePostal: false,
+    position: false,
+    contexteMissionnel: false,
+    qualificationInfraction: false,
+    qualificationsPenales: false,
     resume: false,
     blessures: false,
-    qualificationsPenales: false,
-    commentaireDecision: false,
-    commentaireConvention: false,
-    // Masquer les métadonnées par défaut
-    createdAt: false,
-    updatedAt: false,
+    partieCivile: false,
+    montantPartieCivile: false,
+    soutiens: false,
+    // assigneA: true (visible par défaut)
     creePar: false,
     modifiePar: false,
+    createdAt: false,
+    updatedAt: false,
+    // dossier: true (visible par défaut)
+    decisions: false,
+    conventions: false,
+    // badges: true (visible par défaut)
+    // baps: true (visible par défaut)
   })
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [sorting, setSorting] = useState<SortingState>([])
@@ -258,6 +280,10 @@ const DemandesTablePanel: React.FC = () => {
     queryKey: ['all-demandes'],
     queryFn: fetchAllDemandes,
   })
+
+  const handleViewDossier = (dossierId: string) => {
+    navigate(`/dossiers/${dossierId}`)
+  }
 
   // Fonction de filtre personnalisée pour les multi-sélections
   const multiSelectFilter = useCallback((row: any, columnId: string, filterValue: string[]) => {
@@ -289,7 +315,7 @@ const DemandesTablePanel: React.FC = () => {
       if (!demande.baps?.length) {
         return filterValue.includes('Aucun BAP')
       }
-      const bapNames = demande.baps.map((b: any) => b.bap.nom)
+      const bapNames = demande.baps.map((b: any) => b.bap.nomBAP)
       return filterValue.some(filter => bapNames.includes(filter))
     } else {
       cellValue = String(row.getValue(columnId) || '')
@@ -329,7 +355,7 @@ const DemandesTablePanel: React.FC = () => {
       if (accessor === 'baps') {
         // Pour les BAP, on retourne tous les noms de BAP individuels
         if (!demande.baps?.length) return ['Aucun BAP']
-        return demande.baps.map(b => b.bap.nom)
+        return demande.baps.map(b => b.bap.nomBAP)
       }
       // Accesseur simple
       return String((demande as any)[accessor] || '')
@@ -625,32 +651,6 @@ const DemandesTablePanel: React.FC = () => {
         },
       },
       {
-        accessorKey: 'commentaireDecision',
-        header: 'Commentaire décision',
-        cell: ({ getValue }) => {
-          const commentaire = getValue() as string
-          if (!commentaire) return ''
-          return (
-            <span className="text-sm" title={commentaire}>
-              {commentaire.length > 30 ? commentaire.substring(0, 30) + '...' : commentaire}
-            </span>
-          )
-        },
-      },
-      {
-        accessorKey: 'commentaireConvention',
-        header: 'Commentaire convention',
-        cell: ({ getValue }) => {
-          const commentaire = getValue() as string
-          if (!commentaire) return ''
-          return (
-            <span className="text-sm" title={commentaire}>
-              {commentaire.length > 30 ? commentaire.substring(0, 30) + '...' : commentaire}
-            </span>
-          )
-        },
-      },
-      {
         id: 'assigneA',
         header: 'Assigné à',
         filterFn: multiSelectFilter,
@@ -715,7 +715,15 @@ const DemandesTablePanel: React.FC = () => {
           if (!dossier) return ''
           return (
             <div className="text-sm">
-              <div className="font-medium">{dossier.numero}</div>
+              <div
+                className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleViewDossier(dossier.id)
+                }}
+              >
+                {dossier.numero}
+              </div>
               {dossier.sgami && (
                 <div className="text-gray-500 text-xs">{dossier.sgami.nom}</div>
               )}
@@ -776,6 +784,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         id: 'badges',
         header: 'Badges',
+        accessorFn: (row) => row.badges?.map(b => b.badge.nom).join(', ') || '',
         filterFn: multiSelectFilter,
         cell: ({ row }) => {
           const badges = row.original.badges
@@ -802,13 +811,14 @@ const DemandesTablePanel: React.FC = () => {
       {
         id: 'baps',
         header: 'BAP',
+        accessorFn: (row) => row.baps?.map(b => b.bap.nomBAP).join(', ') || '',
         filterFn: multiSelectFilter,
         cell: ({ row }) => {
           const baps = row.original.baps
           if (!baps?.length) return ''
           return (
             <span className="text-sm">
-              {baps.map(bapRel => bapRel.bap.nom).join(', ')}
+              {baps.map(bapRel => bapRel.bap.nomBAP).join(', ')}
             </span>
           )
         },

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,9 +11,108 @@ import {
   ColumnFiltersState,
   SortingState,
 } from '@tanstack/react-table'
-import { ChevronDownIcon, ChevronUpIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, ChevronUpIcon, EyeIcon, FunnelIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/utils/api'
+
+// Composant de filtre déroulant multi-sélection
+const MultiSelectFilter: React.FC<{
+  column: any
+  values: string[]
+  title: string
+}> = ({ column, values, title }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const selectedValues = (column.getFilterValue() as string[]) || []
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Fermer le dropdown quand on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const toggleValue = (value: string) => {
+    const newSelectedValues = selectedValues.includes(value)
+      ? selectedValues.filter(v => v !== value)
+      : [...selectedValues, value]
+    
+    column.setFilterValue(newSelectedValues.length > 0 ? newSelectedValues : undefined)
+  }
+
+  const clearFilter = () => {
+    column.setFilterValue(undefined)
+    setIsOpen(false)
+  }
+
+  const uniqueValues = [...new Set(values.filter(v => v != null && v !== ''))].sort()
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setIsOpen(!isOpen)
+        }}
+        className={`mt-1 w-full px-2 py-1 text-xs border rounded focus:ring-blue-500 focus:border-blue-500 flex items-center justify-between ${
+          selectedValues.length > 0 
+            ? 'border-blue-500 bg-blue-50 text-blue-700' 
+            : 'border-gray-300 bg-white text-gray-700'
+        }`}
+      >
+        <FunnelIcon className="h-3 w-3" />
+        <span className="mx-1 truncate">
+          {selectedValues.length > 0 ? `${selectedValues.length} sélectionné${selectedValues.length > 1 ? 's' : ''}` : 'Filtrer...'}
+        </span>
+        <ChevronDownIcon className={`h-3 w-3 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div 
+          className="absolute z-50 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg"
+          style={{ top: '100%', left: '-50%' }}
+        >
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-gray-700">{title}</span>
+              {selectedValues.length > 0 && (
+                <button
+                  onClick={clearFilter}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
+                  Effacer
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="max-h-60 overflow-y-auto p-1">
+            {uniqueValues.map((value) => (
+              <label
+                key={value}
+                className="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer text-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedValues.includes(value)}
+                  onChange={() => toggleValue(value)}
+                  className="mr-2 h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="truncate">{value}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface Demande {
   id: string
@@ -123,7 +222,7 @@ interface Demande {
 }
 
 const fetchAllDemandes = async (): Promise<Demande[]> => {
-  const response = await api.get('/demandes?limit=10000')
+  const response = await api.get('/demandes?limit=999999')
   return response.data.demandes
 }
 
@@ -160,6 +259,37 @@ const DemandesTablePanel: React.FC = () => {
     queryFn: fetchAllDemandes,
   })
 
+  // Fonction de filtre personnalisée pour les multi-sélections
+  const multiSelectFilter = useCallback((row: any, columnId: string, filterValue: string[]) => {
+    if (!filterValue || filterValue.length === 0) return true
+    const cellValue = row.getValue(columnId)
+    if (!cellValue) return false
+    return filterValue.includes(String(cellValue))
+  }, [])
+
+  // Extraction des valeurs uniques pour les filtres déroulants
+  const getUniqueValues = useCallback((accessor: string) => {
+    return demandes.map(demande => {
+      // Gestion des accesseurs complexes (relations)
+      if (accessor === 'militaire') {
+        const grade = demande.grade?.gradeAbrege || ''
+        const nom = demande.nom || ''
+        const prenom = demande.prenom || ''
+        return `${grade} ${prenom} ${nom}`.trim()
+      }
+      if (accessor === 'assigneA') {
+        const assigneA = demande.assigneA
+        if (!assigneA) return ''
+        return `${assigneA.grade} ${assigneA.prenom} ${assigneA.nom}`.trim()
+      }
+      if (accessor === 'dossier') {
+        return demande.dossier?.numero || ''
+      }
+      // Accesseur simple
+      return String((demande as any)[accessor] || '')
+    })
+  }, [demandes])
+
   const columns = useMemo<ColumnDef<Demande>[]>(
     () => [
       {
@@ -172,6 +302,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'type',
         header: 'Type',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => {
           const type = getValue() as string
           return (
@@ -208,6 +339,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'statutDemandeur',
         header: 'Statut demandeur',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -267,6 +399,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'contexteMissionnel',
         header: 'Contexte missionnel',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -274,6 +407,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'qualificationInfraction',
         header: 'Qualification infraction',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -288,6 +422,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'position',
         header: 'Position',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => {
           const position = getValue() as string
           if (!position) return ''
@@ -307,6 +442,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'branche',
         header: 'Branche',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -314,6 +450,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'formationAdministrative',
         header: 'Formation administrative',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -791,18 +928,37 @@ const DemandesTablePanel: React.FC = () => {
                     </div>
                     
                     {/* Filtre de colonne */}
-                    {header.column.getCanFilter() && (
-                      <input
-                        type="text"
-                        value={(header.column.getFilterValue() ?? '') as string}
-                        onChange={(e) =>
-                          header.column.setFilterValue(e.target.value)
-                        }
-                        placeholder={`Filtrer...`}
-                        className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    )}
+                    {header.column.getCanFilter() && (() => {
+                      const columnId = header.column.id
+                      // Colonnes avec filtres multi-sélection
+                      const multiSelectColumns = ['type', 'statutDemandeur', 'position', 'branche', 'formationAdministrative', 'contexteMissionnel', 'qualificationInfraction']
+                      
+                      if (multiSelectColumns.includes(columnId)) {
+                        return (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <MultiSelectFilter
+                              column={header.column}
+                              values={getUniqueValues(columnId)}
+                              title={typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : columnId}
+                            />
+                          </div>
+                        )
+                      }
+                      
+                      // Filtre texte par défaut pour les autres colonnes
+                      return (
+                        <input
+                          type="text"
+                          value={(header.column.getFilterValue() ?? '') as string}
+                          onChange={(e) =>
+                            header.column.setFilterValue(e.target.value)
+                          }
+                          placeholder={`Filtrer...`}
+                          className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )
+                    })()}
                   </th>
                 ))}
               </tr>

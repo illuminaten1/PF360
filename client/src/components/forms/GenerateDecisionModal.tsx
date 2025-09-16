@@ -87,7 +87,6 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
           visaId: militaryVisa?.id || '',
           avis_hierarchiques: false,
           typeVictMec: undefined,
-          considerant: '',
           dateSignature: '',
           dateEnvoi: '',
           demandeIds: []
@@ -105,7 +104,6 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
         visaId: data.visaId,
         avis_hierarchiques: data.avis_hierarchiques,
         typeVictMec: data.typeVictMec,
-        considerant: data.considerant,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : undefined,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : undefined,
         dossierId: dossier.id,
@@ -437,8 +435,8 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Quatrième ligne : Demandes à inclure et Considérant */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Quatrième ligne : Demandes à inclure */}
+                  <div className="grid grid-cols-1 gap-6">
                     {/* Demandes à inclure */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -462,7 +460,7 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-2 border-gray-200 rounded-lg p-4 shadow-sm transition-all h-[256px]">
                         <div className="h-full overflow-y-auto">
                           {dossier.demandes.length === 0 ? (
@@ -497,34 +495,12 @@ const GenerateDecisionModal: React.FC<GenerateDecisionModalProps> = ({
                           )}
                         </div>
                       </div>
-                      
+
                       {errors.demandeIds && (
                         <p className="mt-1 text-sm text-red-600">{errors.demandeIds.message}</p>
                       )}
                       <p className="mt-2 text-xs text-gray-500">
                         {selectedDemandeIds.length} demande(s) sélectionnée(s) sur {dossier.demandes.length} dans le dossier
-                      </p>
-                    </div>
-
-                    {/* Considérant */}
-                    <div>
-                      <label htmlFor="considerant" className="block text-sm font-medium text-gray-700 mb-2">
-                        Considérant
-                      </label>
-                      <div className="relative">
-                        <textarea
-                          {...register('considerant')}
-                          className="block w-full h-[256px] px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
-                          placeholder="Texte du considérant de la décision..."
-                        />
-                        <div className="absolute top-3 right-3 pointer-events-none">
-                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500">
-                        Optionnel - Texte explicatif pour justifier la décision
                       </p>
                     </div>
                   </div>

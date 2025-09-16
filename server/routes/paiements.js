@@ -458,7 +458,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const paiementExistant = await prisma.paiement.findUnique({
       where: { id }
     });
@@ -466,6 +466,10 @@ router.delete('/:id', async (req, res) => {
     if (!paiementExistant) {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
+
+    await prisma.paiementDecision.deleteMany({
+      where: { paiementId: id }
+    });
 
     await prisma.paiement.delete({
       where: { id }

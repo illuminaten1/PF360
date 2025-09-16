@@ -262,14 +262,47 @@ const DemandesTablePanel: React.FC = () => {
   // Fonction de filtre personnalisée pour les multi-sélections
   const multiSelectFilter = useCallback((row: any, columnId: string, filterValue: string[]) => {
     if (!filterValue || filterValue.length === 0) return true
-    const cellValue = row.getValue(columnId)
-    if (!cellValue) return false
-    return filterValue.includes(String(cellValue))
+    
+    const demande = row.original
+    let cellValue: string
+    
+    // Gestion spéciale pour les colonnes complexes
+    if (columnId === 'assigneA') {
+      const assigneA = demande.assigneA
+      cellValue = assigneA ? `${assigneA.grade} ${assigneA.prenom} ${assigneA.nom}`.trim() : 'Non assigné'
+      return filterValue.includes(cellValue)
+    } else if (columnId === 'dossier') {
+      cellValue = demande.dossier?.numero || 'Aucun dossier'
+      return filterValue.includes(cellValue)
+    } else if (columnId === 'partieCivile') {
+      cellValue = demande.partieCivile ? 'Oui' : 'Non'
+      return filterValue.includes(cellValue)
+    } else if (columnId === 'badges') {
+      // Pour les badges, on vérifie si un des badges sélectionnés est présent
+      if (!demande.badges?.length) {
+        return filterValue.includes('Aucun badge')
+      }
+      const badgeNames = demande.badges.map((b: any) => b.badge.nom)
+      return filterValue.some(filter => badgeNames.includes(filter))
+    } else if (columnId === 'baps') {
+      // Pour les BAP, on vérifie si un des BAP sélectionnés est présent
+      if (!demande.baps?.length) {
+        return filterValue.includes('Aucun BAP')
+      }
+      const bapNames = demande.baps.map((b: any) => b.bap.nom)
+      return filterValue.some(filter => bapNames.includes(filter))
+    } else {
+      cellValue = String(row.getValue(columnId) || '')
+      return filterValue.includes(cellValue)
+    }
+    
+    // Pour les cas qui ont déjà retourné, ce code ne sera jamais atteint
+    return true
   }, [])
 
   // Extraction des valeurs uniques pour les filtres déroulants
   const getUniqueValues = useCallback((accessor: string) => {
-    return demandes.map(demande => {
+    const allValues = demandes.flatMap(demande => {
       // Gestion des accesseurs complexes (relations)
       if (accessor === 'militaire') {
         const grade = demande.grade?.gradeAbrege || ''
@@ -279,15 +312,30 @@ const DemandesTablePanel: React.FC = () => {
       }
       if (accessor === 'assigneA') {
         const assigneA = demande.assigneA
-        if (!assigneA) return ''
+        if (!assigneA) return 'Non assigné'
         return `${assigneA.grade} ${assigneA.prenom} ${assigneA.nom}`.trim()
       }
       if (accessor === 'dossier') {
-        return demande.dossier?.numero || ''
+        return demande.dossier?.numero || 'Aucun dossier'
+      }
+      if (accessor === 'partieCivile') {
+        return demande.partieCivile ? 'Oui' : 'Non'
+      }
+      if (accessor === 'badges') {
+        // Pour les badges, on retourne tous les noms de badges individuels
+        if (!demande.badges?.length) return ['Aucun badge']
+        return demande.badges.map(b => b.badge.nom)
+      }
+      if (accessor === 'baps') {
+        // Pour les BAP, on retourne tous les noms de BAP individuels
+        if (!demande.baps?.length) return ['Aucun BAP']
+        return demande.baps.map(b => b.bap.nom)
       }
       // Accesseur simple
       return String((demande as any)[accessor] || '')
     })
+    
+    return allValues
   }, [demandes])
 
   const columns = useMemo<ColumnDef<Demande>[]>(
@@ -392,6 +440,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'departement',
         header: 'Département',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -520,6 +569,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'partieCivile',
         header: 'Partie civile',
+        filterFn: multiSelectFilter,
         cell: ({ getValue }) => {
           const isPartieCivile = getValue() as boolean
           return (
@@ -603,6 +653,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         id: 'assigneA',
         header: 'Assigné à',
+        filterFn: multiSelectFilter,
         cell: ({ row }) => {
           const assigneA = row.original.assigneA
           if (!assigneA) return ''
@@ -658,6 +709,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         id: 'dossier',
         header: 'Dossier',
+        filterFn: multiSelectFilter,
         cell: ({ row }) => {
           const dossier = row.original.dossier
           if (!dossier) return ''
@@ -724,6 +776,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         id: 'badges',
         header: 'Badges',
+        filterFn: multiSelectFilter,
         cell: ({ row }) => {
           const badges = row.original.badges
           if (!badges?.length) return ''
@@ -749,6 +802,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         id: 'baps',
         header: 'BAP',
+        filterFn: multiSelectFilter,
         cell: ({ row }) => {
           const baps = row.original.baps
           if (!baps?.length) return ''
@@ -931,7 +985,7 @@ const DemandesTablePanel: React.FC = () => {
                     {header.column.getCanFilter() && (() => {
                       const columnId = header.column.id
                       // Colonnes avec filtres multi-sélection
-                      const multiSelectColumns = ['type', 'statutDemandeur', 'position', 'branche', 'formationAdministrative', 'contexteMissionnel', 'qualificationInfraction']
+                      const multiSelectColumns = ['type', 'statutDemandeur', 'position', 'branche', 'formationAdministrative', 'contexteMissionnel', 'qualificationInfraction', 'departement', 'partieCivile', 'assigneA', 'dossier', 'badges', 'baps']
                       
                       if (multiSelectColumns.includes(columnId)) {
                         return (

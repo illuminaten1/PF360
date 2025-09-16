@@ -724,7 +724,8 @@ router.post('/convention/:conventionId', async (req, res) => {
               include: {
                 grade: true
               }
-            }
+            },
+            sgami: true
           }
         },
         avocat: true,
@@ -803,6 +804,12 @@ router.post('/convention/:conventionId', async (req, res) => {
         nomDossier: convention.dossier.nomDossier,
         notes: convention.dossier.notes
       },
+      sgami: convention.dossier.sgami ? {
+        nom: convention.dossier.sgami.nom,
+        formatCourtNommage: convention.dossier.sgami.formatCourtNommage,
+        texteConvention: convention.dossier.sgami.texteConvention,
+        intituleFicheReglement: convention.dossier.sgami.intituleFicheReglement
+      } : null,
       demandes: convention.demandes.map(cd => ({
         nom: cd.demande.nom,
         prenom: cd.demande.prenom,

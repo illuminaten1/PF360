@@ -44,6 +44,12 @@ Placez ce fichier dans templates/convention-template.docx
 {d.dossier.nomDossier} - Nom optionnel du dossier
 {d.dossier.notes} - Notes du dossier
 
+===== SGAMI (via le dossier) =====
+{d.sgami.nom} - Nom du SGAMI
+{d.sgami.formatCourtNommage} - Format court de nommage
+{d.sgami.texteConvention} - Texte spécifique pour les conventions
+{d.sgami.intituleFicheReglement} - Intitulé pour les fiches de règlement
+
 ===== DEMANDES ASSOCIÉES =====
 {d.demandes[0].nom} - Nom du demandeur
 {d.demandes[0].prenom} - Prénom du demandeur
@@ -91,6 +97,7 @@ Partie représentée : {d.convention.victimeOuMisEnCause}
 DOSSIER
 Numéro : {d.dossier.numero}
 Nom : {d.dossier.nomDossier}
+SGAMI : {d.sgami.nom}
 
 DEMANDEURS
 {d.demandeursListeDetaille:convCRLF}

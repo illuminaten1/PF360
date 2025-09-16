@@ -141,7 +141,7 @@ const getComplementFacturation = (typeFacturation) => {
     case 'DEMI_JOURNEE':
       return ' par demi-journée d\'assistance';
     case 'ASSISES':
-      return ', montant forfaitaire maximal représentant 1 000 euros [mille euros] hors taxes par militaire pour la préparation du dossier devant la cour d\'assises et 500 euros [cinq cents euros] hors taxes par demi-journée de présence devant la cour d\'assises, quel que soit le nombre de militaires concernés';
+      return ', montant décomposé ainsi :\n - 1 000 € [mille euros] hors taxes par militaire pour la préparation du dossier devant la cour d\'assises\n - 500 € [cinq cents euros] hors taxes par demi-journée de présence devant la cour d\'assises, quel que soit le nombre de militaires concernés';
     default:
       return '';
   }

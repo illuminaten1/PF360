@@ -9,6 +9,10 @@ Placez ce fichier dans templates/convention-template.docx
 {d.convention.instance} - Instance judiciaire
 {d.convention.montantHT} - Montant HT de la convention (en chiffres)
 {d.convention.montantHTEnLettres} - Montant HT de la convention en lettres (ex: "sept cent euros")
+{d.convention.complementFacturation:convCRLF} - Texte complémentaire selon le type de facturation
+                                              - FORFAITAIRE : vide
+                                              - DEMI_JOURNEE : " par demi-journée d'assistance"
+                                              - ASSISES : ", montant décomposé ainsi : ..." (avec retours à la ligne)
 {d.convention.dateCreation} - Date de création (format FR)
 {d.convention.dateRetourSigne} - Date de retour signé par l'avocat (format FR)
 
@@ -113,7 +117,7 @@ Adresse : {d.avocat.adressePostale}
 SIRET : {d.avocat.siretOuRidet}
 
 MONTANT
-Montant HT de cette convention : {d.convention.montantHT} € ({d.convention.montantHTEnLettres})
+Montant HT de cette convention : {d.convention.montantHT} € ({d.convention.montantHTEnLettres}{d.convention.complementFacturation:convCRLF})
 
 DÉCISIONS VISÉES
 {d.decisionsListe}

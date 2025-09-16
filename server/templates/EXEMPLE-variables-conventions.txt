@@ -5,7 +5,7 @@ Placez ce fichier dans templates/convention-template.docx
 ===== VARIABLES CONVENTION =====
 {d.convention.numero} - Numéro de la convention
 {d.convention.type} - Type (CONVENTION)
-{d.convention.victimeOuMisEnCause} - VICTIME | MIS_EN_CAUSE
+{d.convention.victimeOuMisEnCause} - victime | mis en cause (formaté en texte lisible)
 {d.convention.instance} - Instance judiciaire
 {d.convention.montantHT} - Montant HT de la convention (en chiffres)
 {d.convention.montantHTEnLettres} - Montant HT de la convention en lettres (ex: "sept cent euros")

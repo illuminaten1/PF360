@@ -471,12 +471,24 @@ router.post('/avenant/:avenantId', async (req, res) => {
       return res.status(400).json({ error: 'Ce document n\'est pas un avenant' });
     }
 
+    // Fonction pour formater victimeOuMisEnCause
+    const getVictimeMecLabel = (type) => {
+      switch (type) {
+        case 'VICTIME':
+          return 'victime'
+        case 'MIS_EN_CAUSE':
+          return 'mis en cause'
+        default:
+          return type?.toLowerCase() || ''
+      }
+    }
+
     // Formater les données pour Carbone selon le schéma Prisma
     const data = {
       avenant: {
         numero: avenant.numero,
         type: avenant.type,
-        victimeOuMisEnCause: avenant.victimeOuMisEnCause,
+        victimeOuMisEnCause: getVictimeMecLabel(avenant.victimeOuMisEnCause),
         instance: avenant.instance,
         montantHT: avenant.montantHT,
         montantHTGagePrecedemment: avenant.montantHTGagePrecedemment,
@@ -760,12 +772,24 @@ router.post('/convention/:conventionId', async (req, res) => {
       return res.status(400).json({ error: 'Ce document n\'est pas une convention' });
     }
 
+    // Fonction pour formater victimeOuMisEnCause
+    const getVictimeMecLabel = (type) => {
+      switch (type) {
+        case 'VICTIME':
+          return 'victime'
+        case 'MIS_EN_CAUSE':
+          return 'mis en cause'
+        default:
+          return type?.toLowerCase() || ''
+      }
+    }
+
     // Formater les données pour Carbone selon le schéma Prisma
     const data = {
       convention: {
         numero: convention.numero,
         type: convention.type,
-        victimeOuMisEnCause: convention.victimeOuMisEnCause,
+        victimeOuMisEnCause: getVictimeMecLabel(convention.victimeOuMisEnCause),
         instance: convention.instance,
         montantHT: convention.montantHT,
         montantHTEnLettres: convertirNombreEnLettres(Math.floor(convention.montantHT)) + ' euros',

@@ -15,6 +15,7 @@ const createConventionSchema = z.object({
   instance: z.string().min(1, "L'instance est requise"),
   montantHT: z.number().positive("Le montant HT doit être positif"),
   montantHTGagePrecedemment: z.number().positive().optional(),
+  typeFacturation: z.enum(['FORFAITAIRE', 'DEMI_JOURNEE', 'ASSISES']).optional(),
   dateRetourSigne: z.string().optional(),
   dossierId: z.string().min(1, "Le dossier est requis"),
   avocatId: z.string().min(1, "L'avocat est requis"),
@@ -29,6 +30,7 @@ const updateConventionSchema = z.object({
   instance: z.string().min(1).optional(),
   montantHT: z.number().positive().optional(),
   montantHTGagePrecedemment: z.number().positive().optional(),
+  typeFacturation: z.enum(['FORFAITAIRE', 'DEMI_JOURNEE', 'ASSISES']).optional(),
   dateRetourSigne: z.string().optional().nullable(),
   dossierId: z.string().min(1).optional(),
   avocatId: z.string().min(1).optional(),
@@ -117,16 +119,17 @@ router.post('/', async (req, res) => {
     console.log('=== DEBUG: Convention creation request ===');
     console.log('Request body:', JSON.stringify(req.body, null, 2));
     const validatedData = createConventionSchema.parse(req.body);
-    const { 
-      type, 
-      victimeOuMisEnCause, 
-      instance, 
-      montantHT, 
+    const {
+      type,
+      victimeOuMisEnCause,
+      instance,
+      montantHT,
       montantHTGagePrecedemment,
+      typeFacturation,
       dateRetourSigne,
-      dossierId, 
-      avocatId, 
-      demandes = [], 
+      dossierId,
+      avocatId,
+      demandes = [],
       diligences = [],
       decisions = []
     } = validatedData;
@@ -153,6 +156,7 @@ router.post('/', async (req, res) => {
           instance,
           montantHT,
           montantHTGagePrecedemment,
+          typeFacturation,
           dateRetourSigne: dateRetourSigne ? new Date(dateRetourSigne) : null,
           dossierId,
           avocatId,
@@ -340,16 +344,17 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const validatedData = updateConventionSchema.parse(req.body);
-    const { 
-      type, 
-      victimeOuMisEnCause, 
-      instance, 
-      montantHT, 
+    const {
+      type,
+      victimeOuMisEnCause,
+      instance,
+      montantHT,
       montantHTGagePrecedemment,
+      typeFacturation,
       dateRetourSigne,
-      dossierId, 
-      avocatId, 
-      demandes = [], 
+      dossierId,
+      avocatId,
+      demandes = [],
       diligences = [],
       decisions = []
     } = validatedData;
@@ -405,6 +410,7 @@ router.put('/:id', async (req, res) => {
     if (instance !== undefined) updateData.instance = instance;
     if (montantHT !== undefined) updateData.montantHT = montantHT;
     if (montantHTGagePrecedemment !== undefined) updateData.montantHTGagePrecedemment = montantHTGagePrecedemment;
+    if (typeFacturation !== undefined) updateData.typeFacturation = typeFacturation;
     if (dateRetourSigne !== undefined) {
       updateData.dateRetourSigne = dateRetourSigne ? new Date(dateRetourSigne) : null;
     }

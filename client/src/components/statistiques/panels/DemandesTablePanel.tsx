@@ -175,6 +175,7 @@ interface Demande {
     grade: string
   }
   dossier?: {
+    id: string
     numero: string
     sgami?: {
       nom: string
@@ -229,8 +230,18 @@ const fetchAllDemandes = async (): Promise<Demande[]> => {
 
 const DemandesTablePanel: React.FC = () => {
   const navigate = useNavigate()
-  // Configuration des colonnes visibles par défaut
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+  // Configuration des colonnes visibles par défaut avec persistance localStorage
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    try {
+      const saved = localStorage.getItem('pf360-statistiques-demandes-table-column-visibility')
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    } catch (error) {
+      console.warn('Failed to load column visibility from localStorage:', error)
+    }
+    // Configuration par défaut si pas de sauvegarde
+    return {
     // Colonnes visibles par défaut : Type, Militaire, Statut demandeur, Date réception, Date faits, Département, Formation administrative, Assigné à, Dossier, Badges, BAP
     numeroDS: false,
     // type: true (visible par défaut)
@@ -271,10 +282,34 @@ const DemandesTablePanel: React.FC = () => {
     conventions: false,
     // badges: true (visible par défaut)
     // baps: true (visible par défaut)
+    }
   })
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() => {
+    try {
+      const saved = localStorage.getItem('pf360-statistiques-demandes-table-column-filters')
+      return saved ? JSON.parse(saved) : []
+    } catch (error) {
+      console.warn('Failed to load column filters from localStorage:', error)
+      return []
+    }
+  })
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    try {
+      const saved = localStorage.getItem('pf360-statistiques-demandes-table-sorting')
+      return saved ? JSON.parse(saved) : []
+    } catch (error) {
+      console.warn('Failed to load sorting from localStorage:', error)
+      return []
+    }
+  })
+  const [globalFilter, setGlobalFilter] = useState(() => {
+    try {
+      return localStorage.getItem('pf360-statistiques-demandes-table-global-filter') || ''
+    } catch (error) {
+      console.warn('Failed to load global filter from localStorage:', error)
+      return ''
+    }
+  })
 
   const { data: demandes = [], isLoading, error } = useQuery({
     queryKey: ['all-demandes'],
@@ -284,6 +319,39 @@ const DemandesTablePanel: React.FC = () => {
   const handleViewDossier = (dossierId: string) => {
     navigate(`/dossiers/${dossierId}`)
   }
+
+  // Sauvegarder les filtres dans localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('pf360-statistiques-demandes-table-column-visibility', JSON.stringify(columnVisibility))
+    } catch (error) {
+      console.warn('Failed to save column visibility to localStorage:', error)
+    }
+  }, [columnVisibility])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('pf360-statistiques-demandes-table-column-filters', JSON.stringify(columnFilters))
+    } catch (error) {
+      console.warn('Failed to save column filters to localStorage:', error)
+    }
+  }, [columnFilters])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('pf360-statistiques-demandes-table-sorting', JSON.stringify(sorting))
+    } catch (error) {
+      console.warn('Failed to save sorting to localStorage:', error)
+    }
+  }, [sorting])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('pf360-statistiques-demandes-table-global-filter', globalFilter)
+    } catch (error) {
+      console.warn('Failed to save global filter to localStorage:', error)
+    }
+  }, [globalFilter])
 
   // Fonction de filtre personnalisée pour les multi-sélections
   const multiSelectFilter = useCallback((row: any, columnId: string, filterValue: string[]) => {
@@ -321,9 +389,6 @@ const DemandesTablePanel: React.FC = () => {
       cellValue = String(row.getValue(columnId) || '')
       return filterValue.includes(cellValue)
     }
-    
-    // Pour les cas qui ont déjà retourné, ce code ne sera jamais atteint
-    return true
   }, [])
 
   // Extraction des valeurs uniques pour les filtres déroulants

@@ -11,7 +11,8 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState
+  type ColumnFiltersState,
+  type Column
 } from '@tanstack/react-table'
 import { Dossier } from '@/types'
 import dayjs from 'dayjs'
@@ -39,7 +40,7 @@ interface DossiersTableProps {
   onDelete: (dossier: Dossier) => void
 }
 
-function Filter({ column }: { column: any }) {
+function Filter({ column }: { column: Column<Dossier, unknown> }) {
   const columnFilterValue = column.getFilterValue()
 
   return (
@@ -53,7 +54,7 @@ function Filter({ column }: { column: any }) {
   )
 }
 
-function SGAMIMultiSelectFilter({ column }: { column: any }) {
+function SGAMIMultiSelectFilter({ column }: { column: Column<Dossier, unknown> }) {
   const columnFilterValue = (column.getFilterValue() ?? []) as string[]
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -148,7 +149,7 @@ function SGAMIMultiSelectFilter({ column }: { column: any }) {
   )
 }
 
-function AssigneAMultiSelectFilter({ column }: { column: any }) {
+function AssigneAMultiSelectFilter({ column }: { column: Column<Dossier, unknown> }) {
   const columnFilterValue = (column.getFilterValue() ?? []) as string[]
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -243,7 +244,7 @@ function AssigneAMultiSelectFilter({ column }: { column: any }) {
   )
 }
 
-function BadgesMultiSelectFilter({ column }: { column: any }) {
+function BadgesMultiSelectFilter({ column }: { column: Column<Dossier, unknown> }) {
   const columnFilterValue = (column.getFilterValue() ?? []) as string[]
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -336,6 +337,84 @@ function BadgesMultiSelectFilter({ column }: { column: any }) {
   )
 }
 
+const DemandeursCell: React.FC<{
+  dossier: Dossier
+  onLierDemandes: (dossierId: string, dossierNumero: string) => void
+}> = ({ dossier, onLierDemandes }) => {
+  const [showAll, setShowAll] = React.useState(false)
+
+  if (dossier.demandes.length === 0) {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          onLierDemandes(dossier.id, dossier.numero)
+        }}
+        className="text-sm text-blue-600 hover:text-blue-800 underline"
+      >
+        Lier des demandes
+      </button>
+    )
+  }
+
+  return (
+    <div className="text-sm">
+      <div className="text-gray-900">
+        {showAll ? (
+          // Afficher tous les demandeurs
+          <div className="space-y-1">
+            {dossier.demandes.map((d, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
+                {d.numeroDS && (
+                  <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
+                )}
+              </div>
+            ))}
+            {dossier.demandes.length > 2 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowAll(false)
+                }}
+                className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
+              >
+                Réduire
+              </button>
+            )}
+          </div>
+        ) : (
+          // Afficher les 2 premiers + bouton
+          <div>
+            {dossier.demandes.slice(0, 2).map((d, index) => (
+              <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
+                {d.numeroDS && (
+                  <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
+                )}
+              </div>
+            ))}
+            {dossier.demandes.length > 2 && (
+              <div className="mt-1">
+                <span className="text-gray-500 text-xs">+{dossier.demandes.length - 2} autre(s) </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowAll(true)
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-xs underline"
+                >
+                  Voir tous
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const DossiersTable: React.FC<DossiersTableProps> = ({
   data,
   loading = false,
@@ -406,79 +485,15 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         },
         cell: ({ row }) => {
           const dossier = row.original
-          if (dossier.demandes.length === 0) {
-            return (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedDossierId(dossier.id)
-                  setSelectedDossierNumero(dossier.numero)
-                  setShowLierDemandesModal(true)
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
-              >
-                Lier des demandes
-              </button>
-            )
-          }
-
-          const [showAll, setShowAll] = React.useState(false)
-          
           return (
-            <div className="text-sm">
-              <div className="text-gray-900">
-                {showAll ? (
-                  // Afficher tous les demandeurs
-                  <div className="space-y-1">
-                    {dossier.demandes.map((d, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
-                        {d.numeroDS && (
-                          <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
-                        )}
-                      </div>
-                    ))}
-                    {dossier.demandes.length > 2 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setShowAll(false)
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
-                      >
-                        Réduire
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  // Afficher les 2 premiers + bouton
-                  <div>
-                    {dossier.demandes.slice(0, 2).map((d, index) => (
-                      <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                        <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
-                        {d.numeroDS && (
-                          <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
-                        )}
-                      </div>
-                    ))}
-                    {dossier.demandes.length > 2 && (
-                      <div className="mt-1">
-                        <span className="text-gray-500 text-xs">+{dossier.demandes.length - 2} autre(s) </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setShowAll(true)
-                          }}
-                          className="text-blue-600 hover:text-blue-800 text-xs underline"
-                        >
-                          Voir tous
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <DemandeursCell
+              dossier={dossier}
+              onLierDemandes={(dossierId, dossierNumero) => {
+                setSelectedDossierId(dossierId)
+                setSelectedDossierNumero(dossierNumero)
+                setShowLierDemandesModal(true)
+              }}
+            />
           )
         },
         enableColumnFilter: true,
@@ -571,7 +586,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
 
           const dossier = row.original
           const badges = dossier.badges || []
-          const badgeNames = badges.map((badgeRel: any) => badgeRel.badge?.nom).filter(Boolean)
+          const badgeNames = badges.map((badgeRel) => badgeRel.badge?.nom).filter(Boolean)
 
           return filterValue.some(selectedBadge => badgeNames.includes(selectedBadge))
         },

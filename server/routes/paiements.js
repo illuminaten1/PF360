@@ -78,9 +78,9 @@ router.post('/', async (req, res) => {
       decisions = []
     } = req.body;
 
-    if (!montantTTC || !dossierId || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
-      return res.status(400).json({ 
-        error: 'Les champs montantTTC, dossierId, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
+    if (!montantTTC || !dossierId || !sgamiId || !pceId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
+      return res.status(400).json({
+        error: 'Les champs montantTTC, dossierId, sgamiId, pceId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires'
       });
     }
 
@@ -138,15 +138,13 @@ router.post('/', async (req, res) => {
       }
     }
 
-    // Si un PCE est spécifié, vérifier qu'il existe
-    if (pceId) {
-      const pceExistant = await prisma.pce.findUnique({
-        where: { id: pceId }
-      });
+    // Vérifier que le PCE existe (maintenant obligatoire)
+    const pceExistant = await prisma.pce.findUnique({
+      where: { id: pceId }
+    });
 
-      if (!pceExistant) {
-        return res.status(404).json({ error: 'PCE non trouvé' });
-      }
+    if (!pceExistant) {
+      return res.status(404).json({ error: 'PCE non trouvé' });
     }
 
     const paiement = await prisma.$transaction(async (tx) => {
@@ -317,9 +315,9 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Paiement non trouvé' });
     }
 
-    if (!montantTTC || !sgamiId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
-      return res.status(400).json({ 
-        error: 'Les champs montantTTC, sgamiId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires' 
+    if (!montantTTC || !sgamiId || !pceId || !emissionTitrePerception || !qualiteBeneficiaire || !identiteBeneficiaire || !conventionJointeFRI) {
+      return res.status(400).json({
+        error: 'Les champs montantTTC, sgamiId, pceId, emissionTitrePerception, qualiteBeneficiaire, identiteBeneficiaire et conventionJointeFRI sont obligatoires'
       });
     }
 
@@ -368,15 +366,13 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    // Si un PCE est spécifié, vérifier qu'il existe
-    if (pceId) {
-      const pceExistant = await prisma.pce.findUnique({
-        where: { id: pceId }
-      });
+    // Vérifier que le PCE existe (maintenant obligatoire)
+    const pceExistant = await prisma.pce.findUnique({
+      where: { id: pceId }
+    });
 
-      if (!pceExistant) {
-        return res.status(404).json({ error: 'PCE non trouvé' });
-      }
+    if (!pceExistant) {
+      return res.status(404).json({ error: 'PCE non trouvé' });
     }
 
     const paiement = await prisma.$transaction(async (tx) => {

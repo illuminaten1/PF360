@@ -286,6 +286,10 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
       newErrors.sgamiId = 'Le SGAMI est obligatoire'
     }
 
+    if (!formData.pceId) {
+      newErrors.pceId = 'Le code PCE est obligatoire'
+    }
+
     if (!formData.identiteBeneficiaire) {
       newErrors.identiteBeneficiaire = 'L\'identité du bénéficiaire est obligatoire'
     }
@@ -461,7 +465,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Code PCE
+                Code PCE *
               </label>
               <Listbox 
                 value={selectedPce} 
@@ -471,7 +475,9 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                 }}
               >
                 <div className="relative">
-                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200">
+                  <Listbox.Button className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                    errors.pceId ? 'border-red-300' : 'border-gray-200'
+                  }`}>
                     <span className="block truncate">
                       {selectedPce ? (
                         `${selectedPce.pceDetaille} - ${selectedPce.pceNumerique}`
@@ -542,6 +548,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
                   </Transition>
                 </div>
               </Listbox>
+              {errors.pceId && <p className="text-red-500 text-xs mt-1">{errors.pceId}</p>}
             </div>
 
             {/* Deuxième ligne: Montant HT - Montant TTC */}

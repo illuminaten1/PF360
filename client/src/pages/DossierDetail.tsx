@@ -25,7 +25,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  EnvelopeIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -39,6 +38,7 @@ import CreateConventionModal from '@/components/forms/CreateConventionModal'
 import EditConventionModal from '@/components/forms/EditConventionModal'
 import PaiementModal from '@/components/forms/PaiementModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import ConventionContextMenu from '@/components/common/ConventionContextMenu'
 
 dayjs.extend(relativeTime)
 dayjs.locale('fr')
@@ -605,57 +605,6 @@ const DossierDetail: React.FC = () => {
     setContextMenu({ show: false, x: 0, y: 0, convention: null })
   }
 
-  const generateEmailRelance = async () => {
-    if (!contextMenu.convention || !dossier) return
-
-    const convention = contextMenu.convention
-    const avocat = convention.avocat
-
-    if (!avocat.email) {
-      toast.error('Aucun email renseigné pour cet avocat')
-      closeContextMenu()
-      return
-    }
-
-    // Générer le contenu de l'email
-    const objet = `Relance convention n°${convention.numero} - Dossier ${dossier.numero}`
-
-    const corps = `Bonjour Maître ${avocat.nom},
-
-Nous nous permettons de vous relancer concernant la convention d'honoraires suivante :
-
-• Convention n°${convention.numero}
-• Type : ${convention.type}
-• Dossier : ${dossier.numero}${dossier.nomDossier ? ` - ${dossier.nomDossier}` : ''}
-• Montant HT : ${convention.montantHT.toLocaleString('fr-FR')} €
-• Instance : ${convention.instance}
-
-${convention.demandes && convention.demandes.length > 0
-  ? `Demandeurs concernés :\n${convention.demandes.map((d: any) => `• ${d.demande.grade?.gradeAbrege ? `${d.demande.grade.gradeAbrege} ` : ''}${d.demande.prenom} ${d.demande.nom}`).join('\n')}`
-  : ''
-}
-
-Sauf erreur, cette convention est en attente de signature de votre part.
-
-Nous vous remercions de votre attention et restons à votre disposition pour tout complément d'information.
-
-Respectueusement,`
-
-    // Construire l'URL mailto
-    const mailtoUrl = `mailto:${avocat.email}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`
-
-    // Ouvrir le client mail
-    try {
-      window.open(mailtoUrl, '_blank')
-      toast.success(`Email de relance préparé pour ${avocat.prenom ? `${avocat.prenom} ` : ''}${avocat.nom}`)
-    } catch (error) {
-      console.error('Erreur lors de l\'ouverture du client mail:', error)
-      toast.error('Impossible d\'ouvrir le client mail')
-    }
-
-    closeContextMenu()
-  }
-
   // Event listeners for context menu
   React.useEffect(() => {
     const handleClickOutside = () => {
@@ -757,32 +706,14 @@ Respectueusement,`
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Menu contextuel pour conventions */}
-      {contextMenu.show && contextMenu.convention && (
-        <div
-          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[200px]"
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={generateEmailRelance}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-            disabled={!contextMenu.convention.avocat?.email}
-          >
-            <EnvelopeIcon className="h-4 w-4" />
-            <span>Envoyer relance par email</span>
-          </button>
-          {!contextMenu.convention.avocat?.email && (
-            <div className="px-4 py-2">
-              <div className="text-xs text-red-500">
-                Aucun email renseigné pour cet avocat
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <ConventionContextMenu
+        show={contextMenu.show}
+        x={contextMenu.x}
+        y={contextMenu.y}
+        convention={contextMenu.convention}
+        dossier={dossier}
+        onClose={closeContextMenu}
+      />
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-6">

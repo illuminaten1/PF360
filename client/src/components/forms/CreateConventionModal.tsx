@@ -33,7 +33,6 @@ const createConventionSchema = z.object({
   typeFacturation: z.enum(['FORFAITAIRE', 'DEMI_JOURNEE', 'ASSISES']).optional(),
   avocatId: z.string().min(1, "L'avocat est requis"),
   diligenceId: z.string().optional(),
-  dateRetourSigne: z.string().optional(),
   decisionIds: z.array(z.string()).min(1, "Au moins une décision doit être sélectionnée"),
   demandeIds: z.array(z.string()).min(1, "Au moins un demandeur doit être sélectionné")
 })
@@ -131,7 +130,6 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
           typeFacturation: undefined,
           avocatId: '',
           diligenceId: '',
-          dateRetourSigne: '',
           decisionIds: [],
           demandeIds: []
         })
@@ -157,7 +155,6 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
         montantHT: data.montantHT,
         montantHTGagePrecedemment: data.type === 'AVENANT' ? data.montantHTGagePrecedemment : undefined,
         typeFacturation: data.typeFacturation || undefined,
-        dateRetourSigne: data.dateRetourSigne || undefined,
         dossierId: dossier.id,
         avocatId: data.avocatId,
         demandes: demandeIds,
@@ -910,25 +907,6 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                     </div>
                   )}
 
-                  {/* Options */}
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 mt-6">Options</h3>
-                  </div>
-
-                  {/* Sixième ligne : Date de retour signée */}
-                  <div>
-                    <label htmlFor="dateRetourSigne" className="block text-sm font-medium text-gray-700 mb-2">
-                      Date de retour signée
-                    </label>
-                    <input
-                      type="date"
-                      {...register('dateRetourSigne')}
-                      className="block w-full h-12 px-4 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all flex items-center"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Laissez vide si pas encore signée
-                    </p>
-                  </div>
 
                   {/* Actions */}
                   <div className="flex justify-end space-x-3 pt-6 border-t mt-8">

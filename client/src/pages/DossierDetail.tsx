@@ -24,7 +24,8 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -63,7 +64,13 @@ const DossierDetail: React.FC = () => {
   const [notes, setNotes] = useState('')
   const [isSavingNotes, setIsSavingNotes] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
-  const notesTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const notesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [contextMenu, setContextMenu] = useState<{
+    show: boolean
+    x: number
+    y: number
+    convention: any | null
+  }>({ show: false, x: 0, y: 0, convention: null })
 
   // Fetch dossier details
   const { data: dossier, isLoading, error } = useQuery<Dossier>({
@@ -576,6 +583,102 @@ const DossierDetail: React.FC = () => {
     }
   }, [])
 
+  // Context menu handlers
+  const handleContextMenu = (e: React.MouseEvent, convention: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      convention
+    })
+  }
+
+  const closeContextMenu = () => {
+    setContextMenu({ show: false, x: 0, y: 0, convention: null })
+  }
+
+  const generateEmailRelance = async () => {
+    if (!contextMenu.convention || !dossier) return
+
+    const convention = contextMenu.convention
+    const avocat = convention.avocat
+
+    if (!avocat.email) {
+      toast.error('Aucun email renseigné pour cet avocat')
+      closeContextMenu()
+      return
+    }
+
+    // Générer le contenu de l'email
+    const objet = `Relance convention n°${convention.numero} - Dossier ${dossier.numero}`
+
+    const corps = `Bonjour Maître ${avocat.nom},
+
+Nous nous permettons de vous relancer concernant la convention d'honoraires suivante :
+
+• Convention n°${convention.numero}
+• Type : ${convention.type}
+• Dossier : ${dossier.numero}${dossier.nomDossier ? ` - ${dossier.nomDossier}` : ''}
+• Montant HT : ${convention.montantHT.toLocaleString('fr-FR')} €
+• Instance : ${convention.instance}
+• Date de création : ${dayjs(convention.dateCreation).format('DD/MM/YYYY')}
+
+${convention.dateRetourSigne
+  ? `Cette convention a été signée le ${dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}.`
+  : 'Cette convention est en attente de signature.'
+}
+
+${convention.demandes && convention.demandes.length > 0
+  ? `Demandeurs concernés :\n${convention.demandes.map((d: any) => `• ${d.demande.prenom} ${d.demande.nom} (DS ${d.demande.numeroDS})`).join('\n')}`
+  : ''
+}
+
+Nous vous remercions de votre attention et restons à votre disposition pour tout complément d'information.
+
+Cordialement,
+Service de l'aide juridictionnelle`
+
+    // Construire l'URL mailto
+    const mailtoUrl = `mailto:${avocat.email}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`
+
+    // Ouvrir le client mail
+    try {
+      window.open(mailtoUrl, '_blank')
+      toast.success(`Email de relance préparé pour ${avocat.prenom ? `${avocat.prenom} ` : ''}${avocat.nom}`)
+    } catch (error) {
+      console.error('Erreur lors de l\'ouverture du client mail:', error)
+      toast.error('Impossible d\'ouvrir le client mail')
+    }
+
+    closeContextMenu()
+  }
+
+  // Event listeners for context menu
+  React.useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu.show) {
+        closeContextMenu()
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && contextMenu.show) {
+        closeContextMenu()
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [contextMenu.show])
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-96">
@@ -653,6 +756,33 @@ const DossierDetail: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* Menu contextuel pour conventions */}
+      {contextMenu.show && contextMenu.convention && (
+        <div
+          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[200px]"
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={generateEmailRelance}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+            disabled={!contextMenu.convention.avocat?.email}
+          >
+            <EnvelopeIcon className="h-4 w-4" />
+            <span>Envoyer relance par email</span>
+          </button>
+          {!contextMenu.convention.avocat?.email && (
+            <div className="px-4 py-2">
+              <div className="text-xs text-red-500">
+                Aucun email renseigné pour cet avocat
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-6">
@@ -1064,7 +1194,7 @@ const DossierDetail: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <DocumentTextIcon className="h-5 w-5 mr-2" />
-                  Conventions d'honoraires ({dossier.conventions.length})
+                  Conventions d&apos;honoraires ({dossier.conventions.length})
                 </h2>
                 <button 
                   onClick={handleCreateConvention}
@@ -1079,7 +1209,7 @@ const DossierDetail: React.FC = () => {
             </div>
             <div className="p-6">
               {dossier.conventions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune convention d'honoraires</p>
+                <p className="text-gray-500 text-center py-4">Aucune convention d&apos;honoraires</p>
               ) : (
                 <div className="space-y-4">
                   {dossier.conventions.map((convention) => {
@@ -1117,7 +1247,11 @@ const DossierDetail: React.FC = () => {
                     }
 
                     return (
-                      <div key={convention.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div
+                        key={convention.id}
+                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                        onContextMenu={(e) => handleContextMenu(e, convention)}
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-4 mb-2">
@@ -1369,7 +1503,7 @@ const DossierDetail: React.FC = () => {
               disabled={isSavingNotes}
             />
             <div className="mt-2 text-xs text-gray-400">
-              Les notes sont sauvegardées automatiquement après 2 secondes d'inactivité.
+              Les notes sont sauvegardées automatiquement après 2 secondes d&apos;inactivité.
             </div>
           </div>
 

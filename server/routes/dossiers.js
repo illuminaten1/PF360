@@ -129,7 +129,8 @@ router.get('/', async (req, res) => {
                 id: true,
                 nom: true,
                 prenom: true,
-                region: true
+                region: true,
+                email: true
               }
             },
             creePar: {
@@ -434,7 +435,8 @@ router.get('/:id', async (req, res) => {
                 id: true,
                 nom: true,
                 prenom: true,
-                region: true
+                region: true,
+                email: true
               }
             },
             creePar: {
@@ -491,7 +493,8 @@ router.get('/:id', async (req, res) => {
                 id: true,
                 nom: true,
                 prenom: true,
-                region: true
+                region: true,
+                email: true
               }
             },
             pce: {
@@ -653,7 +656,8 @@ router.put('/:id', async (req, res) => {
                 id: true,
                 nom: true,
                 prenom: true,
-                region: true
+                region: true,
+                email: true
               }
             },
             creePar: {

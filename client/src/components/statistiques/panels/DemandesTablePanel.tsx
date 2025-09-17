@@ -12,9 +12,10 @@ import {
   ColumnFiltersState,
   SortingState,
 } from '@tanstack/react-table'
-import { ChevronDownIcon, ChevronUpIcon, EyeIcon, FunnelIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, ChevronUpIcon, EyeIcon, FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/utils/api'
+import { exportDemandesTableFiltered } from '@/utils/excelExport'
 
 // Composant de filtre déroulant multi-sélection
 const MultiSelectFilter: React.FC<{
@@ -318,6 +319,15 @@ const DemandesTablePanel: React.FC = () => {
 
   const handleViewDossier = (dossierId: string) => {
     navigate(`/dossiers/${dossierId}`)
+  }
+
+  const handleExportExcel = async () => {
+    if (demandes.length === 0) return
+    try {
+      await exportDemandesTableFiltered(table)
+    } catch (error) {
+      console.error('Erreur lors de l\'export Excel:', error)
+    }
   }
 
   // Sauvegarder les filtres dans localStorage
@@ -940,7 +950,7 @@ const DemandesTablePanel: React.FC = () => {
           Toutes les demandes ({demandes.length})
         </h2>
         
-        {/* Recherche globale */}
+        {/* Recherche globale et actions */}
         <div className="flex items-center space-x-4">
           <input
             type="text"
@@ -949,7 +959,19 @@ const DemandesTablePanel: React.FC = () => {
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
           />
-          
+
+          {/* Bouton export Excel */}
+          {demandes.length > 0 && (
+            <button
+              onClick={handleExportExcel}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              title="Exporter vers Excel (colonnes visibles et filtres appliqués)"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+              Exporter Excel
+            </button>
+          )}
+
           {/* Dropdown visibilité des colonnes */}
           <div className="relative">
             <button
@@ -963,7 +985,7 @@ const DemandesTablePanel: React.FC = () => {
               Colonnes
               <ChevronDownIcon className="h-4 w-4 ml-2" />
             </button>
-            
+
             <div
               id="columns-dropdown"
               className="hidden absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
@@ -981,8 +1003,8 @@ const DemandesTablePanel: React.FC = () => {
                         onChange={column.getToggleVisibilityHandler()}
                         className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      {typeof column.columnDef.header === 'string' 
-                        ? column.columnDef.header 
+                      {typeof column.columnDef.header === 'string'
+                        ? column.columnDef.header
                         : column.id}
                     </label>
                   )

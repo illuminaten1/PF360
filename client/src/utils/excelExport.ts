@@ -207,7 +207,7 @@ export const exportRevueDecisions = async (data: Demande[], selectedUser?: { nom
 }
 
 export const exportRevueConventions = async (data: Demande[], selectedUser?: { nom: string; prenom: string; grade?: string }) => {
-  const userInfo = selectedUser 
+  const userInfo = selectedUser
     ? `${selectedUser.grade ? `${selectedUser.grade} ` : ''}${selectedUser.prenom} ${selectedUser.nom}`
     : 'Utilisateur'
 
@@ -231,7 +231,7 @@ export const exportRevueConventions = async (data: Demande[], selectedUser?: { n
     {
       header: 'Date de décision PJ',
       accessor: (row: Demande) => {
-        const decisionPj = row.decisions?.find(decisionItem => 
+        const decisionPj = row.decisions?.find(decisionItem =>
           decisionItem.decision.type === 'PJ'
         )
         return decisionPj?.decision.dateSignature || null
@@ -260,4 +260,218 @@ export const exportRevueConventions = async (data: Demande[], selectedUser?: { n
     columns,
     data
   })
+}
+
+// Fonction pour formater les valeurs de cellules selon leur type
+const formatCellValue = (cell: any, getValue: () => any, row: Demande): string => {
+  try {
+    const columnId = cell.column.id
+    const value = getValue()
+
+    // Gestion spéciale pour les colonnes calculées
+    if (columnId === 'militaire') {
+      const grade = row.grade?.gradeAbrege || ''
+      const nom = row.nom || ''
+      const prenom = row.prenom || ''
+      return `${grade} ${prenom} ${nom}`.trim()
+    }
+
+    if (columnId === 'assigneA') {
+      const assigneA = row.assigneA
+      if (!assigneA) return 'Non assigné'
+      return `${assigneA.grade} ${assigneA.prenom} ${assigneA.nom}`.trim()
+    }
+
+    if (columnId === 'creePar') {
+      const creePar = row.creePar
+      if (!creePar) return ''
+      return `${creePar.grade} ${creePar.prenom} ${creePar.nom}`.trim()
+    }
+
+    if (columnId === 'modifiePar') {
+      const modifiePar = row.modifiePar
+      if (!modifiePar) return ''
+      return `${modifiePar.grade} ${modifiePar.prenom} ${modifiePar.nom}`.trim()
+    }
+
+    if (columnId === 'dossier') {
+      return row.dossier?.numero || 'Aucun dossier'
+    }
+
+    if (columnId === 'soutiens') {
+      const soutiens = []
+      if (row.soutienPsychologique) soutiens.push('Psy')
+      if (row.soutienSocial) soutiens.push('Social')
+      if (row.soutienMedical) soutiens.push('Médical')
+      return soutiens.join(', ')
+    }
+
+    if (columnId === 'badges') {
+      const badges = row.badges
+      if (!badges?.length) return ''
+      return badges.map(badgeRel => badgeRel.badge.nom).join(', ')
+    }
+
+    if (columnId === 'baps') {
+      const baps = row.baps
+      if (!baps?.length) return ''
+      return baps.map(bapRel => bapRel.bap.nomBAP).join(', ')
+    }
+
+    if (columnId === 'decisions') {
+      const decisions = row.decisions
+      if (!decisions?.length) return ''
+      return decisions.map(decisionRel => {
+        const decision = decisionRel.decision
+        let result = decision.type
+        if (decision.dateSignature) {
+          result += ` (${dayjs(decision.dateSignature).format('DD/MM/YYYY')})`
+        }
+        return result
+      }).join(', ')
+    }
+
+    if (columnId === 'conventions') {
+      const conventions = row.conventions
+      if (!conventions?.length) return ''
+      return conventions.map(conventionRel => {
+        const convention = conventionRel.convention
+        let result = `${convention.numero} - ${convention.type}`
+        if (convention.montantHT) {
+          result += ` (${convention.montantHT.toLocaleString('fr-FR')} €)`
+        }
+        if (convention.avocat) {
+          result += ` - ${convention.avocat.prenom} ${convention.avocat.nom}`
+        }
+        return result
+      }).join('; ')
+    }
+
+    // Formatage des dates
+    if (columnId.includes('date') || columnId.includes('Date')) {
+      if (value && typeof value === 'string') {
+        return dayjs(value).format('DD/MM/YYYY')
+      }
+    }
+
+    // Formatage des types
+    if (columnId === 'type') {
+      return value === 'VICTIME' ? 'Victime' : 'Mis en cause'
+    }
+
+    // Formatage des positions
+    if (columnId === 'position') {
+      if (!value) return ''
+      return value === 'EN_SERVICE' ? 'En service' : 'Hors service'
+    }
+
+    // Formatage des parties civiles
+    if (columnId === 'partieCivile') {
+      return value ? 'Oui' : 'Non'
+    }
+
+    // Formatage des montants
+    if (columnId === 'montantPartieCivile') {
+      if (!value) return ''
+      return `${value.toLocaleString('fr-FR')} €`
+    }
+
+    // Valeur par défaut
+    return value != null ? String(value) : ''
+  } catch (error) {
+    console.warn('Erreur lors du formatage de la cellule:', error)
+    return ''
+  }
+}
+
+export const exportDemandesTableFiltered = async (table: any) => {
+  // Récupérer les données filtrées
+  const filteredData = table.getFilteredRowModel().rows.map((row: any) => row.original)
+
+  // Récupérer les colonnes visibles
+  const visibleColumns = table.getVisibleLeafColumns()
+
+  // Générer les colonnes d'export basées sur les colonnes visibles
+  const columns: ExcelColumn[] = visibleColumns.map((column: any) => {
+    const header = typeof column.columnDef.header === 'string'
+      ? column.columnDef.header
+      : column.id
+
+    return {
+      header,
+      accessor: (row: Demande) => {
+        // Créer un objet cell factice pour utiliser la logique de formatage existante
+        const cell = { column: { id: column.id } }
+        const getValue = () => {
+          if (column.columnDef.accessorFn) {
+            return column.columnDef.accessorFn(row)
+          }
+          if (column.columnDef.accessorKey) {
+            return getNestedProperty(row, column.columnDef.accessorKey)
+          }
+          return null
+        }
+        return formatCellValue(cell, getValue, row)
+      },
+      width: getColumnWidth(column.id)
+    }
+  })
+
+  const filename = `Export_Demandes_Filtrees_${dayjs().format('YYYY-MM-DD_HH-mm')}.xlsx`
+
+  await exportToExcel({
+    filename,
+    sheetName: 'Demandes filtrées',
+    columns,
+    data: filteredData
+  })
+}
+
+// Fonction pour définir la largeur des colonnes selon leur type
+const getColumnWidth = (columnId: string): number => {
+  const widthMap: { [key: string]: number } = {
+    'numeroDS': 15,
+    'type': 15,
+    'militaire': 25,
+    'nigend': 15,
+    'statutDemandeur': 20,
+    'branche': 15,
+    'formationAdministrative': 25,
+    'departement': 15,
+    'unite': 20,
+    'dateReception': 18,
+    'dateFaits': 18,
+    'dateAudience': 18,
+    'commune': 20,
+    'codePostal': 15,
+    'position': 15,
+    'contexteMissionnel': 25,
+    'qualificationInfraction': 25,
+    'qualificationsPenales': 25,
+    'resume': 35,
+    'blessures': 25,
+    'partieCivile': 15,
+    'montantPartieCivile': 15,
+    'soutiens': 20,
+    'assigneA': 25,
+    'creePar': 25,
+    'modifiePar': 25,
+    'createdAt': 18,
+    'updatedAt': 18,
+    'dossier': 20,
+    'decisions': 30,
+    'conventions': 35,
+    'badges': 25,
+    'baps': 25,
+    'adressePostaleLigne1': 30,
+    'adressePostaleLigne2': 30,
+    'telephoneProfessionnel': 18,
+    'telephonePersonnel': 18,
+    'emailProfessionnel': 25,
+    'emailPersonnel': 25,
+    'commentaireDecision': 35,
+    'commentaireConvention': 35
+  }
+
+  return widthMap[columnId] || 20
 }

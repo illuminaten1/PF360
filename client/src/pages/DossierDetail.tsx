@@ -624,22 +624,22 @@ Nous nous permettons de vous relancer concernant la convention d'honoraires suiv
 • Dossier : ${dossier.numero}${dossier.nomDossier ? ` - ${dossier.nomDossier}` : ''}
 • Montant HT : ${convention.montantHT.toLocaleString('fr-FR')} €
 • Instance : ${convention.instance}
-• Date de création : ${dayjs(convention.dateCreation).format('DD/MM/YYYY')}
 
 ${convention.dateRetourSigne
   ? `Cette convention a été signée le ${dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}.`
-  : 'Cette convention est en attente de signature.'
+  : 'Cette convention est en attente de signature de votre part.'
 }
 
 ${convention.demandes && convention.demandes.length > 0
-  ? `Demandeurs concernés :\n${convention.demandes.map((d: any) => `• ${d.demande.prenom} ${d.demande.nom} (DS ${d.demande.numeroDS})`).join('\n')}`
+  ? `Demandeurs concernés :\n${convention.demandes.map((d: any) => `• ${d.demande.grade?.gradeAbrege ? `${d.demande.grade.gradeAbrege} ` : ''}${d.demande.prenom} ${d.demande.nom} (DS ${d.demande.numeroDS})`).join('\n')}`
   : ''
 }
 
 Nous vous remercions de votre attention et restons à votre disposition pour tout complément d'information.
 
-Cordialement,
-Service de l'aide juridictionnelle`
+Respectueusement,
+
+Section protection fonctionnelle`
 
     // Construire l'URL mailto
     const mailtoUrl = `mailto:${avocat.email}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`

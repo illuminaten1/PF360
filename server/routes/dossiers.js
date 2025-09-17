@@ -150,12 +150,8 @@ router.get('/', async (req, res) => {
             demandes: {
               include: {
                 demande: {
-                  select: {
-                    id: true,
-                    numeroDS: true,
-                    nom: true,
-                    prenom: true,
-                    type: true
+                  include: {
+                    grade: true
                   }
                 }
               }
@@ -456,12 +452,8 @@ router.get('/:id', async (req, res) => {
             demandes: {
               include: {
                 demande: {
-                  select: {
-                    id: true,
-                    numeroDS: true,
-                    nom: true,
-                    prenom: true,
-                    type: true
+                  include: {
+                    grade: true
                   }
                 }
               }
@@ -677,12 +669,8 @@ router.put('/:id', async (req, res) => {
             demandes: {
               include: {
                 demande: {
-                  select: {
-                    id: true,
-                    numeroDS: true,
-                    nom: true,
-                    prenom: true,
-                    type: true
+                  include: {
+                    grade: true
                   }
                 }
               }

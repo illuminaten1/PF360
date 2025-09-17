@@ -53,6 +53,289 @@ function Filter({ column }: { column: any }) {
   )
 }
 
+function SGAMIMultiSelectFilter({ column }: { column: any }) {
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const uniqueSGAMIs = useMemo(() => {
+    const uniqueValues = Array.from(column.getFacetedUniqueValues().keys())
+    return uniqueValues.filter(Boolean).sort()
+  }, [column])
+
+  const handleToggleSGAMI = (sgami: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(sgami)
+
+    if (index > -1) {
+      currentFilters.splice(index, 1)
+    } else {
+      currentFilters.push(sgami)
+    }
+
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+
+  const selectAll = () => {
+    column.setFilterValue([...uniqueSGAMIs])
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0
+            ? 'Tous'
+            : columnFilterValue.length === uniqueSGAMIs.length
+            ? 'Tous'
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+
+          <div className="p-1">
+            {uniqueSGAMIs.map(sgami => (
+              <label key={String(sgami)} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(String(sgami))}
+                  onChange={() => handleToggleSGAMI(String(sgami))}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs truncate">{String(sgami)}</span>
+              </label>
+            ))}
+            {uniqueSGAMIs.length === 0 && (
+              <div className="px-2 py-1 text-xs text-gray-500">Aucun SGAMI disponible</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function AssigneAMultiSelectFilter({ column }: { column: any }) {
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const uniqueAssignations = useMemo(() => {
+    const uniqueValues = Array.from(column.getFacetedUniqueValues().keys())
+    return uniqueValues.filter(Boolean).sort()
+  }, [column])
+
+  const handleToggleAssignation = (assignation: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(assignation)
+
+    if (index > -1) {
+      currentFilters.splice(index, 1)
+    } else {
+      currentFilters.push(assignation)
+    }
+
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+
+  const selectAll = () => {
+    column.setFilterValue([...uniqueAssignations])
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0
+            ? 'Tous'
+            : columnFilterValue.length === uniqueAssignations.length
+            ? 'Tous'
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-52 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+
+          <div className="p-1">
+            {uniqueAssignations.map(assignation => (
+              <label key={String(assignation)} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(String(assignation))}
+                  onChange={() => handleToggleAssignation(String(assignation))}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs truncate">{String(assignation)}</span>
+              </label>
+            ))}
+            {uniqueAssignations.length === 0 && (
+              <div className="px-2 py-1 text-xs text-gray-500">Aucune assignation disponible</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function BadgesMultiSelectFilter({ column }: { column: any }) {
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const uniqueBadges = useMemo(() => {
+    const uniqueValues = Array.from(column.getFacetedUniqueValues().keys())
+    return uniqueValues.filter(Boolean).sort()
+  }, [column])
+
+  const handleToggleBadge = (badgeName: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(badgeName)
+
+    if (index > -1) {
+      currentFilters.splice(index, 1)
+    } else {
+      currentFilters.push(badgeName)
+    }
+
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+
+  const selectAll = () => {
+    column.setFilterValue([...uniqueBadges])
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0
+            ? 'Tous'
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+
+          <div className="p-1">
+            {uniqueBadges.map(badgeName => (
+              <label key={String(badgeName)} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(String(badgeName))}
+                  onChange={() => handleToggleBadge(String(badgeName))}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs truncate">{String(badgeName)}</span>
+              </label>
+            ))}
+            {uniqueBadges.length === 0 && (
+              <div className="px-2 py-1 text-xs text-gray-500">Aucun badge disponible</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 const DossiersTable: React.FC<DossiersTableProps> = ({
   data,
   loading = false,
@@ -217,7 +500,13 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+
+          const sgami = row.original.sgami
+          const sgamiName = sgami?.nom || 'Non assigné'
+          return filterValue.includes(sgamiName)
+        }
       },
       {
         id: 'assigneA',
@@ -237,7 +526,13 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+
+          const assigneA = row.original.assigneA
+          const assigneString = assigneA ? `${assigneA.grade || ''} ${assigneA.prenom} ${assigneA.nom}`.trim() : 'Non assigné'
+          return filterValue.includes(assigneString)
+        }
       },
       {
         id: 'badges',
@@ -254,9 +549,9 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
                 <span
                   key={badgeRel.badge.id}
                   className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                  style={badgeRel.badge.couleur ? { 
-                    backgroundColor: `${badgeRel.badge.couleur}20`, 
-                    color: badgeRel.badge.couleur 
+                  style={badgeRel.badge.couleur ? {
+                    backgroundColor: `${badgeRel.badge.couleur}20`,
+                    color: badgeRel.badge.couleur
                   } : {}}
                 >
                   {badgeRel.badge.nom}
@@ -271,54 +566,62 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: 'includesString',
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+
+          const dossier = row.original
+          const badges = dossier.badges || []
+          const badgeNames = badges.map((badgeRel: any) => badgeRel.badge?.nom).filter(Boolean)
+
+          return filterValue.some(selectedBadge => badgeNames.includes(selectedBadge))
+        },
         enableSorting: false
       },
-      {
-        id: 'nombreDecisions',
-        header: 'Décisions',
-        accessorFn: (row) => row.stats?.nombreDecisions || row.decisions.length,
-        cell: ({ getValue, row }) => {
-          const nombre = getValue<number>()
-          const decisions = row.original.decisions
-          return (
-            <div className="text-sm">
-              <div className="text-gray-900">{nombre}</div>
-              {decisions.length > 0 && (
-                <div className="text-gray-500 text-xs">
-                  Dernière: {dayjs(decisions[0]?.date).format('DD/MM/YYYY')}
-                </div>
-              )}
-            </div>
-          )
-        },
-        enableColumnFilter: false,
-        enableSorting: true
-      },
-      {
-        id: 'totalConventions',
-        header: 'Conventions (€)',
-        accessorFn: (row) => row.stats?.totalConventionsHT || 0,
-        cell: ({ getValue }) => (
-          <div className="text-sm font-medium text-gray-900">
-            {getValue<number>().toLocaleString('fr-FR')} €
-          </div>
-        ),
-        enableColumnFilter: false,
-        enableSorting: true
-      },
-      {
-        id: 'totalPaiements',
-        header: 'Paiements (€)',
-        accessorFn: (row) => row.stats?.totalPaiementsTTC || 0,
-        cell: ({ getValue }) => (
-          <div className="text-sm text-gray-900">
-            {getValue<number>().toLocaleString('fr-FR')} €
-          </div>
-        ),
-        enableColumnFilter: false,
-        enableSorting: true
-      },
+      // {
+      //   id: 'nombreDecisions',
+      //   header: 'Décisions',
+      //   accessorFn: (row) => row.stats?.nombreDecisions || row.decisions.length,
+      //   cell: ({ getValue, row }) => {
+      //     const nombre = getValue<number>()
+      //     const decisions = row.original.decisions
+      //     return (
+      //       <div className="text-sm">
+      //         <div className="text-gray-900">{nombre}</div>
+      //         {decisions.length > 0 && (
+      //           <div className="text-gray-500 text-xs">
+      //             Dernière: {dayjs(decisions[0]?.date).format('DD/MM/YYYY')}
+      //           </div>
+      //         )}
+      //       </div>
+      //     )
+      //   },
+      //   enableColumnFilter: false,
+      //   enableSorting: true
+      // },
+      // {
+      //   id: 'totalConventions',
+      //   header: 'Conventions (€)',
+      //   accessorFn: (row) => row.stats?.totalConventionsHT || 0,
+      //   cell: ({ getValue }) => (
+      //     <div className="text-sm font-medium text-gray-900">
+      //       {getValue<number>().toLocaleString('fr-FR')} €
+      //     </div>
+      //   ),
+      //   enableColumnFilter: false,
+      //   enableSorting: true
+      // },
+      // {
+      //   id: 'totalPaiements',
+      //   header: 'Paiements (€)',
+      //   accessorFn: (row) => row.stats?.totalPaiementsTTC || 0,
+      //   cell: ({ getValue }) => (
+      //     <div className="text-sm text-gray-900">
+      //       {getValue<number>().toLocaleString('fr-FR')} €
+      //     </div>
+      //   ),
+      //   enableColumnFilter: false,
+      //   enableSorting: true
+      // },
       {
         accessorKey: 'createdAt',
         header: 'Date création',
@@ -456,7 +759,15 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
                       </div>
                       {header.column.getCanFilter() && (
                         <div>
-                          <Filter column={header.column} />
+                          {header.column.id === 'sgami' ? (
+                            <SGAMIMultiSelectFilter column={header.column} />
+                          ) : header.column.id === 'assigneA' ? (
+                            <AssigneAMultiSelectFilter column={header.column} />
+                          ) : header.column.id === 'badges' ? (
+                            <BadgesMultiSelectFilter column={header.column} />
+                          ) : (
+                            <Filter column={header.column} />
+                          )}
                         </div>
                       )}
                     </div>

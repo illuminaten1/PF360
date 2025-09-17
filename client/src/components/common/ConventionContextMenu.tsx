@@ -136,21 +136,21 @@ Respectueusement,`
       onClick={(e) => e.stopPropagation()}
     >
       <button
-        onClick={generateEmailRelance}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-        disabled={!convention.avocat?.email}
-      >
-        <EnvelopeIcon className="h-4 w-4" />
-        <span>Envoyer relance par email</span>
-      </button>
-
-      <button
         onClick={generateEmailProposition}
         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
         disabled={!convention.avocat?.email}
       >
         <PaperAirplaneIcon className="h-4 w-4" />
         <span>Générer mail de proposition dossier</span>
+      </button>
+
+      <button
+        onClick={generateEmailRelance}
+        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+        disabled={!convention.avocat?.email}
+      >
+        <EnvelopeIcon className="h-4 w-4" />
+        <span>Envoyer relance par email</span>
       </button>
 
       {!convention.avocat?.email && (

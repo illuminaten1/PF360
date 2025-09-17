@@ -436,11 +436,8 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
       {
         accessorKey: 'numero',
         header: 'Numéro',
-        cell: ({ getValue, row }) => (
-          <div 
-            className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-            onClick={() => onView(row.original)}
-          >
+        cell: ({ getValue }) => (
+          <div className="font-medium text-gray-900">
             {getValue<string>()}
           </div>
         ),
@@ -654,21 +651,20 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         cell: ({ row }) => (
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => onView(row.original)}
-              className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
-              title="Voir"
-            >
-              <EyeIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => onEdit(row.original)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(row.original)
+              }}
               className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
               title="Modifier"
             >
               <PencilIcon className="h-5 w-5" />
             </button>
             <button
-              onClick={() => onDelete(row.original)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(row.original)
+              }}
               className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
               title="Supprimer"
             >
@@ -793,7 +789,11 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="hover:bg-gray-50">
+              <tr
+                key={row.id}
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => onView(row.original)}
+              >
                 {row.getVisibleCells().map(cell => (
                   <td
                     key={cell.id}

@@ -1,4 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
+const { getISOWeekWithDates, getWeekKey, getYearRange } = require('../utils/statistics/dateUtils');
+const { sumByProperty, calculateTotalsWithExtraInfo } = require('../utils/statistics/calculUtils');
 
 const prisma = new PrismaClient();
 
@@ -11,41 +13,6 @@ const getRecentWeeklyStats = async (req, res) => {
     const now = new Date();
     const currentYear = now.getFullYear();
     
-    // Fonction pour obtenir le numéro de semaine ISO et les dates de début/fin
-    const getISOWeekWithDates = (date) => {
-      const target = new Date(date);
-      
-      // Trouver le jeudi de cette semaine (ISO week date)
-      const dayOfWeek = target.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const thursday = new Date(target);
-      thursday.setDate(target.getDate() - dayOfWeek + (dayOfWeek === 0 ? -3 : 4));
-      
-      // L'année ISO est l'année du jeudi de cette semaine
-      const isoYear = thursday.getFullYear();
-      
-      // Trouver le premier jeudi de l'année ISO
-      const jan4 = new Date(isoYear, 0, 4); // 4 janvier est toujours dans la semaine 1
-      const jan4DayOfWeek = jan4.getDay();
-      const firstThursday = new Date(jan4);
-      firstThursday.setDate(jan4.getDate() - jan4DayOfWeek + (jan4DayOfWeek === 0 ? -3 : 4));
-      
-      // Calculer le numéro de semaine
-      const weekNum = Math.floor((thursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
-      
-      // Calculer les dates de début (lundi) et fin (dimanche) de la semaine
-      const mondayOfWeek = new Date(target);
-      mondayOfWeek.setDate(target.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
-      
-      const sundayOfWeek = new Date(mondayOfWeek);
-      sundayOfWeek.setDate(mondayOfWeek.getDate() + 6);
-      
-      return {
-        weekNum,
-        startDate: mondayOfWeek,
-        endDate: sundayOfWeek,
-        isoYear
-      };
-    };
 
     // Créer une structure pour stocker toutes les semaines (année + semaine)
     const allWeeklyStats = new Map();
@@ -560,9 +527,9 @@ const getFluxMensuels = async (req, res) => {
     }
     
     // Calcul des moyennes
-    const totalEntrantsAnnee = fluxMensuels.reduce((sum, m) => sum + m.entrantsAnnee, 0);
-    const totalSortantsAnnee = fluxMensuels.reduce((sum, m) => sum + m.sortantsAnnee, 0);
-    const totalEntrantsAnneePrecedente = fluxMensuels.reduce((sum, m) => sum + m.entrantsAnneePrecedente, 0);
+    const totalEntrantsAnnee = sumByProperty(fluxMensuels, 'entrantsAnnee');
+    const totalSortantsAnnee = sumByProperty(fluxMensuels, 'sortantsAnnee');
+    const totalEntrantsAnneePrecedente = sumByProperty(fluxMensuels, 'entrantsAnneePrecedente');
     
     const moyennes = {
       mois: 'MOYENNE / MOIS',
@@ -591,41 +558,6 @@ const getFluxHebdomadaires = async (req, res) => {
     const year = parseInt(req.query.year) || new Date().getFullYear();
     const previousYear = year - 1;
     
-    // Fonction pour obtenir le numéro de semaine ISO et les dates de début/fin
-    const getISOWeekWithDates = (date) => {
-      const target = new Date(date);
-      
-      // Trouver le jeudi de cette semaine (ISO week date)
-      const dayOfWeek = target.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const thursday = new Date(target);
-      thursday.setDate(target.getDate() - dayOfWeek + (dayOfWeek === 0 ? -3 : 4));
-      
-      // L'année ISO est l'année du jeudi de cette semaine
-      const isoYear = thursday.getFullYear();
-      
-      // Trouver le premier jeudi de l'année ISO
-      const jan4 = new Date(isoYear, 0, 4); // 4 janvier est toujours dans la semaine 1
-      const jan4DayOfWeek = jan4.getDay();
-      const firstThursday = new Date(jan4);
-      firstThursday.setDate(jan4.getDate() - jan4DayOfWeek + (jan4DayOfWeek === 0 ? -3 : 4));
-      
-      // Calculer le numéro de semaine
-      const weekNum = Math.floor((thursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
-      
-      // Calculer les dates de début (lundi) et fin (dimanche) de la semaine
-      const mondayOfWeek = new Date(target);
-      mondayOfWeek.setDate(target.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
-      
-      const sundayOfWeek = new Date(mondayOfWeek);
-      sundayOfWeek.setDate(mondayOfWeek.getDate() + 6);
-      
-      return {
-        weekNum,
-        startDate: mondayOfWeek,
-        endDate: sundayOfWeek,
-        isoYear
-      };
-    };
 
     // Créer une structure pour stocker toutes les semaines de l'année
     const weeklyStats = new Map();
@@ -2505,8 +2437,7 @@ const getDepensesOrdonneesParSgami = async (req, res) => {
       .sort((a, b) => b.nombre - a.nombre); // Trier par montant décroissant
 
     // Ajouter les totaux
-    const nombreTotalPaiements = statistiques.reduce((sum, stat) => sum + stat.extraInfo.nombrePaiements, 0);
-    const montantTotalGeneral = statistiques.reduce((sum, stat) => sum + stat.nombre, 0);
+    const { nombreTotal: nombreTotalPaiements, montantTotal: montantTotalGeneral } = calculateTotalsWithExtraInfo(statistiques);
     
     statistiques.push({
       libelle: "TOTAL",
@@ -2641,8 +2572,7 @@ const getDepensesOrdonneesParPce = async (req, res) => {
     statistiques.sort((a, b) => b.nombre - a.nombre);
 
     // Ajouter les totaux
-    const nombreTotalPaiements = statistiques.reduce((sum, stat) => sum + stat.extraInfo.nombrePaiements, 0);
-    const montantTotalGeneral = statistiques.reduce((sum, stat) => sum + stat.nombre, 0);
+    const { nombreTotal: nombreTotalPaiements, montantTotal: montantTotalGeneral } = calculateTotalsWithExtraInfo(statistiques);
     
     statistiques.push({
       libelle: "TOTAL",
@@ -2770,8 +2700,8 @@ const getDepensesOrdonneesParMois = async (req, res) => {
     });
 
     // Calculer les totaux
-    const totalMontantHT = statistiques.reduce((sum, stat) => sum + stat.montantHTPaiements, 0);
-    const totalMontantTTC = statistiques.reduce((sum, stat) => sum + stat.montantTTCDossiers, 0);
+    const totalMontantHT = sumByProperty(statistiques, 'montantHTPaiements');
+    const totalMontantTTC = sumByProperty(statistiques, 'montantTTCDossiers');
     
     // Ajouter la ligne de total
     statistiques.push({

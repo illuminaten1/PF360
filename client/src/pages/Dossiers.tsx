@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
-import api from '@/utils/api'
+import { api } from '@/utils/api'
 import DossiersTable from '@/components/tables/DossiersTable'
 import DossierModal from '@/components/forms/DossierModal'
 

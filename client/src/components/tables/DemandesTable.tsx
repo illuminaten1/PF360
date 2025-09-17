@@ -793,7 +793,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     const prenom = demande.prenom
     const grade = demande.grade?.gradeAbrege || ''
     const type = demande.type === 'VICTIME' ? 'VICT' : 'MEC'
-    const dateFaits = demande.dateFaits ? dayjs(demande.dateFaits).format('DD/MM/YYYY') : 'Date non renseignée'
+    const dateFaits = demande.dateFaits ? dayjs(demande.dateFaits).format('DD-MM-YYYY') : 'Date non renseignée'
 
     // Construction de la chaîne
     let result = `${nom} ${prenom}`
@@ -824,7 +824,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
 
     try {
       await navigator.clipboard.writeText(stringToCopy)
-      setCopySuccess(`Chaîne copiée pour ${contextMenu.demande.numeroDS}`)
+      setCopySuccess(`Nom de dossier copié pour DS ${contextMenu.demande.numeroDS}`)
       setTimeout(() => setCopySuccess(null), 3000)
     } catch (err) {
       console.error('Erreur lors de la copie:', err)

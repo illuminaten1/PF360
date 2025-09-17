@@ -588,6 +588,11 @@ const DossierDetail: React.FC = () => {
     e.preventDefault()
     e.stopPropagation()
 
+    // Ne permettre la relance que si la convention n'est pas encore signée
+    if (convention.dateRetourSigne) {
+      return
+    }
+
     setContextMenu({
       show: true,
       x: e.clientX,
@@ -630,10 +635,7 @@ ${convention.demandes && convention.demandes.length > 0
   : ''
 }
 
-${convention.dateRetourSigne
-  ? `Cette convention a été signée le ${dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}.`
-  : 'Sauf erreur, cette convention est en attente de signature de votre part.'
-}
+Sauf erreur, cette convention est en attente de signature de votre part.
 
 Nous vous remercions de votre attention et restons à votre disposition pour tout complément d'information.
 

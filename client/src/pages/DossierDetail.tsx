@@ -625,21 +625,19 @@ Nous nous permettons de vous relancer concernant la convention d'honoraires suiv
 • Montant HT : ${convention.montantHT.toLocaleString('fr-FR')} €
 • Instance : ${convention.instance}
 
-${convention.dateRetourSigne
-  ? `Cette convention a été signée le ${dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}.`
-  : 'Cette convention est en attente de signature de votre part.'
+${convention.demandes && convention.demandes.length > 0
+  ? `Demandeurs concernés :\n${convention.demandes.map((d: any) => `• ${d.demande.grade?.gradeAbrege ? `${d.demande.grade.gradeAbrege} ` : ''}${d.demande.prenom} ${d.demande.nom}`).join('\n')}`
+  : ''
 }
 
-${convention.demandes && convention.demandes.length > 0
-  ? `Demandeurs concernés :\n${convention.demandes.map((d: any) => `• ${d.demande.grade?.gradeAbrege ? `${d.demande.grade.gradeAbrege} ` : ''}${d.demande.prenom} ${d.demande.nom} (DS ${d.demande.numeroDS})`).join('\n')}`
-  : ''
+${convention.dateRetourSigne
+  ? `Cette convention a été signée le ${dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}.`
+  : 'Sauf erreur, cette convention est en attente de signature de votre part.'
 }
 
 Nous vous remercions de votre attention et restons à votre disposition pour tout complément d'information.
 
-Respectueusement,
-
-Section protection fonctionnelle`
+Respectueusement,`
 
     // Construire l'URL mailto
     const mailtoUrl = `mailto:${avocat.email}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`

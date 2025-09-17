@@ -32,7 +32,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   UserPlusIcon,
-  PlusIcon
+  PlusIcon,
+  ClipboardDocumentListIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
 import AssignerDemandeModal from '../forms/AssignerDemandeModal'
@@ -712,6 +714,13 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   const [showBAPModal, setShowBAPModal] = useState(false)
   const [currentBAP, setCurrentBAP] = useState<any>(null)
   const [selectedDemandes, setSelectedDemandes] = useState<Set<string>>(new Set())
+  const [contextMenu, setContextMenu] = useState<{
+    show: boolean
+    x: number
+    y: number
+    demande: Demande | null
+  }>({ show: false, x: 0, y: 0, demande: null })
+  const [copySuccess, setCopySuccess] = useState<string | null>(null)
 
   const getTypeColor = (type: string) => {
     return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
@@ -777,6 +786,78 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   const getSelectedDemandesData = () => {
     return data.filter(demande => selectedDemandes.has(demande.id))
   }
+
+  const generateDemandeString = (demande: Demande) => {
+    // Format: NOM Prénom GRADE - VICT ou MEC - DATE FAITS
+    const nom = demande.nom.toUpperCase()
+    const prenom = demande.prenom
+    const grade = demande.grade?.gradeAbrege || ''
+    const type = demande.type === 'VICTIME' ? 'VICT' : 'MEC'
+    const dateFaits = demande.dateFaits ? dayjs(demande.dateFaits).format('DD/MM/YYYY') : 'Date non renseignée'
+
+    // Construction de la chaîne
+    let result = `${nom} ${prenom}`
+    if (grade) {
+      result += ` ${grade}`
+    }
+    result += ` - ${type} - ${dateFaits}`
+
+    return result
+  }
+
+  const handleContextMenu = (e: React.MouseEvent, demande: Demande) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      demande
+    })
+  }
+
+  const handleCopyString = async () => {
+    if (!contextMenu.demande) return
+
+    const stringToCopy = generateDemandeString(contextMenu.demande)
+
+    try {
+      await navigator.clipboard.writeText(stringToCopy)
+      setCopySuccess(`Chaîne copiée pour ${contextMenu.demande.numeroDS}`)
+      setTimeout(() => setCopySuccess(null), 3000)
+    } catch (err) {
+      console.error('Erreur lors de la copie:', err)
+    }
+
+    setContextMenu({ show: false, x: 0, y: 0, demande: null })
+  }
+
+  const closeContextMenu = () => {
+    setContextMenu({ show: false, x: 0, y: 0, demande: null })
+  }
+
+  React.useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu.show) {
+        closeContextMenu()
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && contextMenu.show) {
+        closeContextMenu()
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [contextMenu.show])
 
   const columns = useMemo<ColumnDef<Demande>[]>(
     () => [
@@ -1378,7 +1459,42 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <SearchBar 
+      {/* Notification de copie */}
+      {copySuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+          <CheckIcon className="h-5 w-5" />
+          <span className="text-sm font-medium">{copySuccess}</span>
+        </div>
+      )}
+
+      {/* Menu contextuel */}
+      {contextMenu.show && contextMenu.demande && (
+        <div
+          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[200px]"
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={handleCopyString}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+          >
+            <ClipboardDocumentListIcon className="h-4 w-4" />
+            <span>Copier les informations</span>
+          </button>
+          <div className="border-t border-gray-200 my-1"></div>
+          <div className="px-4 py-2">
+            <div className="text-xs text-gray-500 font-medium mb-1">Aperçu:</div>
+            <div className="text-xs text-gray-600 break-all max-w-xs">
+              {generateDemandeString(contextMenu.demande).substring(0, 100)}...
+            </div>
+          </div>
+        </div>
+      )}
+
+      <SearchBar
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         filteredRowsCount={table.getFilteredRowModel().rows.length}
@@ -1529,7 +1645,12 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
               </tr>
             ) : (
               table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onView(row.original)}>
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => onView(row.original)}
+                  onContextMenu={(e) => handleContextMenu(e, row.original)}
+                >
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}

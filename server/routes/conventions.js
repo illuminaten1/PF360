@@ -116,8 +116,6 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    console.log('=== DEBUG: Convention creation request ===');
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
     const validatedData = createConventionSchema.parse(req.body);
     const {
       type,

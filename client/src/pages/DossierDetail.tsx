@@ -588,11 +588,6 @@ const DossierDetail: React.FC = () => {
     e.preventDefault()
     e.stopPropagation()
 
-    // Ne permettre la relance que si la convention n'est pas encore signée
-    if (convention.dateRetourSigne) {
-      return
-    }
-
     setContextMenu({
       show: true,
       x: e.clientX,

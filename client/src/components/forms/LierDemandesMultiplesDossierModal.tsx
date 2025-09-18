@@ -150,7 +150,7 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
@@ -195,7 +195,7 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Rechercher par numéro de dossier ou identité d'un demandeur..."
+              placeholder="Rechercher par numéro de dossier, nom du dossier ou identité d'un demandeur..."
             />
           </div>
           <p className="text-xs text-gray-500 mt-2">
@@ -223,6 +223,9 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
                     Numéro
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nom du dossier
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Demandeurs
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -242,6 +245,15 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-blue-600">
                         {dossier.numero}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {dossier.nomDossier ? (
+                          <span className="font-medium">{dossier.nomDossier}</span>
+                        ) : (
+                          <span className="text-gray-400 italic">Sans nom</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">

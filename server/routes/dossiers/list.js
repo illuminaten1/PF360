@@ -21,6 +21,11 @@ router.get('/', async (req, res) => {
           }
         },
         {
+          nomDossier: {
+            contains: searchTerm
+          }
+        },
+        {
           demandes: {
             some: {
               OR: [
@@ -31,11 +36,6 @@ router.get('/', async (req, res) => {
                 },
                 {
                   prenom: {
-                    contains: searchTerm
-                  }
-                },
-                {
-                  numeroDS: {
                     contains: searchTerm
                   }
                 }

@@ -126,6 +126,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
   const [selectedDiligence, setSelectedDiligence] = useState<any>(null)
   const [avocatSearchQuery, setAvocatSearchQuery] = useState('')
   const [showAvocatDropdown, setShowAvocatDropdown] = useState(false)
+  const [selectedAvocatIndex, setSelectedAvocatIndex] = useState(-1)
 
   // Fetch avocats
   const { data: avocats = [] } = useQuery({
@@ -176,6 +177,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
       setSelectedDiligence(convention.diligences?.[0]?.diligence || null)
       setAvocatSearchQuery(`${convention.avocat.prenom} ${convention.avocat.nom}`)
       setShowAvocatDropdown(false)
+      setSelectedAvocatIndex(-1)
     }
   }, [isOpen, convention, reset])
 
@@ -688,14 +690,54 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                           onChange={(e) => {
                             setAvocatSearchQuery(e.target.value)
                             setShowAvocatDropdown(true)
+                            setSelectedAvocatIndex(-1)
                             if (!e.target.value) {
                               setSelectedAvocat(null)
                               setValue('avocatId', '')
                             }
                           }}
-                          onFocus={() => setShowAvocatDropdown(true)}
+                          onKeyDown={(e) => {
+                            if (!showAvocatDropdown || filteredAvocats.length === 0) return
+
+                            switch (e.key) {
+                              case 'ArrowDown':
+                                e.preventDefault()
+                                setSelectedAvocatIndex(prev =>
+                                  prev < filteredAvocats.length - 1 ? prev + 1 : 0
+                                )
+                                break
+                              case 'ArrowUp':
+                                e.preventDefault()
+                                setSelectedAvocatIndex(prev =>
+                                  prev > 0 ? prev - 1 : filteredAvocats.length - 1
+                                )
+                                break
+                              case 'Enter':
+                                e.preventDefault()
+                                if (selectedAvocatIndex >= 0 && selectedAvocatIndex < filteredAvocats.length) {
+                                  const avocat = filteredAvocats[selectedAvocatIndex]
+                                  setSelectedAvocat(avocat)
+                                  setValue('avocatId', avocat.id)
+                                  setShowAvocatDropdown(false)
+                                  setSelectedAvocatIndex(-1)
+                                }
+                                break
+                              case 'Escape':
+                                e.preventDefault()
+                                setShowAvocatDropdown(false)
+                                setSelectedAvocatIndex(-1)
+                                break
+                            }
+                          }}
+                          onFocus={() => {
+                            setShowAvocatDropdown(true)
+                            setSelectedAvocatIndex(-1)
+                          }}
                           onBlur={() => {
-                            setTimeout(() => setShowAvocatDropdown(false), 200)
+                            setTimeout(() => {
+                              setShowAvocatDropdown(false)
+                              setSelectedAvocatIndex(-1)
+                            }, 200)
                           }}
                           placeholder="Rechercher un avocat par nom..."
                           className={`block w-full h-12 px-4 pr-10 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
@@ -709,15 +751,20 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                         {showAvocatDropdown && avocatSearchQuery && (
                           <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                             {filteredAvocats.length > 0 ? (
-                              filteredAvocats.map((avocat: any) => (
+                              filteredAvocats.map((avocat: any, index: number) => (
                                 <div
                                   key={avocat.id}
                                   onClick={() => {
                                     setSelectedAvocat(avocat)
                                     setValue('avocatId', avocat.id)
                                     setShowAvocatDropdown(false)
+                                    setSelectedAvocatIndex(-1)
                                   }}
-                                  className="cursor-pointer select-none py-2 pl-3 pr-4 hover:bg-blue-100 hover:text-blue-900 text-gray-900"
+                                  className={`cursor-pointer select-none py-2 pl-3 pr-4 text-gray-900 ${
+                                    index === selectedAvocatIndex
+                                      ? 'bg-blue-100 text-blue-900'
+                                      : 'hover:bg-blue-100 hover:text-blue-900'
+                                  }`}
                                 >
                                   <div className="flex items-center justify-between">
                                     <span className="block truncate">

@@ -126,6 +126,47 @@ Respectueusement,`
     onClose()
   }
 
+  const sendEmailConvention = async () => {
+    const avocat = convention.avocat
+
+    if (!avocat.email) {
+      toast.error('Aucun email renseigné pour cet avocat')
+      onClose()
+      return
+    }
+
+    // Générer le contenu de l'email d'envoi de convention
+    const objet = `Convention d'honoraires n°${convention.numero} - ${dossier.numero}`
+
+    const corps = `Bonjour Maître ${avocat.nom},
+
+Veuillez trouver ci-joint la convention d'honoraires relative au dossier suivant :
+
+• Convention n°${convention.numero}
+• Type : ${convention.type}
+• Dossier : ${dossier.numero}${dossier.nomDossier ? ` - ${dossier.nomDossier}` : ''}
+• Montant HT : ${convention.montantHT.toLocaleString('fr-FR')} €
+• Instance : ${convention.instance}
+
+Nous vous remercions de bien vouloir nous retourner cette convention signée dans les meilleurs délais.
+
+Respectueusement,`
+
+    // Construire l'URL mailto
+    const mailtoUrl = `mailto:${avocat.email}?subject=${encodeURIComponent(objet)}&body=${encodeURIComponent(corps)}`
+
+    // Ouvrir le client mail
+    try {
+      window.open(mailtoUrl, '_blank')
+      toast.success(`Email d'envoi de convention préparé pour ${avocat.prenom ? `${avocat.prenom} ` : ''}${avocat.nom}`)
+    } catch (error) {
+      console.error('Erreur lors de l\'ouverture du client mail:', error)
+      toast.error('Impossible d\'ouvrir le client mail')
+    }
+
+    onClose()
+  }
+
   return (
     <div
       className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[200px]"
@@ -142,6 +183,15 @@ Respectueusement,`
       >
         <PaperAirplaneIcon className="h-4 w-4" />
         <span>Générer mail de proposition dossier</span>
+      </button>
+
+      <button
+        onClick={sendEmailConvention}
+        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+        disabled={!convention.avocat?.email}
+      >
+        <EnvelopeIcon className="h-4 w-4" />
+        <span>Envoyer convention par email</span>
       </button>
 
       <button

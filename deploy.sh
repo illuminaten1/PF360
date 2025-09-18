@@ -2,7 +2,12 @@
 echo "🚀 Démarrage du déploiement..."
 
 cd /opt/PF360
-git pull
+# Fetch les dernières modifications
+git fetch origin
+
+# Force la synchronisation avec la branche distante
+echo "🔄 Synchronisation avec origin/main..."
+git reset --hard origin/main
 
 # Mise à jour backend si nécessaire
 cd server

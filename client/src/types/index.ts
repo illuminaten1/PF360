@@ -60,6 +60,9 @@ export interface Demande {
   dateReception: string
   createdAt: string
   updatedAt: string
+  commentaireDecision?: string
+  commentaireConvention?: string
+  commentaireSignature?: string
   dossier?: {
     id: string
     numero: string
@@ -118,6 +121,7 @@ export interface Demande {
       type: 'CONVENTION' | 'AVENANT'
       montantHT: number
       dateCreation: string
+      dateRetourSigne?: string
       avocat: {
         nom: string
         prenom?: string

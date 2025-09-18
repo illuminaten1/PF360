@@ -5,6 +5,7 @@ import { api } from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import RevueDecisionsTable from '@/components/tables/RevueDecisionsTable'
 import RevueConventionsTable from '@/components/tables/RevueConventionsTable'
+import RevueSignaturesTable from '@/components/tables/RevueSignaturesTable'
 
 interface User {
   id: string
@@ -15,8 +16,8 @@ interface User {
 }
 
 const Revue: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'decisions' | 'conventions'>(() => {
-    return (sessionStorage.getItem('revue-active-tab') as 'decisions' | 'conventions') || 'decisions'
+  const [activeTab, setActiveTab] = useState<'decisions' | 'conventions' | 'signatures'>(() => {
+    return (sessionStorage.getItem('revue-active-tab') as 'decisions' | 'conventions' | 'signatures') || 'decisions'
   })
   const [users, setUsers] = useState<User[]>([])
   const [selectedUserId, setSelectedUserId] = useState<string>(() => {
@@ -75,6 +76,11 @@ const Revue: React.FC = () => {
       id: 'conventions',
       name: 'Revue des conventions',
       description: 'Demandes avec décision PJ mais sans convention'
+    },
+    {
+      id: 'signatures',
+      name: 'Suivi des signatures avocats',
+      description: 'Conventions sans date de retour signé'
     }
   ]
 
@@ -194,7 +200,7 @@ const Revue: React.FC = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'decisions' | 'conventions')}
+                onClick={() => setActiveTab(tab.id as 'decisions' | 'conventions' | 'signatures')}
                 className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
@@ -218,7 +224,14 @@ const Revue: React.FC = () => {
         )}
         
         {activeTab === 'conventions' && (
-          <RevueConventionsTable 
+          <RevueConventionsTable
+            selectedUserId={selectedUserId}
+            selectedUser={users.find(u => u.id === selectedUserId)}
+          />
+        )}
+
+        {activeTab === 'signatures' && (
+          <RevueSignaturesTable
             selectedUserId={selectedUserId}
             selectedUser={users.find(u => u.id === selectedUserId)}
           />

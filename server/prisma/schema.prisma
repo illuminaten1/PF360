@@ -98,6 +98,7 @@ model Demande {
   // Commentaires de suivi
   commentaireDecision    String?
   commentaireConvention  String?
+  commentaireSignature   String?
   
   dateReception          DateTime  @default(now())
   createdAt              DateTime  @default(now())

@@ -165,9 +165,9 @@ coverage/
 *.swp
 *~
 
-# Local development
-.env.development
-.env.production
+# Local development - Keep templates but ignore actual .env files
+server/.env
+client/.env
 
 # Documents et fichiers de données
 *.csv

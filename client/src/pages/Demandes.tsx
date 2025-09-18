@@ -9,7 +9,6 @@ import DemandesTable, { DemandesTableRef } from '@/components/tables/DemandesTab
 import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
-import LierDemandeDossierModal from '@/components/forms/LierDemandeDossierModal'
 import LierDemandesMultiplesDossierModal from '@/components/forms/LierDemandesMultiplesDossierModal'
 import DossierModal from '@/components/forms/DossierModal'
 
@@ -26,7 +25,6 @@ const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [isLierModalOpen, setIsLierModalOpen] = useState(false)
   const [isLierMultiplesModalOpen, setIsLierMultiplesModalOpen] = useState(false)
   const [isDossierModalOpen, setIsDossierModalOpen] = useState(false)
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
@@ -167,8 +165,8 @@ const Demandes: React.FC = () => {
   }
 
   const handleAddToDossier = (demande: Demande) => {
-    setSelectedDemande(demande)
-    setIsLierModalOpen(true)
+    setSelectedDemandesForDossier([demande])
+    setIsLierMultiplesModalOpen(true)
   }
 
   const handleCreateDossierWithSelection = (selectedDemandes: Demande[]) => {
@@ -415,17 +413,6 @@ const Demandes: React.FC = () => {
         />
       )}
 
-      {selectedDemande && (
-        <LierDemandeDossierModal
-          isOpen={isLierModalOpen}
-          onClose={() => {
-            setIsLierModalOpen(false)
-            setSelectedDemande(null)
-          }}
-          demandeId={selectedDemande.id}
-          demandeNumeroDS={selectedDemande.numeroDS}
-        />
-      )}
 
       <LierDemandesMultiplesDossierModal
         isOpen={isLierMultiplesModalOpen}

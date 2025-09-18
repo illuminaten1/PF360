@@ -4,8 +4,9 @@
   "description": "Backend API for PF360 application",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
-    "start": "node app.js",
+    "dev": "NODE_ENV=development node -r dotenv/config app.js dotenv_config_path=.env.development",
+    "dev:watch": "NODE_ENV=development nodemon -r dotenv/config app.js dotenv_config_path=.env.development",
+    "start": "NODE_ENV=production node -r dotenv/config app.js dotenv_config_path=.env.production",
     "build": "echo 'No build step needed for Node.js'",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",

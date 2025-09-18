@@ -159,6 +159,14 @@ router.post('/fiche-paiement/:paiementId', async (req, res) => {
 
         return result;
       })(),
+      // Phrase de montant adaptée selon la présence du montant HT
+      montantPhrase: (() => {
+        if (paiement.montantHT != null && paiement.montantHT > 0) {
+          return `${paiement.montantHT} € H.T. soit ${paiement.montantTTC} € T.T.C.`;
+        } else {
+          return `${paiement.montantTTC} € T.T.C.`;
+        }
+      })(),
       // Données générées
       dateGeneration: new Date().toLocaleDateString('fr-FR')
     };

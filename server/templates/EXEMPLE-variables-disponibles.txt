@@ -62,6 +62,11 @@ Placez ce fichier dans templates/fiche-paiement-template.docx
                     - Format: "n° 3435, 78435 et 38209 du 13/05/2025, 24/05/2025 et 26/05/2025" (multiples)
                     - S'adapte automatiquement au nombre de décisions
 
+{d.montantPhrase} - Phrase de montant adaptée automatiquement
+                   - Format: "1200 € H.T. soit 1440 € T.T.C." (si montant HT renseigné)
+                   - Format: "1200 € T.T.C." (si seul le montant TTC est renseigné)
+                   - S'adapte automatiquement selon la présence du montant HT
+
 ===== DÉCISIONS ASSOCIÉES =====
 {d.decisions[0].numero} - Numéro de la décision
 {d.decisions[0].dateSignature} - Date de signature (format FR)
@@ -85,7 +90,7 @@ Demandeurs : {d.demandeursListe}
 PCE : {d.pce.pceNumerique}
 Code marchandise : {d.pce.codeMarchandise}
 
-Montant à régler : {d.paiement.montantHT} € HT soit {d.paiement.montantTTC} € TTC
+Vous remerciant de bien vouloir régler la somme de : {d.montantPhrase}
 
 BÉNÉFICIAIRE
 {d.paiement.qualiteBeneficiaire} {d.paiement.identiteBeneficiaire}

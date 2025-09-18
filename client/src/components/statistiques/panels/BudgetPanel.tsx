@@ -187,16 +187,16 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
                         ...prev,
                         budgetBase: parseFloat(e.target.value) || 0
                       }))}
-                      className="w-full text-center text-lg sm:text-xl font-semibold text-blue-600 bg-white border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full text-center text-4xl sm:text-5xl font-semibold text-blue-600 bg-white border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       placeholder="0"
                     />
                   </div>
                 ) : (
-                  <div className="text-lg sm:text-xl font-semibold text-blue-600 mb-1">
+                  <div className="text-4xl sm:text-5xl font-semibold text-blue-600 mb-1">
                     {budget ? formatCurrency(budget.budgetBase) : '0 €'}
                   </div>
                 )}
-                <div className="text-[10px] text-gray-600">
+                <div className="text-sm text-gray-600">
                   Budget de base
                 </div>
               </div>
@@ -215,16 +215,16 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
                         ...prev,
                         abondements: parseFloat(e.target.value) || 0
                       }))}
-                      className="w-full text-center text-lg sm:text-xl font-semibold text-green-600 bg-white border border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 rounded px-2 py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full text-center text-4xl sm:text-5xl font-semibold text-green-600 bg-white border border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 rounded px-2 py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       placeholder="0"
                     />
                   </div>
                 ) : (
-                  <div className="text-lg sm:text-xl font-semibold text-green-600 mb-1">
+                  <div className="text-4xl sm:text-5xl font-semibold text-green-600 mb-1">
                     {budget ? formatCurrency(budget.abondements) : '0 €'}
                   </div>
                 )}
-                <div className="text-[10px] text-gray-600">
+                <div className="text-sm text-gray-600">
                   Abondements
                 </div>
               </div>
@@ -233,10 +233,10 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
               <div className={`bg-white rounded-lg shadow border p-2 text-center flex flex-col justify-center sm:col-span-2 relative ${
                 isEditing ? 'border-gray-300 bg-gray-50' : 'border-gray-200'
               }`}>
-                <div className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
+                <div className="text-4xl sm:text-5xl font-semibold text-gray-900 mb-1">
                   {formatCurrency((formData.budgetBase || 0) + (formData.abondements || 0))}
                 </div>
-                <div className="text-[10px] text-gray-600 mb-2">
+                <div className="text-sm text-gray-600 mb-2">
                   Budget total
                 </div>
                 
@@ -283,21 +283,21 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
             {/* Partie droite - Nouveaux carrés */}
             <div className="flex-1 flex flex-col gap-1">
               {/* Montant gagé total HT */}
-              <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center flex-1">
-                <div className="text-sm sm:text-base font-semibold text-green-600 mb-1">
+              <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center flex-1">
+                <div className="text-4xl sm:text-5xl font-semibold text-green-600 mb-1">
                   {formatCurrency(getMontantGageTotal())}
                 </div>
-                <div className="text-[9px] text-gray-600 leading-tight">
+                <div className="text-xs text-gray-600 leading-tight">
                   Montant gagé HT
                 </div>
               </div>
 
               {/* Montant ordonné total TTC */}
-              <div className="bg-white rounded-lg shadow border border-gray-200 p-2 text-center flex flex-col justify-center flex-1">
-                <div className="text-sm sm:text-base font-semibold text-orange-600 mb-1">
+              <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center flex-1">
+                <div className="text-4xl sm:text-5xl font-semibold text-orange-600 mb-1">
                   {formatCurrency(getMontantOrdonneTotal())}
                 </div>
-                <div className="text-[9px] text-gray-600 leading-tight">
+                <div className="text-xs text-gray-600 leading-tight">
                   Montant ordonné TTC
                 </div>
               </div>

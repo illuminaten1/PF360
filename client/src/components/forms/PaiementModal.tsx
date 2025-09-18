@@ -592,7 +592,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
             {/* Troisième ligne: Numéro de facture - Date du service fait */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Numéro de facture
+                Référence de la pièce justificative (facture, jugement, etc.)
               </label>
               <input
                 type="text"

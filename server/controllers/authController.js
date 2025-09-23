@@ -36,15 +36,18 @@ const login = async (req, res) => {
     });
 
     if (!user) {
+      await logAction(null, 'LOGIN_FAILED', `Tentative de connexion avec identifiant inexistant: ${identifiant}`, 'USER', null);
       return res.status(401).json({ error: 'Identifiants invalides' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      await logAction(user.id, 'LOGIN_FAILED', `Tentative de connexion avec mot de passe incorrect`, 'USER', user.id);
       return res.status(401).json({ error: 'Identifiants invalides' });
     }
 
     if (!user.active) {
+      await logAction(user.id, 'LOGIN_FAILED', `Tentative de connexion sur compte désactivé`, 'USER', user.id);
       return res.status(401).json({ error: 'Compte désactivé. Veuillez contacter l\'administrateur.' });
     }
 

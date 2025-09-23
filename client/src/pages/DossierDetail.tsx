@@ -523,7 +523,6 @@ const DossierDetail: React.FC = () => {
   const handleDecisionContextMenu = (e: React.MouseEvent, decision: any) => {
     e.preventDefault()
     e.stopPropagation()
-    console.log('Decision context menu triggered:', decision)
     setDecisionContextMenu({
       show: true,
       x: e.clientX,

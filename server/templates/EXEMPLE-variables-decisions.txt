@@ -127,10 +127,20 @@ Placez ce fichier dans templates/decision-template.odt
 
 ===== DONNÉES GÉNÉRÉES =====
 {d.dateGeneration} - Date de génération du document (format FR)
+{d.dates.demandes} - Phrase automatique pour les dates de réception des demandes
+                    - Format intelligent selon le contexte :
+                    - 1 demande : "Vu la demande de protection fonctionnelle reçue le 12 mai 2025"
+                    - Plusieurs demandes, même date : "Vu les demandes de protection fonctionnelle reçues le 12 mai 2025"
+                    - 2 dates, même mois : "Vu les demandes de protection fonctionnelle reçues le 12 et 14 mai 2025"
+                    - 2 dates, même année : "Vu les demandes de protection fonctionnelle reçues le 12 mai et 1er avril 2025"
+                    - 2 dates, années différentes : "Vu les demandes de protection fonctionnelle reçues le 30 décembre 2025 et le 2 janvier 2026"
+                    - 3+ dates : "Vu les demandes de protection fonctionnelle reçues le 1er avril, 12 mai et 14 juin 2025"
 
 ===== EXEMPLE D'UTILISATION =====
 
 DÉCISION N° {d.decision.numero}
+
+{d.dates.demandes}
 
 Type de décision : {d.decision.typeLabel}
 Date de signature : {d.decision.dateSignature}

@@ -284,7 +284,11 @@ router.post('/decision/:decisionId', async (req, res) => {
       isTypePJ: decision.type === 'PJ',
       isTypeRejet: decision.type === 'REJET',
       hasAvisHierarchiques: decision.avis_hierarchiques,
-      hasConsiderant: !!decision.considerant
+      hasConsiderant: !!decision.considerant,
+      // Variable dates.demandes pour générer automatiquement la phrase
+      dates: {
+        demandes: formatDatesDemandes(decision.demandes)
+      }
     };
 
     let templatePath;
@@ -358,6 +362,101 @@ const getTypeDecisionLabel = (type) => {
     default:
       return type || '';
   }
+};
+
+// Fonction pour formater la date au format français avec nombres ordinaux
+const formatDateFrancaise = (date) => {
+  const options = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  };
+  const dateStr = new Date(date).toLocaleDateString('fr-FR', options);
+
+  // Remplacer le premier jour du mois par "1er"
+  return dateStr.replace(/^1 /, '1er ');
+};
+
+// Fonction pour formater les dates des demandes en phrase complète
+const formatDatesDemandes = (demandes) => {
+  if (!demandes || demandes.length === 0) {
+    return '';
+  }
+
+  // Extraire toutes les dates uniques de réception
+  const datesReception = [...new Set(
+    demandes.map(dd => new Date(dd.demande.dateReception).toDateString())
+  )].sort((a, b) => new Date(a) - new Date(b));
+
+  const nombreDemandes = demandes.length;
+  const nombreDatesUniques = datesReception.length;
+
+  let phraseBase = '';
+  let partieDate = '';
+
+  // Déterminer le début de la phrase selon le nombre de demandes
+  if (nombreDemandes === 1) {
+    phraseBase = 'Vu la demande de protection fonctionnelle reçue ';
+  } else {
+    phraseBase = 'Vu les demandes de protection fonctionnelle reçues ';
+  }
+
+  // Formater la partie date selon le nombre de dates uniques
+  if (nombreDatesUniques === 1) {
+    // Une seule date pour toutes les demandes
+    partieDate = `le ${formatDateFrancaise(new Date(datesReception[0]))}`;
+  } else if (nombreDatesUniques === 2) {
+    // Deux dates différentes
+    const date1 = formatDateFrancaise(new Date(datesReception[0]));
+    const date2 = formatDateFrancaise(new Date(datesReception[1]));
+
+    // Vérifier si les deux dates sont dans le même mois/année
+    const d1 = new Date(datesReception[0]);
+    const d2 = new Date(datesReception[1]);
+
+    if (d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear()) {
+      // Même mois et année : "le 12 et 14 mai 2025"
+      const jour1 = d1.getDate() === 1 ? '1er' : d1.getDate().toString();
+      const jour2 = d2.getDate() === 1 ? '1er' : d2.getDate().toString();
+      const moisAnnee = new Date(datesReception[1]).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      partieDate = `le ${jour1} et ${jour2} ${moisAnnee}`;
+    } else {
+      // Mois/années différents : "le 12 mai et 1er avril 2025" ou "le 30 décembre 2025 et le 2 janvier 2026"
+      if (d1.getFullYear() === d2.getFullYear()) {
+        // Même année : "le 12 mai et 1er avril 2025"
+        const date1Court = new Date(datesReception[0]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+        const date1CourtFormatted = date1Court.replace(/^1 /, '1er ');
+        const date2Complet = formatDateFrancaise(new Date(datesReception[1]));
+        partieDate = `le ${date1CourtFormatted} et ${date2Complet}`;
+      } else {
+        // Années différentes : "le 30 décembre 2025 et le 2 janvier 2026"
+        const date1Complet = formatDateFrancaise(new Date(datesReception[0]));
+        const date2Complet = formatDateFrancaise(new Date(datesReception[1]));
+        partieDate = `le ${date1Complet} et le ${date2Complet}`;
+      }
+    }
+  } else {
+    // Trois dates ou plus : optimiser selon les années
+    const dates = datesReception.map(dateStr => new Date(dateStr));
+    const anneesUniques = [...new Set(dates.map(d => d.getFullYear()))];
+
+    if (anneesUniques.length === 1) {
+      // Toutes les dates sont de la même année - optimiser l'affichage
+      const datesCourtesFormatees = dates.slice(0, -1).map(date => {
+        const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+        return dateStr.replace(/^1 /, '1er ');
+      });
+      const derniereDate = formatDateFrancaise(dates[dates.length - 1]);
+      partieDate = `le ${datesCourtesFormatees.join(', ')} et ${derniereDate}`;
+    } else {
+      // Années différentes : afficher toutes les dates complètes
+      const datesFormatees = dates.map(date => formatDateFrancaise(date));
+      const derniereDate = datesFormatees.pop();
+      partieDate = `le ${datesFormatees.join(', ')} et ${derniereDate}`;
+    }
+  }
+
+  return phraseBase + partieDate;
 };
 
 module.exports = router;

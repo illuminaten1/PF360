@@ -454,19 +454,104 @@ const formatDatesDemandes = (demandes) => {
         const derniereDate = jours.pop();
         partieDate = `le ${jours.join(', ')} et ${derniereDate} ${premiereMoisAnnee}`;
       } else {
-        // Même année mais mois différents - optimiser l'affichage
-        const datesCourtesFormatees = dates.slice(0, -1).map(date => {
-          const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-          return dateStr.replace(/^1 /, '1er ');
+        // Même année mais mois différents - grouper par mois
+        const annee = dates[0].getFullYear();
+
+        // Grouper les dates par mois
+        const dateParMois = {};
+        dates.forEach(date => {
+          const mois = date.getMonth();
+          const nomMois = date.toLocaleDateString('fr-FR', { month: 'long' });
+          if (!dateParMois[mois]) {
+            dateParMois[mois] = { nomMois, jours: [] };
+          }
+          const jour = date.getDate() === 1 ? '1er' : date.getDate().toString();
+          dateParMois[mois].jours.push(jour);
         });
-        const derniereDate = formatDateFrancaise(dates[dates.length - 1]);
-        partieDate = `le ${datesCourtesFormatees.join(', ')} et ${derniereDate}`;
+
+        // Construire la phrase en regroupant par mois
+        const moisOrdonnes = Object.keys(dateParMois).sort((a, b) => parseInt(a) - parseInt(b));
+        const partiesMois = moisOrdonnes.map(mois => {
+          const { nomMois, jours } = dateParMois[mois];
+          if (jours.length === 1) {
+            return `${jours[0]} ${nomMois}`;
+          } else {
+            const derniereDate = jours.pop();
+            return `${jours.join(', ')} et ${derniereDate} ${nomMois}`;
+          }
+        });
+
+        const derniereMoisPhrase = partiesMois.pop();
+        if (partiesMois.length > 0) {
+          partieDate = `le ${partiesMois.join(', ')} et ${derniereMoisPhrase} ${annee}`;
+        } else {
+          partieDate = `le ${derniereMoisPhrase} ${annee}`;
+        }
       }
     } else {
-      // Années différentes : afficher toutes les dates complètes
-      const datesFormatees = dates.map(date => formatDateFrancaise(date));
-      const derniereDate = datesFormatees.pop();
-      partieDate = `le ${datesFormatees.join(', ')} et ${derniereDate}`;
+      // Années différentes : grouper par année puis par mois
+      const dateParAnnee = {};
+      dates.forEach(date => {
+        const annee = date.getFullYear();
+        if (!dateParAnnee[annee]) {
+          dateParAnnee[annee] = {};
+        }
+
+        const mois = date.getMonth();
+        const nomMois = date.toLocaleDateString('fr-FR', { month: 'long' });
+        if (!dateParAnnee[annee][mois]) {
+          dateParAnnee[annee][mois] = { nomMois, jours: [] };
+        }
+
+        const jour = date.getDate() === 1 ? '1er' : date.getDate().toString();
+        dateParAnnee[annee][mois].jours.push(jour);
+      });
+
+      // Construire la phrase en regroupant par année puis par mois
+      const anneesOrdonnees = Object.keys(dateParAnnee).sort((a, b) => parseInt(a) - parseInt(b));
+      const partiesAnnees = anneesOrdonnees.map(annee => {
+        const moisDeLAnnee = dateParAnnee[annee];
+        const moisOrdonnes = Object.keys(moisDeLAnnee).sort((a, b) => parseInt(a) - parseInt(b));
+
+        if (moisOrdonnes.length === 1) {
+          // Un seul mois dans cette année
+          const mois = moisOrdonnes[0];
+          const { nomMois, jours } = moisDeLAnnee[mois];
+          if (jours.length === 1) {
+            return `${jours[0]} ${nomMois} ${annee}`;
+          } else {
+            const derniereDate = jours.slice(-1)[0];
+            const autresJours = jours.slice(0, -1);
+            return `${autresJours.join(', ')} et ${derniereDate} ${nomMois} ${annee}`;
+          }
+        } else {
+          // Plusieurs mois dans cette année
+          const partiesMois = moisOrdonnes.map(mois => {
+            const { nomMois, jours } = moisDeLAnnee[mois];
+            if (jours.length === 1) {
+              return `${jours[0]} ${nomMois}`;
+            } else {
+              const derniereDate = jours.slice(-1)[0];
+              const autresJours = jours.slice(0, -1);
+              return `${autresJours.join(', ')} et ${derniereDate} ${nomMois}`;
+            }
+          });
+
+          const derniereMoisPhrase = partiesMois.pop();
+          if (partiesMois.length > 0) {
+            return `${partiesMois.join(', ')} et ${derniereMoisPhrase} ${annee}`;
+          } else {
+            return `${derniereMoisPhrase} ${annee}`;
+          }
+        }
+      });
+
+      const derniereAnneePhrase = partiesAnnees.pop();
+      if (partiesAnnees.length > 0) {
+        partieDate = `le ${partiesAnnees.join(', ')} et ${derniereAnneePhrase}`;
+      } else {
+        partieDate = `le ${derniereAnneePhrase}`;
+      }
     }
   }
 

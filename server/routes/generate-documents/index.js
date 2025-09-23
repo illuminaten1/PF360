@@ -5,6 +5,7 @@ const { authMiddleware } = require('../../middleware/auth');
 const fichePaiementRoutes = require('./fiche-paiement');
 const avenantRoutes = require('./avenant');
 const conventionRoutes = require('./convention');
+const decisionRoutes = require('./decision');
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.use(authMiddleware);
 router.use('/', fichePaiementRoutes);
 router.use('/', avenantRoutes);
 router.use('/', conventionRoutes);
+router.use('/', decisionRoutes);
 
 module.exports = router;

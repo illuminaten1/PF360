@@ -1,0 +1,173 @@
+VARIABLES DISPONIBLES POUR LE TEMPLATE DÉCISION
+
+Placez ce fichier dans templates/decision-template.odt
+
+===== VARIABLES DÉCISION =====
+{d.decision.numero} - Numéro de la décision
+{d.decision.type} - Type (AJ | AJE | PJ | REJET)
+{d.decision.typeLabel} - Type libellé (Assistance judiciaire | Assistance judiciaire élargie | Protection juridique | Rejet)
+{d.decision.motifRejet} - Motif du rejet (seulement si type = REJET)
+{d.decision.dateSignature} - Date de signature (format FR)
+{d.decision.dateEnvoi} - Date d'envoi (format FR)
+{d.decision.avisHierarchiques} - Présence d'avis hiérarchiques (true/false)
+{d.decision.typeVictMec} - Type victime/mis en cause (victime | mis en cause)
+{d.decision.considerant} - Texte du considérant de la décision
+
+===== UTILISATEUR CRÉATEUR =====
+{d.utilisateur.grade} - Grade
+{d.utilisateur.nom} - Nom
+{d.utilisateur.prenom} - Prénom
+{d.utilisateur.gradeAbrege} - Grade abrégé
+{d.utilisateur.mail} - Email
+{d.utilisateur.telephone} - Téléphone
+
+===== VISA =====
+{d.visa.typeVisa} - Type de visa (MILITAIRE | CIVIL)
+{d.visa.texteVisa} - Texte complet du visa
+
+===== DOSSIER =====
+{d.dossier.numero} - Numéro du dossier
+{d.dossier.nomDossier} - Nom optionnel du dossier
+{d.dossier.notes} - Notes du dossier
+
+===== SGAMI (via le dossier) =====
+{d.sgami.nom} - Nom du SGAMI
+{d.sgami.formatCourtNommage} - Format court de nommage
+{d.sgami.texteConvention} - Texte spécifique pour les conventions
+{d.sgami.intituleFicheReglement} - Intitulé pour les fiches de règlement
+
+===== DEMANDES ASSOCIÉES =====
+{d.demandes[0].numeroDS} - Numéro Démarches Simplifiées
+{d.demandes[0].type} - Type de demande (victime | mis en cause)
+{d.demandes[0].nom} - Nom du demandeur
+{d.demandes[0].prenom} - Prénom du demandeur
+{d.demandes[0].grade.gradeComplet} - Grade complet (si présent)
+{d.demandes[0].grade.gradeAbrege} - Grade abrégé (si présent)
+{d.demandes[0].nigend} - NIGEND
+{d.demandes[0].statutDemandeur} - Statut (OG | OCTA | SOG | CSTAGN | GAV | Civil | Réserviste | Retraité | Ayant-droit)
+{d.demandes[0].branche} - Branche (GD | GM | GR | État-Major | GIE SPÉ | DG et ORG. CENTRAUX | GIGN)
+{d.demandes[0].formationAdministrative} - Formation administrative
+{d.demandes[0].departement} - Département
+{d.demandes[0].adressePostaleLigne1} - Adresse ligne 1
+{d.demandes[0].adressePostaleLigne2} - Adresse ligne 2
+{d.demandes[0].telephoneProfessionnel} - Téléphone professionnel
+{d.demandes[0].telephonePersonnel} - Téléphone personnel
+{d.demandes[0].emailProfessionnel} - Email professionnel
+{d.demandes[0].emailPersonnel} - Email personnel
+{d.demandes[0].unite} - Unité d'affectation
+{d.demandes[0].dateFaits} - Date des faits (format FR)
+{d.demandes[0].commune} - Commune des faits
+{d.demandes[0].codePostal} - Code postal des faits
+{d.demandes[0].position} - Position (EN_SERVICE | HORS_SERVICE)
+{d.demandes[0].contexteMissionnel} - Contexte missionnel
+{d.demandes[0].qualificationInfraction} - Qualification d'infraction
+{d.demandes[0].resume} - Résumé des faits
+{d.demandes[0].blessures} - Description des blessures
+{d.demandes[0].partieCivile} - Constitution partie civile (true/false)
+{d.demandes[0].montantPartieCivile} - Montant partie civile
+{d.demandes[0].qualificationsPenales} - Qualifications pénales
+{d.demandes[0].dateAudience} - Date d'audience (format FR)
+{d.demandes[0].soutienPsychologique} - Soutien psychologique (true/false)
+{d.demandes[0].soutienSocial} - Soutien social (true/false)
+{d.demandes[0].soutienMedical} - Soutien médical (true/false)
+{d.demandes[0].commentaireDecision} - Commentaire sur la décision
+{d.demandes[0].commentaireConvention} - Commentaire sur la convention
+{d.demandes[0].commentaireSignature} - Commentaire sur la signature
+{d.demandes[0].dateReception} - Date de réception (format FR)
+{d.demandes[i+1].nom} - Pour accéder aux autres demandes
+
+===== LISTES PRÉ-FORMATÉES (recommandé) =====
+{d.demandeursListe} - Liste complète des demandeurs formatée automatiquement
+                     - Format: "GRADE Prénom NOM, GRADE Prénom NOM, ..."
+                     - S'adapte automatiquement au nombre de demandeurs
+
+{d.demandeursListeDetaille:convCRLF} - Liste détaillée des demandeurs avec infos complètes
+                                      - Format avec NIGEND, statut, branche, formation, unité et contacts
+                                      - Séparation par saut de ligne double entre demandeurs
+                                      - Utilise le convertisseur CRLF pour les sauts de ligne
+
+{d.faitsListe:convCRLF} - Résumé complet des faits pour chaque demande
+                         - Format: "Faits du [date] à [commune] ([code postal])\nPosition: [position]\nContexte: [contexte]..."
+                         - Inclut date, lieu, position, contexte, qualification, résumé, blessures
+                         - Séparation par saut de ligne double entre demandes
+
+===== CONVENTIONS ASSOCIÉES =====
+{d.conventions[0].numero} - Numéro de la convention
+{d.conventions[0].type} - Type (CONVENTION | AVENANT)
+{d.conventions[0].victimeOuMisEnCause} - victime | mis en cause
+{d.conventions[0].instance} - Instance judiciaire
+{d.conventions[0].montantHT} - Montant HT (en chiffres)
+{d.conventions[0].montantHTEnLettres} - Montant HT en lettres
+{d.conventions[0].avocat.nom} - Nom de l'avocat
+{d.conventions[0].avocat.prenom} - Prénom de l'avocat
+{d.conventions[0].avocat.nomComplet} - "Prénom NOM" de l'avocat
+{d.conventions[i+1].numero} - Pour accéder aux autres conventions
+
+{d.conventionsListe} - Liste complète des conventions formatée automatiquement
+                      - Format: "Convention n°XXX (victime) - Prénom NOM, Convention n°YYY (mis en cause) - Prénom2 NOM2, ..."
+                      - S'adapte automatiquement au nombre de conventions
+
+===== PAIEMENTS ASSOCIÉS =====
+{d.paiements[0].numero} - Numéro du paiement
+{d.paiements[0].facture} - Numéro de facture
+{d.paiements[0].montantHT} - Montant HT
+{d.paiements[0].montantTTC} - Montant TTC
+{d.paiements[0].qualiteBeneficiaire} - Qualité du bénéficiaire
+{d.paiements[0].identiteBeneficiaire} - Identité du bénéficiaire
+{d.paiements[i+1].numero} - Pour accéder aux autres paiements
+
+===== VARIABLES BOOLÉENNES POUR CONDITIONS =====
+{d.isTypeAJ} - true si type = AJ
+{d.isTypeAJE} - true si type = AJE
+{d.isTypePJ} - true si type = PJ
+{d.isTypeRejet} - true si type = REJET
+{d.hasAvisHierarchiques} - true si avis hiérarchiques présents
+{d.hasConsiderant} - true si considérant présent
+
+===== DONNÉES GÉNÉRÉES =====
+{d.dateGeneration} - Date de génération du document (format FR)
+
+===== EXEMPLE D'UTILISATION =====
+
+DÉCISION N° {d.decision.numero}
+
+Type de décision : {d.decision.typeLabel}
+Date de signature : {d.decision.dateSignature}
+Date d'envoi : {d.decision.dateEnvoi}
+
+DOSSIER
+Numéro : {d.dossier.numero}
+Nom : {d.dossier.nomDossier}
+SGAMI : {d.sgami.nom}
+
+VISA
+{d.visa.texteVisa}
+
+DEMANDEURS
+{d.demandeursListeDetaille:convCRLF}
+
+FAITS
+{d.faitsListe:convCRLF}
+
+[Conditions avec variables booléennes]
+{d.isTypeRejet:show}{d.decision.motifRejet}{d.isTypeRejet:show}
+
+{d.hasAvisHierarchiques:show}Avis hiérarchiques présents{d.hasAvisHierarchiques:show}
+
+{d.hasConsiderant:show}CONSIDÉRANT
+{d.decision.considerant}{d.hasConsiderant:show}
+
+CONVENTIONS ASSOCIÉES
+{d.conventionsListe}
+
+Document généré le {d.dateGeneration}
+Par : {d.utilisateur.grade} {d.utilisateur.prenom} {d.utilisateur.nom}
+
+===== SYNTAXE CARBONE =====
+• Variables simples : {d.variable}
+• Tableaux avec index : {d.array[0].propriete}, {d.array[i+1].propriete}
+• Variables pré-formatées : {d.demandeursListe}, {d.faitsListe} (recommandé pour les listes)
+• Variables booléennes pour conditions : {d.isTypeAJ:show}contenu si AJ{d.isTypeAJ:show}
+• Pour plusieurs éléments d'un tableau, utilisez [0], [i+1], [i+2], etc.
+• Format ODT natif supporté sans LibreOffice
+• Convertisseur CRLF : {d.variable:convCRLF} pour gérer les sauts de ligne

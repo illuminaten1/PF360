@@ -179,3 +179,4 @@ client/.env
 !server/templates/EXEMPLE-variables-disponibles.txt
 !server/templates/EXEMPLE-variables-avenants.txt
 !server/templates/EXEMPLE-variables-conventions.txt
+!server/templates/EXEMPLE-variables-decisions.txt

@@ -114,7 +114,7 @@ router.post('/decision/:decisionId', async (req, res) => {
         motifRejet: decision.motifRejet,
         dateSignature: decision.dateSignature ? new Date(decision.dateSignature).toLocaleDateString('fr-FR') : null,
         dateEnvoi: decision.dateEnvoi ? new Date(decision.dateEnvoi).toLocaleDateString('fr-FR') : null,
-        avisHierarchiques: decision.avis_hierarchiques,
+        avisHierarchiques: decision.avis_hierarchiques ? 'Vu les avis hiérarchiques ;\n' : '',
         typeVictMec: getVictimeMecLabel(decision.typeVictMec),
         considerant: decision.considerant
       },

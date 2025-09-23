@@ -9,7 +9,7 @@ Placez ce fichier dans templates/decision-template.odt
 {d.decision.motifRejet} - Motif du rejet (seulement si type = REJET)
 {d.decision.dateSignature} - Date de signature (format FR)
 {d.decision.dateEnvoi} - Date d'envoi (format FR)
-{d.decision.avisHierarchiques} - Présence d'avis hiérarchiques (true/false)
+{d.decision.avisHierarchiques} - Texte des avis hiérarchiques ("Vu les avis hiérarchiques ;\n" si présents, vide sinon)
 {d.decision.typeVictMec} - Type victime/mis en cause (victime | mis en cause)
 {d.decision.considerant} - Texte du considérant de la décision
 
@@ -24,6 +24,7 @@ Placez ce fichier dans templates/decision-template.odt
 ===== VISA =====
 {d.visa.typeVisa} - Type de visa (MILITAIRE | CIVIL)
 {d.visa.texteVisa} - Texte complet du visa
+{d.visa.texteVisa:convCRLF} - Texte complet du visa avec gestion des retours à la ligne
 
 ===== DOSSIER =====
 {d.dossier.numero} - Numéro du dossier
@@ -141,7 +142,7 @@ Nom : {d.dossier.nomDossier}
 SGAMI : {d.sgami.nom}
 
 VISA
-{d.visa.texteVisa}
+{d.visa.texteVisa:convCRLF}
 
 DEMANDEURS
 {d.demandeursListeDetaille:convCRLF}

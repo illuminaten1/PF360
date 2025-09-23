@@ -39,6 +39,7 @@ import EditConventionModal from '@/components/forms/EditConventionModal'
 import PaiementModal from '@/components/forms/PaiementModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ConventionContextMenu from '@/components/common/ConventionContextMenu'
+import DecisionContextMenu from '@/components/common/DecisionContextMenu'
 
 dayjs.extend(relativeTime)
 dayjs.locale('fr')
@@ -71,6 +72,12 @@ const DossierDetail: React.FC = () => {
     y: number
     convention: any | null
   }>({ show: false, x: 0, y: 0, convention: null })
+  const [decisionContextMenu, setDecisionContextMenu] = useState<{
+    show: boolean
+    x: number
+    y: number
+    decision: any | null
+  }>({ show: false, x: 0, y: 0, decision: null })
 
   // Fetch dossier details
   const { data: dossier, isLoading, error } = useQuery<Dossier>({
@@ -512,17 +519,41 @@ const DossierDetail: React.FC = () => {
     setContextMenu({ show: false, x: 0, y: 0, convention: null })
   }
 
+  // Decision context menu handlers
+  const handleDecisionContextMenu = (e: React.MouseEvent, decision: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDecisionContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      decision
+    })
+  }
+
+  const closeDecisionContextMenu = () => {
+    setDecisionContextMenu({ show: false, x: 0, y: 0, decision: null })
+  }
+
   // Event listeners for context menu
   React.useEffect(() => {
     const handleClickOutside = () => {
       if (contextMenu.show) {
         closeContextMenu()
       }
+      if (decisionContextMenu.show) {
+        closeDecisionContextMenu()
+      }
     }
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && contextMenu.show) {
-        closeContextMenu()
+      if (e.key === 'Escape') {
+        if (contextMenu.show) {
+          closeContextMenu()
+        }
+        if (decisionContextMenu.show) {
+          closeDecisionContextMenu()
+        }
       }
     }
 
@@ -533,7 +564,7 @@ const DossierDetail: React.FC = () => {
       document.removeEventListener('click', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [contextMenu.show])
+  }, [contextMenu.show, decisionContextMenu.show])
 
   if (isLoading) {
     return (
@@ -620,6 +651,16 @@ const DossierDetail: React.FC = () => {
         convention={contextMenu.convention}
         dossier={dossier}
         onClose={closeContextMenu}
+      />
+
+      {/* Menu contextuel pour décisions */}
+      <DecisionContextMenu
+        show={decisionContextMenu.show}
+        x={decisionContextMenu.x}
+        y={decisionContextMenu.y}
+        decision={decisionContextMenu.decision}
+        dossier={dossier}
+        onClose={closeDecisionContextMenu}
       />
       {/* Header */}
       <div className="mb-8">
@@ -966,7 +1007,11 @@ const DossierDetail: React.FC = () => {
 
 
                     return (
-                      <div key={decision.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div
+                        key={decision.id}
+                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                        onContextMenu={(e) => handleDecisionContextMenu(e, decision)}
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-4 mb-2">

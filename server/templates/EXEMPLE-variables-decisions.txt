@@ -134,7 +134,8 @@ Placez ce fichier dans templates/decision-template.odt
                     - 2 dates, même mois : "Vu les demandes de protection fonctionnelle reçues le 12 et 14 mai 2025"
                     - 2 dates, même année : "Vu les demandes de protection fonctionnelle reçues le 12 mai et 1er avril 2025"
                     - 2 dates, années différentes : "Vu les demandes de protection fonctionnelle reçues le 30 décembre 2025 et le 2 janvier 2026"
-                    - 3+ dates : "Vu les demandes de protection fonctionnelle reçues le 1er avril, 12 mai et 14 juin 2025"
+                    - 3+ dates, même mois : "Vu les demandes de protection fonctionnelle reçues le 1er, 5, 7, 11 et 12 septembre 2025"
+                    - 3+ dates, mois différents : "Vu les demandes de protection fonctionnelle reçues le 1er avril, 12 mai et 14 juin 2025"
 
 ===== EXEMPLE D'UTILISATION =====
 

@@ -436,18 +436,32 @@ const formatDatesDemandes = (demandes) => {
       }
     }
   } else {
-    // Trois dates ou plus : optimiser selon les années
+    // Trois dates ou plus : optimiser selon les années et mois
     const dates = datesReception.map(dateStr => new Date(dateStr));
     const anneesUniques = [...new Set(dates.map(d => d.getFullYear()))];
 
     if (anneesUniques.length === 1) {
-      // Toutes les dates sont de la même année - optimiser l'affichage
-      const datesCourtesFormatees = dates.slice(0, -1).map(date => {
-        const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-        return dateStr.replace(/^1 /, '1er ');
-      });
-      const derniereDate = formatDateFrancaise(dates[dates.length - 1]);
-      partieDate = `le ${datesCourtesFormatees.join(', ')} et ${derniereDate}`;
+      // Toutes les dates sont de la même année
+      const moisUniques = [...new Set(dates.map(d => d.getMonth()))];
+
+      if (moisUniques.length === 1) {
+        // Toutes les dates sont du même mois et de la même année
+        const premiereMoisAnnee = dates[0].toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        const jours = dates.map(date => {
+          return date.getDate() === 1 ? '1er' : date.getDate().toString();
+        });
+
+        const derniereDate = jours.pop();
+        partieDate = `le ${jours.join(', ')} et ${derniereDate} ${premiereMoisAnnee}`;
+      } else {
+        // Même année mais mois différents - optimiser l'affichage
+        const datesCourtesFormatees = dates.slice(0, -1).map(date => {
+          const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+          return dateStr.replace(/^1 /, '1er ');
+        });
+        const derniereDate = formatDateFrancaise(dates[dates.length - 1]);
+        partieDate = `le ${datesCourtesFormatees.join(', ')} et ${derniereDate}`;
+      }
     } else {
       // Années différentes : afficher toutes les dates complètes
       const datesFormatees = dates.map(date => formatDateFrancaise(date));

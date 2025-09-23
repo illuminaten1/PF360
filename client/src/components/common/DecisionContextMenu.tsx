@@ -43,6 +43,7 @@ const DecisionContextMenu: React.FC<DecisionContextMenuProps> = ({
   dossier,
   onClose
 }) => {
+  console.log('DecisionContextMenu render:', { show, x, y, decision: !!decision, dossier: !!dossier })
   if (!show || !decision || !dossier) return null
 
   const getTypeLabel = (type: string) => {

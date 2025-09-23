@@ -127,6 +127,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
         visaId: decision.visa?.id || '',
         avis_hierarchiques: decision.avis_hierarchiques || false,
         typeVictMec: decision.typeVictMec,
+        considerant: decision.considerant || '',
         dateSignature: decision.dateSignature ? dayjs(decision.dateSignature).format('YYYY-MM-DD') : '',
         dateEnvoi: decision.dateEnvoi ? dayjs(decision.dateEnvoi).format('YYYY-MM-DD') : ''
       })
@@ -143,6 +144,7 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
         visaId: data.visaId,
         avis_hierarchiques: data.avis_hierarchiques,
         typeVictMec: data.typeVictMec,
+        considerant: data.considerant,
         dateSignature: data.dateSignature ? new Date(data.dateSignature).toISOString() : null,
         dateEnvoi: data.dateEnvoi ? new Date(data.dateEnvoi).toISOString() : null
       }
@@ -469,8 +471,8 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Quatrième ligne : Demandes concernées */}
-                  <div className="grid grid-cols-1 gap-6">
+                  {/* Quatrième ligne : Demandes concernées et Considérant */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Demandes concernées */}
                     <div>
                       {decision.demandes && decision.demandes.length > 0 && (
@@ -496,6 +498,28 @@ const DecisionEditModal: React.FC<DecisionEditModalProps> = ({
                           </p>
                         </>
                       )}
+                    </div>
+
+                    {/* Considérant */}
+                    <div>
+                      <label htmlFor="considerant" className="block text-sm font-medium text-gray-700 mb-2">
+                        Considérant
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          {...register('considerant')}
+                          className="block w-full h-[256px] px-4 py-3 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all resize-none"
+                          placeholder="Texte du considérant de la décision..."
+                        />
+                        <div className="absolute top-3 right-3 pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Optionnel - Texte explicatif pour justifier la décision
+                      </p>
                     </div>
                   </div>
 

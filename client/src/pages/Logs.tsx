@@ -51,7 +51,6 @@ interface LogsFilters {
   search?: string
   userId?: number
   action?: string
-  entite?: string
   dateFrom?: string
   dateTo?: string
 }
@@ -74,7 +73,6 @@ const Logs: React.FC = () => {
     search: quickSearch || filters.search || undefined,
     userId: filters.userId,
     action: filters.action,
-    entite: filters.entite,
     dateFrom: filters.dateFrom,
     dateTo: filters.dateTo
   }), [currentPage, pageSize, quickSearch, filters])

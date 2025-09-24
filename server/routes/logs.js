@@ -18,7 +18,6 @@ router.get('/', adminMiddleware, async (req, res) => {
       search,
       userId,
       action,
-      entite,
       dateFrom,
       dateTo
     } = req.query;
@@ -49,7 +48,6 @@ router.get('/', adminMiddleware, async (req, res) => {
     // Filtres spécifiques
     if (userId) where.userId = parseInt(userId);
     if (action) where.action = action;
-    if (entite) where.entite = entite;
 
     // Filtres de dates
     if (dateFrom || dateTo) {
@@ -101,7 +99,6 @@ router.get('/', adminMiddleware, async (req, res) => {
         search,
         userId,
         action,
-        entite,
         dateFrom,
         dateTo
       }
@@ -120,7 +117,6 @@ router.get('/export', adminMiddleware, async (req, res) => {
       search,
       userId,
       action,
-      entite,
       dateFrom,
       dateTo,
       limit = 10000 // Limite pour éviter les exports trop volumineux
@@ -148,7 +144,6 @@ router.get('/export', adminMiddleware, async (req, res) => {
 
     if (userId) where.userId = parseInt(userId);
     if (action) where.action = action;
-    if (entite) where.entite = entite;
 
     if (dateFrom || dateTo) {
       where.timestamp = {};
@@ -269,27 +264,17 @@ router.get('/export', adminMiddleware, async (req, res) => {
 router.get('/distinct-values', adminMiddleware, async (req, res) => {
   try {
     // Récupération avec GROUP BY pour obtenir des valeurs distinctes
-    const [actionsResult, entitesResult] = await Promise.all([
-      prisma.$queryRaw`
-        SELECT DISTINCT action
-        FROM "logs"
-        WHERE action IS NOT NULL
-        ORDER BY action ASC
-      `,
-      prisma.$queryRaw`
-        SELECT DISTINCT entite
-        FROM "logs"
-        WHERE entite IS NOT NULL
-        ORDER BY entite ASC
-      `
-    ]);
+    const actionsResult = await prisma.$queryRaw`
+      SELECT DISTINCT action
+      FROM "logs"
+      WHERE action IS NOT NULL
+      ORDER BY action ASC
+    `;
 
     const actions = actionsResult.map((row) => row.action);
-    const entites = entitesResult.map((row) => row.entite);
 
     res.json({
-      actions,
-      entites
+      actions
     });
   } catch (error) {
     console.error('Get distinct values error:', error);

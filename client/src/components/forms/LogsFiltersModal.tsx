@@ -14,7 +14,6 @@ interface LogsFilters {
   search?: string
   userId?: number
   action?: string
-  entite?: string
   dateFrom?: string
   dateTo?: string
 }
@@ -141,7 +140,10 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
               </label>
               <select
                 value={filters.userId?.toString() || ''}
-                onChange={(e) => updateFilter('userId', e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) => {
+                  console.log('User select changed, target value:', e.target.value, 'type:', typeof e.target.value)
+                  updateFilter('userId', e.target.value ? Number(e.target.value) : undefined)
+                }}
                 disabled={usersLoading}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
               >
@@ -154,7 +156,7 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
               </select>
               {users && (
                 <div className="text-xs text-gray-500 mt-1">
-                  {users.length} utilisateurs trouvés
+                  {users.length} utilisateurs trouvés | Valeur actuelle: {filters.userId || 'aucune'}
                 </div>
               )}
             </div>
@@ -167,7 +169,10 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
               </label>
               <select
                 value={filters.action || ''}
-                onChange={(e) => updateFilter('action', e.target.value)}
+                onChange={(e) => {
+                  console.log('Action select changed, target value:', e.target.value, 'type:', typeof e.target.value)
+                  updateFilter('action', e.target.value || undefined)
+                }}
                 disabled={distinctValuesLoading}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
               >
@@ -180,35 +185,11 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
               </select>
               {distinctValues?.actions && (
                 <div className="text-xs text-gray-500 mt-1">
-                  {distinctValues.actions.length} actions trouvées
+                  {distinctValues.actions.length} actions trouvées | Valeur actuelle: {filters.action || 'aucune'}
                 </div>
               )}
             </div>
 
-            {/* Filtre entité */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Entité {distinctValuesLoading && <span className="text-xs text-gray-500">(chargement...)</span>}
-              </label>
-              <select
-                value={filters.entite || ''}
-                onChange={(e) => updateFilter('entite', e.target.value)}
-                disabled={distinctValuesLoading}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
-              >
-                <option value="">Toutes les entités</option>
-                {distinctValues?.entites?.map((entite: string) => (
-                  <option key={entite} value={entite}>
-                    {entite}
-                  </option>
-                ))}
-              </select>
-              {distinctValues?.entites && (
-                <div className="text-xs text-gray-500 mt-1">
-                  {distinctValues.entites.length} entités trouvées
-                </div>
-              )}
-            </div>
 
             {/* Filtres de dates */}
             <div className="grid grid-cols-2 gap-4">

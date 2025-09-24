@@ -268,28 +268,33 @@ router.get('/export', adminMiddleware, async (req, res) => {
 // Endpoint pour récupérer les valeurs distinctes pour les filtres
 router.get('/distinct-values', adminMiddleware, async (req, res) => {
   try {
-    const [actions, entites] = await Promise.all([
-      prisma.log.findMany({
-        select: { action: true },
-        distinct: ['action'],
-        where: { action: { not: null } },
-        orderBy: { action: 'asc' }
-      }),
-      prisma.log.findMany({
-        select: { entite: true },
-        distinct: ['entite'],
-        where: { entite: { not: null } },
-        orderBy: { entite: 'asc' }
-      })
+    // Récupération avec GROUP BY pour obtenir des valeurs distinctes
+    const [actionsResult, entitesResult] = await Promise.all([
+      prisma.$queryRaw`
+        SELECT DISTINCT action
+        FROM "logs"
+        WHERE action IS NOT NULL
+        ORDER BY action ASC
+      `,
+      prisma.$queryRaw`
+        SELECT DISTINCT entite
+        FROM "logs"
+        WHERE entite IS NOT NULL
+        ORDER BY entite ASC
+      `
     ]);
 
+    const actions = actionsResult.map((row) => row.action);
+    const entites = entitesResult.map((row) => row.entite);
+
     res.json({
-      actions: actions.map(log => log.action).filter(Boolean),
-      entites: entites.map(log => log.entite).filter(Boolean)
+      actions,
+      entites
     });
   } catch (error) {
     console.error('Get distinct values error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error('Error details:', error.message);
+    res.status(500).json({ error: 'Erreur serveur', details: error.message });
   }
 });
 

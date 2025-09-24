@@ -82,6 +82,11 @@ Placez ce fichier dans templates/decision-template.odt
                      - Format: "GRADE Prénom NOM, GRADE Prénom NOM, ..."
                      - S'adapte automatiquement au nombre de demandeurs
 
+{d.demandeursListeOrdreGrade} - Liste des demandeurs triée par ordre décroissant de grade
+                               - Format: "colonel Nicolas Dupont, gendarme Pierre Carrière et gendarme adjoint volontaire Marie Duprès"
+                               - Utilise les grades complets et trie selon la hiérarchie définie
+                               - Format avec virgules et "et" avant le dernier élément
+
 {d.demandeursListeDetaille:convCRLF} - Liste détaillée des demandeurs avec infos complètes
                                       - Format avec NIGEND, statut, branche, formation, unité et contacts
                                       - Séparation par saut de ligne double entre demandeurs

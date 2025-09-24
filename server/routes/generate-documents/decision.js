@@ -190,6 +190,35 @@ router.post('/decision/:decisionId', async (req, res) => {
       demandeursListe: decision.demandes.map(dd =>
         `${dd.demande.grade?.gradeAbrege || ''} ${dd.demande.prenom} ${dd.demande.nom}`.trim()
       ).join(', '),
+      // {d.demandeursListeOrdreGrade} - Liste des demandeurs triés par ordre décroissant de grade
+      demandeursListeOrdreGrade: (() => {
+        const demandesAvecGrade = decision.demandes.filter(dd => dd.demande.grade);
+        const demandesSansGrade = decision.demandes.filter(dd => !dd.demande.grade);
+
+        // Trier par ordre croissant du champ ordre (plus l'ordre est petit, plus le grade est élevé)
+        const demandesTriees = demandesAvecGrade.sort((a, b) => {
+          return (a.demande.grade.ordre || 999) - (b.demande.grade.ordre || 999);
+        });
+
+        // Combiner les demandes triées avec celles sans grade
+        const toutesDemandesTriees = [...demandesTriees, ...demandesSansGrade];
+
+        // Formater la liste selon le format demandé
+        const listeFormatee = toutesDemandesTriees.map(dd => {
+          const grade = dd.demande.grade?.gradeComplet || '';
+          const prenom = dd.demande.prenom || '';
+          const nom = dd.demande.nom || '';
+          return `${grade} ${prenom} ${nom}`.trim();
+        });
+
+        // Joindre avec des virgules et "et" pour le dernier élément
+        if (listeFormatee.length === 0) return '';
+        if (listeFormatee.length === 1) return listeFormatee[0];
+        if (listeFormatee.length === 2) return `${listeFormatee[0]} et ${listeFormatee[1]}`;
+
+        const dernierElement = listeFormatee.pop();
+        return `${listeFormatee.join(', ')} et ${dernierElement}`;
+      })(),
       // {d.demandeursListeDetaille:convCRLF} - Chaîne formatée détaillée pour les demandeurs avec infos complètes
       demandeursListeDetaille: decision.demandes.map(dd => {
         const demande = dd.demande;

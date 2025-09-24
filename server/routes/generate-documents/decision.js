@@ -427,8 +427,20 @@ const genererPhraseDecision = (typeDecision, demandes) => {
     return '';
   }
 
+  // Trier les demandes par ordre décroissant de grade (comme dans demandeursListeOrdreGrade)
+  const demandesAvecGrade = demandes.filter(dd => dd.demande.grade);
+  const demandesSansGrade = demandes.filter(dd => !dd.demande.grade);
+
+  // Trier par ordre croissant du champ ordre (plus l'ordre est petit, plus le grade est élevé)
+  const demandesTriees = demandesAvecGrade.sort((a, b) => {
+    return (a.demande.grade.ordre || 999) - (b.demande.grade.ordre || 999);
+  });
+
+  // Combiner les demandes triées avec celles sans grade
+  const toutesDemandesTriees = [...demandesTriees, ...demandesSansGrade];
+
   // Construire la liste des demandeurs avec grade, prénom et nom
-  const demandeursList = demandes.map(dd => {
+  const demandeursList = toutesDemandesTriees.map(dd => {
     const demande = dd.demande;
     const grade = demande.grade?.gradeComplet || '';
     const prenom = demande.prenom || '';

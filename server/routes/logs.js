@@ -54,8 +54,18 @@ router.get('/', adminMiddleware, async (req, res) => {
     // Filtres de dates
     if (dateFrom || dateTo) {
       where.timestamp = {};
-      if (dateFrom) where.timestamp.gte = new Date(dateFrom);
-      if (dateTo) where.timestamp.lte = new Date(dateTo);
+      if (dateFrom) {
+        // Début de journée (00:00:00)
+        const startOfDay = new Date(dateFrom);
+        startOfDay.setHours(0, 0, 0, 0);
+        where.timestamp.gte = startOfDay;
+      }
+      if (dateTo) {
+        // Fin de journée (23:59:59.999)
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        where.timestamp.lte = endOfDay;
+      }
     }
 
     const [logs, total] = await Promise.all([
@@ -142,8 +152,18 @@ router.get('/export', adminMiddleware, async (req, res) => {
 
     if (dateFrom || dateTo) {
       where.timestamp = {};
-      if (dateFrom) where.timestamp.gte = new Date(dateFrom);
-      if (dateTo) where.timestamp.lte = new Date(dateTo);
+      if (dateFrom) {
+        // Début de journée (00:00:00)
+        const startOfDay = new Date(dateFrom);
+        startOfDay.setHours(0, 0, 0, 0);
+        where.timestamp.gte = startOfDay;
+      }
+      if (dateTo) {
+        // Fin de journée (23:59:59.999)
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        where.timestamp.lte = endOfDay;
+      }
     }
 
     const logs = await prisma.log.findMany({

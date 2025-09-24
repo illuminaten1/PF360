@@ -84,10 +84,15 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
   }
 
   const updateFilter = (key: keyof LogsFilters, value: string | number | undefined) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value || undefined
-    }))
+    console.log(`Updating filter ${key}:`, value)
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [key]: value || undefined
+      }
+      console.log('New filters:', newFilters)
+      return newFilters
+    })
   }
 
   if (!isOpen) return null
@@ -135,7 +140,7 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
                 Utilisateur {usersLoading && <span className="text-xs text-gray-500">(chargement...)</span>}
               </label>
               <select
-                value={filters.userId || ''}
+                value={filters.userId?.toString() || ''}
                 onChange={(e) => updateFilter('userId', e.target.value ? Number(e.target.value) : undefined)}
                 disabled={usersLoading}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
@@ -143,7 +148,7 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
                 <option value="">Tous les utilisateurs</option>
                 {users?.map((user: any) => (
                   <option key={user.id} value={user.id}>
-                    {user.prenom} {user.nom} ({user.identifiant})
+                    {user.prenom} {user.nom}{user.identifiant ? ` (${user.identifiant})` : ''}
                   </option>
                 ))}
               </select>

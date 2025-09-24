@@ -1,0 +1,237 @@
+import React, { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  XMarkIcon,
+  FunnelIcon,
+  CalendarDaysIcon,
+  UserIcon,
+  TagIcon
+} from '@heroicons/react/24/outline'
+import api from '@/utils/api'
+import dayjs from 'dayjs'
+
+interface LogsFilters {
+  search?: string
+  userId?: number
+  action?: string
+  entite?: string
+  dateFrom?: string
+  dateTo?: string
+}
+
+interface LogsFiltersModalProps {
+  isOpen: boolean
+  onClose: () => void
+  currentFilters: LogsFilters
+  onApplyFilters: (filters: LogsFilters) => void
+}
+
+const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
+  isOpen,
+  onClose,
+  currentFilters,
+  onApplyFilters
+}) => {
+  const [filters, setFilters] = useState<LogsFilters>(currentFilters)
+
+  useEffect(() => {
+    setFilters(currentFilters)
+  }, [currentFilters, isOpen])
+
+  // Récupération des utilisateurs pour le filtre
+  const { data: users } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api.get('/auth/users')
+      return response.data
+    },
+    enabled: isOpen
+  })
+
+  // Récupération des actions et entités distinctes
+  const { data: distinctValues } = useQuery({
+    queryKey: ['logs-distinct-values'],
+    queryFn: async () => {
+      // Cette route devra être ajoutée côté serveur
+      const response = await api.get('/logs/distinct-values')
+      return response.data
+    },
+    enabled: isOpen
+  })
+
+  const handleApply = () => {
+    onApplyFilters(filters)
+    onClose()
+  }
+
+  const handleReset = () => {
+    const emptyFilters: LogsFilters = {}
+    setFilters(emptyFilters)
+    onApplyFilters(emptyFilters)
+    onClose()
+  }
+
+  const updateFilter = (key: keyof LogsFilters, value: string | number | undefined) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value || undefined
+    }))
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
+
+        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <FunnelIcon className="w-6 h-6 text-primary-600" />
+              <h3 className="text-lg font-medium text-gray-900">
+                Filtres avancés
+              </h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Recherche globale */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Recherche globale
+              </label>
+              <input
+                type="text"
+                value={filters.search || ''}
+                onChange={(e) => updateFilter('search', e.target.value)}
+                placeholder="Rechercher dans actions, détails, entités..."
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Filtre utilisateur */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <UserIcon className="w-4 h-4 inline mr-1" />
+                Utilisateur
+              </label>
+              <select
+                value={filters.userId || ''}
+                onChange={(e) => updateFilter('userId', e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Tous les utilisateurs</option>
+                {users?.map((user: any) => (
+                  <option key={user.id} value={user.id}>
+                    {user.prenom} {user.nom} ({user.identifiant})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtre action */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <TagIcon className="w-4 h-4 inline mr-1" />
+                Action
+              </label>
+              <select
+                value={filters.action || ''}
+                onChange={(e) => updateFilter('action', e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Toutes les actions</option>
+                {distinctValues?.actions?.map((action: string) => (
+                  <option key={action} value={action}>
+                    {action}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtre entité */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Entité
+              </label>
+              <select
+                value={filters.entite || ''}
+                onChange={(e) => updateFilter('entite', e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Toutes les entités</option>
+                {distinctValues?.entites?.map((entite: string) => (
+                  <option key={entite} value={entite}>
+                    {entite}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtres de dates */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <CalendarDaysIcon className="w-4 h-4 inline mr-1" />
+                  Date début
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateFrom || ''}
+                  onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                  max={dayjs().format('YYYY-MM-DD')}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date fin
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateTo || ''}
+                  onChange={(e) => updateFilter('dateTo', e.target.value)}
+                  max={dayjs().format('YYYY-MM-DD')}
+                  min={filters.dateFrom || undefined}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-between">
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              Réinitialiser
+            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleApply}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                Appliquer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default LogsFiltersModal

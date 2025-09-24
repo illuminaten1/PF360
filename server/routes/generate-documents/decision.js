@@ -317,7 +317,9 @@ router.post('/decision/:decisionId', async (req, res) => {
       // Variable dates.demandes pour générer automatiquement la phrase
       dates: {
         demandes: formatDatesDemandes(decision.demandes)
-      }
+      },
+      // Phrase automatique de décision selon le type et le nombre de demandes
+      phraseDecision: genererPhraseDecision(decision.type, decision.demandes)
     };
 
     let templatePath;
@@ -404,6 +406,52 @@ const formatDateFrancaise = (date) => {
 
   // Remplacer le premier jour du mois par "1er"
   return dateStr.replace(/^1 /, '1er ');
+};
+
+// Fonction pour générer la phrase de décision selon le type et le nombre de demandes
+const genererPhraseDecision = (typeDecision, demandes) => {
+  if (!demandes || demandes.length === 0) {
+    return '';
+  }
+
+  const nombreDemandes = demandes.length;
+  let phraseBase = '';
+  let verbe = '';
+
+  // Déterminer le verbe et l'accord selon le type de décision
+  if (['AJ', 'AJE', 'PJ'].includes(typeDecision)) {
+    verbe = nombreDemandes === 1 ? 'est agréée' : 'sont agréées';
+  } else if (typeDecision === 'REJET') {
+    verbe = nombreDemandes === 1 ? 'est rejetée' : 'sont rejetées';
+  } else {
+    return '';
+  }
+
+  // Construire la liste des demandeurs avec grade, prénom et nom
+  const demandeursList = demandes.map(dd => {
+    const demande = dd.demande;
+    const grade = demande.grade?.gradeComplet || '';
+    const prenom = demande.prenom || '';
+    const nom = demande.nom || '';
+    return `${grade} ${prenom} ${nom}`.trim();
+  });
+
+  // Construire la phrase selon le nombre de demandes
+  if (nombreDemandes === 1) {
+    phraseBase = `La demande de protection fonctionnelle de ${demandeursList[0]} ${verbe}.`;
+  } else {
+    // Pour plusieurs demandes, utiliser la liste formatée avec "et" pour le dernier
+    let listeFormatee;
+    if (nombreDemandes === 2) {
+      listeFormatee = `${demandeursList[0]} et ${demandeursList[1]}`;
+    } else {
+      const dernierDemandeur = demandeursList.pop();
+      listeFormatee = `${demandeursList.join(', ')} et ${dernierDemandeur}`;
+    }
+    phraseBase = `Les demandes de protection fonctionnelle de ${listeFormatee} ${verbe}.`;
+  }
+
+  return phraseBase;
 };
 
 // Fonction pour formater les dates des demandes en phrase complète

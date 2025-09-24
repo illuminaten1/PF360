@@ -143,6 +143,17 @@ Placez ce fichier dans templates/decision-template.odt
                     - 3+ dates, mois différents (même année) : "Vu les demandes de protection fonctionnelle reçues le 29 août et 1er, 5, 7, 11 et 12 septembre 2025"
                     - 3+ dates, années différentes : "Vu les demandes de protection fonctionnelle reçues le 29 août 2024 et 1er, 5, 7, 11 et 12 septembre 2025"
 
+{d.phraseDecision} - Phrase automatique de décision selon le type et le nombre de demandes
+                   - Format intelligent selon le type de décision et le nombre de demandeurs :
+                   - Pour les agréments (AJ, AJE, PJ) :
+                     * 1 demande : "La demande de protection fonctionnelle de grade prénom nom est agréée."
+                     * Plusieurs demandes : "Les demandes de protection fonctionnelle de grade prénom nom, grade prénom nom et grade prénom nom sont agréées."
+                   - Pour les rejets (REJET) :
+                     * 1 demande : "La demande de protection fonctionnelle de grade prénom nom est rejetée."
+                     * Plusieurs demandes : "Les demandes de protection fonctionnelle de grade prénom nom, grade prénom nom et grade prénom nom sont rejetées."
+                   - Utilise automatiquement les grades complets, prénoms et noms des demandeurs
+                   - Gère l'accord singulier/pluriel et la conjugaison selon le contexte
+
 ===== EXEMPLE D'UTILISATION =====
 
 DÉCISION N° {d.decision.numero}
@@ -166,6 +177,9 @@ DEMANDEURS
 
 FAITS
 {d.faitsListe:convCRLF}
+
+DÉCISION
+{d.phraseDecision}
 
 [Conditions avec variables booléennes]
 {d.isTypeRejet:show}{d.decision.motifRejet}{d.isTypeRejet:show}

@@ -79,7 +79,7 @@ const LogsTable: React.FC<LogsTableProps> = ({
         header: '',
         cell: ({ row }) => {
           const isExpanded = expandedRows.has(row.original.id)
-          const hasDetail = row.original.detail && row.original.detail.length > 50
+          const hasDetail = row.original.detail && row.original.detail.length > 100
 
           if (!hasDetail) return null
 
@@ -175,7 +175,7 @@ const LogsTable: React.FC<LogsTableProps> = ({
             return <span className="text-sm text-gray-400">-</span>
           }
 
-          if (detail.length <= 50) {
+          if (detail.length <= 100) {
             return <span className="text-sm text-gray-700">{detail}</span>
           }
 

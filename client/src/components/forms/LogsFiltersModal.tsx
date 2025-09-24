@@ -39,20 +39,19 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
   }, [currentFilters, isOpen])
 
   // Récupération des utilisateurs pour le filtre
-  const { data: users } = useQuery({
+  const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await api.get('/auth/users')
+      const response = await api.get('/demandes/users')
       return response.data
     },
     enabled: isOpen
   })
 
   // Récupération des actions et entités distinctes
-  const { data: distinctValues } = useQuery({
+  const { data: distinctValues, isLoading: distinctValuesLoading } = useQuery({
     queryKey: ['logs-distinct-values'],
     queryFn: async () => {
-      // Cette route devra être ajoutée côté serveur
       const response = await api.get('/logs/distinct-values')
       return response.data
     },
@@ -63,6 +62,19 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
     onApplyFilters(filters)
     onClose()
   }
+
+  // Debug: log des données récupérées
+  React.useEffect(() => {
+    if (users) {
+      console.log('Users loaded:', users)
+    }
+  }, [users])
+
+  React.useEffect(() => {
+    if (distinctValues) {
+      console.log('Distinct values loaded:', distinctValues)
+    }
+  }, [distinctValues])
 
   const handleReset = () => {
     const emptyFilters: LogsFilters = {}
@@ -120,12 +132,13 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <UserIcon className="w-4 h-4 inline mr-1" />
-                Utilisateur
+                Utilisateur {usersLoading && <span className="text-xs text-gray-500">(chargement...)</span>}
               </label>
               <select
                 value={filters.userId || ''}
                 onChange={(e) => updateFilter('userId', e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={usersLoading}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
               >
                 <option value="">Tous les utilisateurs</option>
                 {users?.map((user: any) => (
@@ -134,18 +147,24 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
                   </option>
                 ))}
               </select>
+              {users && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {users.length} utilisateurs trouvés
+                </div>
+              )}
             </div>
 
             {/* Filtre action */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <TagIcon className="w-4 h-4 inline mr-1" />
-                Action
+                Action {distinctValuesLoading && <span className="text-xs text-gray-500">(chargement...)</span>}
               </label>
               <select
                 value={filters.action || ''}
                 onChange={(e) => updateFilter('action', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={distinctValuesLoading}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
               >
                 <option value="">Toutes les actions</option>
                 {distinctValues?.actions?.map((action: string) => (
@@ -154,17 +173,23 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
                   </option>
                 ))}
               </select>
+              {distinctValues?.actions && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {distinctValues.actions.length} actions trouvées
+                </div>
+              )}
             </div>
 
             {/* Filtre entité */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Entité
+                Entité {distinctValuesLoading && <span className="text-xs text-gray-500">(chargement...)</span>}
               </label>
               <select
                 value={filters.entite || ''}
                 onChange={(e) => updateFilter('entite', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={distinctValuesLoading}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
               >
                 <option value="">Toutes les entités</option>
                 {distinctValues?.entites?.map((entite: string) => (
@@ -173,6 +198,11 @@ const LogsFiltersModal: React.FC<LogsFiltersModalProps> = ({
                   </option>
                 ))}
               </select>
+              {distinctValues?.entites && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {distinctValues.entites.length} entités trouvées
+                </div>
+              )}
             </div>
 
             {/* Filtres de dates */}

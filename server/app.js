@@ -26,6 +26,7 @@ const generateDocumentsRoutes = require('./routes/generate-documents');
 const logRoutes = require('./routes/logs');
 const statistiquesRoutes = require('./routes/statistiques');
 const budgetRoutes = require('./routes/budget');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -81,6 +82,7 @@ app.use('/api/generate-documents', generateDocumentsRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/statistiques', statistiquesRoutes);
 app.use('/api/budget', budgetRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

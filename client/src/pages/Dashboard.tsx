@@ -6,20 +6,14 @@ import EncartStatistiquesHebdomadaires from '@/components/EncartStatistiquesHebd
 import {
   FolderIcon,
   DocumentTextIcon,
-  ScaleIcon,
-  CreditCardIcon,
   EyeIcon,
-  PresentationChartLineIcon,
-  ArrowTrendingUpIcon
+  PresentationChartLineIcon
 } from '@heroicons/react/24/outline'
 
 interface DashboardStats {
   totalDossiers: number
   totalDemandes: number
-  totalDecisions: number
-  totalPaiements: number
   demandesSans2Mois: number
-  montantTotalConventions: number
 }
 
 const Dashboard: React.FC = () => {
@@ -37,21 +31,22 @@ const Dashboard: React.FC = () => {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      // For now, return mock data since we haven't implemented the endpoint
-      return {
-        totalDossiers: 0,
-        totalDemandes: 0,
-        totalDecisions: 0,
-        totalPaiements: 0,
-        demandesSans2Mois: 0,
-        montantTotalConventions: 0
+      const response = await fetch('/api/dashboard/stats', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des statistiques')
       }
+      return response.json()
     }
   })
 
   const statCards = [
     {
-      name: 'Dossiers',
+      name: 'Mes dossiers',
       value: stats?.totalDossiers || 0,
       icon: FolderIcon,
       color: 'text-blue-600',
@@ -59,7 +54,7 @@ const Dashboard: React.FC = () => {
       href: '/dossiers'
     },
     {
-      name: 'Demandes',
+      name: 'Mes demandes',
       value: stats?.totalDemandes || 0,
       icon: DocumentTextIcon,
       color: 'text-green-600',
@@ -67,23 +62,7 @@ const Dashboard: React.FC = () => {
       href: '/demandes'
     },
     {
-      name: 'Décisions',
-      value: stats?.totalDecisions || 0,
-      icon: ScaleIcon,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      href: '/decisions'
-    },
-    {
-      name: 'Paiements',
-      value: stats?.totalPaiements || 0,
-      icon: CreditCardIcon,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-      href: '/paiements'
-    },
-    {
-      name: 'Revue',
+      name: 'Ma revue',
       value: stats?.demandesSans2Mois || 0,
       icon: EyeIcon,
       color: 'text-orange-600',
@@ -97,14 +76,6 @@ const Dashboard: React.FC = () => {
       color: 'text-cyan-600',
       bgColor: 'bg-cyan-50',
       href: '/statistiques'
-    },
-    {
-      name: 'Montant conventions',
-      value: `${(stats?.montantTotalConventions || 0).toLocaleString('fr-FR')} €`,
-      icon: ArrowTrendingUpIcon,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      href: '/conventions'
     }
   ]
 
@@ -113,8 +84,8 @@ const Dashboard: React.FC = () => {
       <div className="p-6">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-lg shadow p-6">
                 <div className="h-12 bg-gray-200 rounded w-12 mb-4"></div>
                 <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -158,7 +129,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {statCards.map((card) => (
           <div
             key={card.name}

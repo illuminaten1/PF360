@@ -20,23 +20,8 @@ const getDashboardStats = async (req, res) => {
       }
     });
 
-    // Récupérer le nombre de demandes en revue (assignées à l'utilisateur, sans décision depuis plus de 2 mois)
-    const twoMonthsAgo = new Date();
-    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-
-    const demandesSans2Mois = await prisma.demande.count({
-      where: {
-        assigneAId: userId,
-        // Vérifier s'il y a des décisions récentes via les relations
-        decisions: {
-          none: {
-            createdAt: {
-              gte: twoMonthsAgo
-            }
-          }
-        }
-      }
-    });
+    // Pour l'instant, données mockées pour Ma revue
+    const demandesSans2Mois = 3;
 
     const stats = {
       totalDossiers,

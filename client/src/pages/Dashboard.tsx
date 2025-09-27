@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
+import api from '@/utils/api'
 import CalendrierAudiences from '@/components/CalendrierAudiences'
 import EncartStatistiquesHebdomadaires from '@/components/EncartStatistiquesHebdomadaires'
 import {
@@ -31,16 +32,8 @@ const Dashboard: React.FC = () => {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des statistiques')
-      }
-      return response.json()
+      const response = await api.get('/dashboard/stats')
+      return response.data
     }
   })
 

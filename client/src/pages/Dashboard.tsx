@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
-import api from '@/utils/api'
+import { api } from '@/utils/api'
 import CalendrierAudiences from '@/components/CalendrierAudiences'
 import EncartStatistiquesHebdomadaires from '@/components/EncartStatistiquesHebdomadaires'
 import {

@@ -37,8 +37,8 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
-import AssignerDemandeModal from '../forms/AssignerDemandeModal'
 import AssignerBAPModal from '../forms/AssignerBAPModal'
+import AssignerDemandesLotModal from '../forms/AssignerDemandesLotModal'
 import { useAuth } from '@/contexts/AuthContext'
 
 dayjs.locale('fr')
@@ -52,6 +52,7 @@ interface DemandesTableProps {
   onAddToDossier: (demande: Demande) => void
   onCreateDossierWithSelection?: (selectedDemandes: Demande[]) => void
   onLinkToExistingDossier?: (selectedDemandes: Demande[]) => void
+  onBulkAssignToUser?: (selectedDemandes: Demande[]) => void
   canDelete?: boolean
 }
 
@@ -669,7 +670,7 @@ function DateRangeFilter({ column }: { column: any }) {
   )
 }
 
-const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({ 
+const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   data,
   loading = false,
   onView,
@@ -678,6 +679,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
   onAddToDossier,
   onCreateDossierWithSelection,
   onLinkToExistingDossier,
+  onBulkAssignToUser,
   canDelete = true
 }, ref) => {
   const navigate = useNavigate()
@@ -707,13 +709,12 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
     unite: false,
     commune: false
   })
-  const [showAssignerModal, setShowAssignerModal] = useState(false)
+  const [showBAPModal, setShowBAPModal] = useState(false)
   const [selectedDemandeId, setSelectedDemandeId] = useState<string>('')
   const [selectedDemandeNumeroDS, setSelectedDemandeNumeroDS] = useState<string>('')
-  const [currentAssignee, setCurrentAssignee] = useState<any>(null)
-  const [showBAPModal, setShowBAPModal] = useState(false)
   const [currentBAP, setCurrentBAP] = useState<any>(null)
   const [selectedDemandes, setSelectedDemandes] = useState<Set<string>>(new Set())
+  const [showAssignerLotModal, setShowAssignerLotModal] = useState(false)
   const [contextMenu, setContextMenu] = useState<{
     show: boolean
     x: number
@@ -1095,10 +1096,8 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        setSelectedDemandeId(demande.id)
-                        setSelectedDemandeNumeroDS(demande.numeroDS)
-                        setCurrentAssignee(assigneA)
-                        setShowAssignerModal(true)
+                        setSelectedDemandes(new Set([demande.id]))
+                        setShowAssignerLotModal(true)
                       }}
                       className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
                     >
@@ -1114,10 +1113,8 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        setSelectedDemandeId(demande.id)
-                        setSelectedDemandeNumeroDS(demande.numeroDS)
-                        setCurrentAssignee(null)
-                        setShowAssignerModal(true)
+                        setSelectedDemandes(new Set([demande.id]))
+                        setShowAssignerLotModal(true)
                       }}
                       className="ml-2 text-sm text-blue-600 hover:text-blue-800 flex items-center"
                     >
@@ -1501,7 +1498,7 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
       />
 
       {/* Barre d'actions pour la sélection multiple */}
-      {selectedDemandes.size > 0 && (onCreateDossierWithSelection || onLinkToExistingDossier) && (
+      {selectedDemandes.size > 0 && (onCreateDossierWithSelection || onLinkToExistingDossier || onBulkAssignToUser) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -1522,6 +1519,15 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
               >
                 Désélectionner tout
               </button>
+              {onBulkAssignToUser && user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => setShowAssignerLotModal(true)}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <UserPlusIcon className="h-4 w-4" />
+                  <span>Attribuer à un rédacteur</span>
+                </button>
+              )}
               {onLinkToExistingDossier && (
                 <button
                   onClick={() => onLinkToExistingDossier(getSelectedDemandesData())}
@@ -1738,15 +1744,6 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         </div>
       </div>
       
-      {/* Modal pour assigner une demande */}
-      <AssignerDemandeModal
-        isOpen={showAssignerModal}
-        onClose={() => setShowAssignerModal(false)}
-        demandeId={selectedDemandeId}
-        demandeNumeroDS={selectedDemandeNumeroDS}
-        currentAssignee={currentAssignee}
-      />
-      
       {/* Modal pour assigner des BAP */}
       <AssignerBAPModal
         isOpen={showBAPModal}
@@ -1754,6 +1751,16 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         demandeId={selectedDemandeId}
         demandeNumeroDS={selectedDemandeNumeroDS}
         currentBAP={currentBAP}
+      />
+
+      {/* Modal pour assigner des demandes en lot */}
+      <AssignerDemandesLotModal
+        isOpen={showAssignerLotModal}
+        onClose={() => {
+          setShowAssignerLotModal(false)
+          setSelectedDemandes(new Set()) // Clear selection after assignment
+        }}
+        selectedDemandes={getSelectedDemandesData()}
       />
     </div>
   )

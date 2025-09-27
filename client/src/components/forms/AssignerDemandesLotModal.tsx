@@ -7,26 +7,23 @@ import {
   MagnifyingGlassIcon,
   UserIcon,
   CheckIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline'
-import { User } from '@/types'
+import { User, Demande } from '@/types'
 import api from '@/utils/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
-interface AssignerDemandeModalProps {
+interface AssignerDemandesLotModalProps {
   isOpen: boolean
   onClose: () => void
-  demandeId: string
-  demandeNumeroDS: string
-  currentAssignee?: User | null
+  selectedDemandes: Demande[]
 }
 
-const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
+const AssignerDemandesLotModal: React.FC<AssignerDemandesLotModalProps> = ({
   isOpen,
   onClose,
-  demandeId,
-  demandeNumeroDS,
-  currentAssignee
+  selectedDemandes
 }) => {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
@@ -41,7 +38,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
       if (searchTerm) {
         params.append('search', searchTerm)
       }
-      
+
       const response = await api.get(`/demandes/users`)
       return response.data
     },
@@ -53,7 +50,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
   const filteredUtilisateurs = utilisateurs.filter((user: User) => {
     // Exclure les utilisateurs désactivés (active = false)
     if (user.active === false) return false
-    
+
     if (!searchTerm) return true
     const fullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.toLowerCase()
     return fullName.includes(searchTerm.toLowerCase())
@@ -68,31 +65,29 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
     setSelectedUserId('')
   }, [])
 
-  // Mutation pour assigner la demande
-  const assignerDemandeMutation = useMutation({
-    mutationFn: async (assigneAId: string | null) => {
-      // Pour désassigner, l'API attend une chaîne vide, pas null
-      const assigneAIdValue = assigneAId === null ? '' : assigneAId
-      return api.put(`/demandes/${demandeId}`, { assigneAId: assigneAIdValue })
+  // Mutation pour assigner les demandes en lot
+  const assignerDemandesLotMutation = useMutation({
+    mutationFn: async (assigneAId: string) => {
+      // Assigner toutes les demandes sélectionnées en parallèle
+      const promises = selectedDemandes.map(demande =>
+        api.put(`/demandes/${demande.id}`, { assigneAId })
+      )
+      return Promise.all(promises)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
-      queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
-      
-      if (selectedUserId) {
-        const assignedUser = utilisateurs.find((u: User) => u.id === selectedUserId)
-        const userName = assignedUser ? `${assignedUser.grade ? `${assignedUser.grade} ` : ''}${assignedUser.prenom} ${assignedUser.nom}` : 'utilisateur'
-        toast.success(`Demande ${demandeNumeroDS} assignée à ${userName}`)
-      } else {
-        toast.success(`Assignation de la demande ${demandeNumeroDS} supprimée`)
-      }
-      
+
+      const assignedUser = utilisateurs.find((u: User) => u.id === selectedUserId)
+      const userName = assignedUser ? `${assignedUser.grade ? `${assignedUser.grade} ` : ''}${assignedUser.prenom} ${assignedUser.nom}` : 'utilisateur'
+
+      toast.success(`${selectedDemandes.length} demande${selectedDemandes.length > 1 ? 's' : ''} assignée${selectedDemandes.length > 1 ? 's' : ''} à ${userName}`)
+
       resetModal()
       onClose()
     },
     onError: (error: unknown) => {
-      const errorMessage = error && typeof error === 'object' && 'response' in error && 
+      const errorMessage = error && typeof error === 'object' && 'response' in error &&
         error.response && typeof error.response === 'object' && 'data' in error.response &&
         error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
         ? String(error.response.data.error)
@@ -101,19 +96,10 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
     }
   })
 
-  const handleAssignerDemande = async () => {
+  const handleAssignerDemandes = async () => {
     setIsAssigning(true)
     try {
-      await assignerDemandeMutation.mutateAsync(selectedUserId === '' ? null : selectedUserId)
-    } finally {
-      setIsAssigning(false)
-    }
-  }
-
-  const handleRemoveAssignment = async () => {
-    setIsAssigning(true)
-    try {
-      await assignerDemandeMutation.mutateAsync(null)
+      await assignerDemandesLotMutation.mutateAsync(selectedUserId)
     } finally {
       setIsAssigning(false)
     }
@@ -150,17 +136,26 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
-                      <UserPlusIcon className="h-6 w-6 mr-2 text-blue-600" />
-                      Assigner la demande {demandeNumeroDS}
+                      {selectedDemandes.length === 1 ? (
+                        <>
+                          <UserPlusIcon className="h-6 w-6 mr-2 text-purple-600" />
+                          Assigner la demande {selectedDemandes[0]?.numeroDS}
+                        </>
+                      ) : (
+                        <>
+                          <UsersIcon className="h-6 w-6 mr-2 text-purple-600" />
+                          Attribuer {selectedDemandes.length} demandes à un rédacteur
+                        </>
+                      )}
                     </Dialog.Title>
                     <p className="mt-1 text-sm text-gray-600">
-                      {currentAssignee 
-                        ? `Actuellement assignée à ${currentAssignee.grade ? `${currentAssignee.grade} ` : ''}${currentAssignee.prenom} ${currentAssignee.nom}`
-                        : 'Sélectionnez un utilisateur pour assigner cette demande'
+                      {selectedDemandes.length === 1
+                        ? 'Sélectionnez un utilisateur pour assigner cette demande'
+                        : 'Sélectionnez un utilisateur pour assigner toutes les demandes sélectionnées'
                       }
                     </p>
                   </div>
@@ -172,6 +167,23 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                   </button>
                 </div>
 
+                {/* Aperçu des demandes sélectionnées */}
+                {selectedDemandes.length > 1 && (
+                  <div className="mb-6 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Demandes sélectionnées :</h4>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {selectedDemandes.map((demande) => (
+                        <div key={demande.id} className="flex items-center justify-between text-sm">
+                          <span className="text-blue-600 font-medium">{demande.numeroDS}</span>
+                          <span className="text-gray-600">
+                            {demande.nom} {demande.prenom} - {demande.type === 'VICTIME' ? 'Victime' : 'Mis en cause'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Barre de recherche */}
                 <div className="mb-6">
                   <div className="relative">
@@ -181,7 +193,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Rechercher un utilisateur: nom, prénom, grade..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                   </div>
                 </div>
@@ -200,7 +212,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                     <div className="text-center py-12">
                       <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-500">
-                        {searchTerm 
+                        {searchTerm
                           ? 'Aucun utilisateur actif ne correspond à la recherche'
                           : 'Aucun utilisateur disponible'
                         }
@@ -214,10 +226,8 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                           <div
                             key={utilisateur.id}
                             className={`px-4 py-3 border rounded-lg cursor-pointer transition-colors ${
-                              currentAssignee?.id === utilisateur.id
-                                ? 'border-green-500 bg-green-50'
-                                : selectedUserId === utilisateur.id
-                                ? 'border-blue-500 bg-blue-50'
+                              selectedUserId === utilisateur.id
+                                ? 'border-purple-500 bg-purple-50'
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                             }`}
                             onClick={() => handleSelectUser(utilisateur.id)}
@@ -236,10 +246,8 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                                       <span className="text-gray-500">{utilisateur.role}</span>
                                     </div>
                                   </div>
-                                  {currentAssignee?.id === utilisateur.id && (
-                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                      Assigné actuellement
-                                    </span>
+                                  {selectedUserId === utilisateur.id && (
+                                    <CheckIcon className="h-5 w-5 text-purple-600" />
                                   )}
                                 </div>
                               </div>
@@ -252,20 +260,7 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-between pt-6 border-t border-gray-200">
-                  <div>
-                    {currentAssignee && (
-                      <button
-                        type="button"
-                        onClick={handleRemoveAssignment}
-                        className="btn-secondary text-red-600 hover:bg-red-50"
-                        disabled={isAssigning}
-                      >
-                        Supprimer l&apos;assignation
-                      </button>
-                    )}
-                  </div>
-                  
+                <div className="flex justify-end pt-6 border-t border-gray-200">
                   <div className="flex space-x-3">
                     <button
                       type="button"
@@ -277,19 +272,22 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={handleAssignerDemande}
-                      className="btn-primary flex items-center"
+                      onClick={handleAssignerDemandes}
+                      className="btn-primary bg-purple-600 hover:bg-purple-700 flex items-center"
                       disabled={selectedUserId === '' || isAssigning}
                     >
                       {isAssigning ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Assignation...
+                          Attribution en cours...
                         </>
                       ) : (
                         <>
-                          <CheckIcon className="h-4 w-4 mr-2" />
-                          Assigner
+                          <UserPlusIcon className="h-4 w-4 mr-2" />
+                          {selectedDemandes.length === 1
+                            ? 'Assigner la demande'
+                            : `Attribuer les ${selectedDemandes.length} demandes`
+                          }
                         </>
                       )}
                     </button>
@@ -304,4 +302,4 @@ const AssignerDemandeModal: React.FC<AssignerDemandeModalProps> = ({
   )
 }
 
-export default AssignerDemandeModal
+export default AssignerDemandesLotModal

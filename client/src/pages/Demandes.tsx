@@ -179,6 +179,12 @@ const Demandes: React.FC = () => {
     setIsLierMultiplesModalOpen(true)
   }
 
+  const handleBulkAssignToUser = (selectedDemandes: Demande[]) => {
+    // This function is called when bulk assignment is triggered
+    // The actual modal and logic is handled within DemandesTable component
+    console.log('Bulk assignment requested for', selectedDemandes.length, 'demandes')
+  }
+
   const handleSubmitDemande = async (data: any) => {
     if (selectedDemande) {
       await updateDemandeMutation.mutateAsync({ id: selectedDemande.id, data })
@@ -390,6 +396,7 @@ const Demandes: React.FC = () => {
         onAddToDossier={handleAddToDossier}
         onCreateDossierWithSelection={handleCreateDossierWithSelection}
         onLinkToExistingDossier={handleLinkToExistingDossier}
+        onBulkAssignToUser={handleBulkAssignToUser}
         canDelete={user ? ['ADMIN', 'GREFFIER'].includes(user.role) : false}
       />
 

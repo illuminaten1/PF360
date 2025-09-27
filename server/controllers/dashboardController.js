@@ -20,13 +20,9 @@ const getDashboardStats = async (req, res) => {
       }
     });
 
-    // Pour l'instant, données mockées pour Ma revue
-    const demandesSans2Mois = 3;
-
     const stats = {
       totalDossiers,
-      totalDemandes,
-      demandesSans2Mois
+      totalDemandes
     };
 
     res.json(stats);

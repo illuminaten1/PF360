@@ -14,7 +14,6 @@ import {
 interface DashboardStats {
   totalDossiers: number
   totalDemandes: number
-  demandesSans2Mois: number
 }
 
 const Dashboard: React.FC = () => {
@@ -56,7 +55,7 @@ const Dashboard: React.FC = () => {
     },
     {
       name: 'Ma revue',
-      value: stats?.demandesSans2Mois || 0,
+      value: 'Voir',
       icon: EyeIcon,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',

@@ -125,7 +125,12 @@ const Dashboard: React.FC = () => {
           <div
             key={card.name}
             className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6 cursor-pointer"
-            onClick={() => window.location.href = card.href}
+            onClick={() => {
+              if (card.name === 'Mes demandes') {
+                sessionStorage.setItem('demandes-apply-filter', 'mes-demandes')
+              }
+              window.location.href = card.href
+            }}
           >
             <div className="flex items-center">
               <div className={`p-3 rounded-lg ${card.bgColor}`}>

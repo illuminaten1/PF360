@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
@@ -258,7 +258,7 @@ const Demandes: React.FC = () => {
   const applyMyDemandesFilter = () => {
     if (tableRef.current && user) {
       const userFullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.trim()
-      
+
       tableRef.current.setColumnFilters([
         {
           id: 'assigneA',
@@ -267,6 +267,21 @@ const Demandes: React.FC = () => {
       ])
     }
   }
+
+  // Appliquer automatiquement le filtre "mes-demandes" si demandé via sessionStorage
+  useEffect(() => {
+    const filterToApply = sessionStorage.getItem('demandes-apply-filter')
+    if (filterToApply === 'mes-demandes' && tableRef.current && user) {
+      // Attendre que le composant soit entièrement monté
+      const timer = setTimeout(() => {
+        applyMyDemandesFilter()
+        // Nettoyer le sessionStorage après application
+        sessionStorage.removeItem('demandes-apply-filter')
+      }, 100)
+
+      return () => clearTimeout(timer)
+    }
+  }, [user, tableRef.current])
 
   return (
     <div className="p-6">

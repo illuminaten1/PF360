@@ -11,7 +11,6 @@ const {
 } = require('./statistics/administratives');
 
 const {
-  getRecentWeeklyStats,
   getFluxMensuels,
   getFluxHebdomadaires
 } = require('./statistics/flux');
@@ -39,7 +38,6 @@ const {
 
 // Re-export toutes les fonctions pour maintenir la compatibilité
 module.exports = {
-  getRecentWeeklyStats,
   getStatistiquesAdministratives,
   getStatistiquesBAP,
   getStatistiquesQualiteDemandeur,

@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getRecentWeeklyStats, getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees, getDepensesOrdonneesParSgami, getDepensesOrdonneesParPce, getDepensesOrdonneesParMois } = require('../controllers/statistiquesController');
+const { getStatistiquesAdministratives, getStatistiquesBAP, getStatistiquesQualiteDemandeur, getStatistiquesTypeInfraction, getStatistiquesContexteMissionnel, getStatistiquesFormationAdministrative, getStatistiquesBranche, getStatistiquesStatutDemandeur, getStatistiquesBadges, getFluxMensuels, getFluxHebdomadaires, getAutoControle, getExtractionMensuelle, getAnneesDisponibles, getStatistiquesReponseBRPF, getStatistiquesBudgetaires, getEngagementServicePayeur, getEngagementDepensesMensuelles, getDepensesOrdonnees, getDepensesOrdonneesParSgami, getDepensesOrdonneesParPce, getDepensesOrdonneesParMois } = require('../controllers/statistiquesController');
 const { authMiddleware } = require('../middleware/auth');
 
-// GET /api/statistiques/recent - Récupérer les dernières statistiques hebdomadaires
-router.get('/recent', authMiddleware, getRecentWeeklyStats);
 
 // GET /api/statistiques/administratives - Récupérer les statistiques administratives par année
 router.get('/administratives', authMiddleware, getStatistiquesAdministratives);

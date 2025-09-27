@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/utils/api'
 import CalendrierAudiences from '@/components/CalendrierAudiences'
-import EncartStatistiquesHebdomadaires from '@/components/EncartStatistiquesHebdomadaires'
 import {
   FolderIcon,
   DocumentTextIcon,
@@ -141,9 +140,8 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <CalendrierAudiences />
-        <EncartStatistiquesHebdomadaires />
       </div>
     </div>
   )

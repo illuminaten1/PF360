@@ -1,39 +1,47 @@
-const db = require('../config/database');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 const getDashboardStats = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Récupérer le nombre de dossiers de l'utilisateur
-    const [dossiersResult] = await db.query(`
-      SELECT COUNT(*) as total
-      FROM dossiers
-      WHERE createdBy = ? OR responsable_id = ?
-    `, [userId, userId]);
+    // Récupérer le nombre de dossiers assignés à l'utilisateur
+    const totalDossiers = await prisma.dossier.count({
+      where: {
+        assigneAId: userId
+      }
+    });
 
-    // Récupérer le nombre de demandes de l'utilisateur
-    const [demandesResult] = await db.query(`
-      SELECT COUNT(*) as total
-      FROM demandes
-      WHERE createdBy = ? OR responsable_id = ?
-    `, [userId, userId]);
+    // Récupérer le nombre de demandes assignées à l'utilisateur
+    const totalDemandes = await prisma.demande.count({
+      where: {
+        assigneAId: userId
+      }
+    });
 
-    // Récupérer le nombre de demandes en revue (sans décision depuis plus de 2 mois)
-    const [revueResult] = await db.query(`
-      SELECT COUNT(*) as total
-      FROM demandes d
-      WHERE (d.createdBy = ? OR d.responsable_id = ?)
-        AND d.statut != 'cloture'
-        AND (
-          d.date_decision IS NULL
-          OR d.date_decision < DATE_SUB(NOW(), INTERVAL 2 MONTH)
-        )
-    `, [userId, userId]);
+    // Récupérer le nombre de demandes en revue (assignées à l'utilisateur, sans décision depuis plus de 2 mois)
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    const demandesSans2Mois = await prisma.demande.count({
+      where: {
+        assigneAId: userId,
+        // Vérifier s'il y a des décisions récentes via les relations
+        decisions: {
+          none: {
+            createdAt: {
+              gte: twoMonthsAgo
+            }
+          }
+        }
+      }
+    });
 
     const stats = {
-      totalDossiers: dossiersResult[0]?.total || 0,
-      totalDemandes: demandesResult[0]?.total || 0,
-      demandesSans2Mois: revueResult[0]?.total || 0
+      totalDossiers,
+      totalDemandes,
+      demandesSans2Mois
     };
 
     res.json(stats);

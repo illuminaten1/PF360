@@ -829,11 +829,14 @@ const DossierDetail: React.FC = () => {
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <FolderIcon className="h-5 w-5 mr-2" />
-                  Demandes ({dossier.demandes.length})
-                </h2>
-                <button 
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <FolderIcon className="h-5 w-5 mr-2" />
+                    Demandes ({dossier.demandes.length})
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
+                </div>
+                <button
                   onClick={() => setIsLierDemandesModalOpen(true)}
                   className="btn-primary-outline flex items-center text-sm"
                 >
@@ -966,11 +969,14 @@ const DossierDetail: React.FC = () => {
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <ScaleIcon className="h-5 w-5 mr-2" />
-                  Décisions ({dossier.decisions.length})
-                </h2>
-                <button 
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <ScaleIcon className="h-5 w-5 mr-2" />
+                    Décisions ({dossier.decisions.length})
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
+                </div>
+                <button
                   onClick={handleGenerateDecision}
                   disabled={dossier.demandes.length === 0}
                   className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1070,11 +1076,14 @@ const DossierDetail: React.FC = () => {
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <DocumentTextIcon className="h-5 w-5 mr-2" />
-                  Conventions d&apos;honoraires ({dossier.conventions.length})
-                </h2>
-                <button 
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <DocumentTextIcon className="h-5 w-5 mr-2" />
+                    Conventions d&apos;honoraires ({dossier.conventions.length})
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
+                </div>
+                <button
                   onClick={handleCreateConvention}
                   disabled={dossier.decisions.length === 0}
                   className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1235,11 +1244,14 @@ const DossierDetail: React.FC = () => {
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <CurrencyEuroIcon className="h-5 w-5 mr-2" />
-                  Paiements ({dossier.paiements.length})
-                </h2>
-                <button 
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <CurrencyEuroIcon className="h-5 w-5 mr-2" />
+                    Paiements ({dossier.paiements.length})
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
+                </div>
+                <button
                   onClick={handleCreatePaiement}
                   className="btn-primary-outline flex items-center text-sm"
                 >

@@ -31,7 +31,6 @@ import api from '@/utils/api'
 import DossierModal from '@/components/forms/DossierModal'
 import LierDemandesModal from '@/components/forms/LierDemandesModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
-import DecisionViewModal from '@/components/forms/DecisionViewModal'
 import DecisionEditModal from '@/components/forms/DecisionEditModal'
 import GenerateDecisionModal from '@/components/forms/GenerateDecisionModal'
 import CreateConventionModal from '@/components/forms/CreateConventionModal'
@@ -53,7 +52,6 @@ const DossierDetail: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
   const [isDemandeViewModalOpen, setIsDemandeViewModalOpen] = useState(false)
-  const [isDecisionViewModalOpen, setIsDecisionViewModalOpen] = useState(false)
   const [isDecisionEditModalOpen, setIsDecisionEditModalOpen] = useState(false)
   const [isGenerateDecisionModalOpen, setIsGenerateDecisionModalOpen] = useState(false)
   const [isCreateConventionModalOpen, setIsCreateConventionModalOpen] = useState(false)
@@ -324,15 +322,7 @@ const DossierDetail: React.FC = () => {
     setSelectedDemande(null)
   }
 
-  const handleViewDecision = (decision: any) => {
-    setSelectedDecision(decision)
-    setIsDecisionViewModalOpen(true)
-  }
 
-  const handleCloseDecisionModal = () => {
-    setIsDecisionViewModalOpen(false)
-    setSelectedDecision(null)
-  }
 
   const handleEditDecision = (decision: any) => {
     setSelectedDecision(decision)
@@ -1056,12 +1046,6 @@ const DossierDetail: React.FC = () => {
                             >
                               Modifier
                             </button>
-                            <button 
-                              onClick={() => handleViewDecision(decision)}
-                              className="text-green-600 hover:text-green-800 text-sm"
-                            >
-                              Voir détails
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -1450,12 +1434,6 @@ const DossierDetail: React.FC = () => {
         demande={selectedDemande}
       />
 
-      {/* Decision View Modal */}
-      <DecisionViewModal
-        isOpen={isDecisionViewModalOpen}
-        onClose={handleCloseDecisionModal}
-        decision={selectedDecision}
-      />
 
       {/* Decision Edit Modal */}
       <DecisionEditModal

@@ -56,7 +56,6 @@ router.post('/', async (req, res) => {
   try {
     const {
       facture,
-      montantHT,
       montantTTC,
       emissionTitrePerception,
       qualiteBeneficiaire,
@@ -164,7 +163,6 @@ router.post('/', async (req, res) => {
         data: {
           numero: nextNumber,
           facture,
-          montantHT,
           montantTTC,
           emissionTitrePerception,
           qualiteBeneficiaire,
@@ -286,7 +284,6 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const {
       facture,
-      montantHT,
       montantTTC,
       emissionTitrePerception,
       qualiteBeneficiaire,
@@ -386,7 +383,6 @@ router.put('/:id', async (req, res) => {
         where: { id },
         data: {
           facture,
-          montantHT,
           montantTTC,
           emissionTitrePerception,
           qualiteBeneficiaire,

@@ -24,7 +24,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     facture: '',
-    montantHT: '',
     montantTTC: '',
     emissionTitrePerception: 'NON',
     qualiteBeneficiaire: 'Avocat',
@@ -158,7 +157,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
     if (isOpen && paiement) {
       setFormData({
         facture: paiement.facture || '',
-        montantHT: paiement.montantHT?.toString() || '',
         montantTTC: paiement.montantTTC.toString(),
         emissionTitrePerception: paiement.emissionTitrePerception,
         qualiteBeneficiaire: paiement.qualiteBeneficiaire,
@@ -186,7 +184,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
       // Reset form for new paiement
       setFormData({
         facture: '',
-        montantHT: '',
         montantTTC: '',
         emissionTitrePerception: 'NON',
         qualiteBeneficiaire: 'Avocat',
@@ -272,10 +269,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {}
 
-    if (formData.montantHT && (isNaN(Number(formData.montantHT)) || Number(formData.montantHT) <= 0)) {
-      newErrors.montantHT = 'Le montant HT doit être un nombre positif'
-    }
-
     if (!formData.montantTTC) {
       newErrors.montantTTC = 'Le montant TTC est obligatoire'
     } else if (isNaN(Number(formData.montantTTC)) || Number(formData.montantTTC) <= 0) {
@@ -315,7 +308,6 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
 
     const submitData: any = {
       ...formData,
-      montantHT: formData.montantHT ? Number(formData.montantHT) : null,
       montantTTC: Number(formData.montantTTC),
       dossierId,
       dateServiceFait: formData.dateServiceFait || null,
@@ -551,25 +543,7 @@ const PaiementModal: React.FC<PaiementModalProps> = ({
               {errors.pceId && <p className="text-red-500 text-xs mt-1">{errors.pceId}</p>}
             </div>
 
-            {/* Deuxième ligne: Montant HT - Montant TTC */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Montant HT (€)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                name="montantHT"
-                value={formData.montantHT}
-                onChange={handleChange}
-                placeholder="0.00"
-                className={`block w-full h-12 px-4 rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
-                  errors.montantHT ? 'border-red-300' : 'border-gray-200'
-                }`}
-              />
-              {errors.montantHT && <p className="text-red-500 text-xs mt-1">{errors.montantHT}</p>}
-            </div>
-
+            {/* Deuxième ligne: Montant TTC */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Montant TTC (€) *

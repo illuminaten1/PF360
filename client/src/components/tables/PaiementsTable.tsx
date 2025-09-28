@@ -183,23 +183,6 @@ const PaiementsTable: React.FC<PaiementsTableProps> = ({
         filterFn: 'includesString'
       },
       {
-        accessorKey: 'montantHT',
-        header: 'Montant HT',
-        cell: ({ getValue }) => {
-          const montant = getValue<number | null>()
-          return (
-            <div className="flex items-center text-sm">
-              <BanknotesIcon className="h-4 w-4 text-gray-400 mr-2" />
-              <span className="font-medium text-gray-900">
-                {montant ? `${montant.toLocaleString()} €` : 'N/A'}
-              </span>
-            </div>
-          )
-        },
-        enableColumnFilter: false,
-        sortingFn: 'basic'
-      },
-      {
         accessorKey: 'montantTTC',
         header: 'Montant TTC',
         cell: ({ getValue }) => {

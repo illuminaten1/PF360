@@ -484,16 +484,11 @@ const getDepensesOrdonnees = async (req, res) => {
         }
       },
       select: {
-        montantHT: true,
         montantTTC: true
       }
     });
 
     // 3. Calculer les montants totaux
-    const depenseTotaleHT = paiementsDeLAnnee
-      .filter(p => p.montantHT !== null && p.montantHT !== undefined)
-      .reduce((sum, p) => sum + p.montantHT, 0);
-
     const depenseTotaleTTC = paiementsDeLAnnee
       .filter(p => p.montantTTC !== null && p.montantTTC !== undefined)
       .reduce((sum, p) => sum + p.montantTTC, 0);
@@ -519,7 +514,6 @@ const getDepensesOrdonnees = async (req, res) => {
     const montantMoyenTTCParPaiement = nombrePaiementsEmis > 0 ? depenseTotaleTTC / nombrePaiementsEmis : 0;
 
     // Calcul des pourcentages par rapport au budget total
-    const pourcentageDepenseHT = budgetTotal > 0 ? (depenseTotaleHT / budgetTotal) * 100 : 0;
     const pourcentageDepenseTTC = budgetTotal > 0 ? (depenseTotaleTTC / budgetTotal) * 100 : 0;
 
     const statistiques = [
@@ -537,12 +531,6 @@ const getDepensesOrdonnees = async (req, res) => {
         libelle: "Montant moyen TTC par dossier",
         nombre: Math.round(montantMoyenTTCParDossier * 100) / 100,
         type: "currency"
-      },
-      {
-        libelle: "Dépense totale HT (indicatif)",
-        nombre: Math.round(depenseTotaleHT * 100) / 100,
-        pourcentage: Math.round(pourcentageDepenseHT * 100) / 100,
-        type: "currency_with_percentage"
       },
       {
         libelle: "Dépense totale TTC",

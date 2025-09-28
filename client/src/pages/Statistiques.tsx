@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout'
 import { Listbox } from '@headlessui/react'
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ExtractionMensuelleComponent from '@/components/statistiques/ExtractionMensuelleComponent'
+import CardHeader from '@/components/common/CardHeader'
 import { useStatistiquesQueries } from '@/components/statistiques/hooks/useStatistiquesQueries'
+import { createExportHandler } from '@/utils/panelExports'
 import { INITIAL_GRID_LAYOUTS, INITIAL_GRID_LAYOUTS_BUDGETAIRE } from '@/components/statistiques/config/gridLayouts'
 import { getPanelTitle, PANEL_ORDER_ADMINISTRATIF, PANEL_ORDER_BUDGETAIRE } from '@/components/statistiques/config/panelConfig'
 import { PanelKey } from '@/components/statistiques/types'
@@ -90,6 +92,16 @@ const Statistiques: React.FC = () => {
   const storageKey = activeTab === 'administratif' ? 'pf360-statistiques-grid-layouts-administratif' : 'pf360-statistiques-grid-layouts-budgetaire'
   const initialLayouts = activeTab === 'administratif' ? INITIAL_GRID_LAYOUTS : INITIAL_GRID_LAYOUTS_BUDGETAIRE
 
+  // Créer des refs pour tous les panels possibles
+  const panelRefs = useRef<{ [key: string]: React.RefObject<HTMLDivElement> }>({})
+
+  const getPanelRef = (panelId: string) => {
+    if (!panelRefs.current[panelId]) {
+      panelRefs.current[panelId] = React.createRef<HTMLDivElement>()
+    }
+    return panelRefs.current[panelId]
+  }
+
   // Use the custom hook for all queries
   const {
     statsAdministratives,
@@ -140,82 +152,236 @@ const Statistiques: React.FC = () => {
   const yearOptions = anneesDisponibles || [currentYear]
 
   const renderPanel = (id: PanelKey) => {
+    const panelRef = getPanelRef(id)
     let content
+    let enableScreenshot = false
+    let enableExcelExport = false
+    let hasData = true
+    let onExcelExport: (() => void) | undefined
+
     switch (id) {
       case 'general':
         content = <StatistiquesGeneralesPanel stats={statsAdministratives?.generales} />
+        enableScreenshot = true
+        hasData = !!statsAdministratives?.generales
         break
       case 'users':
         content = <StatistiquesUtilisateurPanel users={statsAdministratives?.utilisateurs} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsAdministratives?.utilisateurs?.length
+        onExcelExport = createExportHandler(
+          () => statsAdministratives?.utilisateurs || [],
+          'utilisateurs-statistiques'
+        )
         break
       case 'bap':
         content = <StatistiquesBAPPanel statsBAP={statsBAP} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsBAP?.length
+        onExcelExport = createExportHandler(
+          () => statsBAP || [],
+          'statistiques-bap'
+        )
         break
       case 'qualite':
         content = <QualiteDemandeurPanel statsQualite={statsQualite} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsQualite?.length
+        onExcelExport = createExportHandler(
+          () => statsQualite || [],
+          'qualite-demandeur'
+        )
         break
       case 'infractions':
         content = <TypeInfractionPanel statsInfractions={statsInfractions} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsInfractions?.length
+        onExcelExport = createExportHandler(
+          () => statsInfractions || [],
+          'type-infractions'
+        )
         break
       case 'contexte':
         content = <ContexteMissionnelPanel statsContexte={statsContexte} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsContexte?.length
+        onExcelExport = createExportHandler(
+          () => statsContexte || [],
+          'contexte-missionnel'
+        )
         break
       case 'formation':
         content = <FormationAdministrativePanel statsFormation={statsFormation} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsFormation?.length
+        onExcelExport = createExportHandler(
+          () => statsFormation || [],
+          'formation-administrative'
+        )
         break
       case 'branche':
         content = <BranchePanel statsBranche={statsBranche} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsBranche?.length
+        onExcelExport = createExportHandler(
+          () => statsBranche || [],
+          'statistiques-branche'
+        )
         break
       case 'statut':
         content = <StatutDemandeurPanel statsStatut={statsStatut} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsStatut?.length
+        onExcelExport = createExportHandler(
+          () => statsStatut || [],
+          'statut-demandeur'
+        )
         break
       case 'badges':
         content = <BadgesPanel statsBadges={statsBadges} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsBadges?.length
+        onExcelExport = createExportHandler(
+          () => statsBadges || [],
+          'statistiques-badges'
+        )
         break
       case 'reponseBrpf':
         content = <ReponseBRPFPanel statsReponseBRPF={statsReponseBRPF} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsReponseBRPF?.statistiques?.length
+        onExcelExport = createExportHandler(
+          () => statsReponseBRPF?.statistiques || [],
+          'reponse-brpf'
+        )
         break
       case 'autocontrole':
         content = <AutoControlePanel autoControle={autoControle} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!autoControle
+        onExcelExport = createExportHandler(
+          () => autoControle ? [autoControle] : [],
+          'auto-controle'
+        )
         break
       case 'fluxmensuels':
         content = <FluxMensuelsPanel fluxMensuels={fluxMensuels} selectedYear={selectedYear} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!fluxMensuels?.fluxMensuels?.length
+        onExcelExport = createExportHandler(
+          () => fluxMensuels?.fluxMensuels || [],
+          'flux-mensuels'
+        )
         break
       case 'fluxhebdo':
         content = <FluxHebdomadairesPanel fluxHebdomadaires={fluxHebdomadaires} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!fluxHebdomadaires?.fluxHebdomadaires?.length
+        onExcelExport = createExportHandler(
+          () => fluxHebdomadaires?.fluxHebdomadaires || [],
+          'flux-hebdomadaires'
+        )
         break
       case 'extraction':
         content = <ExtractionMensuelleComponent stats={extractionMensuelle} />
         break
       case 'budget':
         content = <BudgetPanel selectedYear={selectedYear} isAdmin={isAdmin} statsBudgetaires={statsBudgetaires} statsDepensesOrdonnees={statsDepensesOrdonnees} />
+        enableScreenshot = true
+        hasData = true
         break
       case 'statistiquesBudgetaires':
         content = <StatistiquesBudgetairesPanel statsBudgetaires={statsBudgetaires} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsBudgetaires?.statistiques?.length
+        onExcelExport = createExportHandler(
+          () => statsBudgetaires?.statistiques || [],
+          'statistiques-budgetaires'
+        )
         break
       case 'engagementServicePayeur':
         content = <EngagementServicePayeurPanel statsEngagements={statsEngagements} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsEngagements?.engagements?.length
+        onExcelExport = createExportHandler(
+          () => statsEngagements?.engagements || [],
+          'engagement-service-payeur'
+        )
         break
       case 'engagementDepensesMensuelles':
         content = <EngagementDepensesMensuellesPanel statsEngagementsMensuels={statsEngagementsMensuels} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsEngagementsMensuels?.engagementsMensuels?.length
+        onExcelExport = createExportHandler(
+          () => statsEngagementsMensuels?.engagementsMensuels || [],
+          'engagement-depenses-mensuelles'
+        )
         break
       case 'engagementDepensesGraphique':
         content = <EngagementDepensesGraphiquePanel statsEngagementsMensuels={statsEngagementsMensuels} />
+        enableScreenshot = true
+        hasData = !!statsEngagementsMensuels?.engagementsMensuels?.length
         break
       case 'depensesOrdonnees':
         content = <DepensesOrdonneesPanel statsDepensesOrdonnees={statsDepensesOrdonnees} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsDepensesOrdonnees?.statistiques?.length
+        onExcelExport = createExportHandler(
+          () => statsDepensesOrdonnees?.statistiques || [],
+          'depenses-ordonnees'
+        )
         break
       case 'depensesOrdonneesParSgami':
         content = <DepensesOrdonneesParSgamiPanel statsDepensesOrdonneesParSgami={statsDepensesOrdonneesParSgami} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsDepensesOrdonneesParSgami?.statistiques?.length
+        onExcelExport = createExportHandler(
+          () => statsDepensesOrdonneesParSgami?.statistiques || [],
+          'depenses-ordonnees-par-sgami'
+        )
         break
       case 'depensesOrdonneesParPce':
         content = <DepensesOrdonneesParPcePanel statsDepensesOrdonneesParPce={statsDepensesOrdonneesParPce} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsDepensesOrdonneesParPce?.statistiques?.length
+        onExcelExport = createExportHandler(
+          () => statsDepensesOrdonneesParPce?.statistiques || [],
+          'depenses-ordonnees-par-pce'
+        )
         break
       case 'depensesOrdonneesParMois':
         content = <DepensesOrdonneesParMoisPanel statsDepensesOrdonneesParMois={statsDepensesOrdonneesParMois} />
+        enableScreenshot = true
+        enableExcelExport = true
+        hasData = !!statsDepensesOrdonneesParMois?.statistiques?.length
+        onExcelExport = createExportHandler(
+          () => statsDepensesOrdonneesParMois?.statistiques || [],
+          'depenses-ordonnees-par-mois'
+        )
         break
       case 'depensesOrdonneesGraphique':
         content = <DepensesOrdonneesGraphiquePanel statsDepensesOrdonneesParMois={statsDepensesOrdonneesParMois} />
+        enableScreenshot = true
+        hasData = !!statsDepensesOrdonneesParMois?.statistiques?.length
         break
       case 'toutes-demandes':
         content = <DemandesTablePanel />
@@ -246,16 +412,16 @@ const Statistiques: React.FC = () => {
           ? 'border-l-4 border-l-orange-400 border-t-gray-200 border-r-gray-200 border-b-gray-200'
           : 'border-gray-200'
       }`}>
-        <div className={`px-4 py-3 border-b font-semibold text-sm ${
-          isEngagementPanel
-            ? 'border-green-200 bg-green-100 text-green-900'
-            : isDepensesOrdonneesPanel
-            ? 'border-orange-200 bg-orange-100 text-orange-900'
-            : 'border-gray-200 bg-gray-50 text-gray-900'
-        }`}>
-          {getPanelTitle(id)}
-        </div>
-        <div className="flex-1 overflow-hidden">
+        <CardHeader
+          title={getPanelTitle(id)}
+          enableScreenshot={enableScreenshot}
+          enableExcelExport={enableExcelExport}
+          hasData={hasData}
+          exportFileName={id}
+          targetRef={panelRef}
+          onExcelExport={onExcelExport}
+        />
+        <div ref={panelRef} className="flex-1 overflow-hidden">
           {content}
         </div>
       </div>

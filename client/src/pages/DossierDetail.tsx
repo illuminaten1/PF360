@@ -40,6 +40,7 @@ import PaiementModal from '@/components/forms/PaiementModal'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ConventionContextMenu from '@/components/common/ConventionContextMenu'
 import DecisionContextMenu from '@/components/common/DecisionContextMenu'
+import PaiementContextMenu from '@/components/common/PaiementContextMenu'
 
 dayjs.extend(relativeTime)
 dayjs.locale('fr')
@@ -78,6 +79,12 @@ const DossierDetail: React.FC = () => {
     y: number
     decision: any | null
   }>({ show: false, x: 0, y: 0, decision: null })
+  const [paiementContextMenu, setPaiementContextMenu] = useState<{
+    show: boolean
+    x: number
+    y: number
+    paiement: any | null
+  }>({ show: false, x: 0, y: 0, paiement: null })
 
   // Fetch dossier details
   const { data: dossier, isLoading, error } = useQuery<Dossier>({
@@ -410,54 +417,10 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitPaiement = async (data: any) => {
-    let paiementResult;
     if (selectedPaiement) {
-      paiementResult = await updatePaiementMutation.mutateAsync(data)
+      await updatePaiementMutation.mutateAsync(data)
     } else {
-      paiementResult = await createPaiementMutation.mutateAsync(data)
-    }
-    
-    // Générer automatiquement le document de paiement
-    try {
-      // Attendre un peu pour s'assurer que la transaction est bien commitée
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      const response = await api.post(`/generate-documents/fiche-paiement/${paiementResult.id}`, {}, {
-        responseType: 'blob'
-      })
-      
-      // Créer un lien pour télécharger le fichier
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      
-      // Extraire le nom du fichier depuis l'en-tête Content-Disposition
-      const contentDisposition = response.headers['content-disposition']
-      let fileName = `fiche-paiement-${paiementResult.numero || 'nouveau'}.odt`
-      
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="(.+)"/)
-        if (fileNameMatch) {
-          fileName = fileNameMatch[1]
-        }
-      }
-      
-      link.setAttribute('download', fileName)
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      
-      toast.success('Document de paiement généré avec succès')
-    } catch (error: any) {
-      console.error('Erreur lors de la génération du document:', error)
-      
-      // Erreur plus spécifique selon le code de statut
-      if (error.response?.status === 404) {
-        toast.error('Template de règlement non trouvé. Veuillez contacter l\'administrateur.')
-      } else {
-        toast.error('Erreur lors de la génération du document de paiement')
-      }
+      await createPaiementMutation.mutateAsync(data)
     }
   }
 
@@ -535,6 +498,22 @@ const DossierDetail: React.FC = () => {
     setDecisionContextMenu({ show: false, x: 0, y: 0, decision: null })
   }
 
+  // Paiement context menu handlers
+  const handlePaiementContextMenu = (e: React.MouseEvent, paiement: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setPaiementContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+      paiement
+    })
+  }
+
+  const closePaiementContextMenu = () => {
+    setPaiementContextMenu({ show: false, x: 0, y: 0, paiement: null })
+  }
+
   // Event listeners for context menu
   React.useEffect(() => {
     const handleClickOutside = () => {
@@ -543,6 +522,9 @@ const DossierDetail: React.FC = () => {
       }
       if (decisionContextMenu.show) {
         closeDecisionContextMenu()
+      }
+      if (paiementContextMenu.show) {
+        closePaiementContextMenu()
       }
     }
 
@@ -554,6 +536,9 @@ const DossierDetail: React.FC = () => {
         if (decisionContextMenu.show) {
           closeDecisionContextMenu()
         }
+        if (paiementContextMenu.show) {
+          closePaiementContextMenu()
+        }
       }
     }
 
@@ -564,7 +549,7 @@ const DossierDetail: React.FC = () => {
       document.removeEventListener('click', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [contextMenu.show, decisionContextMenu.show])
+  }, [contextMenu.show, decisionContextMenu.show, paiementContextMenu.show])
 
   if (isLoading) {
     return (
@@ -661,6 +646,16 @@ const DossierDetail: React.FC = () => {
         decision={decisionContextMenu.decision}
         dossier={dossier}
         onClose={closeDecisionContextMenu}
+      />
+
+      {/* Menu contextuel pour paiements */}
+      <PaiementContextMenu
+        show={paiementContextMenu.show}
+        x={paiementContextMenu.x}
+        y={paiementContextMenu.y}
+        paiement={paiementContextMenu.paiement}
+        dossier={dossier}
+        onClose={closePaiementContextMenu}
       />
       {/* Header */}
       <div className="mb-8">
@@ -1259,7 +1254,11 @@ const DossierDetail: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {dossier.paiements.map((paiement) => (
-                      <div key={paiement.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div
+                        key={paiement.id}
+                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                        onContextMenu={(e) => handlePaiementContextMenu(e, paiement)}
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             {/* Ligne principale - Numéro et montant */}

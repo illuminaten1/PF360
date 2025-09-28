@@ -92,7 +92,7 @@ const DepensesOrdonneesParPcePanel: React.FC<DepensesOrdonneesParPcePanelProps> 
                   <td className={`px-2 py-2 text-sm align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
-                    <div className="truncate" title={stat.libelle}>
+                    <div className="break-words hyphens-auto" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                       {stat.libelle}
                     </div>
                   </td>

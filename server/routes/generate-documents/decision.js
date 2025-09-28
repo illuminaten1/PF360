@@ -300,7 +300,6 @@ router.post('/decision/:decisionId', async (req, res) => {
       paiements: decision.paiements.map(pd => ({
         numero: pd.paiement.numero,
         facture: pd.paiement.facture,
-        montantHT: pd.paiement.montantHT,
         montantTTC: pd.paiement.montantTTC,
         qualiteBeneficiaire: pd.paiement.qualiteBeneficiaire,
         identiteBeneficiaire: pd.paiement.identiteBeneficiaire

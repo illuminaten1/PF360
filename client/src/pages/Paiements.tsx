@@ -77,7 +77,6 @@ const Paiements: React.FC = () => {
     const autresIntervenantCount = paiements.filter(p => p.qualiteBeneficiaire !== 'Avocat').length
     const emissionTitreCount = paiements.filter(p => p.emissionTitrePerception === 'OUI').length
     const conventionJointeCount = paiements.filter(p => p.conventionJointeFRI === 'OUI').length
-    const totalMontantHT = paiements.reduce((sum, p) => sum + (p.montantHT || 0), 0)
     const totalMontantTTC = paiements.reduce((sum, p) => sum + p.montantTTC, 0)
 
     return {
@@ -86,7 +85,6 @@ const Paiements: React.FC = () => {
       autresIntervenantCount,
       emissionTitreCount,
       conventionJointeCount,
-      totalMontantHT,
       totalMontantTTC
     }
   }
@@ -152,10 +150,6 @@ const Paiements: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-2xl font-bold text-amber-600">{stats.conventionJointeCount}</div>
             <div className="text-sm text-gray-600">Convention jointe</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-green-600">{stats.totalMontantHT.toLocaleString()} €</div>
-            <div className="text-sm text-gray-600">Total HT</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-2xl font-bold text-purple-600">{stats.totalMontantTTC.toLocaleString()} €</div>

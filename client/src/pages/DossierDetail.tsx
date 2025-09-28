@@ -1266,9 +1266,6 @@ const DossierDetail: React.FC = () => {
                               <span className="font-medium text-gray-900">
                                 {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
                               </span>
-                              <span className="text-sm text-gray-500">
-                                ({(paiement.montantHT || 0).toLocaleString('fr-FR')} € HT)
-                              </span>
                             </div>
 
                             {/* Bénéficiaire */}

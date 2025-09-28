@@ -116,7 +116,6 @@ Placez ce fichier dans templates/decision-template.odt
 ===== PAIEMENTS ASSOCIÉS =====
 {d.paiements[0].numero} - Numéro du paiement
 {d.paiements[0].facture} - Numéro de facture
-{d.paiements[0].montantHT} - Montant HT
 {d.paiements[0].montantTTC} - Montant TTC
 {d.paiements[0].qualiteBeneficiaire} - Qualité du bénéficiaire
 {d.paiements[0].identiteBeneficiaire} - Identité du bénéficiaire

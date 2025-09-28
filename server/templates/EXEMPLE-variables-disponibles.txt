@@ -4,8 +4,7 @@ Placez ce fichier dans templates/fiche-paiement-template.docx
 
 ===== VARIABLES PAIEMENT =====
 {d.paiement.numero} - Numéro du paiement
-{d.paiement.facture} - Numéro de facture  
-{d.paiement.montantHT} - Montant HT
+{d.paiement.facture} - Numéro de facture
 {d.paiement.montantTTC} - Montant TTC
 {d.paiement.emissionTitrePerception} - OUI | NON
 {d.paiement.qualiteBeneficiaire} - Avocat | Commissaire de justice | etc.

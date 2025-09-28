@@ -192,7 +192,7 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
                     />
                   </div>
                 ) : (
-                  <div className="text-4xl sm:text-5xl font-semibold text-blue-600 mb-1">
+                  <div className="text-4xl sm:text-5xl font-semibold text-gray-900 mb-1">
                     {budget ? formatCurrency(budget.budgetBase) : '0 €'}
                   </div>
                 )}
@@ -220,7 +220,7 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
                     />
                   </div>
                 ) : (
-                  <div className="text-4xl sm:text-5xl font-semibold text-green-600 mb-1">
+                  <div className="text-4xl sm:text-5xl font-semibold text-gray-900 mb-1">
                     {budget ? formatCurrency(budget.abondements) : '0 €'}
                   </div>
                 )}
@@ -287,7 +287,7 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
                 <div className="text-4xl sm:text-5xl font-semibold text-green-600 mb-1">
                   {formatCurrency(getMontantGageTotal())}
                 </div>
-                <div className="text-xs text-gray-600 leading-tight">
+                <div className="text-sm text-gray-600">
                   Montant gagé HT
                 </div>
               </div>
@@ -297,7 +297,7 @@ const BudgetPanel: React.FC<BudgetPanelProps> = ({ selectedYear, isAdmin, statsB
                 <div className="text-4xl sm:text-5xl font-semibold text-orange-600 mb-1">
                   {formatCurrency(getMontantOrdonneTotal())}
                 </div>
-                <div className="text-xs text-gray-600 leading-tight">
+                <div className="text-sm text-gray-600">
                   Montant ordonné TTC
                 </div>
               </div>

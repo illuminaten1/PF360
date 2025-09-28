@@ -67,8 +67,8 @@ const FluxHebdomadairesPanel: React.FC<FluxHebdomairesPanelProps> = ({ fluxHebdo
                     {flux.sortantsAnnee}
                   </td>
                   <td className={`px-2 py-2 text-center text-sm font-medium align-middle ${
-                    flux.difference > 0 ? 'text-green-600' : 
-                    flux.difference < 0 ? 'text-red-600' : 'text-gray-900'
+                    flux.difference > 0 ? 'text-red-600' :
+                    flux.difference < 0 ? 'text-green-600' : 'text-gray-900'
                   }`}>
                     {flux.difference > 0 ? '+' : ''}{flux.difference}
                   </td>

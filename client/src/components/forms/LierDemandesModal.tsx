@@ -189,8 +189,8 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1 pr-4">
                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
                       <LinkIcon className="h-6 w-6 mr-2 text-blue-600" />
                       Lier des demandes au dossier {dossierNumero}
@@ -213,7 +213,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                   </div>
                   <button
                     onClick={handleClose}
-                    className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
+                    className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
                   >
                     <XMarkIcon className="h-5 w-5" />
                   </button>

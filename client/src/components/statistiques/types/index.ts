@@ -263,13 +263,10 @@ export interface DepensesOrdonneesParPceData {
 export interface DepenseOrdonneeMois {
   mois: string
   annee: number
-  montantHTPaiements: number
+  montantTTCPaiements: number
   montantTTCDossiers: number
-  cumulHT?: number
   cumulTTC?: number
-  pourcentageCumulHT?: number
   pourcentageCumulTTC?: number
-  pourcentageHT?: number
   pourcentageTTC?: number
   bold?: boolean
   isTotal?: boolean

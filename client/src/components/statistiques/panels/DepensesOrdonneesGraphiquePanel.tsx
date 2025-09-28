@@ -4,13 +4,10 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 interface DepenseOrdonneeMois {
   mois: string
   annee: number
-  montantHTPaiements: number
+  montantTTCPaiements: number
   montantTTCDossiers: number
-  cumulHT?: number
   cumulTTC?: number
-  pourcentageHT?: number
   pourcentageTTC?: number
-  pourcentageCumulHT?: number
   pourcentageCumulTTC?: number
   bold?: boolean
   isTotal?: boolean
@@ -71,20 +68,17 @@ const DepensesOrdonneesGraphiquePanel: React.FC<DepensesOrdonneesGraphiquePanelP
     if (viewMode === 'pourcentage') {
       return filteredData.map(dep => ({
         mois: formatMoisLabel(dep.mois),
-        montantHT: dep.pourcentageCumulHT || 0,
         montantTTC: dep.pourcentageCumulTTC || 0
       }))
     } else if (viewMode === 'cumule') {
       return filteredData.map(dep => ({
         mois: formatMoisLabel(dep.mois),
-        montantHT: dep.cumulHT || 0,
         montantTTC: dep.cumulTTC || 0
       }))
     } else {
       return filteredData.map(dep => ({
         mois: formatMoisLabel(dep.mois),
-        montantHT: dep.montantHTPaiements,
-        montantTTC: dep.montantTTCDossiers
+        montantTTC: dep.montantTTCPaiements
       }))
     }
   })()
@@ -120,14 +114,9 @@ const DepensesOrdonneesGraphiquePanel: React.FC<DepensesOrdonneesGraphiquePanelP
               <Legend 
                 wrapperStyle={{ paddingTop: '20px' }}
               />
-              <Bar 
-                dataKey="montantHT" 
-                fill="#2563eb" 
-                name="Dépenses ordonnées HT"
-              />
-              <Bar 
-                dataKey="montantTTC" 
-                fill="#dc2626" 
+              <Bar
+                dataKey="montantTTC"
+                fill="#dc2626"
                 name="Dépenses ordonnées TTC"
               />
             </BarChart>
@@ -158,27 +147,15 @@ const DepensesOrdonneesGraphiquePanel: React.FC<DepensesOrdonneesGraphiquePanelP
               <Legend 
                 wrapperStyle={{ paddingTop: '20px' }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="montantHT" 
-                stroke="#2563eb" 
-                strokeWidth={3}
-                dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
-                name={
-                  viewMode === 'pourcentage' 
-                    ? 'HT (% du budget annuel)' 
-                    : 'Cumul HT'
-                }
-              />
-              <Line 
-                type="monotone" 
-                dataKey="montantTTC" 
-                stroke="#dc2626" 
+              <Line
+                type="monotone"
+                dataKey="montantTTC"
+                stroke="#dc2626"
                 strokeWidth={3}
                 dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
                 name={
-                  viewMode === 'pourcentage' 
-                    ? 'TTC en % du budget annuel' 
+                  viewMode === 'pourcentage'
+                    ? 'TTC en % du budget annuel'
                     : 'Cumul TTC'
                 }
               />

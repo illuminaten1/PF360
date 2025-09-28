@@ -30,18 +30,6 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
     return `${nomMois} ${stat.annee}`
   }
 
-  const formatValueWithPercentageHT = (amount: number, percentage?: number) => {
-    const formattedCurrency = formatCurrency(amount)
-    if (percentage !== undefined) {
-      return (
-        <div className="text-xs">
-          <div>{formattedCurrency} HT</div>
-          <div className="text-xs text-gray-500">({percentage.toFixed(1)}% du budget)</div>
-        </div>
-      )
-    }
-    return <div className="text-xs">{formattedCurrency} HT</div>
-  }
 
   const formatValueWithPercentageTTC = (amount: number, percentage?: number) => {
     const formattedCurrency = formatCurrency(amount)
@@ -79,12 +67,6 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
                 Mois
               </th>
               <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Payé HT (indicatif)
-              </th>
-              <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Cumul HT (indicatif)
-              </th>
-              <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                 Payé TTC
               </th>
               <th className="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
@@ -112,20 +94,10 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
                   }`}>
                     {formatMoisLabel(stat)}
                   </td>
-                  <td className={`px-2 py-2 text-center text-sm align-middle ${
-                    isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
-                  }`}>
-                    {formatValueWithPercentageHT(stat.montantHTPaiements, stat.pourcentageHT)}
-                  </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
                   }`}>
-                    {stat.cumulHT !== undefined ? formatCumulWithPercentage(stat.cumulHT, stat.pourcentageCumulHT, 'HT') : <div className="text-xs">-</div>}
-                  </td>
-                  <td className={`px-1 py-2 text-center text-xs align-middle ${
-                    isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
-                  }`}>
-                    {formatValueWithPercentageTTC(stat.montantTTCDossiers, stat.pourcentageTTC)}
+                    {formatValueWithPercentageTTC(stat.montantTTCPaiements, stat.pourcentageTTC)}
                   </td>
                   <td className={`px-1 py-2 text-center text-xs align-middle ${
                     isTotalLine ? 'font-bold text-orange-900' : stat.bold ? 'font-bold text-gray-900' : 'font-medium text-gray-900'
@@ -137,7 +109,7 @@ const DepensesOrdonneesParMoisPanel: React.FC<DepensesOrdonneesParMoisPanelProps
               })
             ) : (
               <tr style={{ height: '100%' }}>
-                <td colSpan={5} className="px-3 py-4 text-center text-xs text-gray-500 align-middle">
+                <td colSpan={3} className="px-3 py-4 text-center text-xs text-gray-500 align-middle">
                   Aucune donnée disponible
                 </td>
               </tr>

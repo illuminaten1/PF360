@@ -811,12 +811,12 @@ const getDepensesOrdonneesParMois = async (req, res) => {
       statsParMois[mois] = {
         mois: mois.toString().padStart(2, '0'),
         annee: year,
-        montantHTPaiements: 0,
+        montantTTCPaiements: 0,
         montantTTCDossiers: 0
       };
     }
 
-    // 1. Récupérer les paiements émis chaque mois (montant HT)
+    // 1. Récupérer les paiements émis chaque mois (montant TTC)
     const paiementsParMois = await prisma.paiement.findMany({
       where: {
         createdAt: {
@@ -826,7 +826,7 @@ const getDepensesOrdonneesParMois = async (req, res) => {
       },
       select: {
         createdAt: true,
-        montantHT: true
+        montantTTC: true
       }
     });
 
@@ -834,7 +834,7 @@ const getDepensesOrdonneesParMois = async (req, res) => {
     paiementsParMois.forEach(paiement => {
       const mois = paiement.createdAt.getMonth() + 1; // getMonth() retourne 0-11
       if (statsParMois[mois]) {
-        statsParMois[mois].montantHTPaiements += paiement.montantHT || 0;
+        statsParMois[mois].montantTTCPaiements += paiement.montantTTC || 0;
       }
     });
 
@@ -870,39 +870,30 @@ const getDepensesOrdonneesParMois = async (req, res) => {
     let statistiques = Object.values(statsParMois);
 
     // Calculer les cumuls
-    let cumulHT = 0;
     let cumulTTC = 0;
 
     statistiques = statistiques.map(stat => {
-      cumulHT += stat.montantHTPaiements;
-      cumulTTC += stat.montantTTCDossiers;
+      cumulTTC += stat.montantTTCPaiements;
 
       return {
         ...stat,
-        cumulHT: cumulHT,
         cumulTTC: cumulTTC,
-        pourcentageCumulHT: budgetTotal > 0 ? (cumulHT / budgetTotal) * 100 : 0,
         pourcentageCumulTTC: budgetTotal > 0 ? (cumulTTC / budgetTotal) * 100 : 0,
-        pourcentageHT: budgetTotal > 0 ? (stat.montantHTPaiements / budgetTotal) * 100 : 0,
-        pourcentageTTC: budgetTotal > 0 ? (stat.montantTTCDossiers / budgetTotal) * 100 : 0
+        pourcentageTTC: budgetTotal > 0 ? (stat.montantTTCPaiements / budgetTotal) * 100 : 0
       };
     });
 
     // Calculer les totaux
-    const totalMontantHT = sumByProperty(statistiques, 'montantHTPaiements');
-    const totalMontantTTC = sumByProperty(statistiques, 'montantTTCDossiers');
+    const totalMontantTTC = sumByProperty(statistiques, 'montantTTCPaiements');
 
     // Ajouter la ligne de total
     statistiques.push({
       mois: 'Total',
       annee: year,
-      montantHTPaiements: totalMontantHT,
+      montantTTCPaiements: totalMontantTTC,
       montantTTCDossiers: totalMontantTTC,
-      cumulHT: totalMontantHT,
       cumulTTC: totalMontantTTC,
-      pourcentageCumulHT: budgetTotal > 0 ? (totalMontantHT / budgetTotal) * 100 : 0,
       pourcentageCumulTTC: budgetTotal > 0 ? (totalMontantTTC / budgetTotal) * 100 : 0,
-      pourcentageHT: budgetTotal > 0 ? (totalMontantHT / budgetTotal) * 100 : 0,
       pourcentageTTC: budgetTotal > 0 ? (totalMontantTTC / budgetTotal) * 100 : 0,
       isTotal: true,
       bold: true

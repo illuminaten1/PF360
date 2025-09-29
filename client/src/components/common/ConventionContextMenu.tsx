@@ -1,6 +1,7 @@
 import React from 'react'
 import { EnvelopeIcon, PaperAirplaneIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+import { showHighAmountConventionToast } from '@/utils/toasts'
 import api from '@/utils/api'
 
 interface Convention {
@@ -230,6 +231,11 @@ Respectueusement,`
       window.URL.revokeObjectURL(url)
 
       toast.success(`Document ${convention.type === 'AVENANT' ? 'd\'avenant' : 'de convention'} généré avec succès`)
+
+      // Toast supplémentaire pour les conventions > 3000€ HT
+      if (convention.montantHT > 2999) {
+        showHighAmountConventionToast()
+      }
     } catch (error: unknown) {
       console.error('Erreur lors de la génération du document:', error)
 

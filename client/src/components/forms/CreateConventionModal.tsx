@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, DocumentTextIcon, ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
+import { showHighAmountConventionToast } from '@/utils/toasts'
 
 const createConventionSchema = z.object({
   type: z.enum(['CONVENTION', 'AVENANT'], {
@@ -149,7 +150,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
     try {
       // Use the selected demande IDs from the form
       const demandeIds = data.demandeIds
-      
+
       const cleanedData = {
         type: data.type,
         victimeOuMisEnCause: data.victimeOuMisEnCause,
@@ -163,8 +164,14 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
         diligences: data.diligenceId ? [data.diligenceId] : [],
         decisions: data.decisionIds
       }
-      
+
       await onSubmit(cleanedData)
+
+      // Toast supplémentaire pour les conventions > 3000€ HT
+      if (data.montantHT > 2999) {
+        showHighAmountConventionToast()
+      }
+
       onClose()
     } catch (error) {
       console.error('Erreur lors de la création:', error)
@@ -225,7 +232,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
     if (filteredDemandeIds.length !== selectedDemandeIds.length) {
       setValue('demandeIds', filteredDemandeIds)
     }
-  }, [selectedDecisionIds, setValue, availableDemandeurs])
+  }, [selectedDecisionIds, setValue, availableDemandeurs, selectedDemandeIds])
 
   // Clear montantHTGagePrecedemment when switching to CONVENTION
   React.useEffect(() => {
@@ -357,7 +364,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
                     <DocumentTextIcon className="h-6 w-6 mr-2 text-blue-600" />
-                    Créer une convention d'honoraires - Dossier {dossier.numero}
+                    Créer une convention d&apos;honoraires - Dossier {dossier.numero}
                   </Dialog.Title>
                   <button
                     type="button"
@@ -912,7 +919,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                         <div className="h-full overflow-y-auto">
                           {availableDemandeurs.length === 0 ? (
                             <p className="text-gray-500 text-sm text-center py-4">
-                              Sélectionnez d'abord une ou plusieurs décisions
+                              Sélectionnez d&apos;abord une ou plusieurs décisions
                             </p>
                           ) : (
                             <div className="space-y-2">

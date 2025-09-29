@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { XMarkIcon, DocumentTextIcon, ChevronUpDownIcon, CheckIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
+import { showHighAmountConventionToast } from '@/utils/toasts'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
 
@@ -211,8 +212,14 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
         diligences: data.diligenceId ? [data.diligenceId] : [],
         decisions: data.decisionIds
       }
-      
+
       await onSubmit(cleanedData)
+
+      // Toast supplémentaire pour les conventions > 3000€ HT
+      if (data.montantHT > 2999) {
+        showHighAmountConventionToast()
+      }
+
       onClose()
     } catch (error) {
       console.error('Erreur lors de la modification:', error)
@@ -273,7 +280,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
     if (filteredDemandeIds.length !== selectedDemandeIds.length) {
       setValue('demandeIds', filteredDemandeIds)
     }
-  }, [selectedDecisionIds, setValue, availableDemandeurs])
+  }, [selectedDecisionIds, setValue, availableDemandeurs, selectedDemandeIds])
 
   const getVictimeMecLabel = (type: string) => {
     switch (type) {

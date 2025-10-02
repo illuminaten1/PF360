@@ -1,5 +1,5 @@
 import React from 'react'
-import { EnvelopeIcon, PaperAirplaneIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline'
+import { EnvelopeIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { showHighAmountConventionToast } from '@/utils/toasts'
 import api from '@/utils/api'
@@ -266,7 +266,7 @@ Respectueusement,`
         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
       >
         <DocumentArrowDownIcon className="h-4 w-4" />
-        <span>Générer le document</span>
+        <span>Générer le document en ODT</span>
       </button>
 
       <button
@@ -274,8 +274,8 @@ Respectueusement,`
         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
         disabled={!convention.avocat?.email}
       >
-        <PaperAirplaneIcon className="h-4 w-4" />
-        <span>Générer mail de proposition dossier</span>
+        <EnvelopeIcon className="h-4 w-4" />
+        <span>Générer le mail de proposition du dossier</span>
       </button>
 
       <button
@@ -284,7 +284,7 @@ Respectueusement,`
         disabled={!convention.avocat?.email}
       >
         <EnvelopeIcon className="h-4 w-4" />
-        <span>Envoyer convention par email</span>
+        <span>Envoyer la convention ou l&apos;avenant par email</span>
       </button>
 
       <button
@@ -293,7 +293,7 @@ Respectueusement,`
         disabled={!convention.avocat?.email}
       >
         <EnvelopeIcon className="h-4 w-4" />
-        <span>Envoyer relance par email</span>
+        <span>Envoyer une relance de signature par email</span>
       </button>
 
       {!convention.avocat?.email && (

@@ -11,7 +11,7 @@ const SGAMIPage: React.FC = () => {
       config={{
         entityName: "sgami",
         entityDisplayName: "SGAMI",
-        entityPluralName: "sgami",
+        entityPluralName: "organismes payeurs",
         apiEndpoint: "/sgami",
         icon: BuildingOfficeIcon,
         hasStats: true

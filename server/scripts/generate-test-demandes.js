@@ -622,7 +622,11 @@ async function main() {
   // Récupérer les données nécessaires
   const badges = await prisma.badge.findMany()
   const users = await prisma.user.findMany({ where: { active: true } })
-  const sgamis = await prisma.sgami.findMany()
+  const sgamis = await prisma.sgami.findMany({
+    where: {
+      nom: { not: 'SGAMI EST CONSIGNATION' }
+    }
+  })
   const grades = await prisma.grade.findMany({ orderBy: { ordre: 'asc' } })
   const baps = await prisma.bAP.findMany()
   

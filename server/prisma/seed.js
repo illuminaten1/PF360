@@ -32,7 +32,7 @@ async function main() {
     { nom: 'SGAMI SUD-OUEST', formatCourtNommage: 'SO' },
     { nom: 'SGAMI SUD-EST', formatCourtNommage: 'SE' },
     { nom: 'SGAMI ILE-DE-FRANCE', formatCourtNommage: 'IDF' },
-    { nom: 'SGAMI EST', formatCourtNommage: 'EST-CONSIGNATION' },
+    { nom: 'SGAMI EST CONSIGNATION', formatCourtNommage: 'EST-CONSIGNATION' },
     { nom: 'SGAMI EST', formatCourtNommage: 'EST' },
     { nom: 'SGAMI SUD', formatCourtNommage: 'SUD' },
     { nom: 'SATPN NOUVELLE-CALEDONIE', formatCourtNommage: 'NC' },

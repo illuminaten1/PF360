@@ -171,7 +171,7 @@ const Avocats: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Annuaire des avocats</h1>
             <p className="mt-1 text-sm text-gray-600">
-              Gestion de l'annuaire des avocats partenaires
+              Gestion de l'annuaire des avocats
             </p>
           </div>
           <div className="flex items-center space-x-4">

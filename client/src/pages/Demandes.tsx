@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
@@ -261,7 +261,7 @@ const Demandes: React.FC = () => {
     }
   }
 
-  const applyMyDemandesFilter = () => {
+  const applyMyDemandesFilter = useCallback(() => {
     if (tableRef.current && user) {
       const userFullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.trim()
 
@@ -272,7 +272,7 @@ const Demandes: React.FC = () => {
         }
       ])
     }
-  }
+  }, [user])
 
   // Appliquer automatiquement le filtre "mes-demandes" si demandé via sessionStorage
   useEffect(() => {
@@ -287,7 +287,7 @@ const Demandes: React.FC = () => {
 
       return () => clearTimeout(timer)
     }
-  }, [user, tableRef.current])
+  }, [user, applyMyDemandesFilter])
 
   return (
     <div className="p-6">
@@ -296,7 +296,7 @@ const Demandes: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Demandes</h1>
             <p className="mt-1 text-sm text-gray-600">
-              Gestion des demandes d'aide juridique
+              Gestion des demandes
             </p>
           </div>
           <button
@@ -350,7 +350,7 @@ const Demandes: React.FC = () => {
               
               {/* Statistiques actuelles */}
               <div className="flex-1">
-                <div className="text-sm font-medium text-gray-700 mb-3">Aujourd'hui</div>
+                <div className="text-sm font-medium text-gray-700 mb-3">Aujourd&apos;hui</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div 
                     className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-green-200"

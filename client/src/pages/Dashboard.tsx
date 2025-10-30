@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
               Bienvenue, {user?.grade && `${user.grade} `}{user?.prenom} {user?.nom}
             </h1>
             <p className="mt-1 text-sm text-gray-600">
-              Vue d'ensemble de l'activité PF360
+              Vue d'ensemble de l'activité
             </p>
           </div>
           <div className="text-right">

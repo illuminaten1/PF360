@@ -103,7 +103,7 @@ const Dossiers: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dossiers</h1>
             <p className="mt-1 text-sm text-gray-600">
-              Gestion des dossiers d'aide juridique
+              Gestion des dossiers
             </p>
           </div>
           <button

@@ -312,6 +312,24 @@ const DemandesTablePanel: React.FC = () => {
     }
   })
 
+  // State et ref pour le dropdown des colonnes
+  const [isColumnsDropdownOpen, setIsColumnsDropdownOpen] = useState(false)
+  const columnsDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Fermer le dropdown des colonnes quand on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (columnsDropdownRef.current && !columnsDropdownRef.current.contains(event.target as Node)) {
+        setIsColumnsDropdownOpen(false)
+      }
+    }
+
+    if (isColumnsDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isColumnsDropdownOpen])
+
   const { data: demandes = [], isLoading, error } = useQuery({
     queryKey: ['all-demandes'],
     queryFn: fetchAllDemandes,
@@ -973,13 +991,10 @@ const DemandesTablePanel: React.FC = () => {
           )}
 
           {/* Dropdown visibilité des colonnes */}
-          <div className="relative">
+          <div className="relative" ref={columnsDropdownRef}>
             <button
               className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              onClick={() => {
-                const dropdown = document.getElementById('columns-dropdown')
-                dropdown?.classList.toggle('hidden')
-              }}
+              onClick={() => setIsColumnsDropdownOpen(!isColumnsDropdownOpen)}
             >
               <EyeIcon className="h-4 w-4 mr-2" />
               Colonnes
@@ -988,7 +1003,7 @@ const DemandesTablePanel: React.FC = () => {
 
             <div
               id="columns-dropdown"
-              className="hidden absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+              className={`${isColumnsDropdownOpen ? '' : 'hidden'} absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5`}
             >
               <div className="py-1 max-h-60 overflow-y-auto">
                 {table.getAllLeafColumns().map((column) => {

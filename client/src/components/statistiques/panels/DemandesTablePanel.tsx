@@ -335,9 +335,9 @@ const DemandesTablePanel: React.FC = () => {
     queryFn: fetchAllDemandes,
   })
 
-  const handleViewDossier = (dossierId: string) => {
+  const handleViewDossier = useCallback((dossierId: string) => {
     navigate(`/dossiers/${dossierId}`)
-  }
+  }, [navigate])
 
   const handleExportExcel = async () => {
     if (demandes.length === 0) return
@@ -917,7 +917,7 @@ const DemandesTablePanel: React.FC = () => {
         },
       },
     ],
-    []
+    [handleViewDossier, multiSelectFilter]
   )
 
   const table = useReactTable({

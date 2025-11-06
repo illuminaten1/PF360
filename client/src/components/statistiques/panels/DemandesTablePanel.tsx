@@ -384,10 +384,10 @@ const DemandesTablePanel: React.FC = () => {
   // Fonction de filtre personnalisée pour les multi-sélections
   const multiSelectFilter = useCallback((row: any, columnId: string, filterValue: string[]) => {
     if (!filterValue || filterValue.length === 0) return true
-    
+
     const demande = row.original
     let cellValue: string
-    
+
     // Gestion spéciale pour les colonnes complexes
     if (columnId === 'assigneA') {
       const assigneA = demande.assigneA
@@ -417,6 +417,13 @@ const DemandesTablePanel: React.FC = () => {
       cellValue = String(row.getValue(columnId) || '')
       return filterValue.includes(cellValue)
     }
+  }, [])
+
+  // Fonction de filtre pour recherche "commence par" (pour code postal, etc.)
+  const startsWithFilter = useCallback((row: any, columnId: string, filterValue: string) => {
+    if (!filterValue) return true
+    const cellValue = String(row.getValue(columnId) || '')
+    return cellValue.toLowerCase().startsWith(filterValue.toLowerCase())
   }, [])
 
   // Extraction des valeurs uniques pour les filtres déroulants
@@ -545,6 +552,7 @@ const DemandesTablePanel: React.FC = () => {
       {
         accessorKey: 'codePostal',
         header: 'Code postal',
+        filterFn: startsWithFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
@@ -917,7 +925,7 @@ const DemandesTablePanel: React.FC = () => {
         },
       },
     ],
-    [handleViewDossier, multiSelectFilter]
+    [handleViewDossier, multiSelectFilter, startsWithFilter]
   )
 
   const table = useReactTable({

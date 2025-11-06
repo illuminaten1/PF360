@@ -544,14 +544,14 @@ const DemandesTablePanel: React.FC = () => {
       },
       {
         accessorKey: 'commune',
-        header: 'Commune',
+        header: 'Commune faits',
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
         ),
       },
       {
         accessorKey: 'codePostal',
-        header: 'Code postal',
+        header: 'Code postal faits',
         filterFn: startsWithFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>
@@ -566,7 +566,7 @@ const DemandesTablePanel: React.FC = () => {
       },
       {
         accessorKey: 'departement',
-        header: 'Département',
+        header: 'Département affectation',
         filterFn: multiSelectFilter,
         cell: ({ getValue }) => (
           <span className="text-sm">{getValue() as string}</span>

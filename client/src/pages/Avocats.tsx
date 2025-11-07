@@ -167,14 +167,14 @@ const Avocats: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Annuaire des avocats</h1>
             <p className="mt-1 text-sm text-gray-600">
               Gestion de l'annuaire des avocats
             </p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <label className="flex items-center">
               <input
                 type="checkbox"
@@ -186,7 +186,7 @@ const Avocats: React.FC = () => {
             </label>
             <button
               onClick={handleCreateAvocat}
-              className="btn-primary flex items-center"
+              className="btn-primary flex items-center w-full sm:w-auto justify-center"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
               Ajouter un avocat

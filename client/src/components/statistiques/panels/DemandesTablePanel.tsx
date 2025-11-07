@@ -971,13 +971,13 @@ const DemandesTablePanel: React.FC = () => {
 
   return (
     <div className="p-6 space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-lg font-semibold text-gray-900">
           Toutes les demandes ({demandes.length})
         </h2>
-        
+
         {/* Recherche globale et actions */}
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <input
             type="text"
             placeholder="Rechercher..."
@@ -990,7 +990,7 @@ const DemandesTablePanel: React.FC = () => {
           {demandes.length > 0 && (
             <button
               onClick={handleExportExcel}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               title="Exporter vers Excel (colonnes visibles et filtres appliqués)"
             >
               <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
@@ -1001,7 +1001,7 @@ const DemandesTablePanel: React.FC = () => {
           {/* Dropdown visibilité des colonnes */}
           <div className="relative" ref={columnsDropdownRef}>
             <button
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               onClick={() => setIsColumnsDropdownOpen(!isColumnsDropdownOpen)}
             >
               <EyeIcon className="h-4 w-4 mr-2" />

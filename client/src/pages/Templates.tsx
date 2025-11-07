@@ -258,41 +258,41 @@ const TemplatesPage: React.FC = () => {
           const templateType = key as keyof TemplatesConfig
           return (
             <div key={key} className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                <div className="flex-1">
                   <h3 className="text-lg font-medium text-gray-900">{template.name}</h3>
                   <p className="text-sm text-gray-500 mt-1">{template.filename}</p>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  template.status === 'custom' 
-                    ? 'bg-green-100 text-green-800' 
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium self-start ${
+                  template.status === 'custom'
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-blue-100 text-blue-800'
                 }`}>
                   {template.status === 'custom' ? 'Personnalisé' : 'Par défaut'}
                 </span>
               </div>
-              
-              <div className="flex flex-wrap gap-2">
+
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 <button
                   onClick={() => handleDownloadTemplate(templateType)}
                   disabled={isLoadingActions}
-                  className="btn-secondary flex items-center text-sm"
+                  className="btn-secondary flex items-center justify-center text-sm"
                   title="Télécharger le template actuel"
                 >
                   <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
                   Télécharger
                 </button>
-                
+
                 <button
                   onClick={() => triggerFileInput(templateType)}
                   disabled={isLoadingActions}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center justify-center text-sm transition-colors disabled:opacity-50"
                   title="Uploader un template personnalisé"
                 >
                   <ArrowUpTrayIcon className="h-4 w-4 mr-1" />
                   Uploader
                 </button>
-                
+
                 <input
                   type="file"
                   ref={inputRefs[templateType]}
@@ -300,22 +300,22 @@ const TemplatesPage: React.FC = () => {
                   accept=".odt"
                   onChange={(e) => handleUploadTemplate(e, templateType)}
                 />
-                
+
                 <button
                   onClick={() => openVersionHistory(templateType)}
                   disabled={isLoadingActions}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg flex items-center justify-center text-sm transition-colors disabled:opacity-50"
                   title="Voir l'historique des versions"
                 >
                   <ClockIcon className="h-4 w-4 mr-1" />
                   Historique
                 </button>
-                
+
                 {template.status === 'custom' && (
                   <button
                     onClick={() => openRestoreConfirmation(templateType)}
                     disabled={isLoadingActions}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm transition-colors disabled:opacity-50"
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg flex items-center justify-center text-sm transition-colors disabled:opacity-50"
                     title="Restaurer le template par défaut"
                   >
                     <ArrowPathIcon className="h-4 w-4 mr-1" />

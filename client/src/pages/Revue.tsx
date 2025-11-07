@@ -195,8 +195,8 @@ const Revue: React.FC = () => {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+        <div className="border-b border-gray-200 overflow-x-auto">
+          <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max px-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

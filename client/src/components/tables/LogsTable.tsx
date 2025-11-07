@@ -328,15 +328,15 @@ const LogsTable: React.FC<LogsTableProps> = ({
       </div>
 
       {pagination && pagination.pages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t bg-white rounded-b-lg">
-          <div className="text-sm text-gray-700">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t bg-white rounded-b-lg">
+          <div className="text-sm text-gray-700 text-center sm:text-left">
             Page {pagination.page} sur {pagination.pages}
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center justify-center sm:justify-end space-x-1 overflow-x-auto">
             <button
               onClick={() => handlePageChange(1)}
               disabled={pagination.page === 1}
-              className="flex items-center px-2 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hidden sm:flex items-center px-2 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Première page"
             >
               ««
@@ -346,8 +346,8 @@ const LogsTable: React.FC<LogsTableProps> = ({
               disabled={pagination.page === 1}
               className="flex items-center px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeftIcon className="w-4 h-4 mr-1" />
-              Précédent
+              <ChevronLeftIcon className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Précédent</span>
             </button>
 
             {/* Pages numériques */}
@@ -376,13 +376,13 @@ const LogsTable: React.FC<LogsTableProps> = ({
               disabled={pagination.page === pagination.pages}
               className="flex items-center px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Suivant
-              <ChevronRightIcon className="w-4 h-4 ml-1" />
+              <span className="hidden sm:inline">Suivant</span>
+              <ChevronRightIcon className="w-4 h-4 sm:ml-1" />
             </button>
             <button
               onClick={() => handlePageChange(pagination.pages)}
               disabled={pagination.page === pagination.pages}
-              className="flex items-center px-2 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hidden sm:flex items-center px-2 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Dernière page"
             >
               »»

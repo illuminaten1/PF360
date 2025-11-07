@@ -112,7 +112,7 @@ const MainLayout: React.FC = () => {
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <nav className="flex-1 px-4 py-4 space-y-1">
+          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto min-h-0">
             {navigation.map((item) => (
               <Link
                 key={item.name}

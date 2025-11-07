@@ -330,7 +330,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('dateReception')}
                           type="date"
-                          className="input w-full"
+                          className="input w-full max-w-[160px] sm:max-w-none"
                           disabled={isSubmitting}
                         />
                       </div>
@@ -764,7 +764,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('dateFaits')}
                           type="date"
-                          className="input w-full"
+                          className="input w-full max-w-[160px] sm:max-w-none"
                           disabled={isSubmitting}
                         />
                       </div>
@@ -900,7 +900,7 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
                         <input
                           {...register('dateAudience')}
                           type="date"
-                          className="input w-full"
+                          className="input w-full max-w-[160px] sm:max-w-none"
                           disabled={isSubmitting}
                         />
                       </div>

@@ -262,7 +262,7 @@ function ManagementPage<T extends { id: string }>({
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
             <Icon className="w-7 h-7 mr-3 text-blue-600" />
@@ -277,12 +277,12 @@ function ManagementPage<T extends { id: string }>({
             {config.entityName === 'visa' && 'Modifiez le texte des visas CIVIL et MILITAIRE'}
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           {customButtons}
           {config.hasCreate !== false && (
             <button
               onClick={handleCreate}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
               <span>Nouveau {config.entityDisplayName.toLowerCase()}</span>

@@ -152,7 +152,7 @@ const Users: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
             <UserGroupIcon className="w-7 h-7 mr-3 text-blue-600" />
@@ -160,24 +160,24 @@ const Users: React.FC = () => {
           </h1>
           <p className="text-gray-600 mt-1">Gérez les comptes utilisateurs et leurs permissions</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <button
             onClick={() => setIsHistoryModalOpen(true)}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
           >
             <ClockIcon className="w-5 h-5" />
             <span>Historique transferts</span>
           </button>
           <button
             onClick={() => setIsTransferModalOpen(true)}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
           >
             <ArrowPathIcon className="w-5 h-5" />
             <span>Transférer assignations</span>
           </button>
           <button
             onClick={handleCreateUser}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
           >
             <PlusIcon className="w-5 h-5" />
             <span>Nouvel utilisateur</span>

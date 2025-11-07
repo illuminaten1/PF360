@@ -9,36 +9,12 @@ import PaiementsTable from '@/components/tables/PaiementsTable'
 const Paiements: React.FC = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [selectedDossier, setSelectedDossier] = useState<string>('')
-  const [selectedSgami, setSelectedSgami] = useState<string>('')
 
   // Fetch all paiements
   const { data: paiements = [], isLoading } = useQuery<Paiement[]>({
-    queryKey: ['paiements-all', selectedDossier, selectedSgami],
+    queryKey: ['paiements-all'],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (selectedDossier) params.append('dossierId', selectedDossier)
-      if (selectedSgami) params.append('sgamiId', selectedSgami)
-      
-      const response = await api.get(`/paiements${params.toString() ? `?${params.toString()}` : ''}`)
-      return response.data
-    }
-  })
-
-  // Fetch dossiers for filter
-  const { data: dossiers = [] } = useQuery({
-    queryKey: ['dossiers'],
-    queryFn: async () => {
-      const response = await api.get('/dossiers')
-      return response.data
-    }
-  })
-
-  // Fetch SGAMIS for filter
-  const { data: sgamis = [] } = useQuery({
-    queryKey: ['sgamis'],
-    queryFn: async () => {
-      const response = await api.get('/sgami')
+      const response = await api.get('/paiements')
       return response.data
     }
   })
@@ -94,39 +70,11 @@ const Paiements: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Paiements</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Gestion des paiements et fiches de règlement
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <select
-              value={selectedSgami}
-              onChange={(e) => setSelectedSgami(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-            >
-              <option value="">Tous les SGAMIS</option>
-              {sgamis.map((sgami: any) => (
-                <option key={sgami.id} value={sgami.id}>
-                  {sgami.nom}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedDossier}
-              onChange={(e) => setSelectedDossier(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-            >
-              <option value="">Tous les dossiers</option>
-              {dossiers.map((dossier: any) => (
-                <option key={dossier.id} value={dossier.id}>
-                  Dossier {dossier.numero} {dossier.nomDossier && `- ${dossier.nomDossier}`}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Paiements</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Gestion des paiements et fiches de règlement
+          </p>
         </div>
 
         {/* Stats */}

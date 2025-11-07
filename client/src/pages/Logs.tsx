@@ -216,7 +216,7 @@ const Logs: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div className="flex items-center space-x-3">
             <DocumentTextIcon className="w-8 h-8 text-primary-600" />
             <div>
@@ -227,11 +227,11 @@ const Logs: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex space-x-3">
+          <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
             <button
               onClick={() => handleExport('csv')}
               disabled={isLoading}
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <DocumentArrowDownIcon className="w-4 h-4 mr-2" />
               CSV
@@ -240,7 +240,7 @@ const Logs: React.FC = () => {
             <button
               onClick={() => handleExport('excel')}
               disabled={isLoading}
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <DocumentArrowDownIcon className="w-4 h-4 mr-2" />
               Excel
@@ -249,37 +249,57 @@ const Logs: React.FC = () => {
             <button
               onClick={handleDeleteAll}
               disabled={deleteAllDemandesMutation.isPending}
-              className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 isConfirmingDelete
                   ? 'bg-red-600 text-white hover:bg-red-700'
                   : 'bg-red-100 text-red-700 hover:bg-red-200'
               } ${deleteAllDemandesMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <TrashIcon className="w-4 h-4 mr-2" />
-              {deleteAllDemandesMutation.isPending
-                ? 'Suppression...'
-                : isConfirmingDelete
-                ? 'Confirmer suppression'
-                : 'Supprimer toutes les demandes'
-              }
+              <span className="hidden sm:inline">
+                {deleteAllDemandesMutation.isPending
+                  ? 'Suppression...'
+                  : isConfirmingDelete
+                  ? 'Confirmer suppression'
+                  : 'Supprimer toutes les demandes'
+                }
+              </span>
+              <span className="sm:hidden">
+                {deleteAllDemandesMutation.isPending
+                  ? 'Suppression...'
+                  : isConfirmingDelete
+                  ? 'Confirmer'
+                  : 'Supprimer tout'
+                }
+              </span>
             </button>
 
             <button
               onClick={handleGenerateTest}
               disabled={generateTestDemandesMutation.isPending}
-              className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 isConfirmingGenerate
                   ? 'bg-green-600 text-white hover:bg-green-700'
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
               } ${generateTestDemandesMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <BeakerIcon className="w-4 h-4 mr-2" />
-              {generateTestDemandesMutation.isPending
-                ? 'Génération...'
-                : isConfirmingGenerate
-                ? 'Confirmer génération'
-                : 'Générer demandes de test'
-              }
+              <span className="hidden sm:inline">
+                {generateTestDemandesMutation.isPending
+                  ? 'Génération...'
+                  : isConfirmingGenerate
+                  ? 'Confirmer génération'
+                  : 'Générer demandes de test'
+                }
+              </span>
+              <span className="sm:hidden">
+                {generateTestDemandesMutation.isPending
+                  ? 'Génération...'
+                  : isConfirmingGenerate
+                  ? 'Confirmer'
+                  : 'Générer test'
+                }
+              </span>
             </button>
           </div>
         </div>

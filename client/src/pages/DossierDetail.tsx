@@ -1005,14 +1005,15 @@ const DossierDetail: React.FC = () => {
                         className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
                         onContextMenu={(e) => handleDecisionContextMenu(e, decision)}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-4 mb-2">
+                        <div className="flex flex-col gap-2">
+                          {/* Ligne 1: Type et bouton */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2 flex-1">
                               <h3 className="font-semibold text-gray-900">
                                 {getTypeLabel(decision.type)}
                               </h3>
                               {decision.demandes && decision.demandes.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
+                                <>
                                   {decision.demandes.slice(0, 2).map((d, index) => (
                                     <span key={`demande-${decision.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                       {d.demande.prenom} {d.demande.nom}
@@ -1023,31 +1024,31 @@ const DossierDetail: React.FC = () => {
                                       +{decision.demandes.length - 2}
                                     </span>
                                   )}
-                                </div>
+                                </>
                               )}
                             </div>
-                            <div className="text-sm text-gray-600 space-y-1">
-                              {(decision as any).dateSignature && (
-                                <div>Signée le: {dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}</div>
-                              )}
-                              {(decision as any).dateEnvoi && (
-                                <div>Envoyée le: {dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}</div>
-                              )}
-                              {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
-                                <div>Date: {dayjs((decision as any).date).format('DD/MM/YYYY')}</div>
-                              )}
-                              {decision.creePar && (
-                                <div>Créée par: {decision.creePar.prenom} {decision.creePar.nom}</div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button 
+                            <button
                               onClick={() => handleEditDecision(decision)}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
+                              className="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0"
                             >
                               Modifier
                             </button>
+                          </div>
+
+                          {/* Ligne 2: Dates et créateur */}
+                          <div className="text-sm text-gray-600 space-y-1">
+                            {(decision as any).dateSignature && (
+                              <div>Signée le: {dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}</div>
+                            )}
+                            {(decision as any).dateEnvoi && (
+                              <div>Envoyée le: {dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}</div>
+                            )}
+                            {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
+                              <div>Date: {dayjs((decision as any).date).format('DD/MM/YYYY')}</div>
+                            )}
+                            {decision.creePar && (
+                              <div>Créée par: {decision.creePar.prenom} {decision.creePar.nom}</div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1125,97 +1126,98 @@ const DossierDetail: React.FC = () => {
                         className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
                         onContextMenu={(e) => handleContextMenu(e, convention)}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-4 mb-2">
+                        <div className="flex flex-col gap-2">
+                          {/* Ligne 1: Titre, badges et bouton */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2 flex-1">
                               <h3 className="font-semibold text-gray-900">
                                 Convention n°{convention.numero}
                               </h3>
-                              <div className="flex items-center gap-2">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadge(convention.type)}`}>
-                                  {convention.type}
-                                </span>
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(convention.victimeOuMisEnCause)}`}>
-                                  {getVictimeMecLabel(convention.victimeOuMisEnCause)}
-                                </span>
-                              </div>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadge(convention.type)}`}>
+                                {convention.type}
+                              </span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(convention.victimeOuMisEnCause)}`}>
+                                {getVictimeMecLabel(convention.victimeOuMisEnCause)}
+                              </span>
                             </div>
-                            <div className="text-sm text-gray-900 mb-2">
-                              <strong>{convention.avocat.prenom} {convention.avocat.nom}</strong>
-                            </div>
-                            <div className="text-sm text-gray-600 space-y-1">
-                              <div className="flex items-center gap-4">
-                                <span>Montant HT: <strong>{convention.montantHT.toLocaleString('fr-FR')} €</strong></span>
-                                {convention.montantHTGagePrecedemment && (
-                                  <span>Montant gagé préc.: {convention.montantHTGagePrecedemment.toLocaleString('fr-FR')} €</span>
-                                )}
-                              </div>
-                              {convention.instance && (
-                                <div>Instance: {convention.instance}</div>
-                              )}
-                              <div className="flex items-center gap-4">
-                                <span>Créée le: {dayjs(convention.dateCreation).format('DD/MM/YYYY')}</span>
-                                {convention.dateRetourSigne ? (
-                                  <span className="flex items-center text-green-600">
-                                    <CheckCircleIcon className="h-4 w-4 mr-1" />
-                                    Signée le {dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}
-                                  </span>
-                                ) : (
-                                  <span className="flex items-center text-orange-600">
-                                    <ClockIcon className="h-4 w-4 mr-1" />
-                                    En attente de signature
-                                  </span>
-                                )}
-                              </div>
-                              {convention.demandes && convention.demandes.length > 0 && (
-                                <div className="mt-2">
-                                  <span className="text-xs text-gray-500">Demandeurs: </span>
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {convention.demandes.slice(0, 3).map((d, index) => (
-                                      <span key={`demande-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {d.demande.prenom} {d.demande.nom}
-                                      </span>
-                                    ))}
-                                    {convention.demandes.length > 3 && (
-                                      <span key={`more-demandes-${convention.id}`} className="text-xs text-gray-500">
-                                        +{convention.demandes.length - 3} autre(s)
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              {convention.diligences && convention.diligences.length > 0 && (
-                                <div className="mt-2">
-                                  <span className="text-xs text-gray-500">Diligences: </span>
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {convention.diligences.slice(0, 2).map((d, index) => (
-                                      <span key={`diligence-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                        {d.diligence.nom}
-                                      </span>
-                                    ))}
-                                    {convention.diligences.length > 2 && (
-                                      <span key={`more-diligences-${convention.id}`} className="text-xs text-gray-500">
-                                        +{convention.diligences.length - 2} autre(s)
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              {convention.creePar && (
-                                <div className="text-xs">
-                                  Créée par: {(convention.creePar as any).grade && `${(convention.creePar as any).grade} `}
-                                  {convention.creePar.prenom} {convention.creePar.nom}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button 
+                            <button
                               onClick={() => handleEditConvention(convention)}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
+                              className="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0"
                             >
                               Modifier
                             </button>
+                          </div>
+
+                          {/* Ligne 2: Avocat */}
+                          <div className="text-sm text-gray-900">
+                            <strong>{convention.avocat.prenom} {convention.avocat.nom}</strong>
+                          </div>
+
+                          {/* Ligne 3: Informations détaillées */}
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span>Montant HT: <strong>{convention.montantHT.toLocaleString('fr-FR')} €</strong></span>
+                              {convention.montantHTGagePrecedemment && (
+                                <span>• Montant gagé préc.: {convention.montantHTGagePrecedemment.toLocaleString('fr-FR')} €</span>
+                              )}
+                            </div>
+                            {convention.instance && (
+                              <div>Instance: {convention.instance}</div>
+                            )}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span>Créée le: {dayjs(convention.dateCreation).format('DD/MM/YYYY')}</span>
+                              {convention.dateRetourSigne ? (
+                                <span className="flex items-center text-green-600">
+                                  • <CheckCircleIcon className="h-4 w-4 mx-1" />
+                                  Signée le {dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}
+                                </span>
+                              ) : (
+                                <span className="flex items-center text-orange-600">
+                                  • <ClockIcon className="h-4 w-4 mx-1" />
+                                  En attente de signature
+                                </span>
+                              )}
+                            </div>
+                            {convention.demandes && convention.demandes.length > 0 && (
+                              <div className="mt-2">
+                                <span className="text-xs text-gray-500">Demandeurs: </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {convention.demandes.slice(0, 3).map((d, index) => (
+                                    <span key={`demande-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      {d.demande.prenom} {d.demande.nom}
+                                    </span>
+                                  ))}
+                                  {convention.demandes.length > 3 && (
+                                    <span key={`more-demandes-${convention.id}`} className="text-xs text-gray-500">
+                                      +{convention.demandes.length - 3} autre(s)
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {convention.diligences && convention.diligences.length > 0 && (
+                              <div className="mt-2">
+                                <span className="text-xs text-gray-500">Diligences: </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {convention.diligences.slice(0, 2).map((d, index) => (
+                                    <span key={`diligence-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                      {d.diligence.nom}
+                                    </span>
+                                  ))}
+                                  {convention.diligences.length > 2 && (
+                                    <span key={`more-diligences-${convention.id}`} className="text-xs text-gray-500">
+                                      +{convention.diligences.length - 2} autre(s)
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {convention.creePar && (
+                              <div className="text-xs">
+                                Créée par: {(convention.creePar as any).grade && `${(convention.creePar as any).grade} `}
+                                {convention.creePar.prenom} {convention.creePar.nom}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1257,10 +1259,10 @@ const DossierDetail: React.FC = () => {
                         className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
                         onContextMenu={(e) => handlePaiementContextMenu(e, paiement)}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            {/* Ligne principale - Numéro et montant */}
-                            <div className="flex items-baseline gap-3 mb-2">
+                        <div className="flex flex-col gap-2">
+                          {/* Ligne 1: Numéro, montant et boutons */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex flex-wrap items-baseline gap-2 flex-1">
                               <span className="font-medium text-gray-900">
                                 FRI {(paiement as any).numero}
                               </span>
@@ -1269,66 +1271,64 @@ const DossierDetail: React.FC = () => {
                                 {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
                               </span>
                             </div>
-
-                            {/* Bénéficiaire */}
-                            <div className="text-sm text-gray-900 mb-3">
-                              <span className="font-medium">Bénéficiaire :</span>
-                              <span className="ml-1">
-                                {(paiement as any).identiteBeneficiaire || 'Bénéficiaire non renseigné'}
-                              </span>
-                              {(paiement as any).qualiteBeneficiaire && (
-                                <span className="ml-2 text-gray-600">
-                                  ({(paiement as any).qualiteBeneficiaire})
-                                </span>
-                              )}
-                            </div>
-
-                            {/* PCE */}
-                            {(paiement as any).pce && (
-                              <div className="text-sm text-gray-900 mb-3">
-                                <span className="font-medium">PCE :</span>
-                                <span className="ml-1">
-                                  {(paiement as any).pce.pceDetaille} - {(paiement as any).pce.pceNumerique}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Informations administratives */}
-                            <div className="text-sm text-gray-900 space-y-1">
-                              {/* SGAMI et Facture */}
-                              <div className="flex items-center gap-4">
-                                {(paiement as any).sgami && (
-                                  <span><span className="font-medium">Org. payeur :</span> {(paiement as any).sgami.nom}</span>
-                                )}
-                                {paiement.facture && (
-                                  <span><span className="font-medium">Facture :</span> {paiement.facture}</span>
-                                )}
-                              </div>
-
-
-                              {/* Métadonnées */}
-                              {paiement.creePar && (
-                                <div className="text-xs text-gray-500 mt-2">
-                                  Créé par: {(paiement.creePar as any).grade && `${(paiement.creePar as any).grade} `}
-                                  {paiement.creePar.prenom} {paiement.creePar.nom}
-                                </div>
-                              )}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <button
+                                onClick={() => handleEditPaiement(paiement)}
+                                className="text-blue-600 hover:text-blue-800 text-sm"
+                              >
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() => handleDeletePaiement(paiement)}
+                                disabled={deletePaiementMutation.isPending}
+                                className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                              >
+                                Supprimer
+                              </button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleEditPaiement(paiement)}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                              Modifier
-                            </button>
-                            <button
-                              onClick={() => handleDeletePaiement(paiement)}
-                              disabled={deletePaiementMutation.isPending}
-                              className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
-                            >
-                              Supprimer
-                            </button>
+
+                          {/* Ligne 2: Bénéficiaire */}
+                          <div className="text-sm text-gray-900">
+                            <span className="font-medium">Bénéficiaire :</span>
+                            <span className="ml-1">
+                              {(paiement as any).identiteBeneficiaire || 'Bénéficiaire non renseigné'}
+                            </span>
+                            {(paiement as any).qualiteBeneficiaire && (
+                              <span className="ml-2 text-gray-600">
+                                ({(paiement as any).qualiteBeneficiaire})
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Ligne 3: PCE */}
+                          {(paiement as any).pce && (
+                            <div className="text-sm text-gray-900">
+                              <span className="font-medium">PCE :</span>
+                              <span className="ml-1">
+                                {(paiement as any).pce.pceDetaille} - {(paiement as any).pce.pceNumerique}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Ligne 4: Informations administratives */}
+                          <div className="text-sm text-gray-900 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {(paiement as any).sgami && (
+                                <span><span className="font-medium">Org. payeur :</span> {(paiement as any).sgami.nom}</span>
+                              )}
+                              {paiement.facture && (
+                                <span>• <span className="font-medium">Facture :</span> {paiement.facture}</span>
+                              )}
+                            </div>
+
+                            {/* Métadonnées */}
+                            {paiement.creePar && (
+                              <div className="text-xs text-gray-500">
+                                Créé par: {(paiement.creePar as any).grade && `${(paiement.creePar as any).grade} `}
+                                {paiement.creePar.prenom} {paiement.creePar.nom}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

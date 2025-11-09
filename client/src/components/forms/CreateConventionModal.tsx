@@ -29,8 +29,14 @@ const createConventionSchema = z.object({
   ], {
     required_error: "L'instance est requise"
   }),
-  montantHT: z.number().positive("Le montant HT doit être positif"),
-  montantHTGagePrecedemment: z.number().positive().optional().nullable(),
+  montantHT: z.number({
+    required_error: "Le montant HT est requis",
+    invalid_type_error: "Le montant HT est requis"
+  }).positive("Le montant HT doit être positif"),
+  montantHTGagePrecedemment: z.number({
+    required_error: "Le montant HT gagé précédemment est requis",
+    invalid_type_error: "Le montant HT gagé précédemment est requis"
+  }).positive("Le montant HT gagé précédemment doit être positif").optional().nullable(),
   typeFacturation: z.enum(['FORFAITAIRE', 'DEMI_JOURNEE', 'ASSISES']).optional(),
   avocatId: z.string().min(1, "L'avocat est requis"),
   diligenceId: z.string().optional(),

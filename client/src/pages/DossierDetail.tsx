@@ -649,54 +649,56 @@ const DossierDetail: React.FC = () => {
       />
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Dossier {dossier.numero}
-              {dossier.nomDossier && (
-                <span className="text-2xl font-bold text-gray-600">
-                  {' - '}{dossier.nomDossier}
-                </span>
-              )}
-            </h1>
-            
-            {/* Badges */}
-            {dossier.badges.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {dossier.badges.map((badgeRel) => (
-                    <span
-                      key={badgeRel.badge.id}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
-                      style={badgeRel.badge.couleur ? {
-                        backgroundColor: `${badgeRel.badge.couleur}20`,
-                        color: badgeRel.badge.couleur
-                      } : {}}
-                    >
-                      {badgeRel.badge.nom}
-                    </span>
-                  ))}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 flex-1">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Dossier {dossier.numero}
+                {dossier.nomDossier && (
+                  <span className="text-2xl font-bold text-gray-600">
+                    {' - '}{dossier.nomDossier}
+                  </span>
+                )}
+              </h1>
+
+              {/* Badges */}
+              {dossier.badges.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {dossier.badges.map((badgeRel) => (
+                      <span
+                        key={badgeRel.badge.id}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-purple-100 text-purple-800"
+                        style={badgeRel.badge.couleur ? {
+                          backgroundColor: `${badgeRel.badge.couleur}20`,
+                          color: badgeRel.badge.couleur
+                        } : {}}
+                      >
+                        {badgeRel.badge.nom}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <button
               onClick={handleEditDossier}
-              className="btn-secondary flex items-center"
+              className="btn-secondary flex items-center justify-center"
             >
               <PencilIcon className="h-4 w-4 mr-2" />
               Modifier
             </button>
             <button
               onClick={handleDeleteDossier}
-              className="btn-danger flex items-center"
+              className="btn-danger flex items-center justify-center"
               disabled={deleteDossierMutation.isPending}
             >
               <TrashIcon className="h-4 w-4 mr-2" />

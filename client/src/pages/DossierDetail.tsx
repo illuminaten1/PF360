@@ -820,7 +820,7 @@ const DossierDetail: React.FC = () => {
           {/* Demandes Section */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                     <FolderIcon className="h-5 w-5 mr-2" />
@@ -830,7 +830,7 @@ const DossierDetail: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setIsLierDemandesModalOpen(true)}
-                  className="btn-primary-outline flex items-center text-sm"
+                  className="btn-primary-outline flex items-center justify-center text-sm w-full sm:w-auto"
                 >
                   <LinkIcon className="h-4 w-4 mr-1" />
                   Lier des demandes
@@ -960,7 +960,7 @@ const DossierDetail: React.FC = () => {
           {/* Decisions Section */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                     <ScaleIcon className="h-5 w-5 mr-2" />
@@ -971,7 +971,7 @@ const DossierDetail: React.FC = () => {
                 <button
                   onClick={handleGenerateDecision}
                   disabled={dossier.demandes.length === 0}
-                  className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary-outline flex items-center justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                   title={dossier.demandes.length === 0 ? "Aucune demande disponible" : "Générer une nouvelle décision"}
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
@@ -1062,7 +1062,7 @@ const DossierDetail: React.FC = () => {
           {/* Conventions Section */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                     <DocumentTextIcon className="h-5 w-5 mr-2" />
@@ -1073,7 +1073,7 @@ const DossierDetail: React.FC = () => {
                 <button
                   onClick={handleCreateConvention}
                   disabled={dossier.decisions.length === 0}
-                  className="btn-primary-outline flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary-outline flex items-center justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                   title={dossier.decisions.length === 0 ? "Aucune décision disponible" : "Créer une nouvelle convention"}
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
@@ -1231,7 +1231,7 @@ const DossierDetail: React.FC = () => {
           {/* Paiements Section */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                     <CurrencyEuroIcon className="h-5 w-5 mr-2" />
@@ -1241,7 +1241,7 @@ const DossierDetail: React.FC = () => {
                 </div>
                 <button
                   onClick={handleCreatePaiement}
-                  className="btn-primary-outline flex items-center text-sm"
+                  className="btn-primary-outline flex items-center justify-center text-sm w-full sm:w-auto"
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Nouveau paiement

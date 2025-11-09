@@ -1087,17 +1087,6 @@ const DossierDetail: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {dossier.conventions.map((convention) => {
-                    const getTypeBadge = (type: string) => {
-                      switch (type) {
-                        case 'CONVENTION':
-                          return 'bg-blue-100 text-blue-800'
-                        case 'AVENANT':
-                          return 'bg-orange-100 text-orange-800'
-                        default:
-                          return 'bg-gray-100 text-gray-800'
-                      }
-                    }
-
                     const getVictimeMecBadge = (type: string) => {
                       switch (type) {
                         case 'VICTIME':
@@ -1131,11 +1120,8 @@ const DossierDetail: React.FC = () => {
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2 flex-1">
                               <h3 className="font-semibold text-gray-900">
-                                Convention n°{convention.numero}
+                                {convention.type === 'AVENANT' ? 'Avenant' : 'Convention'} n°{convention.numero}
                               </h3>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadge(convention.type)}`}>
-                                {convention.type}
-                              </span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(convention.victimeOuMisEnCause)}`}>
                                 {getVictimeMecLabel(convention.victimeOuMisEnCause)}
                               </span>

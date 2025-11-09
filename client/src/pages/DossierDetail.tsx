@@ -1371,12 +1371,12 @@ const DossierDetail: React.FC = () => {
               value={notes}
               onChange={handleNotesChange}
               placeholder="Ajoutez des notes sur ce dossier...
-              
+
 • Échanges avec les parties
 • Consignes particulières
 • Points d'attention
 • Historique des actions"
-              className="w-full resize-none border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors [&::-webkit-scrollbar]:hidden"
+              className="w-full resize-none border border-gray-300 rounded-md px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors [&::-webkit-scrollbar]:hidden"
               disabled={isSavingNotes}
             />
             <div className="mt-2 text-xs text-gray-400">

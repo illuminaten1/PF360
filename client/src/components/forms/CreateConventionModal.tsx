@@ -538,6 +538,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                           type="number"
                           step="0.01"
                           min="0"
+                          inputMode="decimal"
                           {...register('montantHT', { valueAsNumber: true })}
                           className="block w-full h-12 px-4 pr-8 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
                           placeholder="0.00"
@@ -560,6 +561,7 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                             type="number"
                             step="0.01"
                             min="0"
+                            inputMode="decimal"
                             {...register('montantHTGagePrecedemment', { valueAsNumber: true })}
                             className="block w-full h-12 px-4 pr-8 rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all"
                             placeholder="0.00"

@@ -687,7 +687,15 @@ const CreateConventionModal: React.FC<CreateConventionModalProps> = ({
                               filteredAvocats.map((avocat: any, index: number) => (
                                 <div
                                   key={avocat.id}
-                                  onClick={() => {
+                                  onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    setSelectedAvocat(avocat)
+                                    setValue('avocatId', avocat.id)
+                                    setShowAvocatDropdown(false)
+                                    setSelectedAvocatIndex(-1)
+                                  }}
+                                  onTouchStart={(e) => {
+                                    e.preventDefault()
                                     setSelectedAvocat(avocat)
                                     setValue('avocatId', avocat.id)
                                     setShowAvocatDropdown(false)

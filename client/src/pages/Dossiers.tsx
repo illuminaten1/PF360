@@ -1,17 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/utils/api'
-import DossiersTable from '@/components/tables/DossiersTable'
+import DossiersTable, { DossiersTableRef } from '@/components/tables/DossiersTable'
 import DossierModal from '@/components/forms/DossierModal'
 
 const Dossiers: React.FC = () => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDossier, setSelectedDossier] = useState<Dossier | null>(null)
+  const { user } = useAuth()
+  const tableRef = useRef<DossiersTableRef>(null)
 
   const queryClient = useQueryClient()
 
@@ -96,6 +99,34 @@ const Dossiers: React.FC = () => {
     }
   }
 
+  const applyMyDossiersFilter = useCallback(() => {
+    if (tableRef.current && user) {
+      const userFullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.trim()
+
+      tableRef.current.setColumnFilters([
+        {
+          id: 'assigneA',
+          value: [userFullName]
+        }
+      ])
+    }
+  }, [user])
+
+  // Appliquer automatiquement le filtre "mes-dossiers" si demandé via sessionStorage
+  useEffect(() => {
+    const filterToApply = sessionStorage.getItem('dossiers-apply-filter')
+    if (filterToApply === 'mes-dossiers' && tableRef.current && user) {
+      // Attendre que le composant soit entièrement monté
+      const timer = setTimeout(() => {
+        applyMyDossiersFilter()
+        // Nettoyer le sessionStorage après application
+        sessionStorage.removeItem('dossiers-apply-filter')
+      }, 100)
+
+      return () => clearTimeout(timer)
+    }
+  }, [user, applyMyDossiersFilter])
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -143,6 +174,7 @@ const Dossiers: React.FC = () => {
       </div>
 
       <DossiersTable
+        ref={tableRef}
         data={dossiers}
         onView={handleViewDossier}
         onEdit={handleEditDossier}

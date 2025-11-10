@@ -128,6 +128,8 @@ const Dashboard: React.FC = () => {
             onClick={() => {
               if (card.name === 'Mes demandes') {
                 sessionStorage.setItem('demandes-apply-filter', 'mes-demandes')
+              } else if (card.name === 'Mes dossiers') {
+                sessionStorage.setItem('dossiers-apply-filter', 'mes-dossiers')
               }
               window.location.href = card.href
             }}

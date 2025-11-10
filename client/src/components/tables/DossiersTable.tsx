@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, forwardRef, useImperativeHandle } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -18,7 +18,6 @@ import { Dossier } from '@/types'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
 import {
-  EyeIcon,
   PencilIcon,
   TrashIcon,
   UserIcon,
@@ -38,6 +37,11 @@ interface DossiersTableProps {
   onView: (dossier: Dossier) => void
   onEdit: (dossier: Dossier) => void
   onDelete: (dossier: Dossier) => void
+}
+
+export interface DossiersTableRef {
+  setColumnFilters: (filters: ColumnFiltersState) => void
+  clearAllFilters: () => void
 }
 
 function Filter({ column }: { column: Column<Dossier, unknown> }) {
@@ -415,13 +419,13 @@ const DemandeursCell: React.FC<{
   )
 }
 
-const DossiersTable: React.FC<DossiersTableProps> = ({
+const DossiersTable = forwardRef<DossiersTableRef, DossiersTableProps>(({
   data,
   loading = false,
   onView,
   onEdit,
   onDelete
-}) => {
+}, ref) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true }
   ])
@@ -676,7 +680,7 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete]
+    [onEdit, onDelete]
   )
 
   const table = useReactTable({
@@ -703,6 +707,16 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
       }
     }
   })
+
+  useImperativeHandle(ref, () => ({
+    setColumnFilters: (filters: ColumnFiltersState) => {
+      setColumnFilters(filters)
+    },
+    clearAllFilters: () => {
+      setColumnFilters([])
+      setGlobalFilter('')
+    }
+  }), [setColumnFilters, setGlobalFilter])
 
   if (loading) {
     return (
@@ -887,6 +901,8 @@ const DossiersTable: React.FC<DossiersTableProps> = ({
       />
     </div>
   )
-}
+})
+
+DossiersTable.displayName = 'DossiersTable'
 
 export default DossiersTable

@@ -1008,24 +1008,10 @@ const DossierDetail: React.FC = () => {
                         <div className="flex flex-col gap-2">
                           {/* Ligne 1: Type et bouton */}
                           <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-wrap items-center gap-2 flex-1">
-                              <h3 className="font-semibold text-gray-900">
+                            <div className="flex flex-wrap items-baseline gap-2 flex-1">
+                              <span className="font-medium text-gray-900">
                                 {getTypeLabel(decision.type)}
-                              </h3>
-                              {decision.demandes && decision.demandes.length > 0 && (
-                                <>
-                                  {decision.demandes.slice(0, 2).map((d, index) => (
-                                    <span key={`demande-${decision.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                      {d.demande.prenom} {d.demande.nom}
-                                    </span>
-                                  ))}
-                                  {decision.demandes.length > 2 && (
-                                    <span key={`more-demandes-${decision.id}`} className="text-xs text-gray-500">
-                                      +{decision.demandes.length - 2}
-                                    </span>
-                                  )}
-                                </>
-                              )}
+                              </span>
                             </div>
                             <button
                               onClick={() => handleEditDecision(decision)}
@@ -1035,19 +1021,51 @@ const DossierDetail: React.FC = () => {
                             </button>
                           </div>
 
-                          {/* Ligne 2: Dates et créateur */}
-                          <div className="text-sm text-gray-600 space-y-1">
+                          {/* Ligne 2: Demandeurs */}
+                          {decision.demandes && decision.demandes.length > 0 && (
+                            <div className="text-sm text-gray-900">
+                              <span className="font-medium">Demandeurs :</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {decision.demandes.slice(0, 2).map((d, index) => (
+                                  <span key={`demande-${decision.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {d.demande.prenom} {d.demande.nom}
+                                  </span>
+                                ))}
+                                {decision.demandes.length > 2 && (
+                                  <span key={`more-demandes-${decision.id}`} className="text-xs text-gray-500">
+                                    +{decision.demandes.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Ligne 3: Informations administratives */}
+                          <div className="text-sm text-gray-900 space-y-1">
                             {(decision as any).dateSignature && (
-                              <div>Signée le: {dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}</div>
+                              <div>
+                                <span className="font-medium">Signée le :</span>
+                                <span className="ml-1">{dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}</span>
+                              </div>
                             )}
                             {(decision as any).dateEnvoi && (
-                              <div>Envoyée le: {dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}</div>
+                              <div>
+                                <span className="font-medium">Envoyée le :</span>
+                                <span className="ml-1">{dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}</span>
+                              </div>
                             )}
                             {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
-                              <div>Date: {dayjs((decision as any).date).format('DD/MM/YYYY')}</div>
+                              <div>
+                                <span className="font-medium">Date :</span>
+                                <span className="ml-1">{dayjs((decision as any).date).format('DD/MM/YYYY')}</span>
+                              </div>
                             )}
+
+                            {/* Métadonnées */}
                             {decision.creePar && (
-                              <div>Créée par: {decision.creePar.prenom} {decision.creePar.nom}</div>
+                              <div className="text-xs text-gray-500">
+                                Créée par: {decision.creePar.prenom} {decision.creePar.nom}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1116,12 +1134,13 @@ const DossierDetail: React.FC = () => {
                         onContextMenu={(e) => handleContextMenu(e, convention)}
                       >
                         <div className="flex flex-col gap-2">
-                          {/* Ligne 1: Titre, badges et bouton */}
+                          {/* Ligne 1: Numéro, type et bouton */}
                           <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-wrap items-center gap-2 flex-1">
-                              <h3 className="font-semibold text-gray-900">
+                            <div className="flex flex-wrap items-baseline gap-2 flex-1">
+                              <span className="font-medium text-gray-900">
                                 {convention.type === 'AVENANT' ? 'Avenant' : 'Convention'} n°{convention.numero}
-                              </h3>
+                              </span>
+                              <span className="text-sm text-gray-600">•</span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(convention.victimeOuMisEnCause)}`}>
                                 {getVictimeMecLabel(convention.victimeOuMisEnCause)}
                               </span>
@@ -1136,20 +1155,35 @@ const DossierDetail: React.FC = () => {
 
                           {/* Ligne 2: Avocat */}
                           <div className="text-sm text-gray-900">
-                            <strong>{convention.avocat.prenom} {convention.avocat.nom}</strong>
+                            <span className="font-medium">Avocat :</span>
+                            <span className="ml-1">
+                              {convention.avocat.prenom} {convention.avocat.nom}
+                            </span>
                           </div>
 
-                          {/* Ligne 3: Informations détaillées */}
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span>Montant HT: <strong>{convention.montantHT.toLocaleString('fr-FR')} €</strong></span>
-                              {convention.montantHTGagePrecedemment && (
-                                <span>• Montant gagé préc.: {convention.montantHTGagePrecedemment.toLocaleString('fr-FR')} €</span>
-                              )}
-                            </div>
-                            {convention.instance && (
-                              <div>Instance: {convention.instance}</div>
+                          {/* Ligne 3: Montant */}
+                          <div className="text-sm text-gray-900">
+                            <span className="font-medium">Montant HT :</span>
+                            <span className="ml-1">
+                              {convention.montantHT.toLocaleString('fr-FR')} €
+                            </span>
+                            {convention.montantHTGagePrecedemment && (
+                              <span className="ml-2 text-gray-600">
+                                (Gagé préc.: {convention.montantHTGagePrecedemment.toLocaleString('fr-FR')} €)
+                              </span>
                             )}
+                          </div>
+
+                          {/* Ligne 4: Instance */}
+                          {convention.instance && (
+                            <div className="text-sm text-gray-900">
+                              <span className="font-medium">Instance :</span>
+                              <span className="ml-1">{convention.instance}</span>
+                            </div>
+                          )}
+
+                          {/* Ligne 5: Informations administratives */}
+                          <div className="text-sm text-gray-900 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span>Créée le: {dayjs(convention.dateCreation).format('DD/MM/YYYY')}</span>
                               {convention.dateRetourSigne ? (
@@ -1164,8 +1198,10 @@ const DossierDetail: React.FC = () => {
                                 </span>
                               )}
                             </div>
+
+                            {/* Demandeurs */}
                             {convention.demandes && convention.demandes.length > 0 && (
-                              <div className="mt-2">
+                              <div className="mt-1">
                                 <span className="text-xs text-gray-500">Demandeurs: </span>
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {convention.demandes.slice(0, 3).map((d, index) => (
@@ -1181,8 +1217,10 @@ const DossierDetail: React.FC = () => {
                                 </div>
                               </div>
                             )}
+
+                            {/* Diligences */}
                             {convention.diligences && convention.diligences.length > 0 && (
-                              <div className="mt-2">
+                              <div className="mt-1">
                                 <span className="text-xs text-gray-500">Diligences: </span>
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {convention.diligences.slice(0, 2).map((d, index) => (
@@ -1198,8 +1236,10 @@ const DossierDetail: React.FC = () => {
                                 </div>
                               </div>
                             )}
+
+                            {/* Métadonnées */}
                             {convention.creePar && (
-                              <div className="text-xs">
+                              <div className="text-xs text-gray-500">
                                 Créée par: {(convention.creePar as any).grade && `${(convention.creePar as any).grade} `}
                                 {convention.creePar.prenom} {convention.creePar.nom}
                               </div>

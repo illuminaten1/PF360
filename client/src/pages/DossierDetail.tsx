@@ -1,6 +1,6 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
@@ -17,14 +17,7 @@ import {
   FolderIcon,
   CalendarIcon,
   ClipboardDocumentListIcon,
-  PlusIcon,
   CheckIcon,
-  LinkIcon,
-  XMarkIcon,
-  ExclamationTriangleIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
 } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import api from '@/utils/api'
@@ -40,6 +33,13 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ConventionContextMenu from '@/components/common/ConventionContextMenu'
 import DecisionContextMenu from '@/components/common/DecisionContextMenu'
 import PaiementContextMenu from '@/components/common/PaiementContextMenu'
+import DemandesSection from '@/components/dossiers/DemandesSection'
+import DecisionsSection from '@/components/dossiers/DecisionsSection'
+import ConventionsSection from '@/components/dossiers/ConventionsSection'
+import PaiementsSection from '@/components/dossiers/PaiementsSection'
+import { useDossierMutations } from '@/hooks/useDossierMutations'
+import { useContextMenus } from '@/hooks/useContextMenus'
+import { useNotesAutoSave } from '@/hooks/useNotesAutoSave'
 
 dayjs.extend(relativeTime)
 dayjs.locale('fr')
@@ -47,7 +47,6 @@ dayjs.locale('fr')
 const DossierDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLierDemandesModalOpen, setIsLierDemandesModalOpen] = useState(false)
@@ -61,28 +60,6 @@ const DossierDetail: React.FC = () => {
   const [selectedDecision, setSelectedDecision] = useState<any>(null)
   const [selectedConvention, setSelectedConvention] = useState<any>(null)
   const [selectedPaiement, setSelectedPaiement] = useState<any>(null)
-  const [notes, setNotes] = useState('')
-  const [isSavingNotes, setIsSavingNotes] = useState(false)
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
-  const notesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [contextMenu, setContextMenu] = useState<{
-    show: boolean
-    x: number
-    y: number
-    convention: any | null
-  }>({ show: false, x: 0, y: 0, convention: null })
-  const [decisionContextMenu, setDecisionContextMenu] = useState<{
-    show: boolean
-    x: number
-    y: number
-    decision: any | null
-  }>({ show: false, x: 0, y: 0, decision: null })
-  const [paiementContextMenu, setPaiementContextMenu] = useState<{
-    show: boolean
-    x: number
-    y: number
-    paiement: any | null
-  }>({ show: false, x: 0, y: 0, paiement: null })
 
   // Fetch dossier details
   const { data: dossier, isLoading, error } = useQuery<Dossier>({
@@ -95,220 +72,34 @@ const DossierDetail: React.FC = () => {
     enabled: !!id
   })
 
-  // Update dossier mutation
-  const updateDossierMutation = useMutation({
-    mutationFn: async (data: any) => {
-      if (!id) throw new Error('ID du dossier manquant')
-      const response = await api.put(`/dossiers/${id}`, data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      toast.success('Dossier modifié avec succès')
-      setIsEditModalOpen(false)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la modification')
-    }
+  // Custom hooks
+  const mutations = useDossierMutations(id)
+  const contextMenus = useContextMenus<any, any, any>()
+  const notes = useNotesAutoSave({
+    initialNotes: dossier?.notes || '',
+    saveNotesMutation: mutations.saveNotesMutation
   })
 
-  // Save notes mutation
-  const saveNotesMutation = useMutation({
-    mutationFn: async (notes: string) => {
-      if (!id) throw new Error('ID du dossier manquant')
-      const response = await api.put(`/dossiers/${id}`, { notes })
-      return response.data
-    },
-    onSuccess: (updatedDossier) => {
-      // Update only the cache without invalidating (no refetch)
-      queryClient.setQueryData(['dossier', id], updatedDossier)
-      setLastSavedAt(new Date())
-      setIsSavingNotes(false)
-    },
-    onError: () => {
-      toast.error('Erreur lors de la sauvegarde des notes')
-      setIsSavingNotes(false)
-    }
-  })
-
-  // Delete dossier mutation
-  const deleteDossierMutation = useMutation({
-    mutationFn: async () => {
-      if (!id) throw new Error('ID du dossier manquant')
-      await api.delete(`/dossiers/${id}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      toast.success('Dossier supprimé avec succès')
-      navigate('/dossiers')
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la suppression')
-    }
-  })
-
-  // Unlink demande mutation
-  const unlinkDemandeMutation = useMutation({
-    mutationFn: async (demandeId: string) => {
-      const response = await api.put(`/demandes/${demandeId}`, { dossierId: null })
-      return response.data
-    },
-    onSuccess: (updatedDemande) => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['demandes'] })
-      toast.success(`Demande ${updatedDemande?.numeroDS || 'inconnue'} déliée du dossier`)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la déliaison')
-    }
-  })
-
-  // Create decision mutation
-  const createDecisionMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.post('/decisions', data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['decisions-all'] })
-      toast.success('Décision générée avec succès')
-      setIsGenerateDecisionModalOpen(false)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la génération de la décision')
-    }
-  })
-
-  // Update decision mutation
-  const updateDecisionMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.put(`/decisions/${data.id}`, data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['decisions-all'] })
-      toast.success('Décision modifiée avec succès')
-      setIsDecisionEditModalOpen(false)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la modification de la décision')
-    }
-  })
-
-  // Create convention mutation
-  const createConventionMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.post('/conventions', data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['conventions-all'] })
-      toast.success('Convention créée avec succès')
-      setIsCreateConventionModalOpen(false)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la création de la convention')
-    }
-  })
-
-  // Update convention mutation
-  const updateConventionMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.put(`/conventions/${data.id}`, data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['conventions-all'] })
-      toast.success('Convention modifiée avec succès')
-      setIsEditConventionModalOpen(false)
-      setSelectedConvention(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la modification de la convention')
-    }
-  })
-
-  // Create paiement mutation
-  const createPaiementMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.post('/paiements', data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['paiements-all'] })
-      toast.success('Paiement créé avec succès')
-      setIsPaiementModalOpen(false)
-      setSelectedPaiement(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la création du paiement')
-    }
-  })
-
-  // Update paiement mutation
-  const updatePaiementMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.put(`/paiements/${data.id}`, data)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['paiements-all'] })
-      toast.success('Paiement modifié avec succès')
-      setIsPaiementModalOpen(false)
-      setSelectedPaiement(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la modification du paiement')
-    }
-  })
-
-  // Delete paiement mutation
-  const deletePaiementMutation = useMutation({
-    mutationFn: async (paiementId: string) => {
-      await api.delete(`/paiements/${paiementId}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossier', id] })
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
-      queryClient.invalidateQueries({ queryKey: ['paiements-all'] })
-      toast.success('Paiement supprimé avec succès')
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erreur lors de la suppression du paiement')
-    }
-  })
-
+  // Dossier handlers
   const handleEditDossier = () => {
     setIsEditModalOpen(true)
   }
 
   const handleDeleteDossier = () => {
     if (dossier && window.confirm(`Êtes-vous sûr de vouloir supprimer le dossier ${dossier.numero} ?`)) {
-      deleteDossierMutation.mutate()
+      mutations.deleteDossierMutation.mutate()
     }
   }
 
   const handleSubmitDossier = async (data: any) => {
-    await updateDossierMutation.mutateAsync(data)
+    await mutations.updateDossierMutation.mutateAsync(data)
+    setIsEditModalOpen(false)
   }
 
+  // Demandes handlers
   const handleUnlinkDemande = (demande: any) => {
     if (window.confirm(`Êtes-vous sûr de vouloir délier la demande ${demande.numeroDS} (${demande.prenom} ${demande.nom}) de ce dossier ?`)) {
-      unlinkDemandeMutation.mutate(demande.id)
+      mutations.unlinkDemandeMutation.mutate(demande.id)
     }
   }
 
@@ -322,8 +113,7 @@ const DossierDetail: React.FC = () => {
     setSelectedDemande(null)
   }
 
-
-
+  // Decisions handlers
   const handleEditDecision = (decision: any) => {
     setSelectedDecision(decision)
     setIsDecisionEditModalOpen(true)
@@ -343,13 +133,16 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitDecision = async (data: any) => {
-    await createDecisionMutation.mutateAsync(data)
+    await mutations.createDecisionMutation.mutateAsync(data)
+    setIsGenerateDecisionModalOpen(false)
   }
 
   const handleSubmitDecisionEdit = async (data: any) => {
-    await updateDecisionMutation.mutateAsync(data)
+    await mutations.updateDecisionMutation.mutateAsync(data)
+    setIsDecisionEditModalOpen(false)
   }
 
+  // Conventions handlers
   const handleCreateConvention = () => {
     if (!dossier || dossier.decisions.length === 0) {
       toast.error('Aucune décision disponible pour créer une convention')
@@ -359,12 +152,12 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitConvention = async (data: any) => {
-    await createConventionMutation.mutateAsync(data)
+    await mutations.createConventionMutation.mutateAsync(data)
+    setIsCreateConventionModalOpen(false)
   }
 
   const handleEditConvention = async (convention: any) => {
     try {
-      // Fetch full convention data
       const response = await api.get(`/conventions/${convention.id}`)
       setSelectedConvention(response.data)
       setIsEditConventionModalOpen(true)
@@ -375,7 +168,9 @@ const DossierDetail: React.FC = () => {
   }
 
   const handleSubmitConventionEdit = async (data: any) => {
-    await updateConventionMutation.mutateAsync(data)
+    await mutations.updateConventionMutation.mutateAsync(data)
+    setIsEditConventionModalOpen(false)
+    setSelectedConvention(null)
   }
 
   const handleCloseConventionEditModal = () => {
@@ -383,6 +178,7 @@ const DossierDetail: React.FC = () => {
     setSelectedConvention(null)
   }
 
+  // Paiements handlers
   const handleCreatePaiement = () => {
     setSelectedPaiement(null)
     setIsPaiementModalOpen(true)
@@ -390,7 +186,6 @@ const DossierDetail: React.FC = () => {
 
   const handleEditPaiement = async (paiement: any) => {
     try {
-      // Fetch full paiement data including decisions
       const response = await api.get(`/paiements/${paiement.id}`)
       setSelectedPaiement(response.data)
       setIsPaiementModalOpen(true)
@@ -402,144 +197,24 @@ const DossierDetail: React.FC = () => {
 
   const handleDeletePaiement = (paiement: any) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer ce paiement de ${paiement.montantTTC.toLocaleString('fr-FR')} € ?`)) {
-      deletePaiementMutation.mutate(paiement.id)
+      mutations.deletePaiementMutation.mutate(paiement.id)
     }
   }
 
   const handleSubmitPaiement = async (data: any) => {
     if (selectedPaiement) {
-      await updatePaiementMutation.mutateAsync(data)
+      await mutations.updatePaiementMutation.mutateAsync(data)
     } else {
-      await createPaiementMutation.mutateAsync(data)
+      await mutations.createPaiementMutation.mutateAsync(data)
     }
+    setIsPaiementModalOpen(false)
+    setSelectedPaiement(null)
   }
 
   const handleClosePaiementModal = () => {
     setIsPaiementModalOpen(false)
     setSelectedPaiement(null)
   }
-
-  // Initialize notes when dossier loads
-  useEffect(() => {
-    if (dossier && dossier.notes !== undefined) {
-      setNotes(dossier.notes || '')
-    }
-  }, [dossier])
-
-  // Auto-save notes with debounce
-  const debouncedSaveNotes = useCallback((newNotes: string) => {
-    if (notesTimeoutRef.current) {
-      clearTimeout(notesTimeoutRef.current)
-    }
-    
-    notesTimeoutRef.current = setTimeout(() => {
-      if (newNotes !== (dossier?.notes || '')) {
-        setIsSavingNotes(true)
-        saveNotesMutation.mutate(newNotes)
-      }
-    }, 2000)
-  }, [dossier?.notes, saveNotesMutation])
-
-  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newNotes = e.target.value
-    setNotes(newNotes)
-    debouncedSaveNotes(newNotes)
-  }
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (notesTimeoutRef.current) {
-        clearTimeout(notesTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // Context menu handlers
-  const handleContextMenu = (e: React.MouseEvent, convention: any) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    setContextMenu({
-      show: true,
-      x: e.clientX,
-      y: e.clientY,
-      convention
-    })
-  }
-
-  const closeContextMenu = () => {
-    setContextMenu({ show: false, x: 0, y: 0, convention: null })
-  }
-
-  // Decision context menu handlers
-  const handleDecisionContextMenu = (e: React.MouseEvent, decision: any) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDecisionContextMenu({
-      show: true,
-      x: e.clientX,
-      y: e.clientY,
-      decision
-    })
-  }
-
-  const closeDecisionContextMenu = () => {
-    setDecisionContextMenu({ show: false, x: 0, y: 0, decision: null })
-  }
-
-  // Paiement context menu handlers
-  const handlePaiementContextMenu = (e: React.MouseEvent, paiement: any) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setPaiementContextMenu({
-      show: true,
-      x: e.clientX,
-      y: e.clientY,
-      paiement
-    })
-  }
-
-  const closePaiementContextMenu = () => {
-    setPaiementContextMenu({ show: false, x: 0, y: 0, paiement: null })
-  }
-
-  // Event listeners for context menu
-  React.useEffect(() => {
-    const handleClickOutside = () => {
-      if (contextMenu.show) {
-        closeContextMenu()
-      }
-      if (decisionContextMenu.show) {
-        closeDecisionContextMenu()
-      }
-      if (paiementContextMenu.show) {
-        closePaiementContextMenu()
-      }
-    }
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (contextMenu.show) {
-          closeContextMenu()
-        }
-        if (decisionContextMenu.show) {
-          closeDecisionContextMenu()
-        }
-        if (paiementContextMenu.show) {
-          closePaiementContextMenu()
-        }
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [contextMenu.show, decisionContextMenu.show, paiementContextMenu.show])
 
   if (isLoading) {
     return (
@@ -574,79 +249,38 @@ const DossierDetail: React.FC = () => {
     nombreDecisions: dossier.decisions.length
   }
 
-  const getTypeColor = (type: string) => {
-    return type === 'VICTIME' ? 'bg-sky-100 text-sky-800' : 'bg-orange-100 text-orange-800'
-  }
-
-  const getTypeLabel = (type: string) => {
-    return type.replace(/_/g, ' ')
-  }
-
-  const getAudienceUrgency = (dateAudience?: string) => {
-    if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
-    
-    const today = dayjs()
-    const audienceDate = dayjs(dateAudience)
-    const daysDiff = audienceDate.diff(today, 'day')
-    
-    if (daysDiff < 0) {
-      return { 
-        type: 'passed', 
-        style: 'bg-gray-100 text-gray-800', 
-        icon: XCircleIcon 
-      }
-    } else if (daysDiff < 7) {
-      return { 
-        type: 'urgent', 
-        style: 'bg-red-100 text-red-800', 
-        icon: ExclamationTriangleIcon 
-      }
-    } else if (daysDiff < 14) {
-      return { 
-        type: 'soon', 
-        style: 'bg-orange-100 text-orange-800', 
-        icon: ClockIcon 
-      }
-    } else {
-      return { 
-        type: 'normal', 
-        style: 'bg-green-100 text-green-800', 
-        icon: CheckCircleIcon 
-      }
-    }
-  }
-
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Menu contextuel pour conventions */}
       <ConventionContextMenu
-        show={contextMenu.show}
-        x={contextMenu.x}
-        y={contextMenu.y}
-        convention={contextMenu.convention}
+        show={contextMenus.conventionMenu.show}
+        x={contextMenus.conventionMenu.x}
+        y={contextMenus.conventionMenu.y}
+        convention={contextMenus.conventionMenu.item}
         dossier={dossier}
-        onClose={closeContextMenu}
+        onClose={contextMenus.closeConventionMenu}
       />
 
       {/* Menu contextuel pour décisions */}
       <DecisionContextMenu
-        show={decisionContextMenu.show}
-        x={decisionContextMenu.x}
-        y={decisionContextMenu.y}
-        decision={decisionContextMenu.decision}
+        show={contextMenus.decisionMenu.show}
+        x={contextMenus.decisionMenu.x}
+        y={contextMenus.decisionMenu.y}
+        decision={contextMenus.decisionMenu.item}
         dossier={dossier}
-        onClose={closeDecisionContextMenu}
+        onClose={contextMenus.closeDecisionMenu}
       />
 
       {/* Menu contextuel pour paiements */}
       <PaiementContextMenu
-        show={paiementContextMenu.show}
-        x={paiementContextMenu.x}
-        y={paiementContextMenu.y}
-        paiement={paiementContextMenu.paiement}
+        show={contextMenus.paiementMenu.show}
+        x={contextMenus.paiementMenu.x}
+        y={contextMenus.paiementMenu.y}
+        paiement={contextMenus.paiementMenu.item}
         dossier={dossier}
-        onClose={closePaiementContextMenu}
+        onClose={contextMenus.closePaiementMenu}
       />
+
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
@@ -699,7 +333,7 @@ const DossierDetail: React.FC = () => {
             <button
               onClick={handleDeleteDossier}
               className="btn-danger flex items-center justify-center"
-              disabled={deleteDossierMutation.isPending}
+              disabled={mutations.deleteDossierMutation.isPending}
             >
               <TrashIcon className="h-4 w-4 mr-2" />
               Supprimer
@@ -818,556 +452,45 @@ const DossierDetail: React.FC = () => {
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Demandes Section */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <FolderIcon className="h-5 w-5 mr-2" />
-                    Demandes ({dossier.demandes.length})
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
-                </div>
-                <button
-                  onClick={() => setIsLierDemandesModalOpen(true)}
-                  className="btn-primary-outline flex items-center justify-center text-sm w-full sm:w-auto"
-                >
-                  <LinkIcon className="h-4 w-4 mr-1" />
-                  Lier des demandes
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              {dossier.demandes.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune demande dans ce dossier</p>
-              ) : (
-                <div className="space-y-3">
-                  {dossier.demandes.map((demande) => {
-                    const dateAudience = (demande as any).dateAudience
-                    const urgency = getAudienceUrgency(dateAudience)
-                    const IconComponent = urgency.icon
-                    const today = dayjs().startOf('day')
-                    const audienceDate = dateAudience ? dayjs(dateAudience).startOf('day') : null
-                    const daysDiff = audienceDate ? audienceDate.diff(today, 'day') : null
-                    
-                    return (
-                      <div key={demande.id} className="border rounded-lg p-3 hover:bg-gray-50">
-                        <div className="flex flex-col gap-2">
-                          {/* Ligne 1: Nom et badges */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-                              <h3 className="font-medium text-gray-900 text-sm">
-                                {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
-                                {demande.prenom} {demande.nom}
-                              </h3>
-
-                              {/* Badges et BAP */}
-                              {(((demande as any).badges && (demande as any).badges.length > 0) || ((demande as any).baps && (demande as any).baps.length > 0)) && (
-                                <>
-                                  {/* Badges */}
-                                  {(demande as any).badges && (demande as any).badges.slice(0, 2).map((badgeRel: any) => (
-                                    <span
-                                      key={badgeRel.badge.id}
-                                      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                                      style={badgeRel.badge.couleur ? {
-                                        backgroundColor: `${badgeRel.badge.couleur}20`,
-                                        color: badgeRel.badge.couleur
-                                      } : {}}
-                                    >
-                                      {badgeRel.badge.nom}
-                                    </span>
-                                  ))}
-
-                                  {/* BAP */}
-                                  {(demande as any).baps && (demande as any).baps.length > 0 && (
-                                    <span
-                                      key={`bap-${demande.id}`}
-                                      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                                      title={`BAP: ${(demande as any).baps[0].bap.nomBAP}`}
-                                    >
-                                      {(demande as any).baps[0].bap.nomBAP}
-                                    </span>
-                                  )}
-
-                                  {(demande as any).badges && (demande as any).badges.length > 2 && (
-                                    <span key={`more-badges-${demande.id}`} className="text-xs text-gray-500">
-                                      +{(demande as any).badges.length - 2}
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                            </div>
-
-                            {/* Boutons d'action */}
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                              <button
-                                onClick={() => handleViewDemande(demande)}
-                                className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50"
-                              >
-                                Voir
-                              </button>
-                              <button
-                                onClick={() => handleUnlinkDemande(demande)}
-                                disabled={unlinkDemandeMutation.isPending}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                                title="Délier du dossier"
-                              >
-                                <XMarkIcon className="h-3 w-3" />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Ligne 2: Type, dates */}
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
-                              {getTypeLabel(demande.type)}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
-                            </span>
-                            {demande.dateFaits && (
-                              <span className="text-xs text-gray-500">
-                                • Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Ligne 3: Badge audience si présent */}
-                          {dateAudience && (
-                            <div>
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${urgency.style}`}>
-                                {IconComponent && (
-                                  <IconComponent className="h-3 w-3 mr-1" />
-                                )}
-                                Audience {dayjs(dateAudience).format('DD/MM/YYYY')}
-                                {daysDiff !== null && daysDiff >= 0 && (
-                                  <span className="ml-1">
-                                    - {daysDiff} j.
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
+          <DemandesSection
+            demandes={dossier.demandes}
+            isUnlinking={mutations.unlinkDemandeMutation.isPending}
+            onLierDemandes={() => setIsLierDemandesModalOpen(true)}
+            onViewDemande={handleViewDemande}
+            onUnlinkDemande={handleUnlinkDemande}
+          />
 
           {/* Decisions Section */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <ScaleIcon className="h-5 w-5 mr-2" />
-                    Décisions ({dossier.decisions.length})
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
-                </div>
-                <button
-                  onClick={handleGenerateDecision}
-                  disabled={dossier.demandes.length === 0}
-                  className="btn-primary-outline flex items-center justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                  title={dossier.demandes.length === 0 ? "Aucune demande disponible" : "Générer une nouvelle décision"}
-                >
-                  <PlusIcon className="h-4 w-4 mr-1" />
-                  Générer décision
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              {dossier.decisions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune décision prise pour ce dossier</p>
-              ) : (
-                <div className="space-y-4">
-                  {dossier.decisions.map((decision) => {
-                    const getTypeLabel = (type: string) => {
-                      switch (type) {
-                        case 'AJ': return 'Aide Juridique'
-                        case 'AJE': return 'Aide Juridique Évolutive'
-                        case 'PJ': return 'Protection Juridictionnelle'
-                        case 'REJET': return 'Rejet'
-                        // Support des anciens types pour compatibilité
-                        case 'OCTROI': return 'Aide Juridique'
-                        case 'OCTROI_PARTIEL': return 'Aide Juridique Partielle'
-                        default: return type
-                      }
-                    }
-
-
-                    return (
-                      <div
-                        key={decision.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-                        onContextMenu={(e) => handleDecisionContextMenu(e, decision)}
-                      >
-                        <div className="flex flex-col gap-2">
-                          {/* Ligne 1: Type et bouton */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-wrap items-baseline gap-2 flex-1">
-                              <span className="font-medium text-gray-900">
-                                {getTypeLabel(decision.type)}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => handleEditDecision(decision)}
-                              className="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0"
-                            >
-                              Modifier
-                            </button>
-                          </div>
-
-                          {/* Ligne 2: Demandeurs */}
-                          {decision.demandes && decision.demandes.length > 0 && (
-                            <div className="text-sm text-gray-900">
-                              <span className="font-medium">Demandeurs :</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {decision.demandes.slice(0, 2).map((d, index) => (
-                                  <span key={`demande-${decision.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {d.demande.prenom} {d.demande.nom}
-                                  </span>
-                                ))}
-                                {decision.demandes.length > 2 && (
-                                  <span key={`more-demandes-${decision.id}`} className="text-xs text-gray-500">
-                                    +{decision.demandes.length - 2}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Ligne 3: Informations administratives */}
-                          <div className="text-sm text-gray-900 space-y-1">
-                            {(decision as any).dateSignature && (
-                              <div>
-                                <span className="font-medium">Signée le :</span>
-                                <span className="ml-1">{dayjs((decision as any).dateSignature).format('DD/MM/YYYY')}</span>
-                              </div>
-                            )}
-                            {(decision as any).dateEnvoi && (
-                              <div>
-                                <span className="font-medium">Envoyée le :</span>
-                                <span className="ml-1">{dayjs((decision as any).dateEnvoi).format('DD/MM/YYYY')}</span>
-                              </div>
-                            )}
-                            {!(decision as any).dateSignature && !(decision as any).dateEnvoi && (decision as any).date && (
-                              <div>
-                                <span className="font-medium">Date :</span>
-                                <span className="ml-1">{dayjs((decision as any).date).format('DD/MM/YYYY')}</span>
-                              </div>
-                            )}
-
-                            {/* Métadonnées */}
-                            {decision.creePar && (
-                              <div className="text-xs text-gray-500">
-                                Créée par: {decision.creePar.prenom} {decision.creePar.nom}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
+          <DecisionsSection
+            decisions={dossier.decisions}
+            hasDecisions={dossier.demandes.length > 0}
+            onGenerateDecision={handleGenerateDecision}
+            onEditDecision={handleEditDecision}
+            onContextMenu={contextMenus.handleDecisionContextMenu}
+          />
 
           {/* Conventions Section */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <DocumentTextIcon className="h-5 w-5 mr-2" />
-                    Conventions d&apos;honoraires ({dossier.conventions.length})
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
-                </div>
-                <button
-                  onClick={handleCreateConvention}
-                  disabled={dossier.decisions.length === 0}
-                  className="btn-primary-outline flex items-center justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                  title={dossier.decisions.length === 0 ? "Aucune décision disponible" : "Créer une nouvelle convention"}
-                >
-                  <PlusIcon className="h-4 w-4 mr-1" />
-                  Nouvelle convention
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              {dossier.conventions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune convention d&apos;honoraires</p>
-              ) : (
-                <div className="space-y-4">
-                  {dossier.conventions.map((convention) => {
-                    const getVictimeMecBadge = (type: string) => {
-                      switch (type) {
-                        case 'VICTIME':
-                          return 'bg-sky-100 text-sky-800'
-                        case 'MIS_EN_CAUSE':
-                          return 'bg-amber-100 text-amber-800'
-                        default:
-                          return 'bg-gray-100 text-gray-800'
-                      }
-                    }
-
-                    const getVictimeMecLabel = (type: string) => {
-                      switch (type) {
-                        case 'VICTIME':
-                          return 'Victime'
-                        case 'MIS_EN_CAUSE':
-                          return 'Mis en cause'
-                        default:
-                          return type
-                      }
-                    }
-
-                    return (
-                      <div
-                        key={convention.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-                        onContextMenu={(e) => handleContextMenu(e, convention)}
-                      >
-                        <div className="flex flex-col gap-2">
-                          {/* Ligne 1: Numéro, type et bouton */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-wrap items-baseline gap-2 flex-1">
-                              <span className="font-medium text-gray-900">
-                                {convention.type === 'AVENANT' ? 'Avenant' : 'Convention'} n°{convention.numero}
-                              </span>
-                              <span className="text-sm text-gray-600">•</span>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getVictimeMecBadge(convention.victimeOuMisEnCause)}`}>
-                                {getVictimeMecLabel(convention.victimeOuMisEnCause)}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => handleEditConvention(convention)}
-                              className="text-blue-600 hover:text-blue-800 text-sm flex-shrink-0"
-                            >
-                              Modifier
-                            </button>
-                          </div>
-
-                          {/* Ligne 2: Avocat */}
-                          <div className="text-sm text-gray-900">
-                            <span className="font-medium">Avocat :</span>
-                            <span className="ml-1">
-                              {convention.avocat.prenom} {convention.avocat.nom}
-                            </span>
-                          </div>
-
-                          {/* Ligne 3: Montant */}
-                          <div className="text-sm text-gray-900">
-                            <span className="font-medium">Montant HT :</span>
-                            <span className="ml-1">
-                              {convention.montantHT.toLocaleString('fr-FR')} €
-                            </span>
-                            {convention.montantHTGagePrecedemment && (
-                              <span className="ml-2 text-gray-600">
-                                (Gagé préc.: {convention.montantHTGagePrecedemment.toLocaleString('fr-FR')} €)
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Ligne 4: Instance */}
-                          {convention.instance && (
-                            <div className="text-sm text-gray-900">
-                              <span className="font-medium">Instance :</span>
-                              <span className="ml-1">{convention.instance}</span>
-                            </div>
-                          )}
-
-                          {/* Ligne 5: Informations administratives */}
-                          <div className="text-sm text-gray-900 space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span>Créée le: {dayjs(convention.dateCreation).format('DD/MM/YYYY')}</span>
-                              {convention.dateRetourSigne ? (
-                                <span className="flex items-center text-green-600">
-                                  • <CheckCircleIcon className="h-4 w-4 mx-1" />
-                                  Signée le {dayjs(convention.dateRetourSigne).format('DD/MM/YYYY')}
-                                </span>
-                              ) : (
-                                <span className="flex items-center text-orange-600">
-                                  • <ClockIcon className="h-4 w-4 mx-1" />
-                                  En attente de signature
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Demandeurs */}
-                            {convention.demandes && convention.demandes.length > 0 && (
-                              <div className="mt-1">
-                                <span className="text-xs text-gray-500">Demandeurs: </span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {convention.demandes.slice(0, 3).map((d, index) => (
-                                    <span key={`demande-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                      {d.demande.prenom} {d.demande.nom}
-                                    </span>
-                                  ))}
-                                  {convention.demandes.length > 3 && (
-                                    <span key={`more-demandes-${convention.id}`} className="text-xs text-gray-500">
-                                      +{convention.demandes.length - 3} autre(s)
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Diligences */}
-                            {convention.diligences && convention.diligences.length > 0 && (
-                              <div className="mt-1">
-                                <span className="text-xs text-gray-500">Diligences: </span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {convention.diligences.slice(0, 2).map((d, index) => (
-                                    <span key={`diligence-${convention.id}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                      {d.diligence.nom}
-                                    </span>
-                                  ))}
-                                  {convention.diligences.length > 2 && (
-                                    <span key={`more-diligences-${convention.id}`} className="text-xs text-gray-500">
-                                      +{convention.diligences.length - 2} autre(s)
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Métadonnées */}
-                            {convention.creePar && (
-                              <div className="text-xs text-gray-500">
-                                Créée par: {(convention.creePar as any).grade && `${(convention.creePar as any).grade} `}
-                                {convention.creePar.prenom} {convention.creePar.nom}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
+          <ConventionsSection
+            conventions={dossier.conventions}
+            hasDecisions={dossier.decisions.length > 0}
+            onCreateConvention={handleCreateConvention}
+            onEditConvention={handleEditConvention}
+            onContextMenu={contextMenus.handleConventionContextMenu}
+          />
 
           {/* Paiements Section */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <CurrencyEuroIcon className="h-5 w-5 mr-2" />
-                    Paiements ({dossier.paiements.length})
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">Clic droit pour effectuer des actions</p>
-                </div>
-                <button
-                  onClick={handleCreatePaiement}
-                  className="btn-primary-outline flex items-center justify-center text-sm w-full sm:w-auto"
-                >
-                  <PlusIcon className="h-4 w-4 mr-1" />
-                  Nouveau paiement
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              {dossier.paiements.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucun paiement enregistré</p>
-              ) : (
-                <div className="space-y-4">
-                  {dossier.paiements.map((paiement) => (
-                      <div
-                        key={paiement.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-                        onContextMenu={(e) => handlePaiementContextMenu(e, paiement)}
-                      >
-                        <div className="flex flex-col gap-2">
-                          {/* Ligne 1: Numéro, montant et boutons */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex flex-wrap items-baseline gap-2 flex-1">
-                              <span className="font-medium text-gray-900">
-                                FRI {(paiement as any).numero}
-                              </span>
-                              <span className="text-sm text-gray-600">•</span>
-                              <span className="font-medium text-gray-900">
-                                {paiement.montantTTC.toLocaleString('fr-FR')} € TTC
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <button
-                                onClick={() => handleEditPaiement(paiement)}
-                                className="text-blue-600 hover:text-blue-800 text-sm"
-                              >
-                                Modifier
-                              </button>
-                              <button
-                                onClick={() => handleDeletePaiement(paiement)}
-                                disabled={deletePaiementMutation.isPending}
-                                className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
-                              >
-                                Supprimer
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Ligne 2: Bénéficiaire */}
-                          <div className="text-sm text-gray-900">
-                            <span className="font-medium">Bénéficiaire :</span>
-                            <span className="ml-1">
-                              {(paiement as any).identiteBeneficiaire || 'Bénéficiaire non renseigné'}
-                            </span>
-                            {(paiement as any).qualiteBeneficiaire && (
-                              <span className="ml-2 text-gray-600">
-                                ({(paiement as any).qualiteBeneficiaire})
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Ligne 3: PCE */}
-                          {(paiement as any).pce && (
-                            <div className="text-sm text-gray-900">
-                              <span className="font-medium">PCE :</span>
-                              <span className="ml-1">
-                                {(paiement as any).pce.pceDetaille} - {(paiement as any).pce.pceNumerique}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Ligne 4: Informations administratives */}
-                          <div className="text-sm text-gray-900 space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {(paiement as any).sgami && (
-                                <span><span className="font-medium">Org. payeur :</span> {(paiement as any).sgami.nom}</span>
-                              )}
-                              {paiement.facture && (
-                                <span>• <span className="font-medium">Facture :</span> {paiement.facture}</span>
-                              )}
-                            </div>
-
-                            {/* Métadonnées */}
-                            {paiement.creePar && (
-                              <div className="text-xs text-gray-500">
-                                Créé par: {(paiement.creePar as any).grade && `${(paiement.creePar as any).grade} `}
-                                {paiement.creePar.prenom} {paiement.creePar.nom}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <PaiementsSection
+            paiements={dossier.paiements}
+            isDeletingPaiement={mutations.deletePaiementMutation.isPending}
+            onCreatePaiement={handleCreatePaiement}
+            onEditPaiement={handleEditPaiement}
+            onDeletePaiement={handleDeletePaiement}
+            onContextMenu={contextMenus.handlePaiementContextMenu}
+          />
         </div>
 
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
-
           {/* Notes */}
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-4">
@@ -1376,7 +499,7 @@ const DossierDetail: React.FC = () => {
                 Notes
               </h3>
               <div className="flex items-center text-xs text-gray-500">
-                {isSavingNotes ? (
+                {notes.isSavingNotes ? (
                   <span className="flex items-center">
                     <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -1384,18 +507,18 @@ const DossierDetail: React.FC = () => {
                     </svg>
                     Sauvegarde...
                   </span>
-                ) : lastSavedAt ? (
+                ) : notes.lastSavedAt ? (
                   <span className="flex items-center">
                     <CheckIcon className="h-3 w-3 mr-1 text-green-500" />
-                    Sauvegardé {dayjs(lastSavedAt).fromNow()}
+                    Sauvegardé {dayjs(notes.lastSavedAt).fromNow()}
                   </span>
                 ) : null}
               </div>
             </div>
             <TextareaAutosize
               minRows={4}
-              value={notes}
-              onChange={handleNotesChange}
+              value={notes.notes}
+              onChange={notes.handleNotesChange}
               placeholder="Ajoutez des notes sur ce dossier...
 
 • Échanges avec les parties
@@ -1403,7 +526,7 @@ const DossierDetail: React.FC = () => {
 • Points d'attention
 • Historique des actions"
               className="w-full resize-none border border-gray-300 rounded-md px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors [&::-webkit-scrollbar]:hidden"
-              disabled={isSavingNotes}
+              disabled={notes.isSavingNotes}
             />
             <div className="mt-2 text-xs text-gray-400">
               Les notes sont sauvegardées automatiquement après 2 secondes d&apos;inactivité.
@@ -1429,7 +552,6 @@ const DossierDetail: React.FC = () => {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
@@ -1458,7 +580,6 @@ const DossierDetail: React.FC = () => {
         onClose={handleCloseDemandeModal}
         demande={selectedDemande}
       />
-
 
       {/* Decision Edit Modal */}
       <DecisionEditModal

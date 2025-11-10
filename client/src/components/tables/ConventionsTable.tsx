@@ -58,6 +58,104 @@ function Filter({ column }: { column: any }) {
   )
 }
 
+function TypeFilter({ column }: { column: any }) {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+
+  const uniqueTypes = useMemo(() => {
+    const facetedValues = column.getFacetedUniqueValues()
+    const uniqueValues = Array.from(facetedValues.keys())
+    return uniqueValues.filter(Boolean).sort()
+  }, [column])
+
+  const getTypeLabel = (type: string) => {
+    return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
+  }
+
+  const handleToggleType = (type: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(type)
+
+    if (index > -1) {
+      currentFilters.splice(index, 1)
+    } else {
+      currentFilters.push(type)
+    }
+
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+
+  const selectAll = () => {
+    column.setFilterValue([...uniqueTypes])
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0
+            ? 'Tous'
+            : columnFilterValue.length === uniqueTypes.length
+            ? 'Tous'
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+
+          <div className="p-1">
+            {uniqueTypes.map(type => (
+              <label key={String(type)} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(String(type))}
+                  onChange={() => handleToggleType(String(type))}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs">{getTypeLabel(String(type))}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Overlay pour fermer le dropdown */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 const getTypeBadge = (type: string) => {
   switch (type) {
     case 'CONVENTION':
@@ -199,10 +297,11 @@ const ConventionsTable: React.FC<ConventionsTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: (row, columnId, value) => {
-          if (value === '') return true
-          const type = row.getValue(columnId) as string
-          return type === value
+        filterFn: (row, _columnId, filterValue: string[]) => {
+          if (!filterValue || filterValue.length === 0) return true
+
+          const type = row.getValue('victimeOuMisEnCause') as string
+          return filterValue.includes(type)
         }
       },
       {
@@ -585,7 +684,11 @@ const ConventionsTable: React.FC<ConventionsTableProps> = ({
                       </div>
                       {header.column.getCanFilter() && (
                         <div>
-                          <Filter column={header.column} />
+                          {header.column.id === 'victimeOuMisEnCause' ? (
+                            <TypeFilter column={header.column} />
+                          ) : (
+                            <Filter column={header.column} />
+                          )}
                         </div>
                       )}
                     </div>

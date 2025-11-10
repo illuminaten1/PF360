@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -16,6 +16,20 @@ const Conventions: React.FC = () => {
     queryFn: async () => {
       const response = await api.get('/conventions')
       return response.data
+    }
+  })
+
+  // Update convention mutation
+  const updateConventionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.put(`/conventions/${data.id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conventions-all'] })
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Erreur lors de la modification de la convention')
     }
   })
 
@@ -46,6 +60,20 @@ const Conventions: React.FC = () => {
       deleteConventionMutation.mutate(convention.id)
     }
   }
+
+  // Fonction pour sauvegarder la date de retour signée
+  const handleConventionDateChange = useCallback(async (conventionId: string, field: 'dateRetourSigne', value: string | null) => {
+    try {
+      const updateData = {
+        id: conventionId,
+        [field]: value ? new Date(value).toISOString() : null
+      }
+      await updateConventionMutation.mutateAsync(updateData)
+      toast.success('Date de retour signée mise à jour')
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la date:', error)
+    }
+  }, [updateConventionMutation])
 
   const getStatsData = () => {
     const totalConventions = conventions.length
@@ -117,6 +145,7 @@ const Conventions: React.FC = () => {
         onView={handleViewConvention}
         onEdit={handleEditConvention}
         onDelete={handleDeleteConvention}
+        onDateChange={handleConventionDateChange}
         loading={isLoading}
       />
     </div>

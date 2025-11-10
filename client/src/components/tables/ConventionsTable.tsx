@@ -31,6 +31,7 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline'
 import SearchBar from './SearchBar'
+import DatePickerModal from '../common/DatePickerModal'
 
 dayjs.locale('fr')
 
@@ -40,6 +41,7 @@ interface ConventionsTableProps {
   onView: (convention: Convention) => void
   onEdit: (convention: Convention) => void
   onDelete: (convention: Convention) => void
+  onDateChange?: (conventionId: string, field: 'dateRetourSigne', value: string | null) => void
 }
 
 function Filter({ column }: { column: any }) {
@@ -94,13 +96,46 @@ const ConventionsTable: React.FC<ConventionsTableProps> = ({
   loading = false,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  onDateChange
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'numero', desc: true }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+
+  // État pour le modal de date
+  const [dateModal, setDateModal] = React.useState<{
+    isOpen: boolean
+    conventionId: string
+    field: 'dateRetourSigne'
+    currentDate: string | null
+  }>({
+    isOpen: false,
+    conventionId: '',
+    field: 'dateRetourSigne',
+    currentDate: null
+  })
+
+  const handleDateClick = (convention: Convention, field: 'dateRetourSigne') => {
+    setDateModal({
+      isOpen: true,
+      conventionId: convention.id,
+      field,
+      currentDate: convention[field] || null
+    })
+  }
+
+  const handleDateConfirm = (date: string | null) => {
+    if (onDateChange) {
+      onDateChange(dateModal.conventionId, dateModal.field, date)
+    }
+  }
+
+  const handleDateModalClose = () => {
+    setDateModal(prev => ({ ...prev, isOpen: false }))
+  }
 
   const columns = useMemo<ColumnDef<Convention>[]>(
     () => [
@@ -343,22 +378,31 @@ const ConventionsTable: React.FC<ConventionsTableProps> = ({
       {
         accessorKey: 'dateRetourSigne',
         header: 'Date retour signée',
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const date = getValue<string>()
-          
+          const convention = row.original
+
           return (
             <div className="flex items-center text-sm">
               {date ? (
                 <>
                   <CheckCircleIcon className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-gray-900">
+                  <button
+                    onClick={() => handleDateClick(convention, 'dateRetourSigne')}
+                    className="text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+                  >
                     {dayjs(date).format('DD/MM/YYYY')}
-                  </span>
+                  </button>
                 </>
               ) : (
                 <>
                   <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-gray-500">En attente</span>
+                  <button
+                    onClick={() => handleDateClick(convention, 'dateRetourSigne')}
+                    className="text-gray-500 hover:text-blue-600 hover:underline transition-colors"
+                  >
+                    En attente
+                  </button>
                 </>
               )}
             </div>
@@ -636,6 +680,16 @@ const ConventionsTable: React.FC<ConventionsTableProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        isOpen={dateModal.isOpen}
+        onClose={handleDateModalClose}
+        onConfirm={handleDateConfirm}
+        currentDate={dateModal.currentDate}
+        title="Modifier la date de retour signée"
+        field="Date de retour signée"
+      />
     </div>
   )
 }

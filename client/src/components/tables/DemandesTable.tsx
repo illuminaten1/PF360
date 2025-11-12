@@ -1676,21 +1676,21 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
 
       {/* Pagination */}
       <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-gray-700">
             <span>
               Page {table.getState().pagination.pageIndex + 1} sur{' '}
               {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
             </span>
           </div>
-          
-          <div className="flex items-center space-x-2">
+
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-2">
             <select
               value={table.getState().pagination.pageSize}
               onChange={e => {
                 table.setPageSize(Number(e.target.value))
               }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              className="w-full sm:w-auto border border-gray-300 rounded px-2 py-1 text-xs sm:text-sm"
             >
               {[10, 20, 50, 100, 200].map(pageSize => (
                 <option key={pageSize} value={pageSize}>
@@ -1698,17 +1698,17 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                 </option>
               ))}
             </select>
-            
+
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
-                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-xs sm:text-sm"
                 title="Première page"
               >
                 {'<<'}
               </button>
-              
+
               <button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
@@ -1717,11 +1717,11 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
-              
-              <span className="px-3 py-1 text-sm">
+
+              <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm">
                 {table.getState().pagination.pageIndex + 1}
               </span>
-              
+
               <button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
@@ -1730,11 +1730,11 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
-              
+
               <button
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
-                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-xs sm:text-sm"
                 title="Dernière page"
               >
                 {'>>'}

@@ -292,21 +292,21 @@ const PCETable: React.FC<PCETableProps> = ({
 
       {/* Pagination */}
       <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center justify-center sm:justify-start text-sm text-gray-700">
             <span>
               Page {table.getState().pagination.pageIndex + 1} sur{' '}
               {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
             </span>
           </div>
-          
-          <div className="flex items-center space-x-2">
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <select
               value={table.getState().pagination.pageSize}
               onChange={e => {
                 table.setPageSize(Number(e.target.value))
               }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              className="border border-gray-300 rounded px-2 py-1 text-sm w-full sm:w-auto"
             >
               {[10, 20, 50, 100].map(pageSize => (
                 <option key={pageSize} value={pageSize}>
@@ -314,8 +314,8 @@ const PCETable: React.FC<PCETableProps> = ({
                 </option>
               ))}
             </select>
-            
-            <div className="flex items-center space-x-1">
+
+            <div className="flex items-center justify-center gap-1">
               <button
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
@@ -324,7 +324,7 @@ const PCETable: React.FC<PCETableProps> = ({
               >
                 {'<<'}
               </button>
-              
+
               <button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
@@ -333,11 +333,11 @@ const PCETable: React.FC<PCETableProps> = ({
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
-              
+
               <span className="px-3 py-1 text-sm">
                 {table.getState().pagination.pageIndex + 1}
               </span>
-              
+
               <button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
@@ -346,7 +346,7 @@ const PCETable: React.FC<PCETableProps> = ({
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
-              
+
               <button
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}

@@ -1758,7 +1758,9 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
         isOpen={showAssignerLotModal}
         onClose={() => {
           setShowAssignerLotModal(false)
-          setSelectedDemandes(new Set()) // Clear selection after assignment
+        }}
+        onSuccess={() => {
+          setSelectedDemandes(new Set()) // Clear selection after successful assignment
         }}
         selectedDemandes={getSelectedDemandesData()}
       />

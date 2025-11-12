@@ -441,7 +441,9 @@ const Demandes: React.FC = () => {
         onClose={() => {
           setIsLierMultiplesModalOpen(false)
           setSelectedDemandesForDossier([])
-          // Réinitialiser la sélection dans la table
+        }}
+        onSuccess={() => {
+          // Réinitialiser la sélection dans la table seulement après succès
           tableRef.current?.clearSelection()
         }}
         selectedDemandes={selectedDemandesForDossier}

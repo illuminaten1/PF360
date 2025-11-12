@@ -82,12 +82,14 @@ const DemandeursList: React.FC<DemandeursList> = ({ demandes }) => {
 interface LierDemandesMultiplesDossierModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
   selectedDemandes: Demande[]
 }
 
 const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierModalProps> = ({
   isOpen,
   onClose,
+  onSuccess,
   selectedDemandes
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -132,6 +134,7 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
       queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success(`${selectedDemandes.length} demande${selectedDemandes.length > 1 ? 's' : ''} liée${selectedDemandes.length > 1 ? 's' : ''} au dossier avec succès`)
+      onSuccess?.()
       onClose()
     },
     onError: (error: any) => {

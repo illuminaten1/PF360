@@ -17,12 +17,14 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 interface AssignerDemandesLotModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
   selectedDemandes: Demande[]
 }
 
 const AssignerDemandesLotModal: React.FC<AssignerDemandesLotModalProps> = ({
   isOpen,
   onClose,
+  onSuccess,
   selectedDemandes
 }) => {
   const queryClient = useQueryClient()
@@ -84,6 +86,7 @@ const AssignerDemandesLotModal: React.FC<AssignerDemandesLotModalProps> = ({
       toast.success(`${selectedDemandes.length} demande${selectedDemandes.length > 1 ? 's' : ''} assignée${selectedDemandes.length > 1 ? 's' : ''} à ${userName}`)
 
       resetModal()
+      onSuccess?.()
       onClose()
     },
     onError: (error: unknown) => {

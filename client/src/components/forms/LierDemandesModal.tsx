@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -38,6 +38,17 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
   const [isLinking, setIsLinking] = useState(false)
   const [page, setPage] = useState(1)
   const [limit] = useState(50) // Limite raisonnable par page
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640)
+
+  // Détection du mode mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Fetch dossier details to show assigned user
   const { data: dossier } = useQuery({
@@ -188,35 +199,35 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex-1 pr-4">
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center">
-                      <LinkIcon className="h-6 w-6 mr-2 text-blue-600" />
+              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-4 sm:p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
+                <div className="mb-6">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <Dialog.Title as="h3" className="text-base sm:text-lg font-medium leading-6 text-gray-900 flex items-center flex-1">
+                      <LinkIcon className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-blue-600" />
                       Lier des demandes au dossier {dossierNumero}
                     </Dialog.Title>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Sélectionnez les demandes à associer à ce dossier
-                    </p>
-                    {dossier?.assigneA && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                        <p className="text-sm text-blue-700">
-                          <strong>ℹ️ Information :</strong> Les demandes liées seront automatiquement attribuées à{' '}
-                          <span className="font-semibold">
-                            {dossier.assigneA.grade && `${dossier.assigneA.grade} `}
-                            {dossier.assigneA.prenom} {dossier.assigneA.nom}
-                          </span>
-                          {' '}(utilisateur gestionnaire de ce dossier).
-                        </p>
-                      </div>
-                    )}
+                    <button
+                      onClick={handleClose}
+                      className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                    </button>
                   </div>
-                  <button
-                    onClick={handleClose}
-                    className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
-                  >
-                    <XMarkIcon className="h-5 w-5" />
-                  </button>
+                  <p className="text-sm text-gray-600">
+                    Sélectionnez les demandes à associer à ce dossier
+                  </p>
+                  {dossier?.assigneA && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-700">
+                        <strong>ℹ️ Information :</strong> Les demandes liées seront automatiquement attribuées à{' '}
+                        <span className="font-semibold">
+                          {dossier.assigneA.grade && `${dossier.assigneA.grade} `}
+                          {dossier.assigneA.prenom} {dossier.assigneA.nom}
+                        </span>
+                        {' '}(utilisateur gestionnaire de ce dossier).
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Filtres et recherche */}
@@ -229,16 +240,16 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                           type="text"
                           value={searchTerm}
                           onChange={(e) => handleSearchChange(e.target.value)}
-                          placeholder="Rechercher: nom, prénom, 'Michel DUPONT', N° DS, NIGEND, commune..."
+                          placeholder={isMobile ? "Rechercher..." : "Rechercher: nom, prénom, 'Michel DUPONT', N° DS, NIGEND, commune..."}
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
-                    <div>
+                    <div className="w-full sm:w-auto">
                       <select
                         value={typeFilter}
                         onChange={(e) => handleTypeFilterChange(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">Tous les types</option>
                         <option value="VICTIME">Victime</option>
@@ -271,8 +282,8 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                   ) : (
                     <>
                       {/* Header avec sélection globale */}
-                      <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex flex-wrap items-center gap-3">
                           <label className="flex items-center cursor-pointer">
                             <input
                               type="checkbox"
@@ -290,7 +301,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 text-left sm:text-right">
                           <div>Page {page} sur {totalPages}</div>
                           <div>{totalDemandes} demande(s) au total</div>
                         </div>
@@ -301,54 +312,57 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                         {demandes.map((demande: Demande) => (
                           <div
                             key={demande.id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                            className={`p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
                               selectedDemandes.has(demande.id)
                                 ? 'border-blue-500 bg-blue-50'
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                             }`}
                             onClick={() => handleSelectDemande(demande.id)}
                           >
-                            <div className="flex items-start">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <h4 className="text-sm font-medium text-gray-900">
-                                      {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
-                                      {demande.prenom} {demande.nom}
-                                      {demande.nigend && (
-                                        <span className="ml-2 font-normal text-gray-600">NIGEND: {demande.nigend}</span>
-                                      )}
-                                    </h4>
-                                  </div>
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
-                                    {getTypeLabel(demande.type)}
-                                  </span>
+                            <div className="flex flex-col gap-2">
+                              {/* Ligne 1: Nom et type */}
+                              <div className="flex flex-wrap items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-medium text-gray-900">
+                                    {demande.grade?.gradeAbrege && `${demande.grade.gradeAbrege} `}
+                                    {demande.prenom} {demande.nom}
+                                  </h4>
+                                  {demande.nigend && (
+                                    <span className="text-xs text-gray-600">NIGEND: {demande.nigend}</span>
+                                  )}
                                 </div>
-                                <div className="mt-1 flex items-center justify-between text-xs text-gray-600">
-                                  <div className="flex items-center space-x-4">
-                                    <div className="flex items-center">
-                                      <CalendarIcon className="h-3 w-3 mr-1" />
-                                      Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
-                                    </div>
-                                    {demande.unite && (
-                                      <div>{demande.unite}</div>
-                                    )}
-                                    {demande.dateFaits && (
-                                      <div>
-                                        Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
-                                        {demande.commune && ` - ${demande.commune}`}
-                                      </div>
-                                    )}
-                                    {demande.assigneA && (
-                                      <div className="flex items-center">
-                                        <UserIcon className="h-3 w-3 mr-1" />
-                                        {demande.assigneA.grade && `${demande.assigneA.grade} `}
-                                        {demande.assigneA.prenom} {demande.assigneA.nom}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div>N° DS: {demande.numeroDS}</div>
+                                <span className={`flex-shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(demande.type)}`}>
+                                  {getTypeLabel(demande.type)}
+                                </span>
+                              </div>
+
+                              {/* Ligne 2: Dates et unité */}
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600">
+                                <div className="flex items-center">
+                                  <CalendarIcon className="h-3 w-3 mr-1" />
+                                  Reçu le {dayjs(demande.dateReception).format('DD/MM/YYYY')}
                                 </div>
+                                {demande.unite && (
+                                  <div>{demande.unite}</div>
+                                )}
+                                {demande.dateFaits && (
+                                  <div>
+                                    Faits du {dayjs(demande.dateFaits).format('DD/MM/YYYY')}
+                                    {demande.commune && ` - ${demande.commune}`}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Ligne 3: Assigné à et N° DS */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600">
+                                {demande.assigneA && (
+                                  <div className="flex items-center">
+                                    <UserIcon className="h-3 w-3 mr-1" />
+                                    {demande.assigneA.grade && `${demande.assigneA.grade} `}
+                                    {demande.assigneA.prenom} {demande.assigneA.nom}
+                                  </div>
+                                )}
+                                <div className="font-medium">N° DS: {demande.numeroDS}</div>
                               </div>
                             </div>
                           </div>
@@ -357,13 +371,13 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
 
                       {/* Pagination */}
                       {totalPages > 1 && (
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                          <div className="text-sm text-gray-500">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-4 border-t border-gray-200">
+                          <div className="text-sm text-gray-500 text-center sm:text-left">
                             {demandes.length > 0 && (
                               <>Affichage de {(page - 1) * limit + 1} à {Math.min(page * limit, totalDemandes)} sur {totalDemandes}</>
                             )}
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center justify-center space-x-2">
                             <button
                               onClick={() => setPage(Math.max(1, page - 1))}
                               disabled={page <= 1}
@@ -389,11 +403,11 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="btn-secondary"
+                    className="btn-secondary w-full sm:w-auto"
                     disabled={isLinking}
                   >
                     Annuler
@@ -401,7 +415,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                   <button
                     type="button"
                     onClick={handleLierDemandes}
-                    className="btn-primary flex items-center"
+                    className="btn-primary flex items-center justify-center w-full sm:w-auto"
                     disabled={selectedDemandes.size === 0 || isLinking}
                   >
                     {isLinking ? (

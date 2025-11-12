@@ -1156,9 +1156,9 @@ const DemandesTablePanel: React.FC = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 bg-white border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <span className="text-sm text-gray-700 text-center sm:text-left">
             Page {table.getState().pagination.pageIndex + 1} sur{' '}
             {table.getPageCount()}
           </span>
@@ -1167,7 +1167,7 @@ const DemandesTablePanel: React.FC = () => {
             onChange={(e) => {
               table.setPageSize(Number(e.target.value))
             }}
-            className="text-sm border border-gray-300 rounded px-2 py-1"
+            className="text-sm border border-gray-300 rounded px-2 py-1 w-full sm:w-auto"
           >
             {[25, 50, 100, 200].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
@@ -1176,35 +1176,39 @@ const DemandesTablePanel: React.FC = () => {
             ))}
           </select>
         </div>
-        
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
-            Première
+            <span className="hidden sm:inline">Première</span>
+            <span className="sm:hidden">««</span>
           </button>
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
-            Précédente
+            <span className="hidden sm:inline">Précédente</span>
+            <span className="sm:hidden">«</span>
           </button>
           <button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
-            Suivante
+            <span className="hidden sm:inline">Suivante</span>
+            <span className="sm:hidden">»</span>
           </button>
           <button
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
-            Dernière
+            <span className="hidden sm:inline">Dernière</span>
+            <span className="sm:hidden">»»</span>
           </button>
         </div>
       </div>

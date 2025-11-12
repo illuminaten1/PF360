@@ -199,8 +199,9 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-4 sm:p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
-                <div className="mb-6">
+              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all max-h-[90vh] flex flex-col">
+                {/* Header - Fixed */}
+                <div className="flex-shrink-0 p-4 sm:p-6 pb-0">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <Dialog.Title as="h3" className="text-base sm:text-lg font-medium leading-6 text-gray-900 flex items-center flex-1">
                       <LinkIcon className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-blue-600" />
@@ -230,8 +231,8 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                   )}
                 </div>
 
-                {/* Filtres et recherche */}
-                <div className="mb-6 space-y-4">
+                {/* Filtres et recherche - Fixed */}
+                <div className="flex-shrink-0 px-4 sm:px-6 pt-6 pb-4 space-y-4">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                       <div className="relative">
@@ -259,8 +260,8 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                   </div>
                 </div>
 
-                {/* Contenu */}
-                <div className="mb-6">
+                {/* Contenu - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
                   {isLoading ? (
                     <div className="flex justify-center items-center py-12">
                       <LoadingSpinner />
@@ -308,7 +309,7 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                       </div>
 
                       {/* Liste des demandes */}
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                      <div className="space-y-2">
                         {demandes.map((demande: Demande) => (
                           <div
                             key={demande.id}
@@ -402,8 +403,8 @@ const LierDemandesModal: React.FC<LierDemandesModalProps> = ({
                   )}
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-6 border-t border-gray-200">
+                {/* Actions - Fixed */}
+                <div className="flex-shrink-0 flex flex-col sm:flex-row sm:justify-end gap-3 p-4 sm:p-6 pt-4 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={handleClose}

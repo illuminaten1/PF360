@@ -1499,9 +1499,9 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
 
       {/* Barre d'actions pour la sélection multiple */}
       {selectedDemandes.size > 0 && (onCreateDossierWithSelection || onLinkToExistingDossier || onBulkAssignToUser) && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mt-4 mb-4 mx-4 sm:mx-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                 <span className="text-sm font-medium text-blue-900">
@@ -1512,38 +1512,38 @@ const DemandesTable = forwardRef<DemandesTableRef, DemandesTableProps>(({
                 (demandes non liées à un dossier, utilisateur ou BAP)
               </span>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <button
                 onClick={() => setSelectedDemandes(new Set())}
-                className="px-3 py-1 text-xs text-blue-700 hover:text-blue-900 border border-blue-300 rounded hover:bg-blue-100 transition-colors"
+                className="px-3 py-2 text-xs text-blue-700 hover:text-blue-900 border border-blue-300 rounded hover:bg-blue-100 transition-colors text-center"
               >
                 Désélectionner tout
               </button>
               {onBulkAssignToUser && user?.role === 'ADMIN' && (
                 <button
                   onClick={() => setShowAssignerLotModal(true)}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                  className="px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
-                  <UserPlusIcon className="h-4 w-4" />
-                  <span>Attribuer à un rédacteur</span>
+                  <UserPlusIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Attribuer à un rédacteur</span>
                 </button>
               )}
               {onLinkToExistingDossier && (
                 <button
                   onClick={() => onLinkToExistingDossier(getSelectedDemandesData())}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                  className="px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
-                  <FolderIcon className="h-4 w-4" />
-                  <span>Lier à un dossier</span>
+                  <FolderIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Lier à un dossier</span>
                 </button>
               )}
               {onCreateDossierWithSelection && (
                 <button
                   onClick={() => onCreateDossierWithSelection(getSelectedDemandesData())}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
+                  className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Créer un dossier</span>
+                  <PlusIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Créer un dossier</span>
                 </button>
               )}
             </div>

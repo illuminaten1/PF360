@@ -63,22 +63,26 @@ const buildApiParams = (
     } else if (id === 'commune' && value) {
       params.commune = value
     } else if (id === 'type' && value) {
-      params.type = value
+      // Multi-select filter - can be an array
+      params.type = Array.isArray(value) ? value : [value]
     } else if (id === 'grade' && value) {
-      params.grade = value
+      // Multi-select filter - can be an array
+      params.grade = Array.isArray(value) ? value : [value]
     } else if (id === 'assigneA' && value) {
-      params.assigneA = value
+      // Multi-select filter - can be an array
+      params.assigneA = Array.isArray(value) ? value : [value]
     } else if (id === 'baps' && value) {
-      params.bap = value
-    } else if (id === 'dateReception' && typeof value === 'object') {
+      // Multi-select filter - can be an array
+      params.bap = Array.isArray(value) ? value : [value]
+    } else if (id === 'dateReception' && typeof value === 'object' && !Array.isArray(value)) {
       const dateRange = value as { from?: string; to?: string }
       if (dateRange.from) params.dateDebut = dateRange.from
       if (dateRange.to) params.dateFin = dateRange.to
-    } else if (id === 'dateFaits' && typeof value === 'object') {
+    } else if (id === 'dateFaits' && typeof value === 'object' && !Array.isArray(value)) {
       const dateRange = value as { from?: string; to?: string }
       if (dateRange.from) params.dateFaitsDebut = dateRange.from
       if (dateRange.to) params.dateFaitsFin = dateRange.to
-    } else if (id === 'dateAudience' && typeof value === 'object') {
+    } else if (id === 'dateAudience' && typeof value === 'object' && !Array.isArray(value)) {
       const dateRange = value as { from?: string; to?: string }
       if (dateRange.from) params.dateAudienceDebut = dateRange.from
       if (dateRange.to) params.dateAudienceFin = dateRange.to

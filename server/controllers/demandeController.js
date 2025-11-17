@@ -385,12 +385,17 @@ const getAllDemandes = async (req, res) => {
     if (unite) where.unite = { contains: unite };
     if (commune) where.commune = { contains: commune };
 
-    if (type) where.type = type;
+    // Filtrage par type (peut être un tableau pour multi-select)
+    if (type) {
+      const types = Array.isArray(type) ? type : [type];
+      where.type = { in: types };
+    }
 
-    // Filtrage par grade (via relation)
+    // Filtrage par grade (via relation) - peut être un tableau pour multi-select
     if (grade) {
+      const grades = Array.isArray(grade) ? grade : [grade];
       where.grade = {
-        gradeAbrege: grade
+        gradeAbrege: { in: grades }
       };
     }
 
@@ -427,7 +432,7 @@ const getAllDemandes = async (req, res) => {
       }
     }
 
-    // Filtrage par assignation (par ID ou par nom complet)
+    // Filtrage par assignation (par ID ou par nom complet) - peut être un tableau pour multi-select
     if (assigneAId !== undefined) {
       if (assigneAId === 'null') {
         where.assigneAId = null;
@@ -435,39 +440,74 @@ const getAllDemandes = async (req, res) => {
         where.assigneAId = assigneAId;
       }
     } else if (assigneA) {
-      // Recherche par nom complet (format: "Grade Prenom Nom")
-      if (assigneA === 'Non assigné') {
+      const assigneAs = Array.isArray(assigneA) ? assigneA : [assigneA];
+
+      // Si "Non assigné" est dans le filtre
+      const hasNonAssigne = assigneAs.includes('Non assigné');
+      const otherAssignations = assigneAs.filter(a => a !== 'Non assigné');
+
+      if (hasNonAssigne && otherAssignations.length === 0) {
+        // Seulement "Non assigné"
         where.assigneAId = null;
-      } else {
-        // Recherche dans la relation assigneA
+      } else if (otherAssignations.length > 0 && !hasNonAssigne) {
+        // Seulement des assignations (pas "Non assigné")
         where.assigneA = {
-          OR: [
-            // Recherche sur la combinaison grade + prenom + nom
-            {
-              AND: [
-                { grade: { contains: assigneA.split(' ')[0] || '' } },
-                { prenom: { contains: assigneA.split(' ')[1] || '' } },
-                { nom: { contains: assigneA.split(' ').slice(2).join(' ') || '' } }
-              ]
-            },
-            // Recherche sur prenom + nom seulement (au cas où pas de grade)
-            {
-              AND: [
-                { prenom: { contains: assigneA.split(' ')[0] || '' } },
-                { nom: { contains: assigneA.split(' ').slice(1).join(' ') || '' } }
-              ]
-            }
-          ]
+          OR: otherAssignations.map(assigneItem => ({
+            OR: [
+              // Recherche sur la combinaison grade + prenom + nom
+              {
+                AND: [
+                  { grade: { contains: assigneItem.split(' ')[0] || '' } },
+                  { prenom: { contains: assigneItem.split(' ')[1] || '' } },
+                  { nom: { contains: assigneItem.split(' ').slice(2).join(' ') || '' } }
+                ]
+              },
+              // Recherche sur prenom + nom seulement (au cas où pas de grade)
+              {
+                AND: [
+                  { prenom: { contains: assigneItem.split(' ')[0] || '' } },
+                  { nom: { contains: assigneItem.split(' ').slice(1).join(' ') || '' } }
+                ]
+              }
+            ]
+          }))
         };
+      } else if (hasNonAssigne && otherAssignations.length > 0) {
+        // Mix de "Non assigné" et d'assignations
+        where.OR = [
+          { assigneAId: null },
+          {
+            assigneA: {
+              OR: otherAssignations.map(assigneItem => ({
+                OR: [
+                  {
+                    AND: [
+                      { grade: { contains: assigneItem.split(' ')[0] || '' } },
+                      { prenom: { contains: assigneItem.split(' ')[1] || '' } },
+                      { nom: { contains: assigneItem.split(' ').slice(2).join(' ') || '' } }
+                    ]
+                  },
+                  {
+                    AND: [
+                      { prenom: { contains: assigneItem.split(' ')[0] || '' } },
+                      { nom: { contains: assigneItem.split(' ').slice(1).join(' ') || '' } }
+                    ]
+                  }
+                ]
+              }))
+            }
+          }
+        ];
       }
     }
 
-    // Filtrage par BAP (via relation many-to-many)
+    // Filtrage par BAP (via relation many-to-many) - peut être un tableau pour multi-select
     if (bap) {
+      const baps = Array.isArray(bap) ? bap : [bap];
       where.baps = {
         some: {
           bap: {
-            nomBAP: bap
+            nomBAP: { in: baps }
           }
         }
       };

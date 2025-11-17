@@ -104,23 +104,102 @@ function DebouncedTextFilter({ column, placeholder = 'Filtrer...' }: { column: a
   )
 }
 
-// Filtre dropdown simple
-function SelectFilter({ column, options, placeholder = 'Tous' }: { column: any; options: string[]; placeholder?: string }) {
-  const columnFilterValue = column.getFilterValue() as string | undefined
+// Filtre dropdown avec multi-select
+function MultiSelectFilter({
+  column,
+  options,
+  placeholder = 'Tous'
+}: {
+  column: any;
+  options: string[];
+  placeholder?: string
+}) {
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const handleToggleOption = (option: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(option)
+
+    if (index > -1) {
+      currentFilters.splice(index, 1)
+    } else {
+      currentFilters.push(option)
+    }
+
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+
+  const selectAll = () => {
+    column.setFilterValue([...options])
+  }
 
   return (
-    <select
-      value={columnFilterValue || ''}
-      onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-      className="w-32 border shadow rounded px-2 py-1 text-xs"
-    >
-      <option value="">{placeholder}</option>
-      {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0
+            ? placeholder
+            : columnFilterValue.length === options.length
+            ? placeholder
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+
+          <div className="p-1">
+            {options.map(option => (
+              <label key={option} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(option)}
+                  onChange={() => handleToggleOption(option)}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs truncate">{option}</span>
+              </label>
+            ))}
+            {options.length === 0 && (
+              <div className="px-2 py-1 text-xs text-gray-500">Aucune option disponible</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
   )
 }
 
@@ -504,7 +583,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => (
-            <SelectFilter
+            <MultiSelectFilter
               column={column}
               options={facets?.types || ['VICTIME', 'MIS_EN_CAUSE']}
               placeholder="Tous types"
@@ -525,7 +604,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => (
-            <SelectFilter
+            <MultiSelectFilter
               column={column}
               options={facets?.grades || []}
               placeholder="Tous grades"
@@ -671,7 +750,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => (
-            <SelectFilter
+            <MultiSelectFilter
               column={column}
               options={['Non assigné', ...(facets?.assigneA?.map(a => a.fullName) || [])]}
               placeholder="Tous"
@@ -744,7 +823,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => (
-            <SelectFilter
+            <MultiSelectFilter
               column={column}
               options={facets?.baps?.map(b => b.nom) || []}
               placeholder="Tous BAP"

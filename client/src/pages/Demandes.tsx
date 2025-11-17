@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
+import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/utils/api'
-import DemandesTable, { DemandesTableRef } from '@/components/tables/DemandesTable'
+import DemandesTableV2, { DemandesTableV2Ref } from '@/components/tables/DemandesTableV2'
 import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
@@ -21,6 +22,72 @@ interface DemandesStats {
   mesDemandes: number
 }
 
+// Helper function to convert TanStack Table filters to API params
+const buildApiParams = (
+  pagination: { pageIndex: number; pageSize: number },
+  sorting: SortingState,
+  columnFilters: ColumnFiltersState,
+  globalFilter: string
+) => {
+  const params: any = {
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize
+  }
+
+  // Global search
+  if (globalFilter) {
+    params.search = globalFilter
+  }
+
+  // Sorting
+  if (sorting.length > 0) {
+    const sort = sorting[0]
+    params.sortBy = sort.id
+    params.sortOrder = sort.desc ? 'desc' : 'asc'
+  }
+
+  // Column filters - envoi direct des valeurs au backend
+  columnFilters.forEach((filter) => {
+    const { id, value } = filter
+
+    if (id === 'numeroDS' && value) {
+      params.numeroDS = value
+    } else if (id === 'nom' && value) {
+      params.nom = value
+    } else if (id === 'prenom' && value) {
+      params.prenom = value
+    } else if (id === 'nigend' && value) {
+      params.nigend = value
+    } else if (id === 'unite' && value) {
+      params.unite = value
+    } else if (id === 'commune' && value) {
+      params.commune = value
+    } else if (id === 'type' && value) {
+      params.type = value
+    } else if (id === 'grade' && value) {
+      params.grade = value
+    } else if (id === 'assigneA' && value) {
+      params.assigneA = value
+    } else if (id === 'baps' && value) {
+      params.bap = value
+    } else if (id === 'dateReception' && typeof value === 'object') {
+      const dateRange = value as { from?: string; to?: string }
+      if (dateRange.from) params.dateDebut = dateRange.from
+      if (dateRange.to) params.dateFin = dateRange.to
+    } else if (id === 'dateFaits' && typeof value === 'object') {
+      const dateRange = value as { from?: string; to?: string }
+      if (dateRange.from) params.dateFaitsDebut = dateRange.from
+      if (dateRange.to) params.dateFaitsFin = dateRange.to
+    } else if (id === 'dateAudience' && typeof value === 'object') {
+      const dateRange = value as { from?: string; to?: string }
+      if (dateRange.from) params.dateAudienceDebut = dateRange.from
+      if (dateRange.to) params.dateAudienceFin = dateRange.to
+    }
+  })
+
+  return params
+}
+
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
@@ -30,18 +97,45 @@ const Demandes: React.FC = () => {
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const [selectedDemandesForDossier, setSelectedDemandesForDossier] = useState<Demande[]>([])
   const { user } = useAuth()
-  const tableRef = useRef<DemandesTableRef>(null)
+  const tableRef = useRef<DemandesTableV2Ref>(null)
+
+  // Server-side state
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 })
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'dateReception', desc: true }])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+
+  // Debounced global filter for API calls
+  const [debouncedGlobalFilter, setDebouncedGlobalFilter] = useState('')
 
   const queryClient = useQueryClient()
 
-  // Fetch all demandes (client-side filtering with TanStack)
-  const { data: demandes = [], isLoading } = useQuery({
-    queryKey: ['demandes-all'],
+  // Debounce global filter to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedGlobalFilter(globalFilter)
+      if (globalFilter !== debouncedGlobalFilter) {
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [globalFilter])
+
+  // Fetch demandes with server-side pagination, sorting, and filtering
+  const { data: demandesData, isLoading } = useQuery({
+    queryKey: ['demandes', pagination, sorting, columnFilters, debouncedGlobalFilter],
     queryFn: async () => {
-      const response = await api.get('/demandes?limit=50000') // Get all demandes for client-side processing
-      return response.data.demandes
-    }
+      const params = buildApiParams(pagination, sorting, columnFilters, debouncedGlobalFilter)
+      const response = await api.get('/demandes', { params })
+      return response.data
+    },
+    placeholderData: (previousData) => previousData
   })
+
+  const demandes = demandesData?.demandes || []
+  const totalRows = demandesData?.total || 0
+  const pageCount = demandesData?.pagination?.pages || 0
 
   // Fetch stats
   const { data: stats } = useQuery<DemandesStats>({
@@ -52,6 +146,16 @@ const Demandes: React.FC = () => {
     }
   })
 
+  // Fetch facets for filters
+  const { data: facets } = useQuery({
+    queryKey: ['demandes-facets'],
+    queryFn: async () => {
+      const response = await api.get('/demandes/facets')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+  })
+
   // Create demande mutation
   const createDemandeMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -59,7 +163,7 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande créée avec succès')
@@ -76,7 +180,7 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande modifiée avec succès')
@@ -92,7 +196,7 @@ const Demandes: React.FC = () => {
       await api.delete(`/demandes/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande supprimée avec succès')
@@ -109,7 +213,7 @@ const Demandes: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Dossier créé et demandes liées avec succès')
       // Fermer le modal et réinitialiser la sélection
@@ -199,89 +303,89 @@ const Demandes: React.FC = () => {
 
   // Fonctions pour appliquer les filtres depuis les statistiques
   const applyYearFilter = () => {
-    if (tableRef.current) {
-      const currentYear = new Date().getFullYear()
-      const startOfYear = `${currentYear}-01-01`
-      
-      tableRef.current.setColumnFilters([
-        {
-          id: 'dateReception',
-          value: { from: startOfYear }
-        }
-      ])
-    }
+    const currentYear = new Date().getFullYear()
+    const startOfYear = `${currentYear}-01-01`
+
+    setColumnFilters([
+      {
+        id: 'dateReception',
+        value: { from: startOfYear }
+      }
+    ])
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
-
   const applyUnassignedYearFilter = () => {
-    if (tableRef.current) {
-      const currentYear = new Date().getFullYear()
-      const startOfYear = `${currentYear}-01-01`
-      
-      tableRef.current.setColumnFilters([
-        {
-          id: 'dateReception',
-          value: { from: startOfYear }
-        },
-        {
-          id: 'assigneA',
-          value: ['Non assigné']
-        }
-      ])
-    }
+    const currentYear = new Date().getFullYear()
+    const startOfYear = `${currentYear}-01-01`
+
+    setColumnFilters([
+      {
+        id: 'dateReception',
+        value: { from: startOfYear }
+      },
+      {
+        id: 'assigneA',
+        value: 'Non assigné'
+      }
+    ])
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyTodayFilter = () => {
-    if (tableRef.current) {
-      const today = new Date().toISOString().split('T')[0]
-      
-      tableRef.current.setColumnFilters([
-        {
-          id: 'dateReception',
-          value: { from: today, to: today }
-        }
-      ])
-    }
+    const today = new Date().toISOString().split('T')[0]
+
+    setColumnFilters([
+      {
+        id: 'dateReception',
+        value: { from: today, to: today }
+      }
+    ])
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyTodayUnassignedFilter = () => {
-    if (tableRef.current) {
-      const today = new Date().toISOString().split('T')[0]
-      
-      tableRef.current.setColumnFilters([
-        {
-          id: 'dateReception',
-          value: { from: today, to: today }
-        },
-        {
-          id: 'assigneA',
-          value: ['Non assigné']
-        }
-      ])
-    }
+    const today = new Date().toISOString().split('T')[0]
+
+    setColumnFilters([
+      {
+        id: 'dateReception',
+        value: { from: today, to: today }
+      },
+      {
+        id: 'assigneA',
+        value: 'Non assigné'
+      }
+    ])
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyMyDemandesFilter = useCallback(() => {
-    if (tableRef.current && user) {
+    if (user) {
       const userFullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.trim()
 
-      tableRef.current.setColumnFilters([
+      setColumnFilters([
         {
           id: 'assigneA',
-          value: [userFullName]
+          value: userFullName
         }
       ])
+      setPagination(prev => ({ ...prev, pageIndex: 0 }))
     }
   }, [user])
+
+  const clearAllFilters = () => {
+    setColumnFilters([])
+    setGlobalFilter('')
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
+  }
 
   // Appliquer automatiquement le filtre "mes-demandes" si demandé via sessionStorage
   useEffect(() => {
     const filterToApply = sessionStorage.getItem('demandes-apply-filter')
-    if (filterToApply === 'mes-demandes' && tableRef.current && user) {
-      // Attendre que le composant soit entièrement monté
+    if (filterToApply === 'mes-demandes' && user) {
       const timer = setTimeout(() => {
         applyMyDemandesFilter()
-        // Nettoyer le sessionStorage après application
         sessionStorage.removeItem('demandes-apply-filter')
       }, 100)
 
@@ -375,7 +479,7 @@ const Demandes: React.FC = () => {
             {/* Bouton pour effacer les filtres */}
             <div className="flex justify-end">
               <button
-                onClick={() => tableRef.current?.clearAllFilters()}
+                onClick={clearAllFilters}
                 className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
                 title="Effacer tous les filtres et afficher toutes les demandes"
               >
@@ -386,7 +490,7 @@ const Demandes: React.FC = () => {
         )}
       </div>
 
-      <DemandesTable
+      <DemandesTableV2
         ref={tableRef}
         data={demandes}
         loading={isLoading}
@@ -398,6 +502,18 @@ const Demandes: React.FC = () => {
         onLinkToExistingDossier={handleLinkToExistingDossier}
         onBulkAssignToUser={handleBulkAssignToUser}
         canDelete={user ? ['ADMIN', 'GREFFIER'].includes(user.role) : false}
+        // Server-side props
+        pageCount={pageCount}
+        totalRows={totalRows}
+        pagination={pagination}
+        sorting={sorting}
+        columnFilters={columnFilters}
+        globalFilter={globalFilter}
+        onPaginationChange={setPagination}
+        onSortingChange={setSorting}
+        onColumnFiltersChange={setColumnFilters}
+        onGlobalFilterChange={setGlobalFilter}
+        facets={facets}
       />
 
       <DemandeModal

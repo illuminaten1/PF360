@@ -1100,32 +1100,32 @@ const updateDemandeBAPs = async (req, res) => {
   try {
     const demandeId = req.params.id;
     const { bapId } = req.body;
-    
+
     // Vérifier que la demande existe
     const demande = await prisma.demande.findUnique({
       where: { id: demandeId }
     });
-    
+
     if (!demande) {
       return res.status(404).json({ error: 'Demande non trouvée' });
     }
-    
+
     // Vérifier que le BAP existe si un ID est fourni
     if (bapId) {
       const existingBAP = await prisma.bAP.findUnique({
         where: { id: bapId }
       });
-      
+
       if (!existingBAP) {
         return res.status(400).json({ error: 'Le BAP sélectionné n\'existe pas' });
       }
     }
-    
+
     // Supprimer toutes les relations BAP existantes pour cette demande
     await prisma.demandeBAP.deleteMany({
       where: { demandeId }
     });
-    
+
     // Créer la nouvelle relation si un BAP est fourni
     if (bapId) {
       await prisma.demandeBAP.create({
@@ -1135,7 +1135,7 @@ const updateDemandeBAPs = async (req, res) => {
         }
       });
     }
-    
+
     // Récupérer la demande mise à jour avec le BAP
     const updatedDemande = await prisma.demande.findUnique({
       where: { id: demandeId },
@@ -1147,18 +1147,63 @@ const updateDemandeBAPs = async (req, res) => {
         }
       }
     });
-    
+
     await logAction(
-      req.user.id, 
-      'UPDATE_DEMANDE_BAP', 
-      `Mise à jour du BAP pour la demande ${demande.numeroDS}${bapId ? ' - BAP assigné' : ' - BAP supprimé'}`, 
-      'Demande', 
+      req.user.id,
+      'UPDATE_DEMANDE_BAP',
+      `Mise à jour du BAP pour la demande ${demande.numeroDS}${bapId ? ' - BAP assigné' : ' - BAP supprimé'}`,
+      'Demande',
       demandeId
     );
-    
+
     res.json(updatedDemande);
   } catch (error) {
     console.error('Update demande BAP error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
+const getFacets = async (req, res) => {
+  try {
+    const [types, grades, badges, baps, assigneA] = await Promise.all([
+      prisma.demande.findMany({
+        select: { type: true },
+        distinct: ['type']
+      }),
+      prisma.grade.findMany({
+        select: { gradeAbrege: true },
+        orderBy: { ordre: 'asc' }
+      }),
+      prisma.badge.findMany({
+        select: { id: true, nom: true, couleur: true },
+        orderBy: { nom: 'asc' }
+      }),
+      prisma.bAP.findMany({
+        select: { id: true, nomBAP: true },
+        orderBy: { nomBAP: 'asc' }
+      }),
+      prisma.user.findMany({
+        where: {
+          active: { not: false },
+          demandesAssignees: { some: {} }
+        },
+        select: { id: true, nom: true, prenom: true, grade: true },
+        orderBy: [{ nom: 'asc' }, { prenom: 'asc' }]
+      })
+    ]);
+
+    res.json({
+      types: types.map(t => t.type),
+      grades: grades.map(g => g.gradeAbrege).filter(Boolean),
+      badges: badges.map(b => ({ id: b.id, nom: b.nom, couleur: b.couleur })),
+      baps: baps.map(b => ({ id: b.id, nom: b.nomBAP })),
+      assigneA: assigneA.map(u => ({
+        id: u.id,
+        fullName: `${u.grade || ''} ${u.prenom} ${u.nom}`.trim()
+      }))
+    });
+  } catch (error) {
+    console.error('Get facets error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
@@ -1178,5 +1223,6 @@ module.exports = {
   syncSingleDemandeBAPs,
   syncDemandeAssignationFromDossier,
   syncSingleDemandeAssignation,
-  updateDemandeBAPs
+  updateDemandeBAPs,
+  getFacets
 };

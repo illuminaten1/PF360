@@ -616,11 +616,14 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
       {
         accessorKey: 'nom',
         header: 'Nom',
-        cell: ({ getValue }) => (
-          <div className="font-medium text-gray-900">
-            {getValue<string>()}
-          </div>
-        ),
+        cell: ({ getValue }) => {
+          const nom = getValue<string>()
+          return (
+            <div className="font-medium text-gray-900 max-w-[150px] truncate" title={nom}>
+              {nom}
+            </div>
+          )
+        },
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Nom..." />
@@ -630,11 +633,14 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
       {
         accessorKey: 'prenom',
         header: 'Prénom',
-        cell: ({ getValue }) => (
-          <div className="text-gray-900">
-            {getValue<string>()}
-          </div>
-        ),
+        cell: ({ getValue }) => {
+          const prenom = getValue<string>()
+          return (
+            <div className="text-gray-900 max-w-[150px] truncate" title={prenom}>
+              {prenom}
+            </div>
+          )
+        },
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Prénom..." />

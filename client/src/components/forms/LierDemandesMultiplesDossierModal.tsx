@@ -131,7 +131,8 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
       await Promise.all(promises)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success(`${selectedDemandes.length} demande${selectedDemandes.length > 1 ? 's' : ''} liée${selectedDemandes.length > 1 ? 's' : ''} au dossier avec succès`)
       onSuccess?.()

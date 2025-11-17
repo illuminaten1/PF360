@@ -77,7 +77,7 @@ const AssignerDemandesLotModal: React.FC<AssignerDemandesLotModalProps> = ({
       return Promise.all(promises)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
 
       const assignedUser = utilisateurs.find((u: User) => u.id === selectedUserId)

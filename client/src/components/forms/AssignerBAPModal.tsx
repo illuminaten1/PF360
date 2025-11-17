@@ -76,9 +76,11 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
       return api.put(`/demandes/${demandeId}/baps`, { bapId })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['demandes-all'] })
+      // Invalider toutes les requêtes qui commencent par 'demandes'
+      queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
-      
+      queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
+
       if (selectedBAPId) {
         const selectedBAP = baps.find((b) => b.id === selectedBAPId)
         if (selectedBAP) {
@@ -87,7 +89,7 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
       } else {
         toast.success(`Le BAP a été supprimé de la demande ${demandeNumeroDS}`)
       }
-      
+
       resetModal()
       onClose()
     },

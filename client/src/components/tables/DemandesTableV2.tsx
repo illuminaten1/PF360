@@ -1301,6 +1301,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         isOpen={showAssignerLotModal}
         onClose={() => {
           setShowAssignerLotModal(false)
+          setSelectedDemandes(new Set())
         }}
         onSuccess={() => {
           setSelectedDemandes(new Set())

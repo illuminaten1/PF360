@@ -297,14 +297,39 @@ const demandeSchema = z.object({
 
 const getAllDemandes = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, dateDebut, dateFin, assigneAId, dossierId, sortBy, sortOrder } = req.query;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      type,
+      dateDebut,
+      dateFin,
+      dateFaitsDebut,
+      dateFaitsFin,
+      dateAudienceDebut,
+      dateAudienceFin,
+      assigneAId,
+      assigneA,
+      dossierId,
+      sortBy,
+      sortOrder,
+      // Filtres individuels
+      numeroDS,
+      nom,
+      prenom,
+      nigend,
+      unite,
+      commune,
+      grade,
+      bap
+    } = req.query;
     const skip = (page - 1) * limit;
 
     const where = {};
-    
+
     if (search) {
       const searchTerms = search.trim().split(/\s+/);
-      
+
       if (searchTerms.length === 1) {
         // Recherche simple sur un seul terme
         const term = searchTerms[0];
@@ -351,9 +376,24 @@ const getAllDemandes = async (req, res) => {
         ];
       }
     }
-    
+
+    // Filtres texte individuels
+    if (numeroDS) where.numeroDS = { contains: numeroDS };
+    if (nom) where.nom = { contains: nom };
+    if (prenom) where.prenom = { contains: prenom };
+    if (nigend) where.nigend = { contains: nigend };
+    if (unite) where.unite = { contains: unite };
+    if (commune) where.commune = { contains: commune };
+
     if (type) where.type = type;
-    
+
+    // Filtrage par grade (via relation)
+    if (grade) {
+      where.grade = {
+        gradeAbrege: grade
+      };
+    }
+
     // Filtrage par date de réception
     if (dateDebut || dateFin) {
       where.dateReception = {};
@@ -364,16 +404,75 @@ const getAllDemandes = async (req, res) => {
         where.dateReception.lte = new Date(dateFin + 'T23:59:59.999Z');
       }
     }
-    
-    // Filtrage par assignation
+
+    // Filtrage par date des faits
+    if (dateFaitsDebut || dateFaitsFin) {
+      where.dateFaits = {};
+      if (dateFaitsDebut) {
+        where.dateFaits.gte = new Date(dateFaitsDebut + 'T00:00:00.000Z');
+      }
+      if (dateFaitsFin) {
+        where.dateFaits.lte = new Date(dateFaitsFin + 'T23:59:59.999Z');
+      }
+    }
+
+    // Filtrage par date d'audience
+    if (dateAudienceDebut || dateAudienceFin) {
+      where.dateAudience = {};
+      if (dateAudienceDebut) {
+        where.dateAudience.gte = new Date(dateAudienceDebut + 'T00:00:00.000Z');
+      }
+      if (dateAudienceFin) {
+        where.dateAudience.lte = new Date(dateAudienceFin + 'T23:59:59.999Z');
+      }
+    }
+
+    // Filtrage par assignation (par ID ou par nom complet)
     if (assigneAId !== undefined) {
       if (assigneAId === 'null') {
         where.assigneAId = null;
       } else if (assigneAId) {
         where.assigneAId = assigneAId;
       }
+    } else if (assigneA) {
+      // Recherche par nom complet (format: "Grade Prenom Nom")
+      if (assigneA === 'Non assigné') {
+        where.assigneAId = null;
+      } else {
+        // Recherche dans la relation assigneA
+        where.assigneA = {
+          OR: [
+            // Recherche sur la combinaison grade + prenom + nom
+            {
+              AND: [
+                { grade: { contains: assigneA.split(' ')[0] || '' } },
+                { prenom: { contains: assigneA.split(' ')[1] || '' } },
+                { nom: { contains: assigneA.split(' ').slice(2).join(' ') || '' } }
+              ]
+            },
+            // Recherche sur prenom + nom seulement (au cas où pas de grade)
+            {
+              AND: [
+                { prenom: { contains: assigneA.split(' ')[0] || '' } },
+                { nom: { contains: assigneA.split(' ').slice(1).join(' ') || '' } }
+              ]
+            }
+          ]
+        };
+      }
     }
-    
+
+    // Filtrage par BAP (via relation many-to-many)
+    if (bap) {
+      where.baps = {
+        some: {
+          bap: {
+            nomBAP: bap
+          }
+        }
+      };
+    }
+
     // Filtrage par dossier
     if (dossierId !== undefined) {
       if (dossierId === 'null') {

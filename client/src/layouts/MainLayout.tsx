@@ -187,8 +187,8 @@ const MainLayout: React.FC = () => {
         sidebarExpanded ? 'lg:w-48' : 'lg:w-16'
       }`}>
         <div className="flex flex-col h-full bg-white border-r border-gray-200">
-          <div className={`flex items-center h-16 border-b border-gray-200 transition-all duration-300 ${
-            sidebarExpanded ? 'px-4' : 'justify-center'
+          <div className={`flex items-center h-[65px] border-b border-gray-200 transition-all duration-300 ${
+            sidebarExpanded ? 'pr-4 pl-[46px]' : 'justify-center pl-[10px]'
           }`}>
             <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
               <GlobeAltIcon className="h-5 w-5 text-white" />

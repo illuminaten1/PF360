@@ -1,45 +1,61 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/common/ProtectedRoute'
 import MainLayout from '@/layouts/MainLayout'
-import Login from '@/pages/Login'
-import Dashboard from '@/pages/Dashboard'
-import Dossiers from '@/pages/Dossiers'
-import DossierDetail from '@/pages/DossierDetail'
-import Demandes from '@/pages/Demandes'
-import Avocats from '@/pages/Avocats'
-import Users from '@/pages/Users'
-import Badges from '@/pages/Badges'
-import BAPPage from '@/pages/BAP'
-import SGAMIPage from '@/pages/SGAMI'
-import PCEPage from '@/pages/PCE'
-import VisaPage from '@/pages/Visa'
-import DiligencesPage from '@/pages/Diligences'
-import Decisions from '@/pages/Decisions'
-import Conventions from '@/pages/Conventions'
-import Paiements from '@/pages/Paiements'
-import GradesPage from '@/pages/Grades'
-import Templates from '@/pages/Templates'
-import Revue from '@/pages/Revue'
-import Statistiques from '@/pages/Statistiques'
-import Logs from '@/pages/Logs'
+
+// Lazy load all pages
+const Login = lazy(() => import('@/pages/Login'))
+const Dashboard = lazy(() => import('@/pages/Dashboard'))
+const Dossiers = lazy(() => import('@/pages/Dossiers'))
+const DossierDetail = lazy(() => import('@/pages/DossierDetail'))
+const Demandes = lazy(() => import('@/pages/Demandes'))
+const Avocats = lazy(() => import('@/pages/Avocats'))
+const Decisions = lazy(() => import('@/pages/Decisions'))
+const Conventions = lazy(() => import('@/pages/Conventions'))
+const Paiements = lazy(() => import('@/pages/Paiements'))
+const Revue = lazy(() => import('@/pages/Revue'))
+const Statistiques = lazy(() => import('@/pages/Statistiques'))
+
+// Admin pages (loaded only when needed)
+const Users = lazy(() => import('@/pages/Users'))
+const Badges = lazy(() => import('@/pages/Badges'))
+const BAPPage = lazy(() => import('@/pages/BAP'))
+const SGAMIPage = lazy(() => import('@/pages/SGAMI'))
+const PCEPage = lazy(() => import('@/pages/PCE'))
+const VisaPage = lazy(() => import('@/pages/Visa'))
+const DiligencesPage = lazy(() => import('@/pages/Diligences'))
+const GradesPage = lazy(() => import('@/pages/Grades'))
+const Templates = lazy(() => import('@/pages/Templates'))
+const Logs = lazy(() => import('@/pages/Logs'))
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="text-center">
+      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <p className="mt-2 text-sm text-gray-600">Chargement...</p>
+    </div>
+  </div>
+)
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="demandes" element={<Demandes />} />
           <Route path="dossiers" element={<Dossiers />} />
@@ -133,9 +149,10 @@ function App() {
             }
           />
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+      </Suspense>
     </AuthProvider>
   )
 }

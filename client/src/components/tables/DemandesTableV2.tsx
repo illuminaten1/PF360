@@ -363,6 +363,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
   const [currentBAP, setCurrentBAP] = useState<any>(null)
   const [selectedDemandes, setSelectedDemandes] = useState<Set<string>>(new Set())
   const [showAssignerLotModal, setShowAssignerLotModal] = useState(false)
+  const [modalKey, setModalKey] = useState(0)
   const [contextMenu, setContextMenu] = useState<{
     show: boolean
     x: number
@@ -723,6 +724,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
                       onClick={(e) => {
                         e.stopPropagation()
                         setSelectedDemandes(new Set([demande.id]))
+                        setModalKey(prev => prev + 1)
                         setShowAssignerLotModal(true)
                       }}
                       className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
@@ -740,6 +742,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
                       onClick={(e) => {
                         e.stopPropagation()
                         setSelectedDemandes(new Set([demande.id]))
+                        setModalKey(prev => prev + 1)
                         setShowAssignerLotModal(true)
                       }}
                       className="ml-2 text-sm text-blue-600 hover:text-blue-800 flex items-center"
@@ -1085,7 +1088,10 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
               </button>
               {onBulkAssignToUser && user?.role === 'ADMIN' && (
                 <button
-                  onClick={() => setShowAssignerLotModal(true)}
+                  onClick={() => {
+                    setModalKey(prev => prev + 1)
+                    setShowAssignerLotModal(true)
+                  }}
                   className="px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
                   <UserPlusIcon className="h-4 w-4 flex-shrink-0" />
@@ -1304,6 +1310,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
 
       {/* Modal pour assigner des demandes en lot */}
       <AssignerDemandesLotModal
+        key={modalKey}
         isOpen={showAssignerLotModal}
         onClose={() => {
           setShowAssignerLotModal(false)

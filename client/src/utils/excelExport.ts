@@ -1,6 +1,11 @@
-import ExcelJS from 'exceljs'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
+
+// Lazy load ExcelJS only when needed
+const getExcelJS = async () => {
+  const ExcelJS = await import('exceljs')
+  return ExcelJS.default
+}
 
 interface ExcelColumn {
   header: string
@@ -18,6 +23,9 @@ interface ExportOptions {
 
 export const exportToExcel = async (options: ExportOptions) => {
   const { filename, sheetName, columns, data } = options
+
+  // Lazy load ExcelJS
+  const ExcelJS = await getExcelJS()
 
   // Créer un nouveau classeur
   const workbook = new ExcelJS.Workbook()

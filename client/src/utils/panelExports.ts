@@ -1,5 +1,10 @@
-import ExcelJS from 'exceljs'
 import dayjs from 'dayjs'
+
+// Lazy load ExcelJS only when needed
+const getExcelJS = async () => {
+  const ExcelJS = await import('exceljs')
+  return ExcelJS.default
+}
 
 export interface ExportableData {
   [key: string]: any
@@ -9,6 +14,9 @@ export const exportToExcel = async (data: ExportableData[], filename: string, sh
   if (!data || data.length === 0) {
     throw new Error('Aucune donnée à exporter')
   }
+
+  // Lazy load ExcelJS
+  const ExcelJS = await getExcelJS()
 
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet(sheetName)

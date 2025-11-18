@@ -7,11 +7,21 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
-  type VisibilityState
+  type VisibilityState,
+  type OnChangeFn,
+  type PaginationState,
+  type Column
 } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
+
+// Extend TanStack Table's ColumnMeta to include custom filterComponent
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData, TValue> {
+    filterComponent?: (column: Column<TData, TValue>) => React.ReactNode
+  }
+}
 import {
   EyeIcon,
   PencilIcon,
@@ -59,13 +69,13 @@ interface DemandesTableV2Props {
   // Server-side props
   pageCount: number
   totalRows: number
-  pagination: { pageIndex: number; pageSize: number }
+  pagination: PaginationState
   sorting: SortingState
   columnFilters: ColumnFiltersState
   globalFilter: string
-  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
-  onSortingChange: (sorting: SortingState) => void
-  onColumnFiltersChange: (filters: ColumnFiltersState) => void
+  onPaginationChange: OnChangeFn<PaginationState>
+  onSortingChange: OnChangeFn<SortingState>
+  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>
   onGlobalFilterChange: (filter: string) => void
   onClearFilters?: () => void
   facets?: Facets

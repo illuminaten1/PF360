@@ -28,9 +28,9 @@ import {
   UserPlusIcon,
   PlusIcon,
   ClipboardDocumentListIcon,
-  CheckIcon
+  CheckIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import SearchBar from './SearchBar'
 import AssignerBAPModal from '../forms/AssignerBAPModal'
 import AssignerDemandesLotModal from '../forms/AssignerDemandesLotModal'
 import { useAuth } from '@/contexts/AuthContext'
@@ -67,6 +67,7 @@ interface DemandesTableV2Props {
   onSortingChange: (sorting: SortingState) => void
   onColumnFiltersChange: (filters: ColumnFiltersState) => void
   onGlobalFilterChange: (filter: string) => void
+  onClearFilters?: () => void
   facets?: Facets
 }
 
@@ -334,6 +335,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
   onSortingChange,
   onColumnFiltersChange,
   onGlobalFilterChange,
+  onClearFilters,
   facets
 }, ref) => {
   const navigate = useNavigate()
@@ -1058,11 +1060,65 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         </div>
       )}
 
-      <SearchBar
-        globalFilter={globalFilter}
-        onGlobalFilterChange={onGlobalFilterChange}
-        filteredRowsCount={totalRows}
-      />
+      <div className="border-b border-gray-200">
+        <div className="p-4">
+          {/* Desktop: tout sur une ligne */}
+          <div className="hidden sm:flex items-center gap-3">
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <input
+              type="text"
+              name="search"
+              autoComplete="off"
+              value={globalFilter ?? ''}
+              onChange={(e) => onGlobalFilterChange(String(e.target.value))}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Recherche globale..."
+            />
+            <span className="text-sm text-gray-500 whitespace-nowrap">
+              {totalRows} résultat(s)
+            </span>
+            {onClearFilters && (columnFilters.length > 0 || globalFilter) && (
+              <button
+                onClick={onClearFilters}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200 whitespace-nowrap"
+                title="Effacer tous les filtres et afficher toutes les demandes"
+              >
+                Effacer tous les filtres
+              </button>
+            )}
+          </div>
+
+          {/* Mobile: deux lignes */}
+          <div className="sm:hidden space-y-3">
+            <div className="flex items-center gap-2">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <input
+                type="text"
+                name="search"
+                autoComplete="off"
+                value={globalFilter ?? ''}
+                onChange={(e) => onGlobalFilterChange(String(e.target.value))}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Recherche globale..."
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-gray-500">
+                {totalRows} résultat(s)
+              </span>
+              {onClearFilters && (columnFilters.length > 0 || globalFilter) && (
+                <button
+                  onClick={onClearFilters}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200 whitespace-nowrap"
+                  title="Effacer tous les filtres et afficher toutes les demandes"
+                >
+                  Effacer tous les filtres
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Barre d'actions pour la sélection multiple */}
       {selectedDemandes.size > 0 && (onCreateDossierWithSelection || onLinkToExistingDossier || onBulkAssignToUser) && (

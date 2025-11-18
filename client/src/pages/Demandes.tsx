@@ -479,17 +479,6 @@ const Demandes: React.FC = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Bouton pour effacer les filtres */}
-            <div className="flex justify-end">
-              <button
-                onClick={clearAllFilters}
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-                title="Effacer tous les filtres et afficher toutes les demandes"
-              >
-                Effacer tous les filtres
-              </button>
-            </div>
           </div>
         )}
       </div>
@@ -517,6 +506,7 @@ const Demandes: React.FC = () => {
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
         onGlobalFilterChange={setGlobalFilter}
+        onClearFilters={clearAllFilters}
         facets={facets}
       />
 

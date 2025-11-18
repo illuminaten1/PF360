@@ -116,8 +116,8 @@ const MainLayout: React.FC = () => {
             paddingBottom: 'env(safe-area-inset-bottom)'
           }}
         >
-          <div className="flex h-16 items-center justify-between px-4">
-            <div className="flex items-center">
+          <div className="flex h-[80px] items-center justify-between px-4">
+            <div className="flex items-center pl-[10px]">
               <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
                 <GlobeAltIcon className="h-5 w-5 text-white" />
               </div>

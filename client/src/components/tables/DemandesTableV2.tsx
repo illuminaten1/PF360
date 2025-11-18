@@ -1,4 +1,4 @@
-import React, { useMemo, useState, forwardRef, useImperativeHandle, useEffect } from 'react'
+import React, { useMemo, useState, forwardRef, useImperativeHandle, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   useReactTable,
@@ -392,9 +392,9 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
     return type === 'VICTIME' ? 'Victime' : 'Mis en cause'
   }
 
-  const handleViewDossier = (dossierId: string) => {
+  const handleViewDossier = useCallback((dossierId: string) => {
     navigate(`/dossiers/${dossierId}`)
-  }
+  }, [navigate])
 
   const getAudienceUrgency = (dateAudience?: string) => {
     if (!dateAudience) return { type: 'none', style: 'bg-gray-100 text-gray-800', icon: null }
@@ -430,7 +430,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
     }
   }
 
-  const handleSelectDemande = (demandeId: string, checked: boolean) => {
+  const handleSelectDemande = useCallback((demandeId: string, checked: boolean) => {
     const newSelection = new Set(selectedDemandes)
     if (checked) {
       newSelection.add(demandeId)
@@ -438,7 +438,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
       newSelection.delete(demandeId)
     }
     setSelectedDemandes(newSelection)
-  }
+  }, [selectedDemandes])
 
   const isDemandeSelectable = (demande: Demande) => {
     return !demande.dossier && !demande.assigneA && (!demande.baps || demande.baps.length === 0)
@@ -978,7 +978,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         }
       }
     ],
-    [onView, onEdit, onDelete, onAddToDossier, handleViewDossier, selectedDemandes, facets, user]
+    [onView, onEdit, onDelete, onAddToDossier, handleViewDossier, selectedDemandes, facets, user, canDelete, handleSelectDemande]
   )
 
   const table = useReactTable({

@@ -78,6 +78,9 @@ interface ServerDataTableProps<TData> {
     total: number
     pageCount: number
   }
+
+  // Callback when data changes
+  onDataChange?: (data: TData[]) => void
 }
 
 function ServerDataTableInner<TData>(
@@ -103,7 +106,8 @@ function ServerDataTableInner<TData>(
     toolbarRight,
     toolbarBottom,
     pageSizeOptions = [10, 20, 50, 100, 200],
-    transform
+    transform,
+    onDataChange
   }: ServerDataTableProps<TData>,
   ref: React.Ref<ServerDataTableRef>
 ) {
@@ -131,7 +135,8 @@ function ServerDataTableInner<TData>(
     initialPageSize,
     initialSorting,
     buildParams,
-    transform
+    transform,
+    onDataChange
   })
 
   const table = useReactTable({

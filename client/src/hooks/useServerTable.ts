@@ -21,6 +21,7 @@ interface UseServerTableOptions<TData = any> {
     total: number
     pageCount: number
   }
+  onDataChange?: (data: TData[]) => void
 }
 
 interface UseServerTableReturn<TData = any> {
@@ -97,7 +98,8 @@ export function useServerTable<TData = any>({
   buildParams = defaultBuildParams,
   enabled = true,
   debounceMs = 500,
-  transform
+  transform,
+  onDataChange
 }: UseServerTableOptions<TData>): UseServerTableReturn<TData> {
   // Server-side state
   const [pagination, setPagination] = useState<PaginationState>({
@@ -153,6 +155,13 @@ export function useServerTable<TData = any>({
     setGlobalFilter('')
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
+
+  // Call onDataChange when data changes
+  useEffect(() => {
+    if (onDataChange && transformedData.data) {
+      onDataChange(transformedData.data)
+    }
+  }, [transformedData.data, onDataChange])
 
   return {
     data: transformedData.data,

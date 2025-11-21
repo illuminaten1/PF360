@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
-import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { Demande } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/utils/api'
-import DemandesTableV2, { DemandesTableV2Ref } from '@/components/tables/DemandesTableV2'
+import DemandesTableV2 from '@/components/tables/DemandesTableV2'
+import { ServerDataTableRef } from '@/components/tables'
 import DemandeModal from '@/components/forms/DemandeModal'
 import DemandeViewModal from '@/components/forms/DemandeViewModal'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
@@ -22,76 +22,6 @@ interface DemandesStats {
   mesDemandes: number
 }
 
-// Helper function to convert TanStack Table filters to API params
-const buildApiParams = (
-  pagination: { pageIndex: number; pageSize: number },
-  sorting: SortingState,
-  columnFilters: ColumnFiltersState,
-  globalFilter: string
-) => {
-  const params: any = {
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize
-  }
-
-  // Global search
-  if (globalFilter) {
-    params.search = globalFilter
-  }
-
-  // Sorting
-  if (sorting.length > 0) {
-    const sort = sorting[0]
-    params.sortBy = sort.id
-    params.sortOrder = sort.desc ? 'desc' : 'asc'
-  }
-
-  // Column filters - envoi direct des valeurs au backend
-  columnFilters.forEach((filter) => {
-    const { id, value } = filter
-
-    if (id === 'numeroDS' && value) {
-      params.numeroDS = value
-    } else if (id === 'nom' && value) {
-      params.nom = value
-    } else if (id === 'prenom' && value) {
-      params.prenom = value
-    } else if (id === 'nigend' && value) {
-      params.nigend = value
-    } else if (id === 'unite' && value) {
-      params.unite = value
-    } else if (id === 'commune' && value) {
-      params.commune = value
-    } else if (id === 'type' && value) {
-      // Multi-select filter - can be an array
-      params.type = Array.isArray(value) ? value : [value]
-    } else if (id === 'grade' && value) {
-      // Multi-select filter - can be an array
-      params.grade = Array.isArray(value) ? value : [value]
-    } else if (id === 'assigneA' && value) {
-      // Multi-select filter - can be an array
-      params.assigneA = Array.isArray(value) ? value : [value]
-    } else if (id === 'baps' && value) {
-      // Multi-select filter - can be an array
-      params.bap = Array.isArray(value) ? value : [value]
-    } else if (id === 'dateReception' && typeof value === 'object' && !Array.isArray(value)) {
-      const dateRange = value as { from?: string; to?: string }
-      if (dateRange.from) params.dateDebut = dateRange.from
-      if (dateRange.to) params.dateFin = dateRange.to
-    } else if (id === 'dateFaits' && typeof value === 'object' && !Array.isArray(value)) {
-      const dateRange = value as { from?: string; to?: string }
-      if (dateRange.from) params.dateFaitsDebut = dateRange.from
-      if (dateRange.to) params.dateFaitsFin = dateRange.to
-    } else if (id === 'dateAudience' && typeof value === 'object' && !Array.isArray(value)) {
-      const dateRange = value as { from?: string; to?: string }
-      if (dateRange.from) params.dateAudienceDebut = dateRange.from
-      if (dateRange.to) params.dateAudienceFin = dateRange.to
-    }
-  })
-
-  return params
-}
-
 const Demandes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
@@ -101,45 +31,9 @@ const Demandes: React.FC = () => {
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null)
   const [selectedDemandesForDossier, setSelectedDemandesForDossier] = useState<Demande[]>([])
   const { user } = useAuth()
-  const tableRef = useRef<DemandesTableV2Ref>(null)
-
-  // Server-side state
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 })
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'dateReception', desc: true }])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-
-  // Debounced global filter for API calls
-  const [debouncedGlobalFilter, setDebouncedGlobalFilter] = useState('')
+  const tableRef = useRef<ServerDataTableRef>(null)
 
   const queryClient = useQueryClient()
-
-  // Debounce global filter to avoid too many API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedGlobalFilter(globalFilter)
-      if (globalFilter !== debouncedGlobalFilter) {
-        setPagination(prev => ({ ...prev, pageIndex: 0 }))
-      }
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [globalFilter])
-
-  // Fetch demandes with server-side pagination, sorting, and filtering
-  const { data: demandesData, isLoading } = useQuery({
-    queryKey: ['demandes', pagination, sorting, columnFilters, debouncedGlobalFilter],
-    queryFn: async () => {
-      const params = buildApiParams(pagination, sorting, columnFilters, debouncedGlobalFilter)
-      const response = await api.get('/demandes', { params })
-      return response.data
-    },
-    placeholderData: (previousData) => previousData
-  })
-
-  const demandes = demandesData?.demandes || []
-  const totalRows = demandesData?.total || 0
-  const pageCount = demandesData?.pagination?.pages || 0
 
   // Fetch stats
   const { data: stats } = useQuery<DemandesStats>({
@@ -169,8 +63,10 @@ const Demandes: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-facets'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande créée avec succès')
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la création')
@@ -186,8 +82,10 @@ const Demandes: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-facets'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande modifiée avec succès')
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la modification')
@@ -202,15 +100,17 @@ const Demandes: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['demandes-facets'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
       toast.success('Demande supprimée avec succès')
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la suppression')
     }
   })
 
-  // Create dossier mutation (existing)
+  // Create dossier mutation
   const createDossierMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await api.post('/dossiers', data)
@@ -223,8 +123,7 @@ const Demandes: React.FC = () => {
       // Fermer le modal et réinitialiser la sélection
       setIsDossierModalOpen(false)
       setSelectedDemandesForDossier([])
-      // Réinitialiser la sélection dans la table
-      tableRef.current?.clearSelection()
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la création du dossier')
@@ -249,10 +148,10 @@ const Demandes: React.FC = () => {
   const handleDeleteDemande = (demande: Demande) => {
     // Vérifier les permissions avant de permettre la suppression
     if (!user || !['ADMIN', 'GREFFIER'].includes(user.role)) {
-      toast.error('Vous n\'avez pas les permissions pour supprimer des demandes')
+      toast.error("Vous n'avez pas les permissions pour supprimer des demandes")
       return
     }
-    
+
     setSelectedDemande(demande)
     setIsDeleteModalOpen(true)
   }
@@ -299,6 +198,8 @@ const Demandes: React.FC = () => {
     } else {
       await createDemandeMutation.mutateAsync(data)
     }
+    setIsModalOpen(false)
+    setSelectedDemande(null)
   }
 
   const handleSubmitDossier = async (data: any) => {
@@ -310,79 +211,68 @@ const Demandes: React.FC = () => {
     const currentYear = new Date().getFullYear()
     const startOfYear = `${currentYear}-01-01`
 
-    setColumnFilters([
+    tableRef.current?.setColumnFilters([
       {
         id: 'dateReception',
         value: { from: startOfYear }
       }
     ])
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyUnassignedYearFilter = () => {
     const currentYear = new Date().getFullYear()
     const startOfYear = `${currentYear}-01-01`
 
-    setColumnFilters([
+    tableRef.current?.setColumnFilters([
       {
         id: 'dateReception',
         value: { from: startOfYear }
       },
       {
         id: 'assigneA',
-        value: 'Non assigné'
+        value: ['Non assigné']
       }
     ])
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyTodayFilter = () => {
     const today = new Date().toISOString().split('T')[0]
 
-    setColumnFilters([
+    tableRef.current?.setColumnFilters([
       {
         id: 'dateReception',
         value: { from: today, to: today }
       }
     ])
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyTodayUnassignedFilter = () => {
     const today = new Date().toISOString().split('T')[0]
 
-    setColumnFilters([
+    tableRef.current?.setColumnFilters([
       {
         id: 'dateReception',
         value: { from: today, to: today }
       },
       {
         id: 'assigneA',
-        value: 'Non assigné'
+        value: ['Non assigné']
       }
     ])
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }
 
   const applyMyDemandesFilter = useCallback(() => {
     if (user) {
       const userFullName = `${user.grade || ''} ${user.prenom} ${user.nom}`.trim()
 
-      setColumnFilters([
+      tableRef.current?.setColumnFilters([
         {
           id: 'assigneA',
-          value: userFullName
+          value: [userFullName]
         }
       ])
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
     }
   }, [user])
-
-  const clearAllFilters = () => {
-    setColumnFilters([])
-    setGlobalFilter('')
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
-  }
 
   // Appliquer automatiquement le filtre "mes-demandes" si demandé via sessionStorage
   useEffect(() => {
@@ -403,14 +293,9 @@ const Demandes: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Demandes</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Gestion des demandes
-            </p>
+            <p className="mt-1 text-sm text-gray-600">Gestion des demandes</p>
           </div>
-          <button
-            onClick={handleCreateDemande}
-            className="btn-primary flex items-center"
-          >
+          <button onClick={handleCreateDemande} className="btn-primary flex items-center">
             <PlusIcon className="h-5 w-5 mr-2" />
             Nouvelle demande
           </button>
@@ -423,7 +308,7 @@ const Demandes: React.FC = () => {
               {/* Mes demandes - Section séparée */}
               <div className="md:w-64">
                 <div className="text-sm font-medium text-gray-700 mb-3">Personnel</div>
-                <div 
+                <div
                   className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-indigo-200"
                   onClick={applyMyDemandesFilter}
                   title="Cliquer pour filtrer toutes mes demandes assignées"
@@ -437,7 +322,7 @@ const Demandes: React.FC = () => {
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-blue-200"
                     onClick={applyYearFilter}
                     title="Cliquer pour filtrer les demandes de l'année"
@@ -445,7 +330,7 @@ const Demandes: React.FC = () => {
                     <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
                     <div className="text-sm text-gray-600">Total</div>
                   </div>
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-red-200"
                     onClick={applyUnassignedYearFilter}
                     title="Cliquer pour filtrer les demandes non affectées de l'année"
@@ -455,12 +340,12 @@ const Demandes: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Statistiques actuelles */}
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-700 mb-3">Aujourd&apos;hui</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-green-200"
                     onClick={applyTodayFilter}
                     title="Cliquer pour filtrer les demandes reçues aujourd'hui"
@@ -468,7 +353,7 @@ const Demandes: React.FC = () => {
                     <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
                     <div className="text-sm text-gray-600">Reçues</div>
                   </div>
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-red-200"
                     onClick={applyTodayUnassignedFilter}
                     title="Cliquer pour filtrer les demandes non affectées d'aujourd'hui"
@@ -485,8 +370,6 @@ const Demandes: React.FC = () => {
 
       <DemandesTableV2
         ref={tableRef}
-        data={demandes}
-        loading={isLoading}
         onView={handleViewDemande}
         onEdit={handleEditDemande}
         onDelete={handleDeleteDemande}
@@ -495,18 +378,6 @@ const Demandes: React.FC = () => {
         onLinkToExistingDossier={handleLinkToExistingDossier}
         onBulkAssignToUser={handleBulkAssignToUser}
         canDelete={user ? ['ADMIN', 'GREFFIER'].includes(user.role) : false}
-        // Server-side props
-        pageCount={pageCount}
-        totalRows={totalRows}
-        pagination={pagination}
-        sorting={sorting}
-        columnFilters={columnFilters}
-        globalFilter={globalFilter}
-        onPaginationChange={setPagination}
-        onSortingChange={setSorting}
-        onColumnFiltersChange={setColumnFilters}
-        onGlobalFilterChange={setGlobalFilter}
-        onClearFilters={clearAllFilters}
         facets={facets}
       />
 
@@ -545,7 +416,6 @@ const Demandes: React.FC = () => {
         />
       )}
 
-
       <LierDemandesMultiplesDossierModal
         isOpen={isLierMultiplesModalOpen}
         onClose={() => {
@@ -553,8 +423,7 @@ const Demandes: React.FC = () => {
           setSelectedDemandesForDossier([])
         }}
         onSuccess={() => {
-          // Réinitialiser la sélection dans la table seulement après succès
-          tableRef.current?.clearSelection()
+          tableRef.current?.refetch()
         }}
         selectedDemandes={selectedDemandesForDossier}
       />

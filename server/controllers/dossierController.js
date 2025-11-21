@@ -330,7 +330,7 @@ const getAllDossiers = async (req, res) => {
 const getFacets = async (req, res) => {
   try {
     const [sgamis, badges, assigneA] = await Promise.all([
-      prisma.sGAMI.findMany({
+      prisma.sgami.findMany({
         select: { id: true, nom: true },
         orderBy: { nom: 'asc' }
       }),

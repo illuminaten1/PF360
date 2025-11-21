@@ -362,7 +362,67 @@ const getFacets = async (req, res) => {
   }
 };
 
+const getStats = async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear + 1, 0, 1);
+
+    const [
+      totalDossiers,
+      dossiersToday,
+      dossiersNonAssignes,
+      mesDossiers
+    ] = await Promise.all([
+      // Total dossiers de l'année
+      prisma.dossier.count({
+        where: {
+          createdAt: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        }
+      }),
+      // Dossiers créés aujourd'hui
+      prisma.dossier.count({
+        where: {
+          createdAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0))
+          }
+        }
+      }),
+      // Dossiers non assignés de l'année
+      prisma.dossier.count({
+        where: {
+          assigneAId: null,
+          createdAt: {
+            gte: startOfYear,
+            lt: endOfYear
+          }
+        }
+      }),
+      // Mes dossiers (assignés à l'utilisateur connecté)
+      prisma.dossier.count({
+        where: {
+          assigneAId: req.user.id
+        }
+      })
+    ]);
+
+    res.json({
+      totalDossiers,
+      dossiersToday,
+      dossiersNonAssignes,
+      mesDossiers
+    });
+  } catch (error) {
+    console.error('Get dossiers stats error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
 module.exports = {
   getAllDossiers,
-  getFacets
+  getFacets,
+  getStats
 };

@@ -10,6 +10,13 @@ import DossiersTableV2 from '@/components/tables/DossiersTableV2'
 import { ServerDataTableRef } from '@/components/tables'
 import DossierModal from '@/components/forms/DossierModal'
 
+interface DossiersStats {
+  totalDossiers: number
+  dossiersToday: number
+  dossiersNonAssignes: number
+  mesDossiers: number
+}
+
 const Dossiers: React.FC = () => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -18,6 +25,15 @@ const Dossiers: React.FC = () => {
   const tableRef = useRef<ServerDataTableRef>(null)
 
   const queryClient = useQueryClient()
+
+  // Fetch stats
+  const { data: stats } = useQuery<DossiersStats>({
+    queryKey: ['dossiers-stats'],
+    queryFn: async () => {
+      const response = await api.get('/dossiers/stats')
+      return response.data
+    }
+  })
 
   // Fetch facets for filters
   const { data: facets } = useQuery({
@@ -37,8 +53,10 @@ const Dossiers: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers-facets'] })
       toast.success('Dossier créé avec succès')
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la création')
@@ -53,8 +71,10 @@ const Dossiers: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers-facets'] })
       toast.success('Dossier modifié avec succès')
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la modification')
@@ -68,8 +88,10 @@ const Dossiers: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-stats'] })
       queryClient.invalidateQueries({ queryKey: ['dossiers-facets'] })
       toast.success('Dossier supprimé avec succès')
+      tableRef.current?.refetch()
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la suppression')
@@ -151,17 +173,44 @@ const Dossiers: React.FC = () => {
           </button>
         </div>
 
-        {/* Stats - Temporairement désactivées (nécessitent un endpoint séparé pour server-side) */}
-        {/* TODO: Créer un endpoint /dossiers/stats pour les statistiques globales */}
-        {/*
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-gray-900">...</div>
-            <div className="text-sm text-gray-600">Total dossiers</div>
+        {/* Stats */}
+        {stats && (
+          <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Mes dossiers - Section séparée */}
+              <div className="md:w-64">
+                <div className="text-sm font-medium text-gray-700 mb-3">Personnel</div>
+                <div
+                  className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-indigo-200"
+                  onClick={applyMyDossiersFilter}
+                  title="Cliquer pour filtrer tous mes dossiers assignés"
+                >
+                  <div className="text-2xl font-bold text-indigo-600">{stats.mesDossiers}</div>
+                  <div className="text-sm text-gray-600">Mes dossiers</div>
+                </div>
+              </div>
+
+              {/* Statistiques de l'année et aujourd'hui */}
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-2xl font-bold text-gray-900">{stats.totalDossiers}</div>
+                    <div className="text-sm text-gray-600">Total dossiers</div>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                    <div className="text-2xl font-bold text-green-600">{stats.dossiersToday}</div>
+                    <div className="text-sm text-gray-600">Créés aujourd'hui</div>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                    <div className="text-2xl font-bold text-red-600">{stats.dossiersNonAssignes}</div>
+                    <div className="text-sm text-gray-600">Non assignés</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          ...
-        </div>
-        */}
+        )}
       </div>
 
       <DossiersTableV2

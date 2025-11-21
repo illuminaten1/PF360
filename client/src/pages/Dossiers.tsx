@@ -6,7 +6,8 @@ import { PlusIcon } from '@heroicons/react/24/outline'
 import { Dossier } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/utils/api'
-import DossiersTable, { DossiersTableRef } from '@/components/tables/DossiersTable'
+import DossiersTableV2 from '@/components/tables/DossiersTableV2'
+import { ServerDataTableRef } from '@/components/tables'
 import DossierModal from '@/components/forms/DossierModal'
 
 const Dossiers: React.FC = () => {
@@ -14,17 +15,18 @@ const Dossiers: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDossier, setSelectedDossier] = useState<Dossier | null>(null)
   const { user } = useAuth()
-  const tableRef = useRef<DossiersTableRef>(null)
+  const tableRef = useRef<ServerDataTableRef>(null)
 
   const queryClient = useQueryClient()
 
-  // Fetch all dossiers (client-side filtering with TanStack)
-  const { data: dossiers = [], isLoading } = useQuery<Dossier[]>({
-    queryKey: ['dossiers-all'],
+  // Fetch facets for filters
+  const { data: facets } = useQuery({
+    queryKey: ['dossiers-facets'],
     queryFn: async () => {
-      const response = await api.get('/dossiers')
+      const response = await api.get('/dossiers/facets')
       return response.data
-    }
+    },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   })
 
   // Create dossier mutation
@@ -34,7 +36,8 @@ const Dossiers: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-facets'] })
       toast.success('Dossier créé avec succès')
     },
     onError: (error: any) => {
@@ -49,7 +52,8 @@ const Dossiers: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-facets'] })
       toast.success('Dossier modifié avec succès')
     },
     onError: (error: any) => {
@@ -63,7 +67,8 @@ const Dossiers: React.FC = () => {
       await api.delete(`/dossiers/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers-all'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] })
+      queryClient.invalidateQueries({ queryKey: ['dossiers-facets'] })
       toast.success('Dossier supprimé avec succès')
     },
     onError: (error: any) => {
@@ -146,40 +151,25 @@ const Dossiers: React.FC = () => {
           </button>
         </div>
 
-        {/* Stats */}
+        {/* Stats - Temporairement désactivées (nécessitent un endpoint séparé pour server-side) */}
+        {/* TODO: Créer un endpoint /dossiers/stats pour les statistiques globales */}
+        {/*
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-gray-900">{dossiers.length}</div>
+            <div className="text-2xl font-bold text-gray-900">...</div>
             <div className="text-sm text-gray-600">Total dossiers</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-green-600">
-              {dossiers.filter(d => d.decisions.length > 0).length}
-            </div>
-            <div className="text-sm text-gray-600">Avec décision</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-blue-600">
-              {dossiers.filter(d => d.assigneA).length}
-            </div>
-            <div className="text-sm text-gray-600">Assignés</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-purple-600">
-              {dossiers.reduce((sum, d) => sum + (d.stats?.totalConventionsHT || 0), 0).toLocaleString('fr-FR')} €
-            </div>
-            <div className="text-sm text-gray-600">Montant total</div>
-          </div>
+          ...
         </div>
+        */}
       </div>
 
-      <DossiersTable
+      <DossiersTableV2
         ref={tableRef}
-        data={dossiers}
         onView={handleViewDossier}
         onEdit={handleEditDossier}
         onDelete={handleDeleteDossier}
-        loading={isLoading}
+        facets={facets}
       />
 
       <DossierModal

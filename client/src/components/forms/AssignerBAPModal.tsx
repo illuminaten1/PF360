@@ -75,16 +75,17 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
     mutationFn: async (bapId: string | null) => {
       return api.put(`/demandes/${demandeId}/baps`, { bapId })
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Invalider toutes les requêtes qui commencent par 'demandes'
       queryClient.invalidateQueries({ queryKey: ['demandes'] })
       queryClient.invalidateQueries({ queryKey: ['demande', demandeId] })
       queryClient.invalidateQueries({ queryKey: ['demandes-stats'] })
 
-      if (selectedBAPId) {
-        const selectedBAP = baps.find((b) => b.id === selectedBAPId)
-        if (selectedBAP) {
-          toast.success(`BAP ${selectedBAP.nomBAP} assigné à la demande ${demandeNumeroDS}`)
+      // Utiliser les variables passées à la mutation, pas le state local
+      if (variables) {
+        const assignedBAP = baps.find((b) => b.id === variables)
+        if (assignedBAP) {
+          toast.success(`BAP ${assignedBAP.nomBAP} assigné à la demande ${demandeNumeroDS}`)
         }
       } else {
         toast.success(`Le BAP a été supprimé de la demande ${demandeNumeroDS}`)
@@ -94,8 +95,8 @@ const AssignerBAPModal: React.FC<AssignerBAPModalProps> = ({
       onClose()
     },
     onError: (error: unknown) => {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Erreur lors de l\'assignation'
       toast.error(errorMessage)
     }

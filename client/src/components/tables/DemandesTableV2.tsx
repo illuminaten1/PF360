@@ -23,7 +23,6 @@ declare module '@tanstack/react-table' {
   }
 }
 import {
-  EyeIcon,
   PencilIcon,
   TrashIcon,
   FolderIcon,
@@ -550,14 +549,8 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
       {
         accessorKey: 'numeroDS',
         header: 'Numéro DS',
-        cell: ({ getValue, row }) => (
-          <div
-            className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-            onClick={(e) => {
-              e.stopPropagation()
-              onView(row.original)
-            }}
-          >
+        cell: ({ getValue }) => (
+          <div className="font-medium text-gray-900">
             {getValue<string>()}
           </div>
         ),
@@ -903,16 +896,6 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                onView(row.original)
-              }}
-              className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
-              title="Voir"
-            >
-              <EyeIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
                 onEdit(row.original)
               }}
               className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
@@ -978,7 +961,7 @@ const DemandesTableV2 = forwardRef<DemandesTableV2Ref, DemandesTableV2Props>(({
         }
       }
     ],
-    [onView, onEdit, onDelete, onAddToDossier, handleViewDossier, selectedDemandes, facets, user, canDelete, handleSelectDemande]
+    [onEdit, onDelete, onAddToDossier, handleViewDossier, selectedDemandes, facets, user, canDelete, handleSelectDemande]
   )
 
   const table = useReactTable({

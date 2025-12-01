@@ -198,8 +198,9 @@ function MultiSelectFilter({
 const DemandeursCell: React.FC<{
   dossier: Dossier
   onLierDemandes: (dossierId: string, dossierNumero: string) => void
-}> = ({ dossier, onLierDemandes }) => {
-  const [showAll, setShowAll] = React.useState(false)
+  showAll: boolean
+  onToggleShowAll: () => void
+}> = React.memo(({ dossier, onLierDemandes, showAll, onToggleShowAll }) => {
 
   if (dossier.demandes.length === 0) {
     return (
@@ -232,7 +233,7 @@ const DemandeursCell: React.FC<{
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  setShowAll(false)
+                  onToggleShowAll()
                 }}
                 className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
               >
@@ -256,7 +257,7 @@ const DemandeursCell: React.FC<{
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
-                    setShowAll(true)
+                    onToggleShowAll()
                   }}
                   className="text-blue-600 hover:text-blue-800 text-xs underline"
                 >
@@ -269,7 +270,7 @@ const DemandeursCell: React.FC<{
       </div>
     </div>
   )
-}
+})
 
 const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
   data,
@@ -296,6 +297,7 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
   const [showLierDemandesModal, setShowLierDemandesModal] = useState(false)
   const [selectedDossierId, setSelectedDossierId] = useState<string>('')
   const [selectedDossierNumero, setSelectedDossierNumero] = useState<string>('')
+  const [expandedDossiers, setExpandedDossiers] = useState<Set<string>>(new Set())
 
   const columns = useMemo<ColumnDef<Dossier>[]>(
     () => [
@@ -358,6 +360,18 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
                 setSelectedDossierId(dossierId)
                 setSelectedDossierNumero(dossierNumero)
                 setShowLierDemandesModal(true)
+              }}
+              showAll={expandedDossiers.has(dossier.id)}
+              onToggleShowAll={() => {
+                setExpandedDossiers(prev => {
+                  const newSet = new Set(prev)
+                  if (newSet.has(dossier.id)) {
+                    newSet.delete(dossier.id)
+                  } else {
+                    newSet.add(dossier.id)
+                  }
+                  return newSet
+                })
               }}
             />
           )

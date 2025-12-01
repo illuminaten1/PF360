@@ -590,7 +590,7 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
             {onClearFilters && (columnFilters.length > 0 || globalFilter) && (
               <button
                 onClick={onClearFilters}
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200 whitespace-nowrap"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-colors duration-200 whitespace-nowrap shadow-sm"
                 title="Effacer tous les filtres et afficher tous les dossiers"
               >
                 Effacer tous les filtres
@@ -619,7 +619,7 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
               {onClearFilters && (columnFilters.length > 0 || globalFilter) && (
                 <button
                   onClick={onClearFilters}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200 whitespace-nowrap"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-colors duration-200 whitespace-nowrap shadow-sm"
                   title="Effacer tous les filtres et afficher tous les dossiers"
                 >
                   Effacer tous les filtres

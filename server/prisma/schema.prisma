@@ -26,270 +26,270 @@ model User {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  logs             Log[]
-  dossiersAssignes Dossier[]
-  dossiersCrees    Dossier[]   @relation("DossierCreateur")
-  dossiersModifies Dossier[]   @relation("DossierModificateur")
-  demandesAssignees Demande[]
-  demandesCrees    Demande[]   @relation("DemandeCreateur")
-  demandesModifiees Demande[]  @relation("DemandeModificateur")
-  decisionsCrees   Decision[]  @relation("DecisionCreateur")
-  decisionsModifiees Decision[] @relation("DecisionModificateur")
-  conventions      Convention[]
-  conventionsModifiees Convention[] @relation("ConventionModificateur")
-  paiements        Paiement[]
-  avocatsCrees     Avocat[]    @relation("AvocatCreateur")
-  avocatsModifies  Avocat[]    @relation("AvocatModificateur")
-  diligencesCrees  Diligence[] @relation("DiligenceCreateur")
-  diligencesModifiees Diligence[] @relation("DiligenceModificateur")
-  templatesUploadees TemplateVersion[] @relation("TemplateVersionUploader")
-  transfersAsSource  TransferHistory[] @relation("TransferHistorySource")
-  transfersAsTarget  TransferHistory[] @relation("TransferHistoryTarget")
-  transfersInitiated TransferHistory[] @relation("TransferHistoryTransferrer")
-  transfersRolledBack TransferHistory[] @relation("TransferHistoryRollbacker")
-  budgetsCrees       BudgetAnnuel[] @relation("BudgetAnnuelCreateur")
-  budgetsModifies    BudgetAnnuel[] @relation("BudgetAnnuelModificateur")
+  logs                 Log[]
+  dossiersAssignes     Dossier[]
+  dossiersCrees        Dossier[]         @relation("DossierCreateur")
+  dossiersModifies     Dossier[]         @relation("DossierModificateur")
+  demandesAssignees    Demande[]
+  demandesCrees        Demande[]         @relation("DemandeCreateur")
+  demandesModifiees    Demande[]         @relation("DemandeModificateur")
+  decisionsCrees       Decision[]        @relation("DecisionCreateur")
+  decisionsModifiees   Decision[]        @relation("DecisionModificateur")
+  conventions          Convention[]
+  conventionsModifiees Convention[]      @relation("ConventionModificateur")
+  paiements            Paiement[]
+  avocatsCrees         Avocat[]          @relation("AvocatCreateur")
+  avocatsModifies      Avocat[]          @relation("AvocatModificateur")
+  diligencesCrees      Diligence[]       @relation("DiligenceCreateur")
+  diligencesModifiees  Diligence[]       @relation("DiligenceModificateur")
+  templatesUploadees   TemplateVersion[] @relation("TemplateVersionUploader")
+  transfersAsSource    TransferHistory[] @relation("TransferHistorySource")
+  transfersAsTarget    TransferHistory[] @relation("TransferHistoryTarget")
+  transfersInitiated   TransferHistory[] @relation("TransferHistoryTransferrer")
+  transfersRolledBack  TransferHistory[] @relation("TransferHistoryRollbacker")
+  budgetsCrees         BudgetAnnuel[]    @relation("BudgetAnnuelCreateur")
+  budgetsModifies      BudgetAnnuel[]    @relation("BudgetAnnuelModificateur")
 
   @@map("users")
 }
 
 model Demande {
-  id                     String    @id @default(cuid())
-  numeroDS               String    @unique // Numéro Démarches Simplifiées
-  type                   String // VICTIME | MIS_EN_CAUSE
-  
+  id       String @id @default(cuid())
+  numeroDS String @unique // Numéro Démarches Simplifiées
+  type     String // VICTIME | MIS_EN_CAUSE
+
   // Infos militaires
-  nigend                 String?
-  grade                  Grade?    @relation(fields: [gradeId], references: [id])
-  gradeId                String?
-  statutDemandeur        String? // OG | OCTA | SOG | CSTAGN | GAV | Civil | Réserviste | Retraité | Ayant-droit
-  branche                String? // GD | GM | GR | État-Major | GIE SPÉ | DG et ORG. CENTRAUX | GIGN
+  nigend                  String?
+  grade                   Grade?  @relation(fields: [gradeId], references: [id])
+  gradeId                 String?
+  statutDemandeur         String? // OG | OCTA | SOG | CSTAGN | GAV | Civil | Réserviste | Retraité | Ayant-droit
+  branche                 String? // GD | GM | GR | État-Major | GIE SPÉ | DG et ORG. CENTRAUX | GIGN
   formationAdministrative String? // Liste des formations administratives
-  departement            String? // Départements et codes spéciaux
-  nom                    String
-  prenom                 String
-  adressePostaleLigne1   String?
-  adressePostaleLigne2   String?
-  telephoneProfessionnel String?
-  telephonePersonnel     String?
-  emailProfessionnel     String?
-  emailPersonnel         String?
-  unite                  String?
-  
+  departement             String? // Départements et codes spéciaux
+  nom                     String
+  prenom                  String
+  adressePostaleLigne1    String?
+  adressePostaleLigne2    String?
+  telephoneProfessionnel  String?
+  telephonePersonnel      String?
+  emailProfessionnel      String?
+  emailPersonnel          String?
+  unite                   String?
+
   // Infos faits
-  dateFaits              DateTime?
-  commune                String?
-  codePostal             String?
-  position               String? // EN_SERVICE | HORS_SERVICE
-  contexteMissionnel     String? // Liste des contextes missionnels
+  dateFaits               DateTime?
+  commune                 String?
+  codePostal              String?
+  position                String? // EN_SERVICE | HORS_SERVICE
+  contexteMissionnel      String? // Liste des contextes missionnels
   qualificationInfraction String? // Liste des qualifications d'infraction
-  resume                 String?
-  blessures              String?
-  partieCivile           Boolean   @default(false)
-  montantPartieCivile    Float?
-  qualificationsPenales  String?
-  dateAudience           DateTime?
-  
+  resume                  String?
+  blessures               String?
+  partieCivile            Boolean   @default(false)
+  montantPartieCivile     Float?
+  qualificationsPenales   String?
+  dateAudience            DateTime?
+
   // Soutiens
-  soutienPsychologique   Boolean   @default(false)
-  soutienSocial          Boolean   @default(false)
-  soutienMedical         Boolean   @default(false)
-  
+  soutienPsychologique Boolean @default(false)
+  soutienSocial        Boolean @default(false)
+  soutienMedical       Boolean @default(false)
+
   // Commentaires de suivi
-  commentaireDecision    String?
-  commentaireConvention  String?
-  commentaireSignature   String?
-  
-  dateReception          DateTime  @default(now())
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  
+  commentaireDecision   String?
+  commentaireConvention String?
+  commentaireSignature  String?
+
+  dateReception DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   // Relations
-  dossier                Dossier?  @relation(fields: [dossierId], references: [id])
-  dossierId              String?
-  assigneA               User?     @relation(fields: [assigneAId], references: [id])
-  assigneAId             String?
-  creePar                User?     @relation("DemandeCreateur", fields: [creeParId], references: [id])
-  creeParId              String?
-  modifiePar             User?     @relation("DemandeModificateur", fields: [modifieParId], references: [id])
-  modifieParId           String?
-  decisions              DecisionDemande[]
-  conventions            ConventionDemande[]
-  badges                 DemandeBadge[]
-  baps                   DemandeBAP[]
-  
+  dossier      Dossier?            @relation(fields: [dossierId], references: [id])
+  dossierId    String?
+  assigneA     User?               @relation(fields: [assigneAId], references: [id])
+  assigneAId   String?
+  creePar      User?               @relation("DemandeCreateur", fields: [creeParId], references: [id])
+  creeParId    String?
+  modifiePar   User?               @relation("DemandeModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+  decisions    DecisionDemande[]
+  conventions  ConventionDemande[]
+  badges       DemandeBadge[]
+  baps         DemandeBAP[]
+
   @@map("demandes")
 }
 
 model Dossier {
-  id                  String    @id @default(cuid())
-  numero              String    @unique // Auto-généré via transaction séquentielle
-  nomDossier          String?   // Nom optionnel pour les dossiers importants
-  notes               String?
-  
+  id         String  @id @default(cuid())
+  numero     String  @unique // Auto-généré via transaction séquentielle
+  nomDossier String? // Nom optionnel pour les dossiers importants
+  notes      String?
+
   // Relations
-  demandes            Demande[]
-  sgami               Sgami?    @relation(fields: [sgamiId], references: [id])
-  sgamiId             String?
-  badges              DossierBadge[]
-  baps                DossierBAP[]
-  attendus            DossierAttendu[]
-  assigneA            User?     @relation(fields: [assigneAId], references: [id])
-  assigneAId          String?
-  creePar             User?     @relation("DossierCreateur", fields: [creeParId], references: [id])
-  creeParId           String?
-  modifiePar          User?     @relation("DossierModificateur", fields: [modifieParId], references: [id])
-  modifieParId        String?
-  decisions           Decision[]
-  conventions         Convention[]
-  paiements           Paiement[]
-  
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
+  demandes     Demande[]
+  sgami        Sgami?           @relation(fields: [sgamiId], references: [id])
+  sgamiId      String?
+  badges       DossierBadge[]
+  baps         DossierBAP[]
+  attendus     DossierAttendu[]
+  assigneA     User?            @relation(fields: [assigneAId], references: [id])
+  assigneAId   String?
+  creePar      User?            @relation("DossierCreateur", fields: [creeParId], references: [id])
+  creeParId    String?
+  modifiePar   User?            @relation("DossierModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+  decisions    Decision[]
+  conventions  Convention[]
+  paiements    Paiement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("dossiers")
 }
 
 model Decision {
-  id              String       @id @default(cuid())
-  type            String // AJ | AJE | PJ | REJET
-  motifRejet      String? // Motif du rejet (seulement si type = REJET): "Atteinte involontaire autre qu'accident" | "Accident de la circulation" | "Faute personnelle détachable du service" | "Fait étranger à la qualité de gendarme" | "Absence d'infraction"
-  numero          String? // Numéro de la décision (ex: 2024-AJ-001)
-  dateSignature   DateTime?    // Date de signature de la décision
-  dateEnvoi       DateTime?    // Date d'envoi de la décision
-  documentGenere  String?      // Path vers le document généré
+  id                 String    @id @default(cuid())
+  type               String // AJ | AJE | PJ | REJET
+  motifRejet         String? // Motif du rejet (seulement si type = REJET): "Atteinte involontaire autre qu'accident" | "Accident de la circulation" | "Faute personnelle détachable du service" | "Fait étranger à la qualité de gendarme" | "Absence d'infraction"
+  numero             String? // Numéro de la décision (ex: 2024-AJ-001)
+  dateSignature      DateTime? // Date de signature de la décision
+  dateEnvoi          DateTime? // Date d'envoi de la décision
+  documentGenere     String? // Path vers le document généré
   avis_hierarchiques Boolean   @default(false) // Présence d'avis hiérarchiques (OUI/NON)
-  typeVictMec        String?           // Type de décision : VICTIME | MIS_EN_CAUSE
-  considerant        String?           // Texte du considérant de la décision
-  
+  typeVictMec        String? // Type de décision : VICTIME | MIS_EN_CAUSE
+  considerant        String? // Texte du considérant de la décision
+
   // Relations
-  dossier         Dossier      @relation(fields: [dossierId], references: [id])
-  dossierId       String
-  visa            Visa         @relation(fields: [visaId], references: [id])
-  visaId          String
-  creePar         User         @relation("DecisionCreateur", fields: [creeParId], references: [id])
-  creeParId       String
-  modifiePar      User?        @relation("DecisionModificateur", fields: [modifieParId], references: [id])
-  modifieParId    String?
-  demandes        DecisionDemande[]
-  paiements       PaiementDecision[]
-  conventions     ConventionDecision[]
-  
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  
+  dossier      Dossier              @relation(fields: [dossierId], references: [id])
+  dossierId    String
+  visa         Visa                 @relation(fields: [visaId], references: [id])
+  visaId       String
+  creePar      User                 @relation("DecisionCreateur", fields: [creeParId], references: [id])
+  creeParId    String
+  modifiePar   User?                @relation("DecisionModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+  demandes     DecisionDemande[]
+  paiements    PaiementDecision[]
+  conventions  ConventionDecision[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("decisions")
 }
 
 model Convention {
-  id                          String    @id @default(cuid())
-  numero                      Int       @unique // Auto-incrémenté à partir de 1
-  type                        String    // CONVENTION | AVENANT
-  victimeOuMisEnCause         String    // VICTIME | MIS_EN_CAUSE
-  instance                    String    // Instance judiciaire
-  montantHT                   Float     // Montant HT en euros
-  montantHTGagePrecedemment   Float?    // Pour les avenants seulement
-  typeFacturation             String?   // FORFAITAIRE | DEMI_JOURNEE | ASSISES
-  dateCreation               DateTime  @default(now())
-  dateRetourSigne            DateTime? // Date de retour de la convention signée par l'avocat
-  documentGenere             String?   // Path vers le document généré
-  
+  id                        String    @id @default(cuid())
+  numero                    Int       @unique // Auto-incrémenté à partir de 1
+  type                      String // CONVENTION | AVENANT
+  victimeOuMisEnCause       String // VICTIME | MIS_EN_CAUSE
+  instance                  String // Instance judiciaire
+  montantHT                 Float // Montant HT en euros
+  montantHTGagePrecedemment Float? // Pour les avenants seulement
+  typeFacturation           String? // FORFAITAIRE | DEMI_JOURNEE | ASSISES
+  dateCreation              DateTime  @default(now())
+  dateRetourSigne           DateTime? // Date de retour de la convention signée par l'avocat
+  documentGenere            String? // Path vers le document généré
+
   // Relations
-  dossier         Dossier   @relation(fields: [dossierId], references: [id])
-  dossierId       String
-  avocat          Avocat    @relation(fields: [avocatId], references: [id])
-  avocatId        String
-  creePar         User      @relation(fields: [creeParId], references: [id])
-  creeParId       String
-  modifiePar      User?     @relation("ConventionModificateur", fields: [modifieParId], references: [id])
-  modifieParId    String?
-  demandes        ConventionDemande[]
-  diligences      ConventionDiligence[]
-  decisions       ConventionDecision[]
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  dossier      Dossier               @relation(fields: [dossierId], references: [id])
+  dossierId    String
+  avocat       Avocat                @relation(fields: [avocatId], references: [id])
+  avocatId     String
+  creePar      User                  @relation(fields: [creeParId], references: [id])
+  creeParId    String
+  modifiePar   User?                 @relation("ConventionModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+  demandes     ConventionDemande[]
+  diligences   ConventionDiligence[]
+  decisions    ConventionDecision[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("conventions")
 }
 
 model Paiement {
-  id                        String      @id @default(cuid())
-  numero                    Int         @unique // Auto-incrémenté à partir de 1
-  facture                   String?     // Numéro de facture
-  montantTTC                Float
-  emissionTitrePerception   String      // OUI | NON
-  qualiteBeneficiaire       String      // Avocat | Commissaire de justice | Militaire de la gendarmerie nationale | Régisseur du tribunal judiciaire | Médecin | Victime
-  identiteBeneficiaire      String
-  dateServiceFait           DateTime?
-  conventionJointeFRI       String      // OUI | NON
-  
+  id                      String    @id @default(cuid())
+  numero                  Int       @unique // Auto-incrémenté à partir de 1
+  facture                 String? // Numéro de facture
+  montantTTC              Float
+  emissionTitrePerception String // OUI | NON
+  qualiteBeneficiaire     String // Avocat | Commissaire de justice | Militaire de la gendarmerie nationale | Régisseur du tribunal judiciaire | Médecin | Victime
+  identiteBeneficiaire    String
+  dateServiceFait         DateTime?
+  conventionJointeFRI     String // OUI | NON
+
   // Coordonnées bénéficiaire (peuvent être pré-remplies depuis l'avocat)
-  adresseBeneficiaire       String?
-  siretOuRidet              String?
-  titulaireCompteBancaire   String?
-  codeEtablissement         String?
-  codeGuichet              String?
-  numeroCompte             String?
-  cleRIB                   String?
-  
-  ficheReglement           String?     // Path vers la fiche générée
-  
+  adresseBeneficiaire     String?
+  siretOuRidet            String?
+  titulaireCompteBancaire String?
+  codeEtablissement       String?
+  codeGuichet             String?
+  numeroCompte            String?
+  cleRIB                  String?
+
+  ficheReglement String? // Path vers la fiche générée
+
   // Relations
-  dossier         Dossier     @relation(fields: [dossierId], references: [id])
-  dossierId       String
-  sgami           Sgami       @relation(fields: [sgamiId], references: [id])
-  sgamiId         String
-  avocat          Avocat?     @relation(fields: [avocatId], references: [id])
-  avocatId        String?
-  pce             Pce?        @relation(fields: [pceId], references: [id])
-  pceId           String?
-  creePar         User        @relation(fields: [creeParId], references: [id])
-  creeParId       String
-  
+  dossier   Dossier @relation(fields: [dossierId], references: [id])
+  dossierId String
+  sgami     Sgami   @relation(fields: [sgamiId], references: [id])
+  sgamiId   String
+  avocat    Avocat? @relation(fields: [avocatId], references: [id])
+  avocatId  String?
+  pce       Pce?    @relation(fields: [pceId], references: [id])
+  pceId     String?
+  creePar   User    @relation(fields: [creeParId], references: [id])
+  creeParId String
+
   // Relations many-to-many
-  decisions       PaiementDecision[]
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
+  decisions PaiementDecision[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("paiements")
 }
 
 model Avocat {
-  id                   String   @id @default(cuid())
-  nom                  String
-  prenom               String
-  region               String?
-  adressePostale       String?
-  telephonePublic1     String?
-  telephonePublic2     String?
-  telephonePrive       String?
-  email                String?
-  siretOuRidet         String?
-  villesIntervention   String?  // JSON string pour stocker un array de villes
-  notes                String?  // Notes utiles sur l'avocat
-  specialisation       String?
+  id                        String  @id @default(cuid())
+  nom                       String
+  prenom                    String
+  region                    String?
+  adressePostale            String?
+  telephonePublic1          String?
+  telephonePublic2          String?
+  telephonePrive            String?
+  email                     String?
+  siretOuRidet              String?
+  villesIntervention        String? // JSON string pour stocker un array de villes
+  notes                     String? // Notes utiles sur l'avocat
+  specialisation            String?
   titulaireDuCompteBancaire String?
-  codeEtablissement String?
-  codeGuichet String?
-  numeroDeCompte String?
-  cle String?
-  active               Boolean  @default(true) // Soft delete
-  
+  codeEtablissement         String?
+  codeGuichet               String?
+  numeroDeCompte            String?
+  cle                       String?
+  active                    Boolean @default(true) // Soft delete
+
   // Champs de logging
-  creePar              User?    @relation("AvocatCreateur", fields: [creeParId], references: [id])
-  creeParId            String?
-  modifiePar           User?    @relation("AvocatModificateur", fields: [modifieParId], references: [id])
-  modifieParId         String?
-  
+  creePar      User?   @relation("AvocatCreateur", fields: [creeParId], references: [id])
+  creeParId    String?
+  modifiePar   User?   @relation("AvocatModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+
   // Relations
-  conventions          Convention[]
-  paiements            Paiement[]
-  
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  
+  conventions Convention[]
+  paiements   Paiement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("avocats")
 }
 
@@ -297,64 +297,64 @@ model Log {
   id        String   @id @default(cuid())
   action    String
   detail    String?
-  entite    String?  // Type d'entité concernée
-  entiteId  String?  // ID de l'entité concernée
+  entite    String? // Type d'entité concernée
+  entiteId  String? // ID de l'entité concernée
   timestamp DateTime @default(now())
-  
+
   // Relations
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
   @@map("logs")
 }
 
 model Sgami {
-  id                     String    @id @default(cuid())
-  nom                    String    @unique
+  id                     String  @id @default(cuid())
+  nom                    String  @unique
   formatCourtNommage     String?
   texteConvention        String?
-  intituleFicheReglement String?   // Intitulé SGAMI pour les fiches de règlement (ex: "SGAMI SUD, par mail : adresses@email.com")
-  
+  intituleFicheReglement String? // Intitulé SGAMI pour les fiches de règlement (ex: "SGAMI SUD, par mail : adresses@email.com")
+
   // Relations
-  dossiers Dossier[]
+  dossiers  Dossier[]
   paiements Paiement[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("sgami")
 }
 
 model Badge {
-  id       String         @id @default(cuid())
-  nom      String         @unique
-  couleur  String?        // Code couleur hex
-  
+  id      String  @id @default(cuid())
+  nom     String  @unique
+  couleur String? // Code couleur hex
+
   // Relations
   dossiers DossierBadge[]
   demandes DemandeBadge[]
-  
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("badges")
 }
 
 model BAP {
-  id       String         @id @default(cuid())
-  nomBAP   String         @unique // Ex: RGARA, RGBRET, RGOCC, etc.
-  mail1    String?
-  mail2    String?
-  mail3    String?
-  mail4    String?
-  
+  id     String  @id @default(cuid())
+  nomBAP String  @unique // Ex: RGARA, RGBRET, RGOCC, etc.
+  mail1  String?
+  mail2  String?
+  mail3  String?
+  mail4  String?
+
   // Relations
   dossiers DossierBAP[]
   demandes DemandeBAP[]
-  
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("bap")
 }
 
@@ -362,14 +362,14 @@ model DossierAttendu {
   id          String  @id @default(cuid())
   nomOuNigend String
   commentaire String?
-  
+
   // Relations
-  dossier     Dossier @relation(fields: [dossierId], references: [id])
-  dossierId   String
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  dossier   Dossier @relation(fields: [dossierId], references: [id])
+  dossierId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("dossiers_attendus")
 }
 
@@ -379,7 +379,7 @@ model DossierBadge {
   dossierId String
   badge     Badge   @relation(fields: [badgeId], references: [id])
   badgeId   String
-  
+
   @@id([dossierId, badgeId])
   @@map("dossiers_badges")
 }
@@ -389,7 +389,7 @@ model DemandeBadge {
   demandeId String
   badge     Badge   @relation(fields: [badgeId], references: [id])
   badgeId   String
-  
+
   @@id([demandeId, badgeId])
   @@map("demandes_badges")
 }
@@ -399,7 +399,7 @@ model DossierBAP {
   dossierId String
   bap       BAP     @relation(fields: [bapId], references: [id])
   bapId     String
-  
+
   @@id([dossierId, bapId])
   @@map("dossiers_bap")
 }
@@ -409,7 +409,7 @@ model DemandeBAP {
   demandeId String
   bap       BAP     @relation(fields: [bapId], references: [id])
   bapId     String
-  
+
   @@id([demandeId, bapId])
   @@map("demandes_bap")
 }
@@ -419,7 +419,7 @@ model DecisionDemande {
   decisionId String
   demande    Demande  @relation(fields: [demandeId], references: [id])
   demandeId  String
-  
+
   @@id([decisionId, demandeId])
   @@map("decisions_demandes")
 }
@@ -429,7 +429,7 @@ model PaiementDecision {
   paiementId String
   decision   Decision @relation(fields: [decisionId], references: [id])
   decisionId String
-  
+
   @@id([paiementId, decisionId])
   @@map("paiements_decisions")
 }
@@ -439,7 +439,7 @@ model ConventionDemande {
   conventionId String
   demande      Demande    @relation(fields: [demandeId], references: [id])
   demandeId    String
-  
+
   @@id([conventionId, demandeId])
   @@map("conventions_demandes")
 }
@@ -449,7 +449,7 @@ model ConventionDiligence {
   conventionId String
   diligence    Diligence  @relation(fields: [diligenceId], references: [id])
   diligenceId  String
-  
+
   @@id([conventionId, diligenceId])
   @@map("conventions_diligences")
 }
@@ -459,137 +459,137 @@ model ConventionDecision {
   conventionId String
   decision     Decision   @relation(fields: [decisionId], references: [id])
   decisionId   String
-  
+
   @@id([conventionId, decisionId])
   @@map("conventions_decisions")
 }
 
 model Pce {
-  id                String   @id @default(cuid())
-  ordre             Int      @unique
-  pceDetaille       String   @unique
-  pceNumerique      String
-  codeMarchandise   String
-  
+  id              String @id @default(cuid())
+  ordre           Int    @unique
+  pceDetaille     String @unique
+  pceNumerique    String
+  codeMarchandise String
+
   // Relations
-  paiements         Paiement[]
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  paiements Paiement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("pce")
 }
 
 model Grade {
-  id               String   @id @default(cuid())
-  ordre            Int      @unique
-  gradeComplet     String   @unique // Ex: Maréchal des logis-chef
-  gradeAbrege      String   // Ex: MDC
-  
+  id           String @id @default(cuid())
+  ordre        Int    @unique
+  gradeComplet String @unique // Ex: Maréchal des logis-chef
+  gradeAbrege  String // Ex: MDC
+
   // Relations
-  demandes         Demande[]
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  demandes Demande[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("grades")
 }
 
 model Visa {
-  id                String     @id @default(cuid())
-  typeVisa          String     @unique // MILITAIRE | CIVIL
-  texteVisa         String
-  active            Boolean    @default(true) // Pour activer/désactiver
-  
+  id        String  @id @default(cuid())
+  typeVisa  String  @unique // MILITAIRE | CIVIL
+  texteVisa String
+  active    Boolean @default(true) // Pour activer/désactiver
+
   // Relations
-  decisions         Decision[]
-  
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  
+  decisions Decision[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("visas")
 }
 
 model Diligence {
-  id                String     @id @default(cuid())
-  nom               String     @unique
-  details           String
-  active            Boolean    @default(true)
-  
+  id      String  @id @default(cuid())
+  nom     String  @unique
+  details String
+  active  Boolean @default(true)
+
   // Champs de logging
-  creePar           User?      @relation("DiligenceCreateur", fields: [creeParId], references: [id])
-  creeParId         String?
-  modifiePar        User?      @relation("DiligenceModificateur", fields: [modifieParId], references: [id])
-  modifieParId      String?
-  
+  creePar      User?   @relation("DiligenceCreateur", fields: [creeParId], references: [id])
+  creeParId    String?
+  modifiePar   User?   @relation("DiligenceModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+
   // Relations
-  conventions       ConventionDiligence[]
-  
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  
+  conventions ConventionDiligence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("diligences")
 }
 
 model TemplateVersion {
-  id                String   @id @default(cuid())
-  templateType      String   // decision | convention | avenant | reglement
-  versionNumber     Int      // 1, 2, 3, etc.
-  filename          String   // nom du fichier sur disque
-  originalName      String   // nom original du fichier uploadé
-  isActive          Boolean  @default(false) // version actuellement active
-  fileSize          Int?     // taille du fichier en octets
-  
+  id            String  @id @default(cuid())
+  templateType  String // decision | convention | avenant | reglement
+  versionNumber Int // 1, 2, 3, etc.
+  filename      String // nom du fichier sur disque
+  originalName  String // nom original du fichier uploadé
+  isActive      Boolean @default(false) // version actuellement active
+  fileSize      Int? // taille du fichier en octets
+
   // Relations
-  uploadedBy        User     @relation("TemplateVersionUploader", fields: [uploadedById], references: [id])
-  uploadedById      String
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  uploadedBy   User   @relation("TemplateVersionUploader", fields: [uploadedById], references: [id])
+  uploadedById String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([templateType, versionNumber])
   @@map("template_versions")
 }
 
 model TransferHistory {
-  id                    String   @id @default(cuid())
-  sourceUserId          String
-  targetUserId          String
-  demandesTransferred   Int
-  dossiersTransferred   Int
-  transferredAt         DateTime @default(now())
-  transferredByUserId   String
-  rolledBackAt          DateTime?
-  rolledBackByUserId    String?
-  status                String   @default("ACTIVE") // ACTIVE | ROLLED_BACK
-  
+  id                  String    @id @default(cuid())
+  sourceUserId        String
+  targetUserId        String
+  demandesTransferred Int
+  dossiersTransferred Int
+  transferredAt       DateTime  @default(now())
+  transferredByUserId String
+  rolledBackAt        DateTime?
+  rolledBackByUserId  String?
+  status              String    @default("ACTIVE") // ACTIVE | ROLLED_BACK
+
   // Relations
-  sourceUser            User     @relation("TransferHistorySource", fields: [sourceUserId], references: [id])
-  targetUser            User     @relation("TransferHistoryTarget", fields: [targetUserId], references: [id])
-  transferredBy         User     @relation("TransferHistoryTransferrer", fields: [transferredByUserId], references: [id])
-  rolledBackBy          User?    @relation("TransferHistoryRollbacker", fields: [rolledBackByUserId], references: [id])
-  
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
+  sourceUser    User  @relation("TransferHistorySource", fields: [sourceUserId], references: [id])
+  targetUser    User  @relation("TransferHistoryTarget", fields: [targetUserId], references: [id])
+  transferredBy User  @relation("TransferHistoryTransferrer", fields: [transferredByUserId], references: [id])
+  rolledBackBy  User? @relation("TransferHistoryRollbacker", fields: [rolledBackByUserId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("transfer_history")
 }
 
 model BudgetAnnuel {
-  id              String   @id @default(cuid())
-  annee           Int      @unique // Année du budget (ex: 2024)
-  budgetBase      Float    // Budget de base de l'année
-  abondements     Float    @default(0) // Montant des abondements
-  
+  id          String @id @default(cuid())
+  annee       Int    @unique // Année du budget (ex: 2024)
+  budgetBase  Float // Budget de base de l'année
+  abondements Float  @default(0) // Montant des abondements
+
   // Champs de logging
-  creePar         User?    @relation("BudgetAnnuelCreateur", fields: [creeParId], references: [id])
-  creeParId       String?
-  modifiePar      User?    @relation("BudgetAnnuelModificateur", fields: [modifieParId], references: [id])
-  modifieParId    String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  creePar      User?   @relation("BudgetAnnuelCreateur", fields: [creeParId], references: [id])
+  creeParId    String?
+  modifiePar   User?   @relation("BudgetAnnuelModificateur", fields: [modifieParId], references: [id])
+  modifieParId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("budgets_annuels")
 }
 

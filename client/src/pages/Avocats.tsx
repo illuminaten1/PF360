@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { PlusIcon } from '@heroicons/react/24/outline'
+import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { Avocat } from '@/types'
 import api from '@/utils/api'
 import AvocatsTable from '@/components/tables/AvocatsTable'
@@ -15,49 +16,148 @@ interface AvocatsStats {
   avocatsAvecSpecialisation: number
 }
 
+// Helper function to convert TanStack Table filters to API params
+const buildApiParams = (
+  pagination: { pageIndex: number; pageSize: number },
+  sorting: SortingState,
+  columnFilters: ColumnFiltersState,
+  globalFilter: string,
+  includeInactive: boolean
+) => {
+  const params: any = {
+    page: pagination.pageIndex + 1,
+    limit: pagination.pageSize
+  }
+
+  // Include inactive avocats
+  if (includeInactive) {
+    params.includeInactive = 'true'
+  }
+
+  // Global search
+  if (globalFilter) {
+    params.search = globalFilter
+  }
+
+  // Sorting
+  if (sorting.length > 0) {
+    const sort = sorting[0]
+    params.sortBy = sort.id
+    params.sortOrder = sort.desc ? 'desc' : 'asc'
+  }
+
+  // Column filters
+  columnFilters.forEach((filter) => {
+    const { id, value } = filter
+
+    if (id === 'nom' && value) {
+      params.nom = value
+    } else if (id === 'prenom' && value) {
+      params.prenom = value
+    } else if (id === 'email' && value) {
+      params.email = value
+    } else if (id === 'telephonePublic1' && value) {
+      params.telephonePublic1 = value
+    } else if (id === 'region' && value) {
+      // Multi-select filter - can be an array
+      params.region = Array.isArray(value) ? value : [value]
+    } else if (id === 'specialisation' && value) {
+      // Multi-select filter - can be an array
+      params.specialisation = Array.isArray(value) ? value : [value]
+    } else if (id === 'villesIntervention' && value) {
+      // Multi-select filter - can be an array
+      params.villesIntervention = Array.isArray(value) ? value : [value]
+    }
+  })
+
+  return params
+}
+
 const Avocats: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [selectedAvocat, setSelectedAvocat] = useState<Avocat | null>(null)
   const [showInactive, setShowInactive] = useState(false)
 
+  // Server-side state
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'nom', desc: false }])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+
+  // Debounced global filter for API calls
+  const [debouncedGlobalFilter, setDebouncedGlobalFilter] = useState('')
+
   const queryClient = useQueryClient()
 
-  // Fetch all avocats
-  const { data: avocats = [], isLoading } = useQuery({
-    queryKey: ['avocats', showInactive],
-    queryFn: async () => {
-      const response = await api.get(`/avocats${showInactive ? '?includeInactive=true' : ''}`)
-      return response.data
-    }
-  })
-
-  // Fetch stats
-  const { data: stats } = useQuery<AvocatsStats>({
-    queryKey: ['avocats-stats'],
-    queryFn: async () => {
-      // Pour l'instant, on calcule les stats côté client
-      // Plus tard, on pourra créer un endpoint dédié
-      const totalAvocats = avocats.length
-      const avocatsActifs = avocats.filter((a: Avocat) => a.active !== false).length
-      const avocatsAvecSpecialisation = avocats.filter((a: Avocat) => a.specialisation).length
-      
-      const avocatsParRegion = avocats.reduce((acc: Record<string, number>, avocat: Avocat) => {
-        if (avocat.region) {
-          acc[avocat.region] = (acc[avocat.region] || 0) + 1
-        }
-        return acc
-      }, {})
-
-      return {
-        totalAvocats,
-        avocatsActifs,
-        avocatsParRegion,
-        avocatsAvecSpecialisation
+  // Debounce global filter to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedGlobalFilter(globalFilter)
+      if (globalFilter !== debouncedGlobalFilter) {
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
       }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [globalFilter])
+
+  // Reset to first page when filters or showInactive change
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
+  }, [columnFilters, showInactive])
+
+  // Fetch avocats with server-side pagination, sorting, and filtering
+  const { data: avocatsData, isLoading } = useQuery({
+    queryKey: ['avocats-paginated', pagination, sorting, columnFilters, debouncedGlobalFilter, showInactive],
+    queryFn: async () => {
+      const params = buildApiParams(pagination, sorting, columnFilters, debouncedGlobalFilter, showInactive)
+      const response = await api.get('/avocats/paginated', { params })
+      return response.data
     },
-    enabled: avocats.length > 0
+    placeholderData: (previousData) => previousData
   })
+
+  const avocats = avocatsData?.avocats || []
+  const totalRows = avocatsData?.total || 0
+  const pageCount = avocatsData?.pagination?.pages || 0
+
+  // Fetch facets for filters
+  const { data: facets } = useQuery({
+    queryKey: ['avocats-facets', showInactive],
+    queryFn: async () => {
+      const params: any = {}
+      if (showInactive) {
+        params.includeInactive = 'true'
+      }
+      const response = await api.get('/avocats/facets', { params })
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+  })
+
+  // Fetch stats (computed from current avocats data)
+  const stats: AvocatsStats | undefined = React.useMemo(() => {
+    if (!avocatsData || avocatsData.total === 0) return undefined
+
+    const totalAvocats = avocatsData.total
+    const avocatsActifs = avocats.filter((a: Avocat) => a.active !== false).length
+    const avocatsAvecSpecialisation = avocats.filter((a: Avocat) => a.specialisation).length
+
+    const avocatsParRegion = avocats.reduce((acc: Record<string, number>, avocat: Avocat) => {
+      if (avocat.region) {
+        acc[avocat.region] = (acc[avocat.region] || 0) + 1
+      }
+      return acc
+    }, {})
+
+    return {
+      totalAvocats,
+      avocatsActifs,
+      avocatsParRegion,
+      avocatsAvecSpecialisation
+    }
+  }, [avocats, avocatsData])
 
   // Create avocat mutation
   const createAvocatMutation = useMutation({
@@ -66,8 +166,8 @@ const Avocats: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['avocats'] })
-      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
       toast.success('Avocat créé avec succès')
     },
     onError: (error: any) => {
@@ -82,8 +182,8 @@ const Avocats: React.FC = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['avocats'] })
-      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
       toast.success('Avocat modifié avec succès')
     },
     onError: (error: any) => {
@@ -97,8 +197,8 @@ const Avocats: React.FC = () => {
       await api.delete(`/avocats/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['avocats'] })
-      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
       toast.success('Avocat désactivé avec succès')
     },
     onError: (error: any) => {
@@ -112,8 +212,8 @@ const Avocats: React.FC = () => {
       await api.put(`/avocats/${id}/activate`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['avocats'] })
-      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
       toast.success('Avocat réactivé avec succès')
     },
     onError: (error: any) => {
@@ -161,8 +261,15 @@ const Avocats: React.FC = () => {
     } else {
       await createAvocatMutation.mutateAsync(data)
     }
+    setIsModalOpen(false)
+    setSelectedAvocat(null)
   }
 
+  const handleClearFilters = () => {
+    setColumnFilters([])
+    setGlobalFilter('')
+    setPagination({ pageIndex: 0, pageSize: pagination.pageSize })
+  }
 
   return (
     <div className="p-6">
@@ -201,24 +308,23 @@ const Avocats: React.FC = () => {
               <div className="text-2xl font-bold text-blue-600">{stats.totalAvocats}</div>
               <div className="text-sm text-gray-600">Total avocats</div>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-2xl font-bold text-green-600">{stats.avocatsActifs}</div>
               <div className="text-sm text-gray-600">Avocats actifs</div>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-2xl font-bold text-purple-600">{stats.avocatsAvecSpecialisation}</div>
               <div className="text-sm text-gray-600">Avec spécialisation</div>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-2xl font-bold text-orange-600">{Object.keys(stats.avocatsParRegion).length}</div>
               <div className="text-sm text-gray-600">Régions couvertes</div>
             </div>
           </div>
         )}
-
       </div>
 
       <AvocatsTable
@@ -228,6 +334,19 @@ const Avocats: React.FC = () => {
         onEdit={handleEditAvocat}
         onDelete={handleDeleteAvocat}
         onToggleActive={handleToggleActive}
+        // Server-side props
+        pageCount={pageCount}
+        totalRows={totalRows}
+        pagination={pagination}
+        sorting={sorting}
+        columnFilters={columnFilters}
+        globalFilter={globalFilter}
+        onPaginationChange={setPagination}
+        onSortingChange={setSorting}
+        onColumnFiltersChange={setColumnFilters}
+        onGlobalFilterChange={setGlobalFilter}
+        onClearFilters={handleClearFilters}
+        facets={facets}
       />
 
       <AvocatModal

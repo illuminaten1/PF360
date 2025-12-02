@@ -1,17 +1,14 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
   flexRender,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState
+  type ColumnFiltersState,
+  type OnChangeFn,
+  type PaginationState,
+  type Column
 } from '@tanstack/react-table'
 import { Avocat } from '@/types'
 import {
@@ -24,9 +21,22 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import SearchBar from './SearchBar'
+
+// Extend TanStack Table's ColumnMeta to include custom filterComponent
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData, TValue> {
+    filterComponent?: (column: Column<TData, TValue>) => React.ReactNode
+  }
+}
+
+interface Facets {
+  regions?: string[]
+  specialisations?: string[]
+  villes?: string[]
+}
 
 interface AvocatsTableProps {
   data: Avocat[]
@@ -35,57 +45,145 @@ interface AvocatsTableProps {
   onEdit: (avocat: Avocat) => void
   onDelete: (avocat: Avocat) => void
   onToggleActive?: (avocat: Avocat) => void
+  // Server-side props
+  pageCount: number
+  totalRows: number
+  pagination: PaginationState
+  sorting: SortingState
+  columnFilters: ColumnFiltersState
+  globalFilter: string
+  onPaginationChange: OnChangeFn<PaginationState>
+  onSortingChange: OnChangeFn<SortingState>
+  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>
+  onGlobalFilterChange: (filter: string) => void
+  onClearFilters?: () => void
+  facets?: Facets
 }
 
-function Filter({ column }: { column: any }) {
-  const columnFilterValue = column.getFilterValue()
+// Filtre texte simple avec debounce
+function DebouncedTextFilter({ column, placeholder = 'Filtrer...' }: { column: any; placeholder?: string }) {
+  const columnFilterValue = column.getFilterValue() as string ?? ''
+  const [value, setValue] = useState(columnFilterValue)
+
+  useEffect(() => {
+    setValue(columnFilterValue)
+  }, [columnFilterValue])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      column.setFilterValue(value || undefined)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [value, column])
 
   return (
     <input
       type="text"
-      value={(columnFilterValue ?? '') as string}
-      onChange={(e) => column.setFilterValue(e.target.value)}
-      placeholder={`Filtrer...`}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      placeholder={placeholder}
       className="w-32 border shadow rounded px-2 py-1 text-xs"
     />
   )
 }
 
-function DynamicSelectFilter({ column, data }: { column: any; data: Avocat[] }) {
-  const columnFilterValue = column.getFilterValue()
-  
-  // Extraire les valeurs uniques de la colonne
-  const uniqueValues = useMemo(() => {
-    let values: any[]
-    
-    if (column.id === 'villesIntervention') {
-      // Pour les villes d'intervention, on flatten le tableau
-      values = data
-        .flatMap(row => row.villesIntervention || [])
-        .filter(value => value !== null && value !== undefined && value !== '')
+// Filtre dropdown avec multi-select
+function MultiSelectFilter({
+  column,
+  options,
+  placeholder = 'Tous'
+}: {
+  column: any;
+  options: string[];
+  placeholder?: string
+}) {
+  const columnFilterValue = (column.getFilterValue() ?? []) as string[]
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const handleToggleOption = (option: string) => {
+    const currentFilters = [...columnFilterValue]
+    const index = currentFilters.indexOf(option)
+
+    if (index > -1) {
+      currentFilters.splice(index, 1)
     } else {
-      // Pour les autres colonnes
-      values = data
-        .map(row => row[column.id as keyof Avocat])
-        .filter(value => value !== null && value !== undefined && value !== '')
+      currentFilters.push(option)
     }
-    
-    return Array.from(new Set(values)).sort()
-  }, [data, column.id])
-  
+
+    column.setFilterValue(currentFilters.length > 0 ? currentFilters : undefined)
+  }
+
+  const clearAll = () => {
+    column.setFilterValue(undefined)
+  }
+
+  const selectAll = () => {
+    column.setFilterValue([...options])
+  }
+
   return (
-    <select
-      value={(columnFilterValue ?? '') as string}
-      onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-      className="w-32 border shadow rounded px-2 py-1 text-xs"
-    >
-      <option value="">Tous</option>
-      {uniqueValues.map((value) => (
-        <option key={String(value)} value={String(value)}>
-          {String(value)}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-32 border shadow rounded px-2 py-1 text-xs text-left bg-white hover:bg-gray-50 flex items-center justify-between"
+      >
+        <span className="truncate">
+          {columnFilterValue.length === 0
+            ? placeholder
+            : columnFilterValue.length === options.length
+            ? placeholder
+            : `${columnFilterValue.length} sélectionné${columnFilterValue.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-gray-400">▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={selectAll}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Tout
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Aucun
+              </button>
+            </div>
+          </div>
+
+          <div className="p-1">
+            {options.map(option => (
+              <label key={option} className="flex items-center px-2 py-1 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={columnFilterValue.includes(option)}
+                  onChange={() => handleToggleOption(option)}
+                  className="mr-2 text-blue-600"
+                />
+                <span className="text-xs truncate">{option}</span>
+              </label>
+            ))}
+            {options.length === 0 && (
+              <div className="px-2 py-1 text-xs text-gray-500">Aucune option disponible</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
   )
 }
 
@@ -95,14 +193,21 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
   onView,
   onEdit,
   onDelete,
-  onToggleActive
+  onToggleActive,
+  // Server-side props
+  pageCount,
+  totalRows,
+  pagination,
+  sorting,
+  columnFilters,
+  globalFilter,
+  onPaginationChange,
+  onSortingChange,
+  onColumnFiltersChange,
+  onGlobalFilterChange,
+  onClearFilters,
+  facets
 }) => {
-  const [sorting, setSorting] = React.useState<SortingState>([
-    { id: 'nom', desc: false }
-  ])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = React.useState('')
-
   const columns = useMemo<ColumnDef<Avocat>[]>(
     () => [
       {
@@ -110,7 +215,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         header: 'Nom',
         cell: ({ getValue, row }) => (
           <div className="flex items-center space-x-2">
-            <div 
+            <div
               className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
               onClick={() => onView(row.original)}
             >
@@ -124,7 +229,9 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           </div>
         ),
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        meta: {
+          filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Nom..." />
+        }
       },
       {
         accessorKey: 'prenom',
@@ -135,7 +242,9 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           </div>
         ),
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        meta: {
+          filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Prénom..." />
+        }
       },
       {
         accessorKey: 'region',
@@ -151,7 +260,15 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: 'equals'
+        meta: {
+          filterComponent: (column: any) => (
+            <MultiSelectFilter
+              column={column}
+              options={facets?.regions || []}
+              placeholder="Toutes régions"
+            />
+          )
+        }
       },
       {
         accessorKey: 'specialisation',
@@ -162,7 +279,15 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           </div>
         ),
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        meta: {
+          filterComponent: (column: any) => (
+            <MultiSelectFilter
+              column={column}
+              options={facets?.specialisations || []}
+              placeholder="Toutes"
+            />
+          )
+        }
       },
       {
         accessorKey: 'villesIntervention',
@@ -172,7 +297,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           if (!villes || villes.length === 0) {
             return <span className="text-gray-400">-</span>
           }
-          
+
           return (
             <div className="flex flex-wrap gap-1">
               {villes.slice(0, 2).map((ville, index) => (
@@ -192,11 +317,14 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: (row, columnId, filterValue) => {
-          const villes = row.getValue(columnId) as string[] | undefined
-          if (!villes || !filterValue) return true
-          return villes.some(ville => 
-            ville.toLowerCase().includes(filterValue.toLowerCase())
+        enableSorting: false,
+        meta: {
+          filterComponent: (column: any) => (
+            <MultiSelectFilter
+              column={column}
+              options={facets?.villes || []}
+              placeholder="Toutes villes"
+            />
           )
         }
       },
@@ -206,11 +334,11 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         cell: ({ getValue, row }) => {
           const telephone = getValue<string>()
           const telephone2 = row.original.telephonePublic2
-          
+
           if (!telephone && !telephone2) {
             return <span className="text-gray-400">-</span>
           }
-          
+
           return (
             <div className="text-sm">
               {telephone && (
@@ -233,7 +361,9 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        meta: {
+          filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Tél..." />
+        }
       },
       {
         accessorKey: 'email',
@@ -252,7 +382,9 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
           )
         },
         enableColumnFilter: true,
-        filterFn: 'includesString'
+        meta: {
+          filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Email..." />
+        }
       },
       {
         id: 'actions',
@@ -298,7 +430,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete, onToggleActive]
+    [onView, onEdit, onDelete, onToggleActive, facets]
   )
 
   const table = useReactTable({
@@ -307,60 +439,20 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
     state: {
       sorting,
       columnFilters,
-      globalFilter
+      globalFilter,
+      pagination
     },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      if (!filterValue) return true
-      
-      const searchTerm = filterValue.toLowerCase().trim()
-      const avocat = row.original
-      
-      // Recherche dans nom et prénom (dans les deux sens)
-      const nomComplet1 = `${avocat.prenom || ''} ${avocat.nom || ''}`.toLowerCase()
-      const nomComplet2 = `${avocat.nom || ''} ${avocat.prenom || ''}`.toLowerCase()
-      
-      if (nomComplet1.includes(searchTerm) || nomComplet2.includes(searchTerm)) {
-        return true
-      }
-      
-      // Recherche dans les champs individuels
-      if (avocat.nom?.toLowerCase().includes(searchTerm) ||
-          avocat.prenom?.toLowerCase().includes(searchTerm) ||
-          avocat.specialisation?.toLowerCase().includes(searchTerm) ||
-          avocat.region?.toLowerCase().includes(searchTerm) ||
-          avocat.email?.toLowerCase().includes(searchTerm) ||
-          avocat.telephonePublic1?.includes(searchTerm) ||
-          avocat.telephonePublic2?.includes(searchTerm) ||
-          avocat.notes?.toLowerCase().includes(searchTerm)) {
-        return true
-      }
-      
-      // Recherche dans les villes d'intervention
-      if (avocat.villesIntervention && Array.isArray(avocat.villesIntervention)) {
-        if (avocat.villesIntervention.some(ville => 
-          ville.toLowerCase().includes(searchTerm)
-        )) {
-          return true
-        }
-      }
-      
-      return false
-    },
+    onSortingChange,
+    onColumnFiltersChange,
+    onGlobalFilterChange,
+    onPaginationChange,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    initialState: {
-      pagination: {
-        pageSize: 50
-      }
-    }
+    // Server-side mode
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
+    pageCount,
+    rowCount: totalRows
   })
 
   if (loading) {
@@ -378,12 +470,65 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <SearchBar 
-        globalFilter={globalFilter}
-        onGlobalFilterChange={setGlobalFilter}
-        filteredRowsCount={table.getFilteredRowModel().rows.length}
-        placeholder="Rechercher par nom, prénom, ville d'intervention ou spécialité..."
-      />
+      <div className="border-b border-gray-200">
+        <div className="p-4">
+          {/* Desktop: tout sur une ligne */}
+          <div className="hidden sm:flex items-center gap-3">
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <input
+              type="text"
+              name="search"
+              autoComplete="off"
+              value={globalFilter ?? ''}
+              onChange={(e) => onGlobalFilterChange(String(e.target.value))}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Rechercher par nom, prénom, ville d'intervention ou spécialité..."
+            />
+            <span className="text-sm text-gray-500 whitespace-nowrap">
+              {totalRows} résultat(s)
+            </span>
+            {onClearFilters && (columnFilters.length > 0 || globalFilter) && (
+              <button
+                onClick={onClearFilters}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-colors duration-200 whitespace-nowrap shadow-sm"
+                title="Effacer tous les filtres et afficher tous les avocats"
+              >
+                Effacer tous les filtres
+              </button>
+            )}
+          </div>
+
+          {/* Mobile: deux lignes */}
+          <div className="sm:hidden space-y-3">
+            <div className="flex items-center gap-2">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <input
+                type="text"
+                name="search"
+                autoComplete="off"
+                value={globalFilter ?? ''}
+                onChange={(e) => onGlobalFilterChange(String(e.target.value))}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Recherche globale..."
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-gray-500">
+                {totalRows} résultat(s)
+              </span>
+              {onClearFilters && (columnFilters.length > 0 || globalFilter) && (
+                <button
+                  onClick={onClearFilters}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-colors duration-200 whitespace-nowrap shadow-sm"
+                  title="Effacer tous les filtres et afficher tous les avocats"
+                >
+                  Effacer tous les filtres
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -394,7 +539,11 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                      header.column.getFilterValue()
+                        ? 'bg-blue-50 border-l-2 border-l-blue-300'
+                        : 'bg-gray-50'
+                    }`}
                   >
                     <div className="flex flex-col space-y-2">
                       <div className="flex items-center space-x-2">
@@ -427,13 +576,9 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
                           </>
                         )}
                       </div>
-                      {header.column.getCanFilter() && (
+                      {header.column.getCanFilter() && header.column.columnDef.meta?.filterComponent && (
                         <div>
-                          {header.column.id === 'region' || header.column.id === 'villesIntervention' ? (
-                            <DynamicSelectFilter column={header.column} data={data} />
-                          ) : (
-                            <Filter column={header.column} />
-                          )}
+                          {header.column.columnDef.meta.filterComponent(header.column)}
                         </div>
                       )}
                     </div>
@@ -443,39 +588,65 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
             ))}
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="hover:bg-gray-50">
-                {row.getVisibleCells().map(cell => (
-                  <td
-                    key={cell.id}
-                    className="px-6 py-4 whitespace-nowrap"
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+            {table.getRowModel().rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={table.getHeaderGroups()[0]?.headers.length || 1}
+                  className="px-6 py-16 text-center text-gray-500"
+                >
+                  <div className="flex flex-col items-center">
+                    <svg className="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-sm font-medium text-gray-900 mb-1">Aucun résultat trouvé</p>
+                    <p className="text-sm text-gray-500">Essayez de modifier vos critères de filtrage</p>
+                  </div>
+                </td>
               </tr>
-            ))}
+            ) : (
+              table.getRowModel().rows.map(row => (
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => onView(row.original)}
+                >
+                  {row.getVisibleCells().map(cell => (
+                    <td
+                      key={cell.id}
+                      className={`px-6 py-4 whitespace-nowrap ${
+                        cell.column.getFilterValue() ? 'bg-blue-50/70' : ''
+                      }`}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Pagination */}
       <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-gray-700">
             <span>
-              Page {table.getState().pagination.pageIndex + 1} sur{' '}
-              {table.getPageCount()} • {table.getFilteredRowModel().rows.length} résultat(s)
+              Page {pagination.pageIndex + 1} sur{' '}
+              {pageCount} • {totalRows} résultat(s)
             </span>
           </div>
-          
-          <div className="flex items-center space-x-2">
+
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-2">
             <select
-              value={table.getState().pagination.pageSize}
+              value={pagination.pageSize}
               onChange={e => {
-                table.setPageSize(Number(e.target.value))
+                onPaginationChange({
+                  pageIndex: 0,
+                  pageSize: Number(e.target.value)
+                })
               }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              className="w-full sm:w-auto border border-gray-300 rounded px-2 py-1 text-xs sm:text-sm"
             >
               {[10, 20, 50, 100].map(pageSize => (
                 <option key={pageSize} value={pageSize}>
@@ -483,43 +654,43 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
                 </option>
               ))}
             </select>
-            
+
             <div className="flex items-center space-x-1">
               <button
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: 0 })}
+                disabled={pagination.pageIndex === 0}
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-xs sm:text-sm"
                 title="Première page"
               >
                 {'<<'}
               </button>
-              
+
               <button
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })}
+                disabled={pagination.pageIndex === 0}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 title="Page précédente"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
-              
-              <span className="px-3 py-1 text-sm">
-                {table.getState().pagination.pageIndex + 1}
+
+              <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm">
+                {pagination.pageIndex + 1}
               </span>
-              
+
               <button
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })}
+                disabled={pagination.pageIndex >= pageCount - 1}
                 className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 title="Page suivante"
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
-              
+
               <button
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: pageCount - 1 })}
+                disabled={pagination.pageIndex >= pageCount - 1}
+                className="px-2 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-xs sm:text-sm"
                 title="Dernière page"
               >
                 {'>>'}

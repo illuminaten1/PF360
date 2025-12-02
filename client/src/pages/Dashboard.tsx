@@ -147,8 +147,17 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CalendrierAudiences />
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Widget Placeholder
+          </h2>
+          <div className="flex items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg">
+            <p className="text-gray-500 text-sm">Contenu à venir</p>
+          </div>
+        </div>
       </div>
     </div>
   )

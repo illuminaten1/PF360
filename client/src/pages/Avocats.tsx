@@ -139,28 +139,18 @@ const Avocats: React.FC = () => {
     staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   })
 
-  // Fetch stats (computed from current avocats data)
-  const stats: AvocatsStats | undefined = React.useMemo(() => {
-    if (!avocatsData || avocatsData.total === 0) return undefined
-
-    const totalAvocats = avocatsData.total
-    const avocatsActifs = avocats.filter((a: Avocat) => a.active !== false).length
-    const avocatsAvecSpecialisation = avocats.filter((a: Avocat) => a.specialisation).length
-
-    const avocatsParRegion = avocats.reduce((acc: Record<string, number>, avocat: Avocat) => {
-      if (avocat.region) {
-        acc[avocat.region] = (acc[avocat.region] || 0) + 1
+  // Fetch stats (separate query, independent of pagination/filters)
+  const { data: stats } = useQuery<AvocatsStats>({
+    queryKey: ['avocats-stats', showInactive],
+    queryFn: async () => {
+      const params: any = {}
+      if (showInactive) {
+        params.includeInactive = 'true'
       }
-      return acc
-    }, {})
-
-    return {
-      totalAvocats,
-      avocatsActifs,
-      avocatsParRegion,
-      avocatsAvecSpecialisation
+      const response = await api.get('/avocats/stats', { params })
+      return response.data
     }
-  }, [avocats, avocatsData])
+  })
 
   // Create avocat mutation
   const createAvocatMutation = useMutation({
@@ -171,6 +161,7 @@ const Avocats: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
       queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
       toast.success('Avocat créé avec succès')
     },
     onError: (error: any) => {
@@ -187,6 +178,7 @@ const Avocats: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
       queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
       toast.success('Avocat modifié avec succès')
     },
     onError: (error: any) => {
@@ -202,6 +194,7 @@ const Avocats: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
       queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
       toast.success('Avocat désactivé avec succès')
     },
     onError: (error: any) => {
@@ -217,6 +210,7 @@ const Avocats: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['avocats-paginated'] })
       queryClient.invalidateQueries({ queryKey: ['avocats-facets'] })
+      queryClient.invalidateQueries({ queryKey: ['avocats-stats'] })
       toast.success('Avocat réactivé avec succès')
     },
     onError: (error: any) => {

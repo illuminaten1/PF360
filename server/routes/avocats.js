@@ -8,6 +8,50 @@ const prisma = new PrismaClient();
 
 router.use(authMiddleware);
 
+// Get stats for avocats
+router.get('/stats', async (req, res) => {
+  try {
+    const { includeInactive } = req.query;
+
+    const where = {};
+    if (includeInactive !== 'true') {
+      where.active = true;
+    }
+
+    const [totalAvocats, avocats] = await Promise.all([
+      prisma.avocat.count({ where }),
+      prisma.avocat.findMany({
+        where,
+        select: {
+          active: true,
+          specialisation: true,
+          region: true
+        }
+      })
+    ]);
+
+    const avocatsActifs = avocats.filter(a => a.active !== false).length;
+    const avocatsAvecSpecialisation = avocats.filter(a => a.specialisation).length;
+
+    const avocatsParRegion = avocats.reduce((acc, avocat) => {
+      if (avocat.region) {
+        acc[avocat.region] = (acc[avocat.region] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    res.json({
+      totalAvocats,
+      avocatsActifs,
+      avocatsAvecSpecialisation,
+      avocatsParRegion
+    });
+  } catch (error) {
+    console.error('Get avocats stats error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // Get facets for filters
 router.get('/facets', async (req, res) => {
   try {

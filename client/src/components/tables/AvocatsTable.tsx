@@ -12,8 +12,6 @@ import {
 } from '@tanstack/react-table'
 import { Avocat } from '@/types'
 import {
-  EyeIcon,
-  PencilIcon,
   XMarkIcon,
   CheckIcon,
   ChevronUpIcon,
@@ -42,7 +40,6 @@ interface AvocatsTableProps {
   data: Avocat[]
   loading?: boolean
   onView: (avocat: Avocat) => void
-  onEdit: (avocat: Avocat) => void
   onDelete: (avocat: Avocat) => void
   onToggleActive?: (avocat: Avocat) => void
   // Server-side props
@@ -191,7 +188,6 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
   data,
   loading = false,
   onView,
-  onEdit,
   onDelete,
   onToggleActive,
   // Server-side props
@@ -215,10 +211,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         header: 'Nom',
         cell: ({ getValue, row }) => (
           <div className="flex items-center space-x-2">
-            <div
-              className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
-              onClick={() => onView(row.original)}
-            >
+            <div className="font-medium text-gray-900">
               {getValue<string>()}
             </div>
             {row.original.active === false && (
@@ -391,23 +384,12 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         header: 'Actions',
         cell: ({ row }) => (
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => onView(row.original)}
-              className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
-              title="Voir"
-            >
-              <EyeIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => onEdit(row.original)}
-              className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
-              title="Modifier"
-            >
-              <PencilIcon className="h-5 w-5" />
-            </button>
             {row.original.active !== false ? (
               <button
-                onClick={() => onDelete(row.original)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(row.original)
+                }}
                 className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
                 title="Désactiver"
               >
@@ -416,7 +398,10 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
             ) : (
               onToggleActive && (
                 <button
-                  onClick={() => onToggleActive(row.original)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleActive(row.original)
+                  }}
                   className="p-1 text-gray-400 hover:text-green-600 rounded-full hover:bg-green-50"
                   title="Réactiver"
                 >
@@ -430,7 +415,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete, onToggleActive, facets]
+    [onDelete, onToggleActive, facets]
   )
 
   const table = useReactTable({

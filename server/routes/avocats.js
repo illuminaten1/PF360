@@ -165,7 +165,7 @@ router.get('/paginated', async (req, res) => {
           { specialisation: { contains: term, mode: 'insensitive' } },
           { telephonePublic1: { contains: term } },
           { telephonePublic2: { contains: term } },
-          { villesIntervention: { contains: term } }
+          { villesIntervention: { contains: term, mode: 'insensitive' } }
         ];
       } else if (searchTerms.length === 2) {
         const [term1, term2] = searchTerms;
@@ -174,7 +174,7 @@ router.get('/paginated', async (req, res) => {
           { email: { contains: search, mode: 'insensitive' } },
           { region: { contains: search, mode: 'insensitive' } },
           { specialisation: { contains: search, mode: 'insensitive' } },
-          { villesIntervention: { contains: search } },
+          { villesIntervention: { contains: search, mode: 'insensitive' } },
           // Name combinations in both directions
           {
             AND: [
@@ -196,7 +196,7 @@ router.get('/paginated', async (req, res) => {
           { email: { contains: search, mode: 'insensitive' } },
           { region: { contains: search, mode: 'insensitive' } },
           { specialisation: { contains: search, mode: 'insensitive' } },
-          { villesIntervention: { contains: search } }
+          { villesIntervention: { contains: search, mode: 'insensitive' } }
         ];
       }
     }

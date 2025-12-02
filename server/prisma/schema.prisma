@@ -50,6 +50,8 @@ model User {
   budgetsCrees         BudgetAnnuel[]    @relation("BudgetAnnuelCreateur")
   budgetsModifies      BudgetAnnuel[]    @relation("BudgetAnnuelModificateur")
 
+  @@index([active])
+  @@index([nom, prenom])
   @@map("users")
 }
 
@@ -118,6 +120,18 @@ model Demande {
   badges       DemandeBadge[]
   baps         DemandeBAP[]
 
+  @@index([dateReception])
+  @@index([dateAudience])
+  @@index([dateFaits])
+  @@index([assigneAId])
+  @@index([dossierId])
+  @@index([gradeId])
+  @@index([type])
+  @@index([nom])
+  @@index([prenom])
+  @@index([nigend])
+  @@index([commune])
+  @@index([unite])
   @@map("demandes")
 }
 
@@ -147,6 +161,10 @@ model Dossier {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([createdAt])
+  @@index([assigneAId])
+  @@index([sgamiId])
+  @@index([nomDossier])
   @@map("dossiers")
 }
 
@@ -178,6 +196,12 @@ model Decision {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([dossierId])
+  @@index([visaId])
+  @@index([dateSignature])
+  @@index([dateEnvoi])
+  @@index([type])
+  @@index([createdAt])
   @@map("decisions")
 }
 
@@ -210,6 +234,11 @@ model Convention {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([dossierId])
+  @@index([avocatId])
+  @@index([dateCreation])
+  @@index([dateRetourSigne])
+  @@index([type])
   @@map("conventions")
 }
 
@@ -253,6 +282,11 @@ model Paiement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([dossierId])
+  @@index([sgamiId])
+  @@index([avocatId])
+  @@index([pceId])
+  @@index([createdAt])
   @@map("paiements")
 }
 
@@ -290,6 +324,11 @@ model Avocat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([nom])
+  @@index([prenom])
+  @@index([region])
+  @@index([specialisation])
+  @@index([active])
   @@map("avocats")
 }
 
@@ -305,6 +344,9 @@ model Log {
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
+  @@index([userId])
+  @@index([timestamp])
+  @@index([entite, entiteId])
   @@map("logs")
 }
 
@@ -370,6 +412,7 @@ model DossierAttendu {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([dossierId])
   @@map("dossiers_attendus")
 }
 
@@ -381,6 +424,8 @@ model DossierBadge {
   badgeId   String
 
   @@id([dossierId, badgeId])
+  @@index([dossierId])
+  @@index([badgeId])
   @@map("dossiers_badges")
 }
 
@@ -391,6 +436,8 @@ model DemandeBadge {
   badgeId   String
 
   @@id([demandeId, badgeId])
+  @@index([demandeId])
+  @@index([badgeId])
   @@map("demandes_badges")
 }
 
@@ -401,6 +448,8 @@ model DossierBAP {
   bapId     String
 
   @@id([dossierId, bapId])
+  @@index([dossierId])
+  @@index([bapId])
   @@map("dossiers_bap")
 }
 
@@ -411,6 +460,8 @@ model DemandeBAP {
   bapId     String
 
   @@id([demandeId, bapId])
+  @@index([demandeId])
+  @@index([bapId])
   @@map("demandes_bap")
 }
 
@@ -421,6 +472,8 @@ model DecisionDemande {
   demandeId  String
 
   @@id([decisionId, demandeId])
+  @@index([decisionId])
+  @@index([demandeId])
   @@map("decisions_demandes")
 }
 
@@ -431,6 +484,8 @@ model PaiementDecision {
   decisionId String
 
   @@id([paiementId, decisionId])
+  @@index([paiementId])
+  @@index([decisionId])
   @@map("paiements_decisions")
 }
 
@@ -441,6 +496,8 @@ model ConventionDemande {
   demandeId    String
 
   @@id([conventionId, demandeId])
+  @@index([conventionId])
+  @@index([demandeId])
   @@map("conventions_demandes")
 }
 
@@ -451,6 +508,8 @@ model ConventionDiligence {
   diligenceId  String
 
   @@id([conventionId, diligenceId])
+  @@index([conventionId])
+  @@index([diligenceId])
   @@map("conventions_diligences")
 }
 
@@ -461,6 +520,8 @@ model ConventionDecision {
   decisionId   String
 
   @@id([conventionId, decisionId])
+  @@index([conventionId])
+  @@index([decisionId])
   @@map("conventions_decisions")
 }
 
@@ -572,6 +633,12 @@ model TransferHistory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([sourceUserId])
+  @@index([targetUserId])
+  @@index([transferredByUserId])
+  @@index([rolledBackByUserId])
+  @@index([transferredAt])
+  @@index([status])
   @@map("transfer_history")
 }
 

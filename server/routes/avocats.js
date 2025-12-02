@@ -378,6 +378,47 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Route suggestions/villes AVANT /:id pour éviter le conflit
+router.get('/suggestions/villes', async (_req, res) => {
+  try {
+    const avocats = await prisma.avocat.findMany({
+      where: {
+        active: true,
+        villesIntervention: { not: null }
+      },
+      select: { villesIntervention: true }
+    });
+
+    const villesSet = new Set();
+
+    avocats.forEach(avocat => {
+      if (avocat.villesIntervention) {
+        try {
+          const villes = typeof avocat.villesIntervention === 'string'
+            ? JSON.parse(avocat.villesIntervention)
+            : avocat.villesIntervention;
+
+          if (Array.isArray(villes)) {
+            villes.forEach(ville => {
+              if (ville && ville.trim()) {
+                villesSet.add(ville.trim());
+              }
+            });
+          }
+        } catch (e) {
+          // Ignorer les erreurs de parsing JSON
+        }
+      }
+    });
+
+    const villesUniques = Array.from(villesSet).sort();
+    res.json(villesUniques);
+  } catch (error) {
+    console.error('Get villes suggestions error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -560,46 +601,6 @@ router.put('/:id/activate', async (req, res) => {
     res.json({ message: 'Avocat réactivé avec succès' });
   } catch (error) {
     console.error('Activate avocat error:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
-});
-
-router.get('/suggestions/villes', async (_req, res) => {
-  try {
-    const avocats = await prisma.avocat.findMany({
-      where: { 
-        active: true,
-        villesIntervention: { not: null }
-      },
-      select: { villesIntervention: true }
-    });
-
-    const villesSet = new Set();
-    
-    avocats.forEach(avocat => {
-      if (avocat.villesIntervention) {
-        try {
-          const villes = typeof avocat.villesIntervention === 'string' 
-            ? JSON.parse(avocat.villesIntervention)
-            : avocat.villesIntervention;
-          
-          if (Array.isArray(villes)) {
-            villes.forEach(ville => {
-              if (ville && ville.trim()) {
-                villesSet.add(ville.trim());
-              }
-            });
-          }
-        } catch (e) {
-          // Ignorer les erreurs de parsing JSON
-        }
-      }
-    });
-
-    const villesUniques = Array.from(villesSet).sort();
-    res.json(villesUniques);
-  } catch (error) {
-    console.error('Get villes suggestions error:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });

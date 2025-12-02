@@ -27,15 +27,15 @@ const getAllDossiers = async (req, res) => {
     if (search) {
       const searchTerm = search.trim();
       where.OR = [
-        { numero: { contains: searchTerm } },
-        { nomDossier: { contains: searchTerm } },
+        { numero: { contains: searchTerm, mode: 'insensitive' } },
+        { nomDossier: { contains: searchTerm, mode: 'insensitive' } },
         {
           demandes: {
             some: {
               OR: [
-                { nom: { contains: searchTerm } },
-                { prenom: { contains: searchTerm } },
-                { numeroDS: { contains: searchTerm } }
+                { nom: { contains: searchTerm, mode: 'insensitive' } },
+                { prenom: { contains: searchTerm, mode: 'insensitive' } },
+                { numeroDS: { contains: searchTerm, mode: 'insensitive' } }
               ]
             }
           }
@@ -45,12 +45,12 @@ const getAllDossiers = async (req, res) => {
 
     // Filtre texte individuel - numero
     if (numero) {
-      where.numero = { contains: numero };
+      where.numero = { contains: numero, mode: 'insensitive' };
     }
 
     // Filtre texte individuel - nomDossier
     if (nomDossier) {
-      where.nomDossier = { contains: nomDossier };
+      where.nomDossier = { contains: nomDossier, mode: 'insensitive' };
     }
 
     // Filtrage par SGAMI (multi-select)

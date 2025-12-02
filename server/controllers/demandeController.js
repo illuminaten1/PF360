@@ -334,56 +334,56 @@ const getAllDemandes = async (req, res) => {
         // Recherche simple sur un seul terme
         const term = searchTerms[0];
         where.OR = [
-          { numeroDS: { contains: term } },
-          { nom: { contains: term } },
-          { prenom: { contains: term } },
-          { nigend: { contains: term } },
-          { commune: { contains: term } },
-          { unite: { contains: term } }
+          { numeroDS: { contains: term, mode: 'insensitive' } },
+          { nom: { contains: term, mode: 'insensitive' } },
+          { prenom: { contains: term, mode: 'insensitive' } },
+          { nigend: { contains: term, mode: 'insensitive' } },
+          { commune: { contains: term, mode: 'insensitive' } },
+          { unite: { contains: term, mode: 'insensitive' } }
         ];
       } else if (searchTerms.length === 2) {
         // Recherche sur deux termes : supporter "Michel DUPONT" et "DUPONT Michel"
         const [term1, term2] = searchTerms;
         where.OR = [
           // Recherche simple sur chaque terme individuellement
-          { numeroDS: { contains: search } },
-          { nigend: { contains: search } },
-          { commune: { contains: search } },
-          { unite: { contains: search } },
+          { numeroDS: { contains: search, mode: 'insensitive' } },
+          { nigend: { contains: search, mode: 'insensitive' } },
+          { commune: { contains: search, mode: 'insensitive' } },
+          { unite: { contains: search, mode: 'insensitive' } },
           // Combinaisons nom/prénom dans les deux sens
           {
             AND: [
-              { prenom: { contains: term1 } },
-              { nom: { contains: term2 } }
+              { prenom: { contains: term1, mode: 'insensitive' } },
+              { nom: { contains: term2, mode: 'insensitive' } }
             ]
           },
           {
             AND: [
-              { nom: { contains: term1 } },
-              { prenom: { contains: term2 } }
+              { nom: { contains: term1, mode: 'insensitive' } },
+              { prenom: { contains: term2, mode: 'insensitive' } }
             ]
           }
         ];
       } else {
         // Plus de 2 termes : recherche sur tous les champs individuellement
         where.OR = [
-          { numeroDS: { contains: search } },
-          { nom: { contains: search } },
-          { prenom: { contains: search } },
-          { nigend: { contains: search } },
-          { commune: { contains: search } },
-          { unite: { contains: search } }
+          { numeroDS: { contains: search, mode: 'insensitive' } },
+          { nom: { contains: search, mode: 'insensitive' } },
+          { prenom: { contains: search, mode: 'insensitive' } },
+          { nigend: { contains: search, mode: 'insensitive' } },
+          { commune: { contains: search, mode: 'insensitive' } },
+          { unite: { contains: search, mode: 'insensitive' } }
         ];
       }
     }
 
     // Filtres texte individuels
-    if (numeroDS) where.numeroDS = { contains: numeroDS };
-    if (nom) where.nom = { contains: nom };
-    if (prenom) where.prenom = { contains: prenom };
-    if (nigend) where.nigend = { contains: nigend };
-    if (unite) where.unite = { contains: unite };
-    if (commune) where.commune = { contains: commune };
+    if (numeroDS) where.numeroDS = { contains: numeroDS, mode: 'insensitive' };
+    if (nom) where.nom = { contains: nom, mode: 'insensitive' };
+    if (prenom) where.prenom = { contains: prenom, mode: 'insensitive' };
+    if (nigend) where.nigend = { contains: nigend, mode: 'insensitive' };
+    if (unite) where.unite = { contains: unite, mode: 'insensitive' };
+    if (commune) where.commune = { contains: commune, mode: 'insensitive' };
 
     // Filtrage par type (peut être un tableau pour multi-select)
     if (type) {

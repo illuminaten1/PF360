@@ -164,7 +164,8 @@ router.get('/paginated', async (req, res) => {
           { region: { contains: term, mode: 'insensitive' } },
           { specialisation: { contains: term, mode: 'insensitive' } },
           { telephonePublic1: { contains: term } },
-          { telephonePublic2: { contains: term } }
+          { telephonePublic2: { contains: term } },
+          { villesIntervention: { array_contains: term } }
         ];
       } else if (searchTerms.length === 2) {
         const [term1, term2] = searchTerms;
@@ -173,6 +174,7 @@ router.get('/paginated', async (req, res) => {
           { email: { contains: search, mode: 'insensitive' } },
           { region: { contains: search, mode: 'insensitive' } },
           { specialisation: { contains: search, mode: 'insensitive' } },
+          { villesIntervention: { array_contains: search } },
           // Name combinations in both directions
           {
             AND: [
@@ -193,7 +195,8 @@ router.get('/paginated', async (req, res) => {
           { prenom: { contains: search, mode: 'insensitive' } },
           { email: { contains: search, mode: 'insensitive' } },
           { region: { contains: search, mode: 'insensitive' } },
-          { specialisation: { contains: search, mode: 'insensitive' } }
+          { specialisation: { contains: search, mode: 'insensitive' } },
+          { villesIntervention: { array_contains: search } }
         ];
       }
     }

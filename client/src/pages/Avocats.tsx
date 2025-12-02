@@ -8,6 +8,7 @@ import api from '@/utils/api'
 import AvocatsTable from '@/components/tables/AvocatsTable'
 import AvocatModal from '@/components/forms/AvocatModal'
 import AvocatViewModal from '@/components/forms/AvocatViewModal'
+import AvocatActionConfirmationModal from '@/components/common/AvocatActionConfirmationModal'
 
 interface AvocatsStats {
   totalAvocats: number
@@ -76,7 +77,9 @@ const buildApiParams = (
 const Avocats: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isActionConfirmModalOpen, setIsActionConfirmModalOpen] = useState(false)
   const [selectedAvocat, setSelectedAvocat] = useState<Avocat | null>(null)
+  const [actionType, setActionType] = useState<'deactivate' | 'reactivate'>('deactivate')
   const [showInactive, setShowInactive] = useState(false)
 
   // Server-side state
@@ -226,27 +229,42 @@ const Avocats: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleEditAvocat = (avocat: Avocat) => {
-    setSelectedAvocat(avocat)
-    setIsModalOpen(true)
-  }
-
   const handleViewAvocat = (avocat: Avocat) => {
     setSelectedAvocat(avocat)
     setIsViewModalOpen(true)
   }
 
   const handleDeleteAvocat = (avocat: Avocat) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir désactiver l'avocat ${avocat.prenom} ${avocat.nom} ?`)) {
-      deleteAvocatMutation.mutate(avocat.id)
-    }
+    setSelectedAvocat(avocat)
+    setActionType('deactivate')
+    setIsActionConfirmModalOpen(true)
   }
 
   const handleToggleActive = (avocat: Avocat) => {
     if (avocat.active === false) {
-      if (window.confirm(`Êtes-vous sûr de vouloir réactiver l'avocat ${avocat.prenom} ${avocat.nom} ?`)) {
-        reactivateAvocatMutation.mutate(avocat.id)
-      }
+      setSelectedAvocat(avocat)
+      setActionType('reactivate')
+      setIsActionConfirmModalOpen(true)
+    }
+  }
+
+  const handleConfirmAction = () => {
+    if (!selectedAvocat) return
+
+    if (actionType === 'deactivate') {
+      deleteAvocatMutation.mutate(selectedAvocat.id)
+    } else {
+      reactivateAvocatMutation.mutate(selectedAvocat.id)
+    }
+
+    setIsActionConfirmModalOpen(false)
+    setSelectedAvocat(null)
+  }
+
+  const handleCloseActionModal = () => {
+    if (!deleteAvocatMutation.isPending && !reactivateAvocatMutation.isPending) {
+      setIsActionConfirmModalOpen(false)
+      setSelectedAvocat(null)
     }
   }
 
@@ -331,7 +349,6 @@ const Avocats: React.FC = () => {
         data={avocats}
         loading={isLoading}
         onView={handleViewAvocat}
-        onEdit={handleEditAvocat}
         onDelete={handleDeleteAvocat}
         onToggleActive={handleToggleActive}
         // Server-side props
@@ -368,6 +385,16 @@ const Avocats: React.FC = () => {
         }}
         avocat={selectedAvocat}
         onEdit={handleEditFromView}
+      />
+
+      <AvocatActionConfirmationModal
+        isOpen={isActionConfirmModalOpen}
+        onClose={handleCloseActionModal}
+        onConfirm={handleConfirmAction}
+        avocatName={selectedAvocat?.nom || ''}
+        avocatPrenom={selectedAvocat?.prenom || ''}
+        action={actionType}
+        isLoading={deleteAvocatMutation.isPending || reactivateAvocatMutation.isPending}
       />
     </div>
   )

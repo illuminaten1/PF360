@@ -516,7 +516,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={{ minHeight: '400px' }}>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             {table.getHeaderGroups().map(headerGroup => (

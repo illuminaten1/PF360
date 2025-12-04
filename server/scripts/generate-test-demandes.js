@@ -608,8 +608,8 @@ async function main() {
   }
 
   // Génération pour 2025 - calculer le nombre de dossiers nécessaires
-  const totalDemandes2025 = 2825
-  const totalDemandes2024 = 5000
+  const totalDemandes2025 = 75000  // 50% des 150k demandes pour 2025
+  const totalDemandes2024 = 75000  // 50% des 150k demandes pour 2024
   const moyenneDemandes = 3 // Moyenne de demandes par dossier
   const nbDossiers2025 = Math.ceil(totalDemandes2025 / moyenneDemandes)
   const nbDossiers2024 = Math.ceil(totalDemandes2024 / moyenneDemandes)

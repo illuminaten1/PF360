@@ -209,18 +209,21 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
       {
         accessorKey: 'nom',
         header: 'Nom',
-        cell: ({ getValue, row }) => (
-          <div className="flex items-center space-x-2">
-            <div className="font-medium text-gray-900">
-              {getValue<string>()}
+        cell: ({ getValue, row }) => {
+          const nom = getValue<string>()
+          return (
+            <div className="flex items-center space-x-2">
+              <div className="font-medium text-gray-900 max-w-[150px] break-words">
+                {nom}
+              </div>
+              {row.original.active === false && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  Inactif
+                </span>
+              )}
             </div>
-            {row.original.active === false && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                Inactif
-              </span>
-            )}
-          </div>
-        ),
+          )
+        },
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Nom..." />
@@ -229,11 +232,14 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
       {
         accessorKey: 'prenom',
         header: 'Prénom',
-        cell: ({ getValue }) => (
-          <div className="text-gray-900">
-            {getValue<string>()}
-          </div>
-        ),
+        cell: ({ getValue }) => {
+          const prenom = getValue<string>()
+          return (
+            <div className="text-gray-900 max-w-[150px] break-words">
+              {prenom}
+            </div>
+          )
+        },
         enableColumnFilter: true,
         meta: {
           filterComponent: (column: any) => <DebouncedTextFilter column={column} placeholder="Prénom..." />
@@ -598,7 +604,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
-                      className={`px-6 py-4 whitespace-nowrap ${
+                      className={`px-6 py-4 ${
                         cell.column.getFilterValue() ? 'bg-blue-50/70' : ''
                       }`}
                     >

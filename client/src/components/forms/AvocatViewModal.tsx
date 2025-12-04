@@ -93,37 +93,38 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
             >
               <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-                        <UserIcon className="h-6 w-6 text-white" />
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-6 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                      <div className="bg-white bg-opacity-20 p-2 rounded-lg flex-shrink-0">
+                        <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                      <div>
-                        <Dialog.Title as="h3" className="text-xl font-semibold text-white">
+                      <div className="flex-1 min-w-0">
+                        <Dialog.Title as="h3" className="text-lg sm:text-xl font-semibold text-white break-words">
                           Maître {avocat.prenom} {avocat.nom}
                         </Dialog.Title>
-                        <div className="flex items-center space-x-3 mt-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-2">
                           {avocat.specialisation && (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-white bg-opacity-20 text-blue-100 border-blue-300">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-white bg-opacity-20 text-blue-100 border-blue-300 w-fit">
                               {avocat.specialisation}
                             </span>
                           )}
                           {avocat.region && (
-                            <span className="text-blue-100 text-sm">
+                            <span className="text-blue-100 text-sm sm:text-base font-medium">
                               {avocat.region}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-shrink-0">
                       <button
                         onClick={copyCoordinates}
-                        className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+                        className="sm:flex sm:items-center sm:space-x-2 sm:px-4 sm:py-2 sm:bg-white sm:text-blue-700 sm:hover:bg-blue-50 sm:rounded-lg sm:shadow-md sm:hover:shadow-lg sm:font-medium p-2 text-white hover:bg-white hover:bg-opacity-20 sm:hover:bg-opacity-100 rounded-full sm:rounded-lg transition-colors"
                         title="Copier les coordonnées"
                       >
                         <ClipboardDocumentIcon className="h-5 w-5" />
+                        <span className="hidden sm:inline">Copier les coordonnées</span>
                       </button>
                       <button
                         onClick={onClose}

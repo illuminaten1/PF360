@@ -711,53 +711,16 @@ async function main() {
   
   console.log(`📊 ${dossiers.length} dossiers générés avec ${totalDemandesGenerees} demandes au total`)
   
-  console.log('📤 Insertion des dossiers et demandes en base de données...')
-  
-  // Test d'insertion d'un dossier avec une demande d'abord
-  try {
-    const testDossier = dossiers[0]
-    console.log('🔍 Test d\'insertion d\'un dossier...')
-    console.log(`Dossier: ${testDossier.numero} avec ${testDossier.demandes.length} demandes`)
-    
-    const resultDossier = await prisma.dossier.create({
-      data: {
-        numero: testDossier.numero,
-        assigneAId: testDossier.assigneAId,
-        sgamiId: testDossier.sgamiId,
-        notes: testDossier.notes
-      }
-    })
-    
-    const resultDemande = await prisma.demande.create({
-      data: {
-        ...testDossier.demandes[0],
-        dossierId: resultDossier.id
-      }
-    })
-    
-    console.log('✅ Test réussi, insertion de tous les dossiers et demandes...')
-    
-    // Suppression du test
-    await prisma.demande.delete({ where: { id: resultDemande.id } })
-    await prisma.dossier.delete({ where: { id: resultDossier.id } })
-  } catch (error) {
-    console.error('❌ Erreur lors du test d\'insertion:', error.message)
-    console.error('Stack:', error.stack)
-    return
-  }
-  
-  // Insertion dossier par dossier
-  let dossiersInserted = 0
-  let demandesInserted = 0
-  let demandesNonAffecteesInserted = 0
+  console.log('📤 Insertion OPTIMISÉE des dossiers et demandes en base de données...')
+
   let badgeStats = { signale: 0, uda: 0, vss: 0 }
   let bapStats = {}
-  
+
   // Initialiser les stats BAP
   baps.forEach(bap => {
     bapStats[bap.nomBAP] = 0
   })
-  
+
   // Collecter toutes les demandes non affectées avant de traiter les dossiers
   const toutesDemandesNonAffectees = []
   dossiers.forEach(dossier => {
@@ -765,125 +728,194 @@ async function main() {
       toutesDemandesNonAffectees.push(...dossier.demandesNonAffectees)
     }
   })
-  
-  for (const dossier of dossiers) {
-    try {
-      // 1. Créer le dossier avec assignation et SGAMI
-      const createdDossier = await prisma.dossier.create({
-        data: {
-          numero: dossier.numero,
-          assigneAId: dossier.assigneAId,
-          sgamiId: dossier.sgamiId,
-          notes: dossier.notes
+
+  // OPTIMISATION : Insertion par batch pour éviter les aller-retours DB
+  const BATCH_SIZE = 1000
+  const signaleBadge = badges.find(b => b.nom === 'Signalé')
+  const udaBadge = badges.find(b => b.nom === 'UDA')
+  const vssBadge = badges.find(b => b.nom === 'VSS')
+
+  // Préparer tous les badges à ajouter AVANT l'insertion
+  dossiers.forEach(dossier => {
+    dossier.badgesToAdd = []
+
+    if (Math.random() < 1/250 && signaleBadge) {
+      dossier.badgesToAdd.push(signaleBadge.id)
+      badgeStats.signale++
+    }
+    if (Math.random() < 1/300 && udaBadge) {
+      dossier.badgesToAdd.push(udaBadge.id)
+      badgeStats.uda++
+    }
+    if (Math.random() < 1/600 && vssBadge) {
+      dossier.badgesToAdd.push(vssBadge.id)
+      badgeStats.vss++
+    }
+
+    if (dossier.assignedBap) {
+      bapStats[dossier.assignedBap.nomBAP] = (bapStats[dossier.assignedBap.nomBAP] || 0) + 1
+    }
+  })
+
+  // Insérer les dossiers par batch
+  console.log(`📦 Insertion de ${dossiers.length} dossiers en batch de ${BATCH_SIZE}...`)
+  for (let i = 0; i < dossiers.length; i += BATCH_SIZE) {
+    const batch = dossiers.slice(i, i + BATCH_SIZE)
+
+    const dossiersData = batch.map(d => ({
+      numero: d.numero,
+      assigneAId: d.assigneAId,
+      sgamiId: d.sgamiId,
+      notes: d.notes
+    }))
+
+    await prisma.dossier.createMany({
+      data: dossiersData,
+      skipDuplicates: true
+    })
+
+    console.log(`✅ ${Math.min(i + BATCH_SIZE, dossiers.length)}/${dossiers.length} dossiers insérés`)
+  }
+
+  // Récupérer les dossiers créés avec leurs IDs
+  console.log('🔄 Récupération des IDs des dossiers créés...')
+  const createdDossiers = await prisma.dossier.findMany({
+    select: { id: true, numero: true },
+    orderBy: { id: 'asc' }
+  })
+
+  // Créer un map numero -> id pour retrouver rapidement les IDs
+  const dossierIdMap = new Map()
+  createdDossiers.forEach(d => dossierIdMap.set(d.numero, d.id))
+
+  // Préparer toutes les demandes avec leurs dossierIds
+  console.log('📦 Préparation de toutes les demandes...')
+  const toutesDemandesAvecDossier = []
+  dossiers.forEach(dossier => {
+    const dossierId = dossierIdMap.get(dossier.numero)
+    if (dossierId) {
+      dossier.demandes.forEach(demande => {
+        toutesDemandesAvecDossier.push({
+          ...demande,
+          dossierId
+        })
+      })
+    }
+  })
+
+  // Insérer toutes les demandes par batch
+  console.log(`📦 Insertion de ${toutesDemandesAvecDossier.length} demandes en batch de ${BATCH_SIZE}...`)
+  for (let i = 0; i < toutesDemandesAvecDossier.length; i += BATCH_SIZE) {
+    const batch = toutesDemandesAvecDossier.slice(i, i + BATCH_SIZE)
+
+    await prisma.demande.createMany({
+      data: batch,
+      skipDuplicates: true
+    })
+
+    console.log(`✅ ${Math.min(i + BATCH_SIZE, toutesDemandesAvecDossier.length)}/${toutesDemandesAvecDossier.length} demandes insérées`)
+  }
+
+  // Insérer les demandes non affectées par batch
+  if (toutesDemandesNonAffectees.length > 0) {
+    console.log(`📦 Insertion de ${toutesDemandesNonAffectees.length} demandes non affectées en batch...`)
+
+    for (let i = 0; i < toutesDemandesNonAffectees.length; i += BATCH_SIZE) {
+      const batch = toutesDemandesNonAffectees.slice(i, i + BATCH_SIZE)
+
+      await prisma.demande.createMany({
+        data: batch.map(d => ({ ...d, dossierId: null })),
+        skipDuplicates: true
+      })
+
+      console.log(`✅ ${Math.min(i + BATCH_SIZE, toutesDemandesNonAffectees.length)}/${toutesDemandesNonAffectees.length} demandes non affectées insérées`)
+    }
+  }
+
+  // Récupérer les demandes créées pour lier les BAP
+  console.log('🔄 Récupération des demandes pour liaison BAP...')
+  const demandesAvecNumeroDS = await prisma.demande.findMany({
+    select: { id: true, numeroDS: true, dossierId: true }
+  })
+
+  const demandeIdMap = new Map()
+  demandesAvecNumeroDS.forEach(d => demandeIdMap.set(d.numeroDS, d))
+
+  // Préparer les badges de dossiers
+  const dossierBadgesData = []
+  dossiers.forEach(dossier => {
+    const dossierId = dossierIdMap.get(dossier.numero)
+    if (dossierId && dossier.badgesToAdd && dossier.badgesToAdd.length > 0) {
+      dossier.badgesToAdd.forEach(badgeId => {
+        dossierBadgesData.push({ dossierId, badgeId })
+      })
+    }
+  })
+
+  // Insérer les badges de dossiers
+  if (dossierBadgesData.length > 0) {
+    console.log(`📦 Insertion de ${dossierBadgesData.length} badges de dossiers...`)
+    await prisma.dossierBadge.createMany({
+      data: dossierBadgesData,
+      skipDuplicates: true
+    })
+  }
+
+  // Préparer les BAP de dossiers
+  const dossierBAPData = []
+  dossiers.forEach(dossier => {
+    const dossierId = dossierIdMap.get(dossier.numero)
+    if (dossierId && dossier.assignedBap) {
+      dossierBAPData.push({
+        dossierId,
+        bapId: dossier.assignedBap.id
+      })
+    }
+  })
+
+  // Insérer les BAP de dossiers
+  if (dossierBAPData.length > 0) {
+    console.log(`📦 Insertion de ${dossierBAPData.length} BAP de dossiers...`)
+    await prisma.dossierBAP.createMany({
+      data: dossierBAPData,
+      skipDuplicates: true
+    })
+  }
+
+  // Préparer les BAP de demandes (toutes les demandes d'un dossier avec BAP)
+  const demandeBAPData = []
+  dossiers.forEach(dossier => {
+    if (dossier.assignedBap) {
+      dossier.demandes.forEach(demande => {
+        const demandeInfo = demandeIdMap.get(demande.numeroDS)
+        if (demandeInfo) {
+          demandeBAPData.push({
+            demandeId: demandeInfo.id,
+            bapId: dossier.assignedBap.id
+          })
         }
       })
-      
-      // 2. Attribuer des badges au dossier selon les probabilités
-      const dossierBadgesToAdd = []
-      
-      // Badge "Signalé" : 1/250 = 0.4%
-      if (Math.random() < 1/250) {
-        const signaleBadge = badges.find(b => b.nom === 'Signalé')
-        if (signaleBadge) {
-          dossierBadgesToAdd.push(signaleBadge.id)
-          badgeStats.signale++
-        }
-      }
-      
-      // Badge "UDA" : 1/300 = 0.33%
-      if (Math.random() < 1/300) {
-        const udaBadge = badges.find(b => b.nom === 'UDA')
-        if (udaBadge) {
-          dossierBadgesToAdd.push(udaBadge.id)
-          badgeStats.uda++
-        }
-      }
-      
-      // Badge "VSS" : 1/600 = 0.17%
-      if (Math.random() < 1/600) {
-        const vssBadge = badges.find(b => b.nom === 'VSS')
-        if (vssBadge) {
-          dossierBadgesToAdd.push(vssBadge.id)
-          badgeStats.vss++
-        }
-      }
-      
-      // Attribuer les badges sélectionnés au dossier
-      if (dossierBadgesToAdd.length > 0) {
-        for (const badgeId of dossierBadgesToAdd) {
-          await prisma.dossierBadge.create({
-            data: {
-              dossierId: createdDossier.id,
-              badgeId: badgeId
-            }
-          })
-        }
-      }
-      
-      // 3. Attribuer le BAP au dossier si applicable
-      if (dossier.assignedBap) {
-        await prisma.dossierBAP.create({
-          data: {
-            dossierId: createdDossier.id,
-            bapId: dossier.assignedBap.id
-          }
-        })
-        bapStats[dossier.assignedBap.nomBAP]++
-      }
-      
-      // 4. Créer les demandes du dossier
-      for (const demande of dossier.demandes) {
-        const createdDemande = await prisma.demande.create({
-          data: {
-            ...demande,
-            dossierId: createdDossier.id
-          }
-        })
-        
-        // Si le dossier est lié à un BAP, lier aussi toutes ses demandes
-        if (dossier.assignedBap) {
-          await prisma.demandeBAP.create({
-            data: {
-              demandeId: createdDemande.id,
-              bapId: dossier.assignedBap.id
-            }
-          })
-        }
-        
-        demandesInserted++
-      }
-      
-      dossiersInserted++
-      
-      if (dossiersInserted % 50 === 0) {
-        console.log(`✅ ${dossiersInserted}/${dossiers.length} dossiers insérés (${demandesInserted} demandes)`)
-      }
-    } catch (error) {
-      console.error(`❌ Erreur lors de l'insertion du dossier ${dossier.numero}:`, error.message)
-      // On continue avec le dossier suivant
+    }
+  })
+
+  // Insérer les BAP de demandes par batch
+  if (demandeBAPData.length > 0) {
+    console.log(`📦 Insertion de ${demandeBAPData.length} BAP de demandes en batch...`)
+    for (let i = 0; i < demandeBAPData.length; i += BATCH_SIZE) {
+      const batch = demandeBAPData.slice(i, i + BATCH_SIZE)
+
+      await prisma.demandeBAP.createMany({
+        data: batch,
+        skipDuplicates: true
+      })
+
+      console.log(`✅ ${Math.min(i + BATCH_SIZE, demandeBAPData.length)}/${demandeBAPData.length} BAP de demandes insérés`)
     }
   }
-  
-  // Insérer les demandes non affectées (sans dossier, sans BAP, sans assignation)
-  if (toutesDemandesNonAffectees.length > 0) {
-    console.log(`📝 Insertion de ${toutesDemandesNonAffectees.length} demandes non affectées...`)
-    
-    for (const demande of toutesDemandesNonAffectees) {
-      try {
-        await prisma.demande.create({
-          data: {
-            ...demande,
-            dossierId: null // Explicitement sans dossier
-          }
-        })
-        demandesNonAffecteesInserted++
-      } catch (error) {
-        console.error(`❌ Erreur lors de l'insertion de la demande non affectée ${demande.numeroDS}:`, error.message)
-      }
-    }
-    
-    console.log(`✅ ${demandesNonAffecteesInserted} demandes non affectées insérées`)
-  }
+
+  const dossiersInserted = dossiers.length
+  const demandesInserted = toutesDemandesAvecDossier.length
+  const demandesNonAffecteesInserted = toutesDemandesNonAffectees.length
   
   console.log(`🎉 Génération terminée ! ${dossiersInserted} dossiers, ${demandesInserted} demandes dans des dossiers et ${demandesNonAffecteesInserted} demandes non affectées ont été créées en base de données.`)
   console.log(`🏷️  Badges attribués aux dossiers :`)

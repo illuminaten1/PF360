@@ -289,8 +289,8 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
-                <div className="flex items-center justify-between mb-6">
+              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all max-h-[90vh] flex flex-col">
+                <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                     {title}
                   </Dialog.Title>
@@ -302,7 +302,8 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+                  <div className="overflow-y-auto px-6 py-4 space-y-8 flex-1">
                   {/* Informations générales */}
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <h4 className="text-md font-medium text-gray-900 mb-4">Informations générales</h4>
@@ -613,8 +614,9 @@ const AvocatModal: React.FC<AvocatModalProps> = ({
                       />
                     </div>
                   </div>
+                  </div>
 
-                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                  <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-gray-200 bg-white">
                     <button
                       type="button"
                       onClick={onClose}

@@ -91,9 +91,9 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all max-h-[90vh] overflow-y-auto">
+              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all max-h-[90vh] flex flex-col">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-6 py-4">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-6 py-4 flex-shrink-0">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                       <div className="bg-white bg-opacity-20 p-2 rounded-lg flex-shrink-0">
@@ -136,7 +136,7 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                   </div>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto flex-1">
                   <div className="space-y-8">
                     {/* Informations générales */}
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
@@ -353,24 +353,25 @@ const AvocatViewModal: React.FC<AvocatViewModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Boutons d'action */}
-                    <div className="flex justify-end space-x-3 pt-6 mt-8 border-t border-gray-200">
-                      {onEdit && (
-                        <button
-                          onClick={onEdit}
-                          className="px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium"
-                        >
-                          Modifier
-                        </button>
-                      )}
-                      <button
-                        onClick={onClose}
-                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                      >
-                        Fermer
-                      </button>
-                    </div>
                   </div>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 bg-white flex-shrink-0">
+                  {onEdit && (
+                    <button
+                      onClick={onEdit}
+                      className="px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium"
+                    >
+                      Modifier
+                    </button>
+                  )}
+                  <button
+                    onClick={onClose}
+                    className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    Fermer
+                  </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

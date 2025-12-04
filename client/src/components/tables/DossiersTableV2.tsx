@@ -1,5 +1,4 @@
-import React, { useMemo, useState, forwardRef, useImperativeHandle, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useMemo, useState, forwardRef, useImperativeHandle, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -200,7 +199,7 @@ const DemandeursCell: React.FC<{
   onLierDemandes: (dossierId: string, dossierNumero: string) => void
   showAll: boolean
   onToggleShowAll: () => void
-}> = React.memo(({ dossier, onLierDemandes, showAll, onToggleShowAll }) => {
+}> = React.memo(function DemandeursCell({ dossier, onLierDemandes, showAll, onToggleShowAll }) {
 
   if (dossier.demandes.length === 0) {
     return (
@@ -217,13 +216,13 @@ const DemandeursCell: React.FC<{
   }
 
   return (
-    <div className="text-sm">
+    <div className="text-sm max-w-[300px]">
       <div className="text-gray-900">
         {showAll ? (
           <div className="space-y-1">
             {dossier.demandes.map((d, index) => (
               <div key={index} className="flex items-center justify-between">
-                <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
+                <span className="break-words">{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
                 {d.numeroDS && (
                   <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
                 )}
@@ -245,7 +244,7 @@ const DemandeursCell: React.FC<{
           <div>
             {dossier.demandes.slice(0, 2).map((d, index) => (
               <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                <span>{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
+                <span className="break-words">{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
                 {d.numeroDS && (
                   <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
                 )}
@@ -292,7 +291,6 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
   onClearFilters,
   facets
 }, ref) => {
-  const navigate = useNavigate()
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [showLierDemandesModal, setShowLierDemandesModal] = useState(false)
   const [selectedDossierId, setSelectedDossierId] = useState<string>('')
@@ -516,7 +514,7 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
         enableSorting: false
       }
     ],
-    [onEdit, onDelete, facets]
+    [onEdit, onDelete, facets, expandedDossiers]
   )
 
   const table = useReactTable({
@@ -713,7 +711,9 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
-                      className={`px-6 py-4 whitespace-nowrap ${
+                      className={`px-6 py-4 ${
+                        cell.column.id === 'demandeurs' ? '' : 'whitespace-nowrap'
+                      } ${
                         cell.column.getFilterValue() ? 'bg-blue-50/70' : ''
                       }`}
                     >

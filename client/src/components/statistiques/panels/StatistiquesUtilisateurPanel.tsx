@@ -5,8 +5,7 @@ import {
   TableHeaderCell,
   TableBody,
   TableRow,
-  TableCell,
-  Badge
+  TableCell
 } from '@tremor/react'
 import { StatistiquesUtilisateur } from '../types'
 
@@ -86,18 +85,10 @@ const StatistiquesUtilisateurPanel: React.FC<StatistiquesUtilisateurPanelProps> 
               <TableCell className="text-center">{user.demandesAttribuees}</TableCell>
               <TableCell className="text-center">{user.demandesPropres}</TableCell>
               <TableCell className="text-center">{user.demandesBAP}</TableCell>
-              <TableCell className="text-center">
-                <Badge color="blue" size="xs">{user.decisionsRepartition.PJ}</Badge>
-              </TableCell>
-              <TableCell className="text-center">
-                <Badge color="purple" size="xs">{user.decisionsRepartition.AJ}</Badge>
-              </TableCell>
-              <TableCell className="text-center">
-                <Badge color="green" size="xs">{user.decisionsRepartition.AJE}</Badge>
-              </TableCell>
-              <TableCell className="text-center">
-                <Badge color="red" size="xs">{user.decisionsRepartition.REJET}</Badge>
-              </TableCell>
+              <TableCell className="text-center">{user.decisionsRepartition.PJ}</TableCell>
+              <TableCell className="text-center">{user.decisionsRepartition.AJ}</TableCell>
+              <TableCell className="text-center">{user.decisionsRepartition.AJE}</TableCell>
+              <TableCell className="text-center">{user.decisionsRepartition.REJET}</TableCell>
               <TableCell className="text-center">{user.enCours}</TableCell>
               <TableCell className="text-center">{user.enCoursPropre}</TableCell>
               <TableCell className="text-center">{user.enCoursBAP}</TableCell>
@@ -109,18 +100,10 @@ const StatistiquesUtilisateurPanel: React.FC<StatistiquesUtilisateurPanelProps> 
             <TableCell className="text-center font-bold">{totals.demandesAttribuees}</TableCell>
             <TableCell className="text-center font-bold">{totals.demandesPropres}</TableCell>
             <TableCell className="text-center font-bold">{totals.demandesBAP}</TableCell>
-            <TableCell className="text-center">
-              <Badge color="blue" size="xs" className="font-bold">{totals.PJ}</Badge>
-            </TableCell>
-            <TableCell className="text-center">
-              <Badge color="purple" size="xs" className="font-bold">{totals.AJ}</Badge>
-            </TableCell>
-            <TableCell className="text-center">
-              <Badge color="green" size="xs" className="font-bold">{totals.AJE}</Badge>
-            </TableCell>
-            <TableCell className="text-center">
-              <Badge color="red" size="xs" className="font-bold">{totals.REJET}</Badge>
-            </TableCell>
+            <TableCell className="text-center font-bold">{totals.PJ}</TableCell>
+            <TableCell className="text-center font-bold">{totals.AJ}</TableCell>
+            <TableCell className="text-center font-bold">{totals.AJE}</TableCell>
+            <TableCell className="text-center font-bold">{totals.REJET}</TableCell>
             <TableCell className="text-center font-bold">{totals.enCours}</TableCell>
             <TableCell className="text-center font-bold">{totals.enCoursPropre}</TableCell>
             <TableCell className="text-center font-bold">{totals.enCoursBAP}</TableCell>

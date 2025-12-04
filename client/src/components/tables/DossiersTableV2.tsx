@@ -243,7 +243,7 @@ const DemandeursCell: React.FC<{
         ) : (
           <div>
             {dossier.demandes.slice(0, 2).map((d, index) => (
-              <div key={index} className={index > 0 ? 'mt-1' : ''}>
+              <div key={index} className={`flex items-center justify-between ${index > 0 ? 'mt-1' : ''}`}>
                 <span className="break-words">{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
                 {d.numeroDS && (
                   <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>

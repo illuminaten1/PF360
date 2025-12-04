@@ -78,20 +78,20 @@ const StatistiquesUtilisateurPanel: React.FC<StatistiquesUtilisateurPanelProps> 
         </TableHead>
         <TableBody>
           {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell className="font-medium text-tremor-content-strong">
+            <TableRow key={user.id} className="group transition">
+              <TableCell className="font-medium text-tremor-content-strong group-hover:bg-blue-50/30 dark:group-hover:bg-blue-800/5">
                 {user.grade ? `${user.grade} ` : ''}{user.prenom} {user.nom}
               </TableCell>
-              <TableCell className="text-center text-tremor-content bg-green-50">{user.demandesAttribuees}</TableCell>
-              <TableCell className="text-center text-tremor-content bg-green-50">{user.demandesPropres}</TableCell>
-              <TableCell className="text-center text-tremor-content bg-green-50">{user.demandesBAP}</TableCell>
-              <TableCell className="text-center text-tremor-content">{user.decisionsRepartition.PJ}</TableCell>
-              <TableCell className="text-center text-tremor-content">{user.decisionsRepartition.AJ}</TableCell>
-              <TableCell className="text-center text-tremor-content">{user.decisionsRepartition.AJE}</TableCell>
-              <TableCell className="text-center text-tremor-content">{user.decisionsRepartition.REJET}</TableCell>
-              <TableCell className="text-center text-tremor-content bg-orange-50">{user.enCours}</TableCell>
-              <TableCell className="text-center text-tremor-content bg-orange-50">{user.enCoursPropre}</TableCell>
-              <TableCell className="text-center text-tremor-content bg-orange-50">{user.enCoursBAP}</TableCell>
+              <TableCell className="text-center text-tremor-content bg-green-50 group-hover:bg-green-100/80 dark:group-hover:bg-green-900/20">{user.demandesAttribuees}</TableCell>
+              <TableCell className="text-center text-tremor-content bg-green-50 group-hover:bg-green-100/80 dark:group-hover:bg-green-900/20">{user.demandesPropres}</TableCell>
+              <TableCell className="text-center text-tremor-content bg-green-50 group-hover:bg-green-100/80 dark:group-hover:bg-green-900/20">{user.demandesBAP}</TableCell>
+              <TableCell className="text-center text-tremor-content group-hover:bg-blue-50/30 dark:group-hover:bg-blue-800/5">{user.decisionsRepartition.PJ}</TableCell>
+              <TableCell className="text-center text-tremor-content group-hover:bg-blue-50/30 dark:group-hover:bg-blue-800/5">{user.decisionsRepartition.AJ}</TableCell>
+              <TableCell className="text-center text-tremor-content group-hover:bg-blue-50/30 dark:group-hover:bg-blue-800/5">{user.decisionsRepartition.AJE}</TableCell>
+              <TableCell className="text-center text-tremor-content group-hover:bg-blue-50/30 dark:group-hover:bg-blue-800/5">{user.decisionsRepartition.REJET}</TableCell>
+              <TableCell className="text-center text-tremor-content bg-orange-50 group-hover:bg-orange-100/80 dark:group-hover:bg-orange-900/20">{user.enCours}</TableCell>
+              <TableCell className="text-center text-tremor-content bg-orange-50 group-hover:bg-orange-100/80 dark:group-hover:bg-orange-900/20">{user.enCoursPropre}</TableCell>
+              <TableCell className="text-center text-tremor-content bg-orange-50 group-hover:bg-orange-100/80 dark:group-hover:bg-orange-900/20">{user.enCoursBAP}</TableCell>
             </TableRow>
           ))}
           {/* Ligne de totaux */}

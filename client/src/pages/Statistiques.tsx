@@ -569,7 +569,7 @@ const Statistiques: React.FC = () => {
           {/* Widget Utilisateurs avec Tremor */}
           <div className="bg-white rounded-lg shadow border border-gray-200">
             <div className="border-b border-gray-200 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-900">Utilisateurs</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Répartition</h2>
             </div>
             <StatistiquesUtilisateurPanel users={statsAdministratives?.utilisateurs} />
           </div>

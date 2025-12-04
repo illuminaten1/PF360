@@ -75,7 +75,7 @@ const getStatistiquesAdministratives = async (req, res) => {
       }
     });
 
-    // 2. Récupérer tous les utilisateurs avec leurs statistiques
+    // 2. Récupérer tous les utilisateurs actifs
     const users = await prisma.user.findMany({
       where: {
         active: true,
@@ -89,85 +89,89 @@ const getStatistiquesAdministratives = async (req, res) => {
         prenom: true,
         role: true,
         grade: true
-      },
-      orderBy: [
-        { role: 'asc' },
-        { nom: 'asc' }
-      ]
+      }
     });
 
-    // 3. Calculer les statistiques pour chaque utilisateur
-    const utilisateursStats = await Promise.all(users.map(async (user) => {
-      // Nombre de demandes attribuées
-      const demandesAttribuees = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          dateReception: {
-            gte: startOfYear,
-            lt: endOfYear
+    // 3. Récupérer toutes les demandes de l'année en une seule requête
+    const demandes = await prisma.demande.findMany({
+      where: {
+        dateReception: {
+          gte: startOfYear,
+          lt: endOfYear
+        },
+        assigneAId: {
+          in: users.map(u => u.id)
+        }
+      },
+      select: {
+        id: true,
+        assigneAId: true,
+        baps: {
+          select: {
+            bapId: true
+          }
+        },
+        decisions: {
+          select: {
+            decision: {
+              select: {
+                type: true,
+                dateSignature: true
+              }
+            }
           }
         }
-      });
+      }
+    });
+
+    // 4. Récupérer tous les liens DecisionDemande pour les décisions signées cette année
+    const allDecisionDemandes = await prisma.decisionDemande.findMany({
+      where: {
+        demande: {
+          assigneAId: {
+            in: users.map(u => u.id)
+          }
+        },
+        decision: {
+          dateSignature: {
+            gte: startOfYear,
+            lt: endOfYear,
+            not: null
+          }
+        }
+      },
+      select: {
+        demande: {
+          select: {
+            assigneAId: true
+          }
+        },
+        decision: {
+          select: {
+            type: true
+          }
+        }
+      }
+    });
+
+    // 5. Calculer les statistiques pour chaque utilisateur à partir des données en mémoire
+    const utilisateursStats = users.map(user => {
+      const demandesUser = demandes.filter(d => d.assigneAId === user.id);
+      const demandesAttribuees = demandesUser.length;
 
       // Ne retourner que les utilisateurs ayant au moins une demande attribuée
       if (demandesAttribuees === 0) {
         return null;
       }
 
-      // Nombre de demandes propres (sans BAP lié)
-      const demandesPropres = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          dateReception: {
-            gte: startOfYear,
-            lt: endOfYear
-          },
-          baps: {
-            none: {}
-          }
-        }
-      });
+      // Demandes propres (sans BAP)
+      const demandesPropres = demandesUser.filter(d => d.baps.length === 0).length;
 
-      // Nombre de demandes BAP (avec BAP lié)
-      const demandesBAP = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          dateReception: {
-            gte: startOfYear,
-            lt: endOfYear
-          },
-          baps: {
-            some: {}
-          }
-        }
-      });
+      // Demandes BAP (avec au moins un BAP)
+      const demandesBAP = demandesUser.filter(d => d.baps.length > 0).length;
 
-      // Statistiques des décisions par type pour les demandes assignées à cet utilisateur
-      // Compte le nombre de liens DecisionDemande, pas le nombre de décisions
-      // Une décision liée à 2 demandes compte comme 2
-      const decisionsWithDemandes = await prisma.decisionDemande.findMany({
-        where: {
-          demande: {
-            assigneAId: user.id
-          },
-          decision: {
-            dateSignature: {
-              gte: startOfYear,
-              lt: endOfYear,
-              not: null
-            }
-          }
-        },
-        include: {
-          decision: {
-            select: {
-              type: true
-            }
-          }
-        }
-      });
-
-      // Compter par type de décision
+      // Compter les décisions par type
+      const decisionsUser = allDecisionDemandes.filter(dd => dd.demande.assigneAId === user.id);
       const decisionTypeCounts = {
         PJ: 0,
         AJE: 0,
@@ -175,114 +179,46 @@ const getStatistiquesAdministratives = async (req, res) => {
         REJET: 0
       };
 
-      decisionsWithDemandes.forEach(dd => {
+      decisionsUser.forEach(dd => {
         const type = dd.decision.type;
         if (decisionTypeCounts.hasOwnProperty(type)) {
           decisionTypeCounts[type]++;
         }
       });
 
-      // Les décisions sont déjà comptées correctement dans decisionTypeCounts
-      const decisionsRepartition = decisionTypeCounts;
+      // Passage AJE vers PJ
+      const passageAJEversPJ = demandesUser.filter(d => {
+        const hasAJE = d.decisions.some(dd =>
+          dd.decision.type === 'AJE' &&
+          dd.decision.dateSignature &&
+          dd.decision.dateSignature >= startOfYear &&
+          dd.decision.dateSignature < endOfYear
+        );
+        const hasPJ = d.decisions.some(dd =>
+          dd.decision.type === 'PJ' &&
+          dd.decision.dateSignature &&
+          dd.decision.dateSignature >= startOfYear &&
+          dd.decision.dateSignature < endOfYear
+        );
+        return hasAJE && hasPJ;
+      }).length;
 
-      // Passage AJE vers PJ (demandes avec une décision AJE signée cette année ET une décision PJ signée cette année)
-      const passageAJEversPJ = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          decisions: {
-            some: {
-              decision: {
-                type: 'AJE',
-                dateSignature: {
-                  gte: startOfYear,
-                  lt: endOfYear,
-                  not: null
-                }
-              }
-            }
-          },
-          AND: {
-            decisions: {
-              some: {
-                decision: {
-                  type: 'PJ',
-                  dateSignature: {
-                    gte: startOfYear,
-                    lt: endOfYear,
-                    not: null
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
+      // En cours (sans décision signée)
+      const enCours = demandesUser.filter(d =>
+        !d.decisions.some(dd => dd.decision.dateSignature !== null)
+      ).length;
 
-      // En cours (demandes reçues cette année sans décisions signées)
-      const enCours = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          dateReception: {
-            gte: startOfYear,
-            lt: endOfYear
-          },
-          decisions: {
-            none: {
-              decision: {
-                dateSignature: {
-                  not: null
-                }
-              }
-            }
-          }
-        }
-      });
+      // En cours propre (sans BAP et sans décision signée)
+      const enCoursPropre = demandesUser.filter(d =>
+        d.baps.length === 0 &&
+        !d.decisions.some(dd => dd.decision.dateSignature !== null)
+      ).length;
 
-      // En cours propre (pareil mais sans BAP et sans décisions signées)
-      const enCoursPropre = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          dateReception: {
-            gte: startOfYear,
-            lt: endOfYear
-          },
-          decisions: {
-            none: {
-              decision: {
-                dateSignature: {
-                  not: null
-                }
-              }
-            }
-          },
-          baps: {
-            none: {}
-          }
-        }
-      });
-
-      // En cours BAP (pareil mais avec un BAP et sans décisions signées)
-      const enCoursBAP = await prisma.demande.count({
-        where: {
-          assigneAId: user.id,
-          dateReception: {
-            gte: startOfYear,
-            lt: endOfYear
-          },
-          decisions: {
-            none: {
-              decision: {
-                dateSignature: {
-                  not: null
-                }
-              }
-            }
-          },
-          baps: {
-            some: {}
-          }
-        }
-      });
+      // En cours BAP (avec BAP et sans décision signée)
+      const enCoursBAP = demandesUser.filter(d =>
+        d.baps.length > 0 &&
+        !d.decisions.some(dd => dd.decision.dateSignature !== null)
+      ).length;
 
       return {
         id: user.id,
@@ -293,16 +229,18 @@ const getStatistiquesAdministratives = async (req, res) => {
         demandesAttribuees,
         demandesPropres,
         demandesBAP,
-        decisionsRepartition,
+        decisionsRepartition: decisionTypeCounts,
         passageAJEversPJ,
         enCours,
         enCoursPropre,
         enCoursBAP
       };
-    }));
+    });
 
-    // Filtrer les utilisateurs null (ceux sans demandes attribuées)
-    const utilisateursFiltres = utilisateursStats.filter(user => user !== null);
+    // Filtrer les utilisateurs null (ceux sans demandes attribuées) et trier par nombre de demandes décroissant
+    const utilisateursFiltres = utilisateursStats
+      .filter(user => user !== null)
+      .sort((a, b) => b.demandesAttribuees - a.demandesAttribuees);
 
     res.json({
       generales: {

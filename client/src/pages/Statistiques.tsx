@@ -47,10 +47,10 @@ const Statistiques: React.FC = () => {
   const { user } = useAuth()
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState<number>(currentYear)
-  const [activeTab, setActiveTab] = useState<'administratif' | 'budgetaire' | 'toutes-demandes'>(() => {
+  const [activeTab, setActiveTab] = useState<'administratif' | 'administratif-new' | 'budgetaire' | 'toutes-demandes'>(() => {
     try {
       const savedTab = localStorage.getItem('pf360-statistiques-active-tab')
-      return (savedTab === 'budgetaire' || savedTab === 'administratif' || savedTab === 'toutes-demandes') ? savedTab : 'administratif'
+      return (savedTab === 'budgetaire' || savedTab === 'administratif' || savedTab === 'administratif-new' || savedTab === 'toutes-demandes') ? savedTab : 'administratif'
     } catch {
       return 'administratif'
     }
@@ -127,7 +127,10 @@ const Statistiques: React.FC = () => {
     statsDepensesOrdonneesParMois,
     anneesDisponibles,
     isLoading
-  } = useStatistiquesQueries(selectedYear, activeTab === 'toutes-demandes' ? 'administratif' : activeTab)
+  } = useStatistiquesQueries(
+    selectedYear,
+    activeTab === 'toutes-demandes' ? 'administratif' : activeTab
+  )
 
   // Handle layout changes and save to localStorage
   const handleLayoutChange = (_layout: Layout[], newLayouts: { [key: string]: Layout[] }) => {
@@ -524,6 +527,16 @@ const Statistiques: React.FC = () => {
               Administratif
             </button>
             <button
+              onClick={() => setActiveTab('administratif-new')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'administratif-new'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Administratif new
+            </button>
+            <button
               onClick={() => setActiveTab('budgetaire')}
               className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'budgetaire'
@@ -550,6 +563,16 @@ const Statistiques: React.FC = () => {
       {activeTab === 'toutes-demandes' ? (
         <div className="bg-white rounded-lg shadow border border-gray-200">
           <DemandesTablePanel />
+        </div>
+      ) : activeTab === 'administratif-new' ? (
+        <div className="space-y-6">
+          {/* Widget Utilisateurs avec Tremor */}
+          <div className="bg-white rounded-lg shadow border border-gray-200">
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900">Utilisateurs</h2>
+            </div>
+            <StatistiquesUtilisateurPanel users={statsAdministratives?.utilisateurs} />
+          </div>
         </div>
       ) : (
         <div style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>

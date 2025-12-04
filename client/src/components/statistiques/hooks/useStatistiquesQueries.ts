@@ -24,8 +24,8 @@ import {
   DepensesOrdonneesParMoisData
 } from '../types'
 
-export const useStatistiquesQueries = (selectedYear: number, activeTab: 'administratif' | 'budgetaire') => {
-  const isAdministratif = activeTab === 'administratif'
+export const useStatistiquesQueries = (selectedYear: number, activeTab: 'administratif' | 'administratif-new' | 'budgetaire') => {
+  const isAdministratif = activeTab === 'administratif' || activeTab === 'administratif-new'
   const isBudgetaire = activeTab === 'budgetaire'
 
   const statsAdministratives = useQuery<StatistiquesAdministratives>({

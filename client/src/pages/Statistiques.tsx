@@ -566,7 +566,15 @@ const Statistiques: React.FC = () => {
         </div>
       ) : activeTab === 'administratif-new' ? (
         <div className="space-y-6">
-          {/* Widget Utilisateurs avec Tremor */}
+          {/* Widget Demandes avec KPI Cards Tremor */}
+          <div className="bg-white rounded-lg shadow border border-gray-200">
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900">Demandes</h2>
+            </div>
+            <StatistiquesGeneralesPanel stats={statsAdministratives?.generales} />
+          </div>
+
+          {/* Widget Répartition avec Tremor */}
           <div className="bg-white rounded-lg shadow border border-gray-200">
             <div className="border-b border-gray-200 px-6 py-4">
               <h2 className="text-lg font-semibold text-gray-900">Répartition</h2>

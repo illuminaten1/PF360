@@ -5,47 +5,57 @@ interface StatistiquesGeneralesPanelProps {
   stats: StatistiquesGenerales | undefined
 }
 
-const StatistiquesGeneralesPanel: React.FC<StatistiquesGeneralesPanelProps> = ({ stats }) => (
-  <div className="h-full flex flex-col">
-    <div className="flex-1 overflow-auto p-2">
-      {stats && (
-        <div className="h-full grid grid-cols-1 sm:grid-cols-2 gap-1">
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-4xl sm:text-5xl font-semibold text-blue-600 mb-1">
-              {stats.demandesTotal}
-            </div>
-            <div className="text-sm text-gray-600">
-              Reçues
-            </div>
+const StatistiquesGeneralesPanel: React.FC<StatistiquesGeneralesPanelProps> = ({ stats }) => {
+  if (!stats) {
+    return (
+      <div className="p-6">
+        <p className="text-sm text-gray-500">Aucune donnée disponible</p>
+      </div>
+    )
+  }
+
+  const kpis = [
+    {
+      label: 'Demandes reçues',
+      value: stats.demandesTotal,
+      valueColor: 'text-gray-900 dark:text-gray-50'
+    },
+    {
+      label: 'Demandes traitées',
+      value: stats.demandesTraitees,
+      valueColor: 'text-gray-900 dark:text-gray-50'
+    },
+    {
+      label: 'Demandes en instance',
+      value: stats.demandesEnInstance,
+      valueColor: 'text-gray-900 dark:text-gray-50'
+    },
+    {
+      label: 'Demandes non affectées',
+      value: stats.demandesNonAffectees,
+      valueColor: 'text-gray-900 dark:text-gray-50'
+    }
+  ]
+
+  return (
+    <div className="p-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((kpi, index) => (
+          <div
+            key={index}
+            className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950"
+          >
+            <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">
+              {kpi.label}
+            </p>
+            <p className={`mt-2 text-3xl font-semibold leading-10 ${kpi.valueColor}`}>
+              {kpi.value.toLocaleString('fr-FR')}
+            </p>
           </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-4xl sm:text-5xl font-semibold text-green-600 mb-1">
-              {stats.demandesTraitees}
-            </div>
-            <div className="text-sm text-gray-600">
-              Traitées
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-4xl sm:text-5xl font-semibold text-yellow-600 mb-1">
-              {stats.demandesEnInstance}
-            </div>
-            <div className="text-sm text-gray-600">
-              En instance
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center flex flex-col justify-center">
-            <div className="text-4xl sm:text-5xl font-semibold text-red-600 mb-1">
-              {stats.demandesNonAffectees}
-            </div>
-            <div className="text-sm text-gray-600">
-              Non affectées
-            </div>
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default StatistiquesGeneralesPanel

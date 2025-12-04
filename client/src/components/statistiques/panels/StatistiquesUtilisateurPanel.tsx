@@ -44,14 +44,14 @@ const StatistiquesUtilisateurPanel: React.FC<StatistiquesUtilisateurPanelProps> 
             <TableHeaderCell className="text-left">
               Rédacteurs
             </TableHeaderCell>
-            <TableHeaderCell className="text-center">
-              Total PF
+            <TableHeaderCell className="text-center bg-green-100">
+              Demandes
             </TableHeaderCell>
-            <TableHeaderCell className="text-center">
-              Propres
+            <TableHeaderCell className="text-center bg-green-100">
+              en propre
             </TableHeaderCell>
-            <TableHeaderCell className="text-center">
-              BAP
+            <TableHeaderCell className="text-center bg-green-100">
+              en BAP
             </TableHeaderCell>
             <TableHeaderCell className="text-center">
               PJ
@@ -65,14 +65,14 @@ const StatistiquesUtilisateurPanel: React.FC<StatistiquesUtilisateurPanelProps> 
             <TableHeaderCell className="text-center">
               REJET
             </TableHeaderCell>
-            <TableHeaderCell className="text-center">
-              En cours
+            <TableHeaderCell className="text-center bg-orange-100">
+              Demandes en cours
             </TableHeaderCell>
-            <TableHeaderCell className="text-center">
-              En propre
+            <TableHeaderCell className="text-center bg-orange-100">
+              en propre
             </TableHeaderCell>
-            <TableHeaderCell className="text-center">
-              Suivis BAP
+            <TableHeaderCell className="text-center bg-orange-100">
+              en BAP
             </TableHeaderCell>
           </TableRow>
         </TableHead>
@@ -82,31 +82,31 @@ const StatistiquesUtilisateurPanel: React.FC<StatistiquesUtilisateurPanelProps> 
               <TableCell className="font-medium">
                 {user.grade ? `${user.grade} ` : ''}{user.prenom} {user.nom}
               </TableCell>
-              <TableCell className="text-center">{user.demandesAttribuees}</TableCell>
-              <TableCell className="text-center">{user.demandesPropres}</TableCell>
-              <TableCell className="text-center">{user.demandesBAP}</TableCell>
+              <TableCell className="text-center bg-green-50">{user.demandesAttribuees}</TableCell>
+              <TableCell className="text-center bg-green-50">{user.demandesPropres}</TableCell>
+              <TableCell className="text-center bg-green-50">{user.demandesBAP}</TableCell>
               <TableCell className="text-center">{user.decisionsRepartition.PJ}</TableCell>
               <TableCell className="text-center">{user.decisionsRepartition.AJ}</TableCell>
               <TableCell className="text-center">{user.decisionsRepartition.AJE}</TableCell>
               <TableCell className="text-center">{user.decisionsRepartition.REJET}</TableCell>
-              <TableCell className="text-center">{user.enCours}</TableCell>
-              <TableCell className="text-center">{user.enCoursPropre}</TableCell>
-              <TableCell className="text-center">{user.enCoursBAP}</TableCell>
+              <TableCell className="text-center bg-orange-50">{user.enCours}</TableCell>
+              <TableCell className="text-center bg-orange-50">{user.enCoursPropre}</TableCell>
+              <TableCell className="text-center bg-orange-50">{user.enCoursBAP}</TableCell>
             </TableRow>
           ))}
           {/* Ligne de totaux */}
-          <TableRow className="bg-blue-50 font-bold border-t-2 border-blue-200">
-            <TableCell className="font-bold">TOTAL</TableCell>
-            <TableCell className="text-center font-bold">{totals.demandesAttribuees}</TableCell>
-            <TableCell className="text-center font-bold">{totals.demandesPropres}</TableCell>
-            <TableCell className="text-center font-bold">{totals.demandesBAP}</TableCell>
-            <TableCell className="text-center font-bold">{totals.PJ}</TableCell>
-            <TableCell className="text-center font-bold">{totals.AJ}</TableCell>
-            <TableCell className="text-center font-bold">{totals.AJE}</TableCell>
-            <TableCell className="text-center font-bold">{totals.REJET}</TableCell>
-            <TableCell className="text-center font-bold">{totals.enCours}</TableCell>
-            <TableCell className="text-center font-bold">{totals.enCoursPropre}</TableCell>
-            <TableCell className="text-center font-bold">{totals.enCoursBAP}</TableCell>
+          <TableRow className="font-bold border-t-2 border-gray-300">
+            <TableCell className="font-bold bg-gray-100">TOTAL</TableCell>
+            <TableCell className="text-center font-bold bg-green-100">{totals.demandesAttribuees}</TableCell>
+            <TableCell className="text-center font-bold bg-green-100">{totals.demandesPropres}</TableCell>
+            <TableCell className="text-center font-bold bg-green-100">{totals.demandesBAP}</TableCell>
+            <TableCell className="text-center font-bold bg-gray-100">{totals.PJ}</TableCell>
+            <TableCell className="text-center font-bold bg-gray-100">{totals.AJ}</TableCell>
+            <TableCell className="text-center font-bold bg-gray-100">{totals.AJE}</TableCell>
+            <TableCell className="text-center font-bold bg-gray-100">{totals.REJET}</TableCell>
+            <TableCell className="text-center font-bold bg-orange-100">{totals.enCours}</TableCell>
+            <TableCell className="text-center font-bold bg-orange-100">{totals.enCoursPropre}</TableCell>
+            <TableCell className="text-center font-bold bg-orange-100">{totals.enCoursBAP}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

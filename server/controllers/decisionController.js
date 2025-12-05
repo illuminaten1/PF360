@@ -691,9 +691,35 @@ const deleteDecision = async (req, res) => {
   }
 };
 
+// GET /decisions/stats - Récupération des statistiques globales
+const getStats = async (req, res) => {
+  try {
+    const decisions = await prisma.decision.findMany({
+      select: {
+        id: true,
+        type: true
+      }
+    });
+
+    const stats = {
+      totalDecisions: decisions.length,
+      ajCount: decisions.filter(d => d.type === 'AJ').length,
+      ajeCount: decisions.filter(d => d.type === 'AJE').length,
+      pjCount: decisions.filter(d => d.type === 'PJ').length,
+      rejetCount: decisions.filter(d => d.type === 'REJET').length
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Get stats error:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
 module.exports = {
   getAllDecisions,
   getFacets,
+  getStats,
   getDecisionById,
   createDecision,
   updateDecision,

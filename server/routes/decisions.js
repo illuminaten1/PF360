@@ -3,6 +3,7 @@ const { authMiddleware } = require('../middleware/auth');
 const {
   getAllDecisions,
   getFacets,
+  getStats,
   getDecisionById,
   createDecision,
   updateDecision,
@@ -14,6 +15,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/facets', getFacets);
+router.get('/stats', getStats);
 router.get('/', getAllDecisions);
 router.post('/', createDecision);
 router.get('/:id', getDecisionById);

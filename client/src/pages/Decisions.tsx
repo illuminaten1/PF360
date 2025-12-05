@@ -127,6 +127,7 @@ const Decisions: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['decisions'] })
+      queryClient.invalidateQueries({ queryKey: ['decisions-stats'] })
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Erreur lors de la modification de la décision')
@@ -140,6 +141,7 @@ const Decisions: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['decisions'] })
+      queryClient.invalidateQueries({ queryKey: ['decisions-stats'] })
       toast.success('Décision supprimée avec succès')
     },
     onError: (error: any) => {
@@ -184,20 +186,15 @@ const Decisions: React.FC = () => {
   const totalRows = data?.pagination?.total || 0
   const pageCount = data?.pagination?.totalPages || 0
 
-  // Stats basées sur le total (pas seulement la page actuelle)
-  const getStatsData = () => {
-    // Pour les stats, on peut faire une requête séparée ou les calculer côté serveur
-    // Pour l'instant, on affiche juste le total
-    return {
-      totalDecisions: totalRows,
-      ajCount: decisions.filter((d: Decision) => d.type === 'AJ').length,
-      ajeCount: decisions.filter((d: Decision) => d.type === 'AJE').length,
-      pjCount: decisions.filter((d: Decision) => d.type === 'PJ').length,
-      rejetCount: decisions.filter((d: Decision) => d.type === 'REJET').length
-    }
-  }
-
-  const stats = getStatsData()
+  // Fetch stats globales
+  const { data: stats } = useQuery({
+    queryKey: ['decisions-stats'],
+    queryFn: async () => {
+      const response = await api.get('/decisions/stats')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+  })
 
   return (
     <div className="p-6">
@@ -214,24 +211,24 @@ const Decisions: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-gray-900">{stats.totalDecisions}</div>
+            <div className="text-2xl font-bold text-gray-900">{stats?.totalDecisions || 0}</div>
             <div className="text-sm text-gray-600">Total décisions</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-green-600">{stats.ajCount}</div>
-            <div className="text-sm text-gray-600">Aide Juridique (page)</div>
+            <div className="text-2xl font-bold text-green-600">{stats?.ajCount || 0}</div>
+            <div className="text-sm text-gray-600">Aide Juridique</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.ajeCount}</div>
-            <div className="text-sm text-gray-600">AJ Évolutive (page)</div>
+            <div className="text-2xl font-bold text-blue-600">{stats?.ajeCount || 0}</div>
+            <div className="text-sm text-gray-600">AJ Évolutive</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-purple-600">{stats.pjCount}</div>
-            <div className="text-sm text-gray-600">Protection Juridictionnelle (page)</div>
+            <div className="text-2xl font-bold text-purple-600">{stats?.pjCount || 0}</div>
+            <div className="text-sm text-gray-600">Protection Juridictionnelle</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-red-600">{stats.rejetCount}</div>
-            <div className="text-sm text-gray-600">Rejets (page)</div>
+            <div className="text-2xl font-bold text-red-600">{stats?.rejetCount || 0}</div>
+            <div className="text-sm text-gray-600">Rejets</div>
           </div>
         </div>
       </div>

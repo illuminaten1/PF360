@@ -221,7 +221,7 @@ const DemandeursCell: React.FC<{
         {showAll ? (
           <div className="space-y-1">
             {dossier.demandes.map((d, index) => (
-              <div key={index} className="flex items-center justify-between">
+              <div key={index}>
                 <span className="break-words">{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
                 {d.numeroDS && (
                   <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>

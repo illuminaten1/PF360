@@ -12,7 +12,7 @@ git reset --hard origin/main
 # Mise à jour backend si nécessaire
 cd server
 if [ -f "package.json" ]; then
-    npm install --production
+    npm install --omit=dev
     npx prisma generate
     # npx prisma migrate deploy  # Si vous avez des migrations
 fi

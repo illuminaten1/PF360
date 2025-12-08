@@ -144,6 +144,14 @@ const DemandeModal: React.FC<DemandeModalProps> = ({
     }
   }, [partieCivile, setValue])
 
+  // Fix scroll issue: ensure body overflow is restored when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Force restore scroll when modal closes
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
 
 
   useEffect(() => {

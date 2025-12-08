@@ -341,8 +341,8 @@ const RevueSignaturesTable: React.FC<RevueSignaturesTableProps> = ({
         )
       },
       {
-        id: 'conventions',
-        header: 'Conventions sans signature',
+        id: 'conventionType',
+        header: 'Type / N°',
         accessorFn: (row) => {
           if (!row.conventions) return ''
           return row.conventions
@@ -355,20 +355,11 @@ const RevueSignaturesTable: React.FC<RevueSignaturesTableProps> = ({
           const conventionsSansSignature = demande.conventions?.filter(conv => !conv.convention.dateRetourSigne) || []
 
           return (
-            <div className="text-sm">
+            <div className="text-sm space-y-1">
               {conventionsSansSignature.map((conv) => (
-                <div key={conv.convention.id} className="mb-1">
+                <div key={conv.convention.id}>
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(conv.convention.type)}`}>
                     {getTypeLabel(conv.convention.type)} {conv.convention.numero}
-                  </span>
-                  <span className="ml-2 text-gray-600">
-                    {conv.convention.avocat.nom}{conv.convention.avocat.prenom ? ` ${conv.convention.avocat.prenom}` : ''}
-                  </span>
-                  <span className="ml-2 text-gray-800 font-medium">
-                    {new Intl.NumberFormat('fr-FR', {
-                      style: 'currency',
-                      currency: 'EUR'
-                    }).format(conv.convention.montantHT)}
                   </span>
                 </div>
               ))}
@@ -377,6 +368,60 @@ const RevueSignaturesTable: React.FC<RevueSignaturesTableProps> = ({
         },
         enableColumnFilter: true,
         filterFn: 'includesString'
+      },
+      {
+        id: 'avocat',
+        header: 'Avocat',
+        accessorFn: (row) => {
+          if (!row.conventions) return ''
+          return row.conventions
+            .filter(conv => !conv.convention.dateRetourSigne)
+            .map(conv => `${conv.convention.avocat.nom}${conv.convention.avocat.prenom ? ` ${conv.convention.avocat.prenom}` : ''}`)
+            .join(', ')
+        },
+        cell: ({ row }) => {
+          const demande = row.original
+          const conventionsSansSignature = demande.conventions?.filter(conv => !conv.convention.dateRetourSigne) || []
+
+          return (
+            <div className="text-sm space-y-1">
+              {conventionsSansSignature.map((conv) => (
+                <div key={conv.convention.id} className="text-gray-900">
+                  {conv.convention.avocat.nom}{conv.convention.avocat.prenom ? ` ${conv.convention.avocat.prenom}` : ''}
+                </div>
+              ))}
+            </div>
+          )
+        },
+        enableColumnFilter: true,
+        filterFn: 'includesString'
+      },
+      {
+        id: 'montant',
+        header: 'Montant HT',
+        accessorFn: (row) => {
+          if (!row.conventions) return 0
+          const conventionsSansSignature = row.conventions.filter(conv => !conv.convention.dateRetourSigne)
+          return conventionsSansSignature.reduce((sum, conv) => sum + conv.convention.montantHT, 0)
+        },
+        cell: ({ row }) => {
+          const demande = row.original
+          const conventionsSansSignature = demande.conventions?.filter(conv => !conv.convention.dateRetourSigne) || []
+
+          return (
+            <div className="text-sm space-y-1">
+              {conventionsSansSignature.map((conv) => (
+                <div key={conv.convention.id} className="text-gray-900 font-medium">
+                  {new Intl.NumberFormat('fr-FR', {
+                    style: 'currency',
+                    currency: 'EUR'
+                  }).format(conv.convention.montantHT)}
+                </div>
+              ))}
+            </div>
+          )
+        },
+        enableColumnFilter: false
       },
       {
         accessorKey: 'dateReception',

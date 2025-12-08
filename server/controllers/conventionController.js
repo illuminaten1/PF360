@@ -15,7 +15,7 @@ const createConventionSchema = z.object({
   dossierId: z.string().min(1, "Le dossier est requis"),
   avocatId: z.string().min(1, "L'avocat est requis"),
   demandes: z.array(z.string()).optional(),
-  diligences: z.array(z.string()).optional(),
+  diligences: z.array(z.string()).min(1, "Au moins une diligence est requise"),
   decisions: z.array(z.string()).optional()
 });
 
@@ -30,7 +30,7 @@ const updateConventionSchema = z.object({
   dossierId: z.string().min(1).optional(),
   avocatId: z.string().min(1).optional(),
   demandes: z.array(z.string()).optional(),
-  diligences: z.array(z.string()).optional(),
+  diligences: z.array(z.string()).min(1, "Au moins une diligence est requise").optional(),
   decisions: z.array(z.string()).optional()
 });
 

@@ -29,6 +29,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useNavigate } from 'react-router-dom'
 import { exportRevueDecisions } from '@/utils/excelExport'
 import { useAuth } from '@/contexts/AuthContext'
+import DemandeViewModal from '@/components/forms/DemandeViewModal'
 
 dayjs.locale('fr')
 
@@ -288,6 +289,8 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
   })
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
   const [saving, setSaving] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [selectedDemandeForView, setSelectedDemandeForView] = useState<Demande | null>(null)
 
   useEffect(() => {
     if (selectedUserId) {
@@ -405,6 +408,11 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
 
   const handleViewDossier = (dossierId: string) => {
     navigate(`/dossiers/${dossierId}`)
+  }
+
+  const handleViewDemande = (demande: Demande) => {
+    setSelectedDemandeForView(demande)
+    setIsViewModalOpen(true)
   }
 
   const handleExportExcel = async () => {
@@ -540,7 +548,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
 
           if (isEditing) {
             return (
-              <div className="flex items-start space-x-2 min-w-0">
+              <div className="flex items-start space-x-2 min-w-0" onClick={(e) => e.stopPropagation()}>
                 <textarea
                   value={localValue}
                   onChange={(e) => setLocalValue(e.target.value)}
@@ -589,7 +597,10 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
               </div>
               {user?.role === 'ADMIN' && (
                 <button
-                  onClick={() => handleEditComment(demande.id, currentValue)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEditComment(demande.id, currentValue)
+                  }}
                   className="p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
                   title="Modifier le commentaire"
                 >
@@ -619,7 +630,7 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
 
           if (isEditing) {
             return (
-              <div className="flex items-start space-x-2 min-w-0">
+              <div className="flex items-start space-x-2 min-w-0" onClick={(e) => e.stopPropagation()}>
                 <textarea
                   value={localValue}
                   onChange={(e) => setLocalValue(e.target.value)}
@@ -668,7 +679,10 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
               </div>
               {canEdit && (
                 <button
-                  onClick={() => handleEditCommentRedacteur(demande.id, currentValue)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEditCommentRedacteur(demande.id, currentValue)
+                  }}
                   className="p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
                   title="Modifier le commentaire rédacteur"
                 >
@@ -834,7 +848,11 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
               </tr>
             ) : (
               table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50">
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleViewDemande(row.original)}
+                >
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
@@ -923,6 +941,15 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
           </div>
         </div>
       )}
+
+      <DemandeViewModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false)
+          setSelectedDemandeForView(null)
+        }}
+        demande={selectedDemandeForView}
+      />
     </div>
   )
 }

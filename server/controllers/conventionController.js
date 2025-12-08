@@ -343,7 +343,7 @@ const getFacets = async (req, res) => {
       // Créateurs
       prisma.user.findMany({
         where: {
-          conventionsCrees: {
+          conventions: {
             some: {}
           }
         },

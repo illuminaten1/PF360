@@ -98,9 +98,12 @@ model Demande {
   soutienMedical       Boolean @default(false)
 
   // Commentaires de suivi
-  commentaireDecision   String?
-  commentaireConvention String?
-  commentaireSignature  String?
+  commentaireDecision            String?
+  commentaireConvention          String?
+  commentaireSignature           String?
+  commentaireDecisionRedacteur   String?
+  commentaireConventionRedacteur String?
+  commentaireSignatureRedacteur  String?
 
   dateReception DateTime @default(now())
   createdAt     DateTime @default(now())

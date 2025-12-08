@@ -348,9 +348,9 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
       })
 
       // Mettre à jour les données localement
-      setData(prevData => 
-        prevData.map(demande => 
-          demande.id === editingCell.demandeId 
+      setData(prevData =>
+        prevData.map(demande =>
+          demande.id === editingCell.demandeId
             ? { ...demande, commentaireDecision: commentValue }
             : demande
         )
@@ -359,6 +359,41 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
       setEditingCell(null)
     } catch (error) {
       console.error('Error saving comment:', error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleEditCommentRedacteur = (demandeId: string, currentValue: string) => {
+    setEditingCell({
+      demandeId: `${demandeId}-redacteur`,
+      value: currentValue || ''
+    })
+  }
+
+  const handleSaveCommentRedacteur = async (value?: string) => {
+    if (!editingCell) return
+
+    const commentValue = value !== undefined ? value : editingCell.value
+    const demandeId = editingCell.demandeId.replace('-redacteur', '')
+
+    try {
+      setSaving(true)
+      await api.put(`/demandes/${demandeId}`, {
+        commentaireDecisionRedacteur: commentValue
+      })
+
+      setData(prevData =>
+        prevData.map(demande =>
+          demande.id === demandeId
+            ? { ...demande, commentaireDecisionRedacteur: commentValue }
+            : demande
+        )
+      )
+
+      setEditingCell(null)
+    } catch (error) {
+      console.error('Error saving comment redacteur:', error)
     } finally {
       setSaving(false)
     }
@@ -557,6 +592,85 @@ const RevueDecisionsTable: React.FC<RevueDecisionsTableProps> = ({
                   onClick={() => handleEditComment(demande.id, currentValue)}
                   className="p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
                   title="Modifier le commentaire"
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )
+        },
+        enableSorting: false
+      },
+      {
+        accessorKey: 'commentaireDecisionRedacteur',
+        header: 'Commentaire rédacteur',
+        cell: ({ row, getValue }) => {
+          const demande = row.original
+          const currentValue = getValue<string>()
+          const isEditing = editingCell?.demandeId === `${demande.id}-redacteur`
+          const [localValue, setLocalValue] = React.useState('')
+          const canEdit = demande.assigneA?.id === user?.id
+
+          React.useEffect(() => {
+            if (isEditing) {
+              setLocalValue(currentValue || '')
+            }
+          }, [isEditing, currentValue])
+
+          if (isEditing) {
+            return (
+              <div className="flex items-start space-x-2 min-w-0">
+                <textarea
+                  value={localValue}
+                  onChange={(e) => setLocalValue(e.target.value)}
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  placeholder="Ajouter un commentaire..."
+                  rows={3}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                      handleSaveCommentRedacteur(localValue)
+                    } else if (e.key === 'Escape') {
+                      handleCancelEdit()
+                    }
+                  }}
+                />
+                <div className="flex flex-col space-y-1 mt-1">
+                  <button
+                    onClick={() => handleSaveCommentRedacteur(localValue)}
+                    disabled={saving}
+                    className="p-1 text-green-600 hover:text-green-800 disabled:opacity-50"
+                    title="Sauvegarder (Ctrl+Entrée)"
+                  >
+                    <CheckIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={saving}
+                    className="p-1 text-gray-600 hover:text-gray-800 disabled:opacity-50"
+                    title="Annuler (Échap)"
+                  >
+                    <XMarkIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )
+          }
+
+          return (
+            <div className="flex items-start space-x-2 min-w-0 group">
+              <div className="flex-1 min-w-0">
+                {currentValue ? (
+                  <div className="text-sm text-gray-900 whitespace-pre-wrap">{currentValue}</div>
+                ) : (
+                  <span className="text-sm text-gray-400 italic">Aucun commentaire</span>
+                )}
+              </div>
+              {canEdit && (
+                <button
+                  onClick={() => handleEditCommentRedacteur(demande.id, currentValue)}
+                  className="p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
+                  title="Modifier le commentaire rédacteur"
                 >
                   <PencilIcon className="h-4 w-4" />
                 </button>

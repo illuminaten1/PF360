@@ -115,7 +115,7 @@ const LierDemandesMultiplesDossierModal: React.FC<LierDemandesMultiplesDossierMo
       params.append('limit', '50') // Limite raisonnable avec recherche
       
       const response = await api.get(`/dossiers?${params}`)
-      return response.data || []
+      return response.data.dossiers || []
     },
     enabled: isOpen,
     placeholderData: keepPreviousData, // Évite les clignotements lors de la recherche

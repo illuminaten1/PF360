@@ -284,6 +284,10 @@ const demandeSchema = z.object({
   // Commentaires de suivi
   commentaireDecision: z.string().optional(),
   commentaireConvention: z.string().optional(),
+  commentaireSignature: z.string().optional(),
+  commentaireDecisionRedacteur: z.string().optional(),
+  commentaireConventionRedacteur: z.string().optional(),
+  commentaireSignatureRedacteur: z.string().optional(),
   
   // Date de réception
   dateReception: z.string().optional(),

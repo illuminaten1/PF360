@@ -28,6 +28,7 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import DatePickerModal from '../common/DatePickerModal'
+import DemandeursCell from '../common/DemandeursCell'
 
 dayjs.locale('fr')
 
@@ -333,68 +334,6 @@ const getTypeDecisionLabel = (type: string) => {
   }
 }
 
-// Composant séparé pour la colonne Demandeurs
-const DemandeursCell: React.FC<{
-  decision: Decision
-  showAll: boolean
-  onToggleShowAll: () => void
-}> = React.memo(function DemandeursCell({ decision, showAll, onToggleShowAll }) {
-  if (decision.demandes.length === 0) {
-    return <span className="text-gray-400">Aucun demandeur</span>
-  }
-
-  return (
-    <div className="text-sm">
-      <div className="text-gray-900">
-        {showAll ? (
-          <div className="space-y-1">
-            {decision.demandes.map((d, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span>{d.demande.prenom} {d.demande.nom}</span>
-                <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
-              </div>
-            ))}
-            {decision.demandes.length > 2 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleShowAll()
-                }}
-                className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
-              >
-                Réduire
-              </button>
-            )}
-          </div>
-        ) : (
-          <div>
-            {decision.demandes.slice(0, 2).map((d, index) => (
-              <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                <span>{d.demande.prenom} {d.demande.nom}</span>
-                <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
-              </div>
-            ))}
-            {decision.demandes.length > 2 && (
-              <div className="mt-1">
-                <span className="text-gray-500 text-xs">+{decision.demandes.length - 2} autre(s) </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleShowAll()
-                  }}
-                  className="text-blue-600 hover:text-blue-800 text-xs underline"
-                >
-                  Voir tous
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-})
-
 const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
   data,
   loading = false,
@@ -589,7 +528,11 @@ const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
           const decision = row.original
           return (
             <DemandeursCell
-              decision={decision}
+              demandes={decision.demandes.map(d => ({
+                prenom: d.demande.prenom,
+                nom: d.demande.nom,
+                numeroDS: d.demande.numeroDS
+              }))}
               showAll={expandedDecisions.has(decision.id)}
               onToggleShowAll={() => {
                 setExpandedDecisions(prev => {

@@ -30,6 +30,7 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import DatePickerModal from '../common/DatePickerModal'
+import DemandeursCell from '../common/DemandeursCell'
 
 dayjs.locale('fr')
 
@@ -339,68 +340,6 @@ const getVictimeMecLabel = (type: string) => {
   }
 }
 
-// Composant séparé pour la colonne Demandeurs
-const DemandeursCell: React.FC<{
-  convention: Convention
-  showAll: boolean
-  onToggleShowAll: () => void
-}> = React.memo(function DemandeursCell({ convention, showAll, onToggleShowAll }) {
-  if (convention.demandes.length === 0) {
-    return <span className="text-gray-400">Aucun demandeur</span>
-  }
-
-  return (
-    <div className="text-sm">
-      <div className="text-gray-900">
-        {showAll ? (
-          <div className="space-y-1">
-            {convention.demandes.map((d, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span>{d.demande.prenom} {d.demande.nom}</span>
-                <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
-              </div>
-            ))}
-            {convention.demandes.length > 2 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleShowAll()
-                }}
-                className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
-              >
-                Réduire
-              </button>
-            )}
-          </div>
-        ) : (
-          <div>
-            {convention.demandes.slice(0, 2).map((d, index) => (
-              <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                <span>{d.demande.prenom} {d.demande.nom}</span>
-                <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
-              </div>
-            ))}
-            {convention.demandes.length > 2 && (
-              <div className="mt-1">
-                <span className="text-gray-500 text-xs">+{convention.demandes.length - 2} autre(s) </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleShowAll()
-                  }}
-                  className="text-blue-600 hover:text-blue-800 text-xs underline"
-                >
-                  Voir tous
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-})
-
 const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
   data,
   loading = false,
@@ -635,7 +574,11 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
           const convention = row.original
           return (
             <DemandeursCell
-              convention={convention}
+              demandes={convention.demandes.map(d => ({
+                prenom: d.demande.prenom,
+                nom: d.demande.nom,
+                numeroDS: d.demande.numeroDS
+              }))}
               showAll={expandedConventions.has(convention.id)}
               onToggleShowAll={() => {
                 setExpandedConventions(prev => {

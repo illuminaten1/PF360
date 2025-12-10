@@ -25,6 +25,7 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import LierDemandesModal from '../forms/LierDemandesModal'
+import DemandeursCell from '../common/DemandeursCell'
 
 dayjs.locale('fr')
 
@@ -193,84 +194,6 @@ function MultiSelectFilter({
     </div>
   )
 }
-
-const DemandeursCell: React.FC<{
-  dossier: Dossier
-  onLierDemandes: (dossierId: string, dossierNumero: string) => void
-  showAll: boolean
-  onToggleShowAll: () => void
-}> = React.memo(function DemandeursCell({ dossier, onLierDemandes, showAll, onToggleShowAll }) {
-
-  if (dossier.demandes.length === 0) {
-    return (
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          onLierDemandes(dossier.id, dossier.numero)
-        }}
-        className="text-sm text-blue-600 hover:text-blue-800 underline"
-      >
-        Lier des demandes
-      </button>
-    )
-  }
-
-  return (
-    <div className="text-sm max-w-[300px]">
-      <div className="text-gray-900">
-        {showAll ? (
-          <div className="space-y-1">
-            {dossier.demandes.map((d, index) => (
-              <div key={index}>
-                <span className="break-words">{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
-                {d.numeroDS && (
-                  <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
-                )}
-              </div>
-            ))}
-            {dossier.demandes.length > 2 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleShowAll()
-                }}
-                className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
-              >
-                Réduire
-              </button>
-            )}
-          </div>
-        ) : (
-          <div>
-            {dossier.demandes.slice(0, 2).map((d, index) => (
-              <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                <span className="break-words">{d.grade?.gradeAbrege ? `${d.grade.gradeAbrege} ` : ''}{d.prenom} {d.nom}</span>
-                {d.numeroDS && (
-                  <span className="text-xs text-gray-500 ml-2">({d.numeroDS})</span>
-                )}
-              </div>
-            ))}
-            {dossier.demandes.length > 2 && (
-              <div className="mt-1">
-                <span className="text-gray-500 text-xs">+{dossier.demandes.length - 2} autre(s) </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleShowAll()
-                  }}
-                  className="text-blue-600 hover:text-blue-800 text-xs underline"
-                >
-                  Voir tous
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-})
-
 const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
   data,
   loading = false,
@@ -353,12 +276,12 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
           const dossier = row.original
           return (
             <DemandeursCell
-              dossier={dossier}
-              onLierDemandes={(dossierId, dossierNumero) => {
-                setSelectedDossierId(dossierId)
-                setSelectedDossierNumero(dossierNumero)
-                setShowLierDemandesModal(true)
-              }}
+              demandes={dossier.demandes.map(d => ({
+                prenom: d.prenom,
+                nom: d.nom,
+                numeroDS: d.numeroDS,
+                grade: d.grade?.gradeAbrege
+              }))}
               showAll={expandedDossiers.has(dossier.id)}
               onToggleShowAll={() => {
                 setExpandedDossiers(prev => {
@@ -371,6 +294,20 @@ const DossiersTableV2 = forwardRef<DossiersTableV2Ref, DossiersTableV2Props>(({
                   return newSet
                 })
               }}
+              showGrade={true}
+              emptyState={
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedDossierId(dossier.id)
+                    setSelectedDossierNumero(dossier.numero)
+                    setShowLierDemandesModal(true)
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  Lier des demandes
+                </button>
+              }
             />
           )
         },

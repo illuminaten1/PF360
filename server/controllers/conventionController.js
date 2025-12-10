@@ -676,9 +676,9 @@ const updateConvention = async (req, res) => {
       dateRetourSigne,
       dossierId,
       avocatId,
-      demandes = [],
-      diligences = [],
-      decisions = []
+      demandes,
+      diligences,
+      decisions
     } = validatedData;
 
     const existingConvention = await prisma.convention.findUnique({
@@ -696,36 +696,53 @@ const updateConvention = async (req, res) => {
       });
     }
 
-    await prisma.conventionDemande.deleteMany({
-      where: { conventionId: req.params.id }
-    });
+    // Ne supprimer les relations que si elles sont explicitement fournies dans le body
+    if (demandes !== undefined) {
+      await prisma.conventionDemande.deleteMany({
+        where: { conventionId: req.params.id }
+      });
+    }
 
-    await prisma.conventionDiligence.deleteMany({
-      where: { conventionId: req.params.id }
-    });
+    if (diligences !== undefined) {
+      await prisma.conventionDiligence.deleteMany({
+        where: { conventionId: req.params.id }
+      });
+    }
 
-    await prisma.conventionDecision.deleteMany({
-      where: { conventionId: req.params.id }
-    });
+    if (decisions !== undefined) {
+      await prisma.conventionDecision.deleteMany({
+        where: { conventionId: req.params.id }
+      });
+    }
 
     const updateData = {
-      modifieParId: req.user.id,
-      demandes: {
+      modifieParId: req.user.id
+    };
+
+    // Ne recréer les relations que si elles sont explicitement fournies dans le body
+    if (demandes !== undefined) {
+      updateData.demandes = {
         create: demandes.map(demandeId => ({
           demandeId
         }))
-      },
-      diligences: {
+      };
+    }
+
+    if (diligences !== undefined) {
+      updateData.diligences = {
         create: diligences.map(diligenceId => ({
           diligenceId
         }))
-      },
-      decisions: {
+      };
+    }
+
+    if (decisions !== undefined) {
+      updateData.decisions = {
         create: decisions.map(decisionId => ({
           decisionId
         }))
-      }
-    };
+      };
+    }
 
     if (type !== undefined) updateData.type = type;
     if (victimeOuMisEnCause !== undefined) updateData.victimeOuMisEnCause = victimeOuMisEnCause;

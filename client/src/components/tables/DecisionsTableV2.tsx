@@ -333,6 +333,68 @@ const getTypeDecisionLabel = (type: string) => {
   }
 }
 
+// Composant séparé pour la colonne Demandeurs
+const DemandeursCell: React.FC<{
+  decision: Decision
+  showAll: boolean
+  onToggleShowAll: () => void
+}> = React.memo(function DemandeursCell({ decision, showAll, onToggleShowAll }) {
+  if (decision.demandes.length === 0) {
+    return <span className="text-gray-400">Aucun demandeur</span>
+  }
+
+  return (
+    <div className="text-sm">
+      <div className="text-gray-900">
+        {showAll ? (
+          <div className="space-y-1">
+            {decision.demandes.map((d, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span>{d.demande.prenom} {d.demande.nom}</span>
+                <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
+              </div>
+            ))}
+            {decision.demandes.length > 2 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggleShowAll()
+                }}
+                className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
+              >
+                Réduire
+              </button>
+            )}
+          </div>
+        ) : (
+          <div>
+            {decision.demandes.slice(0, 2).map((d, index) => (
+              <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                <span>{d.demande.prenom} {d.demande.nom}</span>
+                <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
+              </div>
+            ))}
+            {decision.demandes.length > 2 && (
+              <div className="mt-1">
+                <span className="text-gray-500 text-xs">+{decision.demandes.length - 2} autre(s) </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleShowAll()
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-xs underline"
+                >
+                  Voir tous
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+})
+
 const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
   data,
   loading = false,
@@ -355,6 +417,9 @@ const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
   facets
 }) => {
   const navigate = useNavigate()
+
+  // État pour les décisions avec demandeurs expandés
+  const [expandedDecisions, setExpandedDecisions] = React.useState<Set<string>>(new Set())
 
   // État pour le modal de date
   const [dateModal, setDateModal] = React.useState<{
@@ -522,61 +587,22 @@ const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
         },
         cell: ({ row }) => {
           const decision = row.original
-          if (decision.demandes.length === 0) {
-            return <span className="text-gray-400">Aucun demandeur</span>
-          }
-
-          const [showAll, setShowAll] = React.useState(false)
-
           return (
-            <div className="text-sm">
-              <div className="text-gray-900">
-                {showAll ? (
-                  <div className="space-y-1">
-                    {decision.demandes.map((d, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span>{d.demande.prenom} {d.demande.nom}</span>
-                        <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
-                      </div>
-                    ))}
-                    {decision.demandes.length > 2 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setShowAll(false)
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-xs underline mt-1"
-                      >
-                        Réduire
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    {decision.demandes.slice(0, 2).map((d, index) => (
-                      <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                        <span>{d.demande.prenom} {d.demande.nom}</span>
-                        <span className="text-xs text-gray-500 ml-2">({d.demande.numeroDS})</span>
-                      </div>
-                    ))}
-                    {decision.demandes.length > 2 && (
-                      <div className="mt-1">
-                        <span className="text-gray-500 text-xs">+{decision.demandes.length - 2} autre(s) </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setShowAll(true)
-                          }}
-                          className="text-blue-600 hover:text-blue-800 text-xs underline"
-                        >
-                          Voir tous
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <DemandeursCell
+              decision={decision}
+              showAll={expandedDecisions.has(decision.id)}
+              onToggleShowAll={() => {
+                setExpandedDecisions(prev => {
+                  const newSet = new Set(prev)
+                  if (newSet.has(decision.id)) {
+                    newSet.delete(decision.id)
+                  } else {
+                    newSet.add(decision.id)
+                  }
+                  return newSet
+                })
+              }}
+            />
           )
         },
         enableColumnFilter: false,
@@ -747,7 +773,7 @@ const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
         enableSorting: false
       }
     ],
-    [onView, onEdit, onDelete, facets, handleViewDossier]
+    [onView, onEdit, onDelete, facets, handleViewDossier, expandedDecisions]
   )
 
   const table = useReactTable({

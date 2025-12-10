@@ -422,8 +422,7 @@ const Demandes: React.FC = () => {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Mes demandes - Section séparée */}
               <div className="md:w-64">
-                <div className="text-sm font-medium text-gray-700 mb-3">Personnel</div>
-                <div 
+                <div
                   className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-indigo-200"
                   onClick={applyMyDemandesFilter}
                   title="Cliquer pour filtrer toutes mes demandes assignées"
@@ -435,46 +434,44 @@ const Demandes: React.FC = () => {
 
               {/* Statistiques de l'année */}
               <div className="flex-1">
-                <div className="text-sm font-medium text-gray-700 mb-3">Année {new Date().getFullYear()}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-blue-200"
                     onClick={applyYearFilter}
                     title="Cliquer pour filtrer les demandes de l'année"
                   >
                     <div className="text-2xl font-bold text-gray-900">{stats.totalDemandes}</div>
-                    <div className="text-sm text-gray-600">Total</div>
+                    <div className="text-sm text-gray-600">Total {new Date().getFullYear()}</div>
                   </div>
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-red-200"
                     onClick={applyUnassignedYearFilter}
                     title="Cliquer pour filtrer les demandes non affectées de l'année"
                   >
                     <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesAnnee}</div>
-                    <div className="text-sm text-gray-600">Non affectées</div>
+                    <div className="text-sm text-gray-600">Non affectés {new Date().getFullYear()}</div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Statistiques actuelles */}
               <div className="flex-1">
-                <div className="text-sm font-medium text-gray-700 mb-3">Aujourd&apos;hui</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-green-200"
                     onClick={applyTodayFilter}
                     title="Cliquer pour filtrer les demandes reçues aujourd'hui"
                   >
                     <div className="text-2xl font-bold text-green-600">{stats.demandesToday}</div>
-                    <div className="text-sm text-gray-600">Reçues</div>
+                    <div className="text-sm text-gray-600">Reçues aujourd&apos;hui</div>
                   </div>
-                  <div 
+                  <div
                     className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500 cursor-pointer transition-all hover:shadow-md hover:scale-105 border border-transparent hover:border-red-200"
                     onClick={applyTodayUnassignedFilter}
                     title="Cliquer pour filtrer les demandes non affectées d'aujourd'hui"
                   >
                     <div className="text-2xl font-bold text-red-600">{stats.demandesNonAffecteesToday}</div>
-                    <div className="text-sm text-gray-600">Non affectées</div>
+                    <div className="text-sm text-gray-600">Non affectées aujourd&apos;hui</div>
                   </div>
                 </div>
               </div>

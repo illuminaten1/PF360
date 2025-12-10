@@ -899,9 +899,9 @@ const DecisionsTableV2: React.FC<DecisionsTableV2Props> = ({
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
-                      className={`px-6 py-4 whitespace-nowrap ${
-                        cell.column.getFilterValue() ? 'bg-blue-50/70' : ''
-                      }`}
+                      className={`px-6 py-4 ${
+                        cell.column.id === 'demandeurs' ? '' : 'whitespace-nowrap'
+                      } ${cell.column.getFilterValue() ? 'bg-blue-50/70' : ''}`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>

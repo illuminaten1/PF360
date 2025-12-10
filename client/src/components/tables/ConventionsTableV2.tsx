@@ -963,9 +963,9 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
-                      className={`px-6 py-4 whitespace-nowrap ${
-                        cell.column.getFilterValue() ? 'bg-blue-50/70' : ''
-                      }`}
+                      className={`px-6 py-4 ${
+                        cell.column.id === 'demandes' ? '' : 'whitespace-nowrap'
+                      } ${cell.column.getFilterValue() ? 'bg-blue-50/70' : ''}`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>

@@ -812,15 +812,17 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Diligence *
                       </label>
-                      <Listbox 
-                        value={selectedDiligence} 
+                      <Listbox
+                        value={selectedDiligence}
                         onChange={(diligence) => {
                           setSelectedDiligence(diligence)
                           setValue('diligenceId', diligence?.id || '')
                         }}
                       >
                         <div className="relative">
-                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all border-gray-200">
+                          <Listbox.Button className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all ${
+                            errors.diligenceId ? 'border-red-300' : 'border-gray-200'
+                          }`}>
                             <span className="block truncate">
                               {selectedDiligence ? selectedDiligence.nom : 'Sélectionner une diligence'}
                             </span>
@@ -866,6 +868,7 @@ const EditConventionModal: React.FC<EditConventionModalProps> = ({
                           </Transition>
                         </div>
                       </Listbox>
+                      {errors.diligenceId && <p className="text-red-500 text-xs mt-1">{errors.diligenceId.message}</p>}
                     </div>
                   </div>
 

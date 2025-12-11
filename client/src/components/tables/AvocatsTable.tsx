@@ -22,6 +22,7 @@ import {
   EnvelopeIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
+import ExpandableBadgesCell from '../common/ExpandableBadgesCell'
 
 // Extend TanStack Table's ColumnMeta to include custom filterComponent
 declare module '@tanstack/react-table' {
@@ -204,6 +205,9 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
   onClearFilters,
   facets
 }) => {
+  // État pour les avocats avec villes expandées
+  const [expandedAvocats, setExpandedAvocats] = React.useState<Set<string>>(new Set())
+
   const columns = useMemo<ColumnDef<Avocat>[]>(
     () => [
       {
@@ -291,28 +295,27 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
       {
         accessorKey: 'villesIntervention',
         header: 'Villes d\'intervention',
-        cell: ({ getValue }) => {
-          const villes = getValue() as string[] | undefined
-          if (!villes || villes.length === 0) {
-            return <span className="text-gray-400">-</span>
-          }
+        cell: ({ row }) => {
+          const villes = row.original.villesIntervention
+          const avocat = row.original
 
           return (
-            <div className="flex flex-wrap gap-1">
-              {villes.slice(0, 2).map((ville, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                >
-                  {ville}
-                </span>
-              ))}
-              {villes.length > 2 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  +{villes.length - 2}
-                </span>
-              )}
-            </div>
+            <ExpandableBadgesCell
+              items={villes || []}
+              showAll={expandedAvocats.has(avocat.id)}
+              onToggleShowAll={() => {
+                setExpandedAvocats(prev => {
+                  const newSet = new Set(prev)
+                  if (newSet.has(avocat.id)) {
+                    newSet.delete(avocat.id)
+                  } else {
+                    newSet.add(avocat.id)
+                  }
+                  return newSet
+                })
+              }}
+              badgeClassName="bg-green-100 text-green-800"
+            />
           )
         },
         enableColumnFilter: true,
@@ -421,7 +424,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
         enableSorting: false
       }
     ],
-    [onDelete, onToggleActive, facets]
+    [onDelete, onToggleActive, facets, expandedAvocats]
   )
 
   const table = useReactTable({

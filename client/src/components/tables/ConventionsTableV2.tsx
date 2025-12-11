@@ -611,8 +611,8 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
             <div className="text-sm">
               {diligences.slice(0, 2).map((d, index) => (
                 <div key={index} className={`flex items-center ${index > 0 ? 'mt-1' : ''}`}>
-                  <ScaleIcon className="h-3 w-3 text-gray-400 mr-1" />
-                  <span className="text-gray-900">{d.diligence.nom}</span>
+                  <ScaleIcon className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                  <span className="text-gray-900 break-words">{d.diligence.nom}</span>
                 </div>
               ))}
               {diligences.length > 2 && (
@@ -964,7 +964,7 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
                     <td
                       key={cell.id}
                       className={`px-6 py-4 ${
-                        cell.column.id === 'demandes' || cell.column.id === 'avocat' ? '' : 'whitespace-nowrap'
+                        cell.column.id === 'demandes' || cell.column.id === 'avocat' || cell.column.id === 'diligences' ? '' : 'whitespace-nowrap'
                       } ${cell.column.getFilterValue() ? 'bg-blue-50/70' : ''}`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

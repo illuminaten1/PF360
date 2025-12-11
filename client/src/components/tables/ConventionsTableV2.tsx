@@ -512,7 +512,7 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
         cell: ({ row }) => {
           const avocat = row.original.avocat
           return (
-            <div className="text-sm">
+            <div className="text-sm break-words">
               <div className="text-gray-900 font-medium">
                 {avocat.prenom} {avocat.nom}
               </div>
@@ -964,7 +964,7 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
                     <td
                       key={cell.id}
                       className={`px-6 py-4 ${
-                        cell.column.id === 'demandes' ? '' : 'whitespace-nowrap'
+                        cell.column.id === 'demandes' || cell.column.id === 'avocat' ? '' : 'whitespace-nowrap'
                       } ${cell.column.getFilterValue() ? 'bg-blue-50/70' : ''}`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

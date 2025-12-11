@@ -314,7 +314,7 @@ const AvocatsTable: React.FC<AvocatsTableProps> = ({
                   return newSet
                 })
               }}
-              badgeClassName="bg-green-100 text-green-800"
+              displayMode="text"
             />
           )
         },

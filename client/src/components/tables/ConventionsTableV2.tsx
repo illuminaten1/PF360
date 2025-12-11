@@ -608,7 +608,7 @@ const ConventionsTableV2: React.FC<ConventionsTableV2Props> = ({
           }
 
           return (
-            <div className="text-sm">
+            <div className="text-sm min-w-[200px] max-w-md">
               {diligences.slice(0, 2).map((d, index) => (
                 <div key={index} className={`flex items-center ${index > 0 ? 'mt-1' : ''}`}>
                   <ScaleIcon className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
